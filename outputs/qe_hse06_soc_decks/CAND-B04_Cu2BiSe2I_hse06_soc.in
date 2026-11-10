@@ -1,5 +1,6 @@
-! FailSmart-MatEngine Auto-Generated Quantum ESPRESSO HSE06+SOC Input Deck
+! FailSmart-MatEngine v2.0 Auto-Generated Quantum ESPRESSO HSE06+SOC Input Deck
 ! Candidate: CAND-B04 (Cu2BiSe2I) | Target: BOTTOM_IR_075EV
+! Verified Space Group: Pnma (#62) | nat = 24
 &CONTROL
   calculation = 'scf',
   prefix = 'cu2bise2i',
@@ -12,7 +13,7 @@
 /
 &SYSTEM
   ibrav = 0,
-  nat = 6,
+  nat = 24,
   ntyp = 4,
   ecutwfc = 70.0,
   ecutfock = 140.0,
@@ -28,9 +29,38 @@
   adaptive_thr = .true.,
 /
 ATOMIC_SPECIES
-  Cu  1.000  Cu_ONCV_PBE_FR-1.2.upf
-  Bi  1.000  Bi_ONCV_PBE_FR-1.2.upf
-  Se  1.000  Se_ONCV_PBE_FR-1.2.upf
-  I  1.000  I_ONCV_PBE_FR-1.2.upf
+  Cu      63.5460  Cu_ONCV_PBE_FR-1.2.upf
+  Bi     208.9804  Bi_ONCV_PBE_FR-1.2.upf
+  Se      78.9600  Se_ONCV_PBE_FR-1.2.upf
+  I      126.9045  I_ONCV_PBE_FR-1.2.upf
+CELL_PARAMETERS (angstrom)
+      8.99722811      0.00000000      0.00000000
+      0.00000000      9.11752672      0.00000000
+      0.00000000      0.00000000     11.68992383
+ATOMIC_POSITIONS (crystal)
+  Cu     0.00000000    0.00000000    0.50000000
+  Cu     0.50000000    0.00000000    0.00000000
+  Cu     0.00000000    0.50000000    0.50000000
+  Cu     0.50000000    0.50000000    0.00000000
+  Cu     0.67437767    0.25000000    0.50849320
+  Cu     0.82562233    0.75000000    0.00849320
+  Cu     0.32562233    0.75000000    0.49150680
+  Cu     0.17437767    0.25000000    0.99150680
+  Bi     0.00000000    0.00000000    0.00000000
+  Bi     0.50000000    0.00000000    0.50000000
+  Bi     0.00000000    0.50000000    0.00000000
+  Bi     0.50000000    0.50000000    0.50000000
+  Se     0.20263612    0.99127209    0.15140336
+  Se     0.29736388    0.00872791    0.65140336
+  Se     0.79736388    0.49127209    0.84859664
+  Se     0.70263612    0.50872791    0.34859664
+  Se     0.79736388    0.00872791    0.84859664
+  Se     0.70263612    0.99127209    0.34859664
+  Se     0.20263612    0.50872791    0.15140336
+  Se     0.29736388    0.49127209    0.65140336
+  I      0.74241124    0.25000000    0.72685393
+  I      0.75758876    0.75000000    0.22685393
+  I      0.25758876    0.75000000    0.27314607
+  I      0.24241124    0.25000000    0.77314607
 K_POINTS automatic
-  6 6 4 0 0 0
+  3 3 2 0 0 0

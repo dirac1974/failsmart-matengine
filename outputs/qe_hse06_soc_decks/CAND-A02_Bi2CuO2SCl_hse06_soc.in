@@ -1,5 +1,6 @@
-! FailSmart-MatEngine Auto-Generated Quantum ESPRESSO HSE06+SOC Input Deck
+! FailSmart-MatEngine v2.0 Auto-Generated Quantum ESPRESSO HSE06+SOC Input Deck
 ! Candidate: CAND-A02 (Bi2CuO2SCl) | Target: TOP_ACTIVE_GLASS_185EV
+! Verified Space Group: I4/mmm (#139) | nat = 28
 &CONTROL
   calculation = 'scf',
   prefix = 'bi2cuo2scl',
@@ -12,7 +13,7 @@
 /
 &SYSTEM
   ibrav = 0,
-  nat = 7,
+  nat = 28,
   ntyp = 5,
   ecutwfc = 70.0,
   ecutfock = 140.0,
@@ -28,10 +29,43 @@
   adaptive_thr = .true.,
 /
 ATOMIC_SPECIES
-  Bi  1.000  Bi_ONCV_PBE_FR-1.2.upf
-  Cu  1.000  Cu_ONCV_PBE_FR-1.2.upf
-  O  1.000  O_ONCV_PBE_FR-1.2.upf
-  S  1.000  S_ONCV_PBE_FR-1.2.upf
-  Cl  1.000  Cl_ONCV_PBE_FR-1.2.upf
+  Bi     208.9804  Bi_ONCV_PBE_FR-1.2.upf
+  Cu      63.5460  Cu_ONCV_PBE_FR-1.2.upf
+  O       15.9994  O_ONCV_PBE_FR-1.2.upf
+  S       32.0650  S_ONCV_PBE_FR-1.2.upf
+  Cl      35.4530  Cl_ONCV_PBE_FR-1.2.upf
+CELL_PARAMETERS (angstrom)
+      6.30739249      0.00000000      0.00000000
+      0.00000000      6.30739249      0.00000000
+      0.00000000      0.00000000     37.98451088
+ATOMIC_POSITIONS (crystal)
+  Cu     0.00000000    0.00000000    0.00000000
+  Cu     0.50000000    0.50000000    0.50000000
+  Cu     0.00000000    0.00000000    0.50000000
+  Cu     0.50000000    0.50000000    0.00000000
+  Bi     0.00000000    0.50000000    0.25000000
+  Bi     0.50000000    0.00000000    0.25000000
+  Bi     0.50000000    0.00000000    0.75000000
+  Bi     0.00000000    0.50000000    0.75000000
+  Bi     0.00000000    0.50000000    0.00000000
+  Bi     0.50000000    0.00000000    0.00000000
+  Bi     0.50000000    0.00000000    0.50000000
+  Bi     0.00000000    0.50000000    0.50000000
+  S      0.00000000    0.00000000    0.69306047
+  S      0.00000000    0.00000000    0.30693953
+  S      0.50000000    0.50000000    0.19306047
+  S      0.50000000    0.50000000    0.80693953
+  Cl     0.00000000    0.00000000    0.08571509
+  Cl     0.00000000    0.00000000    0.91428491
+  Cl     0.50000000    0.50000000    0.58571509
+  Cl     0.50000000    0.50000000    0.41428491
+  O      0.25000000    0.25000000    0.25000000
+  O      0.75000000    0.75000000    0.25000000
+  O      0.75000000    0.25000000    0.25000000
+  O      0.25000000    0.75000000    0.25000000
+  O      0.75000000    0.75000000    0.75000000
+  O      0.25000000    0.25000000    0.75000000
+  O      0.25000000    0.75000000    0.75000000
+  O      0.75000000    0.25000000    0.75000000
 K_POINTS automatic
-  6 6 4 0 0 0
+  4 4 2 0 0 0

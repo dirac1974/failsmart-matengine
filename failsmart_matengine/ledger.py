@@ -98,9 +98,11 @@ class ContrastiveFailureLedger:
             "Te": (52, 2.10, 2.21, 127.60, 16),
             "O":  (8,  3.44, 1.40, 16.00, 16),
             "N":  (7,  3.04, 1.46, 14.01, 15),
+            "P":  (15, 2.19, 1.10, 30.97, 15),
             "Cl": (17, 3.16, 1.81, 35.45, 17),
             "Br": (35, 2.96, 1.96, 79.90, 17),
             "I":  (53, 2.66, 2.20, 126.90, 17),
+            "Cs": (55, 0.79, 1.67, 132.91, 1),
         }
         total_atoms = max(1, sum(stoichiometry.values()))
         vec = np.zeros(128, dtype=np.float64)
@@ -158,6 +160,13 @@ class ContrastiveFailureLedger:
             vec = vec / norm
         return [round(float(x), 6) for x in vec]
 
+    def reset_to_historical_seeds(self) -> None:
+        """Clear prior campaign runs and re-seed historical literature archetypes."""
+        with self._connect() as conn:
+            conn.execute("DELETE FROM material_evaluations;")
+            conn.commit()
+        self._seed_historical_archetypes()
+
     def _seed_historical_archetypes(self) -> None:
         """Seed documented literature failure and reference archetypes if table is empty."""
         with self._connect() as conn:
@@ -204,8 +213,8 @@ class ContrastiveFailureLedger:
                 "crystal_family": "0D Vacancy-Ordered Halide",
                 "space_group_number": 194,
                 "structural_dimensionality": "0D-Isolated",
-                "elements": ["Bi", "I"],
-                "stoichiometry": {"Bi": 2, "I": 9},
+                "elements": ["Cs", "Bi", "I"],
+                "stoichiometry": {"Cs": 3, "Bi": 2, "I": 9},
                 "chi_diff": 0.64,
                 "tol": 0.88,
                 "stage_reached": 4,

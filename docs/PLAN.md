@@ -126,14 +126,14 @@ flowchart TD
 
 Every screening sweep follows a deterministic **5-Stage Funnel + 2 Adversarial Red-Team Gates**:
 
-| Stage | Lead Agent | Input $\rightarrow$ Output Count | Physics / Chemistry Gate | Target Compute |
+| Stage | Lead Agent | Pilot v2.0 Count ($N=20$) | Physics / Chemistry Gate | Target Compute |
 | :--- | :--- | :--- | :--- | :--- |
-| **Stage 1: Generation** | `crystal_explorer` | $50,000\text{ stoichiometries} \rightarrow 10,000\text{ crystals}$ | SMACT charge/electronegativity + 3-Tier Element Policy + `MatterGen` ($\le 32\text{ atoms}$) + Bond-Valence sanity | Local GPU / CPU |
-| **Stage 2: Surrogate Physics** | `surrogate_physicist` | $10,000 \rightarrow 1,200\text{ dynamically stable}$ | 4x `MACE-OMat24` relaxation + $\Delta E_{\text{hull}} \le 50\text{ meV/atom}$ + Born $C_{ij} \succ 0$ + `phonopy` $\omega^2 > 0$ | Local GPU |
-| **Stage 3: Kinetics & Speciation** | `synthesis_chemist` | $1,200 \rightarrow 150\text{ manufacturable}$ | `rxn_network` ($T \le 500^\circ\text{C}$, no oxide sinks) + Halide volatility + Pourbaix ($\text{pH } 4\text{–}9$) + Cost $< \$0.50/\text{m}^2$ | Multi-core CPU |
-| **Gate A: Pre-DFT Red Team** | `adversarial_critic` | $150 \rightarrow 20\text{ promoted to DFT}$ | Anion unmixing check ($\Delta H_{\text{mix}}$) + TCO interface stability + Epistemic uncertainty audit | CPU |
-| **Stage 4: Quantum & Transport** | `quantum_defect_physicist` | $20 \rightarrow 6\text{ high-mobility absorbers}$ | `QE` `r2SCAN+SOC` $\rightarrow$ `HSE06+SOC` + $m_e^*, m_h^* < 0.8\,m_0$ + Fröhlich polaron check | Cloud GPU Burst |
-| **Stage 5: Defects & 4T Optics** | `quantum_defect_physicist` + `photonic_tandem_architect` | $6 \rightarrow 2\text{–}4\text{ patent-ready finalists}$ | `doped` vacancy/antisite supercells (no deep SRH traps) + Full 3-layer `TMM` $4n^2$ stack $\eta_{\text{4T}} \ge 42\%$ | Cloud GPU Burst |
+| **Stage 1: Generation** | `crystal_explorer` | $20\text{ crystals}$ ($16\text{ benchmark} + 4\text{ SMACT OOD}$) | SMACT charge/electronegativity + 3-Tier Element Policy + `MatterGen` ($\le 32\text{ atoms}$) + Bond-Valence sanity | Local GPU / CPU |
+| **Stage 2: Dynamics & Ion Migration** | `surrogate_physicist` | $20 \rightarrow 17\text{ dynamically & ion-stable}$ | 4x `MACE-OMat24` relaxation + $\Delta E_{\text{hull}} \le 50\text{ meV/atom}$ + Born $C_{ij} \succ 0$ + `phonopy` $\omega^2 > 0$ + Stage 2b $E_{\text{mig}} \ge 0.65\text{ eV}$ | Local GPU |
+| **Stage 3: Kinetics & Speciation** | `synthesis_chemist` | $17 \rightarrow 12\text{ manufacturable}$ | `rxn_network` ($T \le 500^\circ\text{C}$, no refractory oxide sinks) + Halide volatility + Pourbaix ($\text{pH } 4\text{–}9$) + Cost $< \$0.50/\text{m}^2$ | Multi-core CPU |
+| **Gate A: Pre-DFT Red Team** | `adversarial_critic` | $12 \rightarrow 8\text{ promoted to DFT}$ | Anion unmixing check ($\Delta H_{\text{mix}} < 35\text{ meV/atom}$) + TCO interface stability + 1D polaron veto | CPU |
+| **Stage 4: Quantum & Transport** | `quantum_defect_physicist` | $8 \rightarrow 5\text{ high-mobility absorbers}$ | `QE` `r2SCAN+SOC` $\rightarrow$ `HSE06+SOC` + target bandgap window ($1.75\text{–}1.95\text{ eV}$ top, $0.70\text{–}0.85\text{ eV}$ bottom) + Fröhlich polaron check | Cloud GPU Burst |
+| **Stage 5: Defects & 4T Optics** | `quantum_defect_physicist` + `photonic_tandem_architect` | $5\text{ validated finalists}$ | `doped` vacancy/antisite supercells (no deep SRH traps $> 0.15\text{ eV}$) + Full 3-layer `TMM` $4n^2$ stack $\eta_{\text{4T}} \ge 41.5\%$ | Cloud GPU Burst |
 
 ### How the Adversarial Debate Protocol Works in Practice
 At **Gate A** (before spending cloud GPU budget on Stage 4 DFT) and **Gate B** (final sign-off), the state machine runs a structured 3-turn debate:
@@ -157,7 +157,7 @@ CREATE TABLE material_evaluations (
     mace_embedding BLOB,                  -- 128-dim equivariant graph descriptor
     stage_reached INTEGER NOT NULL,       -- 1 to 5
     status TEXT CHECK (status IN ('PROMOTED', 'REJECTED', 'UNCERTAIN_DFT_QUEUE')),
-    primary_failure_mode TEXT,            -- e.g., 'IMAGINARY_PHONON', 'OXIDE_IMPURITY_SINK', 'AQUEOUS_LEACHING', 'SMALL_POLARON_TRAP', 'ANION_PHASE_SEGREGATION', 'DEEP_SRH_DEFECT'
+    primary_failure_mode TEXT,            -- e.g., 'IMAGINARY_PHONON', 'HULL_INSTABILITY', 'ION_MIGRATION_INSTABILITY', 'OXIDE_IMPURITY_SINK', 'AQUEOUS_LEACHING', 'SMALL_POLARON_TRAP', 'ANION_PHASE_SEGREGATION', 'DEEP_SRH_DEFECT'
     e_above_hull_mev REAL,
     min_phonon_freq_thz REAL,
     rxn_temp_celsius REAL,
@@ -186,7 +186,7 @@ We can build and execute this architecture in modular phases right inside this w
 2. **Build the Contrastive Failure Memory Ledger** (local SQLite + vector similarity index) pre-seeded with known chalcohalide/perovskite failure archetypes (e.g., $\text{BaZrS}_3$ high-$T$ $\text{ZrO}_2$ sink, mixed $\text{MAPb(I,Br)}_3$ photo-segregation, $\text{Cs}_3\text{Bi}_2\text{I}_9$ 0D polaron trap).
 3. **Implement the Stage 1–3 & Gate A Tool Suite:**
    * `tools/composition_gen.py`: 3-Tier Element Policy + `SMACT` charge-neutral quaternary/ternary chalcohalide & oxychalcogenide generator + prototype crystal decorator (`pymatgen` / `pyxtal`).
-   * `tools/surrogate_physics.py`: `MACE` / `CHGNet` structural relaxation, convex hull stability against Materials Project, and finite-displacement phonon/elasticity checks.
+   * `tools/surrogate_physics.py`: `MACE` / `CHGNet` structural relaxation, convex hull stability against Materials Project, finite-displacement phonon/elasticity checks, and Stage 2b ion-migration barrier evaluation ($E_{\text{mig}} \ge 0.65\text{ eV}$).
    * `tools/synthesis_kinetics.py`: $<500^\circ\text{C}$ precursor reaction driving-force calculator, halide volatility filter, TCO interface reactivity check, and `pymatgen` Pourbaix aqueous leaching gate ($\text{pH } 4\text{–}9$).
    * `tools/tandem_optics.py`: Transfer-Matrix + $4n^2$ Yablonovitch 3-layer "Silicon-Sandwich" (Top Active Glass + $1.12\text{ eV}$ c-Si + Bottom IR Scavenger) detailed-balance efficiency calculator.
 
@@ -194,11 +194,11 @@ We can build and execute this architecture in modular phases right inside this w
 1. **Define and wire the 7 specialized agents** (`pi_orchestrator`, `crystal_explorer`, `surrogate_physicist`, `synthesis_chemist`, `quantum_defect_physicist`, `photonic_tandem_architect`, and `adversarial_critic`) with the adversarial debate protocol at Gate A and Gate B.
 2. **Configure Stage 4/5 Quantum ESPRESSO & `doped` workflow generators** (`tools/qe_workflows.py`) so promoted candidates automatically emit turnkey, `custodian`-wrapped `Quantum ESPRESSO` (`r2SCAN+SOC` / `HSE06+SOC`) and `doped` defect supercell input decks.
 
-### Phase 3: Pilot Dry-Run Screening Campaign & Interactive Dashboard
-1. **Execute Pilot Sweep #1** across both target windows:
-   * **Track A (Top Active Glass, $1.75\text{–}1.95\text{ eV}$):** $\text{Bi/Sb–Cu/Zn–S/O–Cl/Br}$ oxy-/chalcohalides.
-   * **Track B (Bottom IR Scavenger, $0.70\text{–}0.85\text{ eV}$):** $\text{Bi/Sb–Sn/Cu–Se/S–I}$ heavy chalcohalides.
-2. **Launch an Interactive Discovery & Failure-Ledger Dashboard** (HTML artifact) visualizing the screening funnel, Pareto frontier ($\eta_{\text{4T}}$ vs. synthesis temperature vs. $/m^2$ cost), 3-layer spectral absorption curves, and the live Contrastive Failure Memory Ledger.
+### Phase 3: Pilot Screening Campaign v2.0 & Interactive Dashboard
+1. **Execute Pilot Sweep v2.0** across 20 candidates (16 benchmark + 4 SMACT OOD compositions) in both target windows:
+   * **Track A (Top Active Glass, $1.75\text{–}1.95\text{ eV}$):** $\text{Bi/Sb–Cu/Zn–S/O–Cl/Br}$ oxy-/chalcohalides (validated finalists: `Bi2CuO2SCl`, `Cu2SbS2Cl`, `BiZnOSCl`).
+   * **Track B (Bottom IR Scavenger, $0.70\text{–}0.85\text{ eV}$):** $\text{Bi/Sb–Sn/Cu–Se/S–I}$ heavy chalcohalides (validated finalists: `Sn2SbSe2I3`, `Cu2BiSe2I`).
+2. **Launch an Interactive Discovery & Failure-Ledger Dashboard** (HTML artifact) visualizing the screening funnel ($20 \rightarrow 17 \rightarrow 12 \rightarrow 8 \rightarrow 5$), Pareto frontier ($\eta_{\text{4T}}$ vs. synthesis temperature vs. $/m^2$ cost), 3-layer spectral absorption curves, and the live Contrastive Failure Memory Ledger.
 
 ---
 

@@ -1,4 +1,4 @@
-"""Strict Pydantic data contracts for the 7-agent FailSmart-MatEngine pipeline."""
+"""Strict Pydantic v2 data contracts for the 13-agent FailSmart-MatEngine v2.0 pipeline."""
 
 from typing import Dict, List, Optional
 from pydantic import BaseModel, Field
@@ -39,6 +39,8 @@ class StabilityReport(BaseModel):
     min_phonon_freq_thz: float
     debye_temperature_k: float
     dynamically_stable: bool
+    ion_migration_barrier_ev: float
+    ion_migration_stable: bool
     mlip_force_std_ev_ang: float
     passed_stage2: bool
     failure_reason: Optional[str] = None
@@ -89,6 +91,7 @@ class ElectronicDefectReport(BaseModel):
     hole_eff_mass_m0: float
     eps_inf: float
     eps_static: float
+    lo_phonon_freq_thz: float
     frohlich_alpha: float
     polaron_trapping_mev: float
     dominant_vacancy_defect: str
@@ -105,6 +108,7 @@ class OpticalTandemReport(BaseModel):
     refractive_index_n: float
     yablonovitch_4n2_factor: float
     dipole_forbidden_penalty_ev: float
+    shockley_queisser_limit_percent: float
     standalone_slme_percent: float
     sub_bandgap_transmittance_percent: float
     tco_parasitic_loss_percent: float
@@ -113,6 +117,8 @@ class OpticalTandemReport(BaseModel):
     top_cell_eff_percent: float
     si_middle_cell_eff_percent: float
     bottom_ir_cell_eff_percent: float
+    tandem_2layer_si_eff_percent: float
+    tandem_4t_std_si_fca_eff_percent: float
     tandem_4t_total_eff_percent: float
     passed_optical_gate: bool
     failure_reason: Optional[str] = None

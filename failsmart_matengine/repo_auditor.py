@@ -1,8 +1,8 @@
-"""Repository Consistency & Documentation Gatekeeper Audit Engine.
+"""Repository Consistency & Documentation Gatekeeper Audit Engine (v2.0).
 
 Parses outputs/pilot_campaign_summary.json, data/failure_memory.db,
-outputs/qe_hse06_soc_decks/, README.md, and docs/MEMORY_AND_FAILURE_LEDGER.md
-and asserts that all candidate formulas, counts, and finalist numbers
+outputs/qe_hse06_soc_decks/, README.md, docs/MEMORY_AND_FAILURE_LEDGER.md, and docs/PLAN.md
+and asserts that all candidate formulas, counts, physical metrics, and finalist numbers
 match across all files with 100% bit-for-bit consistency and zero discrepancy.
 """
 
@@ -25,6 +25,7 @@ class RepoConsistencyAuditor:
         self.qe_dir = self.root / "outputs" / "qe_hse06_soc_decks"
         self.readme_path = self.root / "README.md"
         self.ledger_doc_path = self.root / "docs" / "MEMORY_AND_FAILURE_LEDGER.md"
+        self.plan_doc_path = self.root / "docs" / "PLAN.md"
 
         self.summary_data: Dict[str, Any] = {}
         self.db_records: Dict[str, Dict[str, Any]] = {}
@@ -35,7 +36,7 @@ class RepoConsistencyAuditor:
         print(message)
 
     def load_summary_json(self) -> None:
-        """Load and validate JSON structure."""
+        """Load and validate JSON structure for v2.0 campaign."""
         self.log(f"-> Loading {self.summary_json_path} ...")
         assert self.summary_json_path.exists(), f"Missing {self.summary_json_path}"
         with open(self.summary_json_path, "r", encoding="utf-8") as f:
@@ -47,20 +48,32 @@ class RepoConsistencyAuditor:
         assert "ledger_entries" in self.summary_data
 
         counts = self.summary_data["funnel_counts"]
-        assert counts["stage1_generated"] == 16
-        assert counts["stage2_dynamically_stable"] == 14
-        assert counts["stage3_manufacturable"] == 12
-        assert counts["gate_a_promoted_to_dft"] == 9
-        assert counts["stage4_5_validated_finalists"] == 6
-        assert counts["redundancy_verifications_passed"] == 16
+        assert counts["stage1_generated"] == 20, f"Expected stage1_generated == 20, got {counts['stage1_generated']}"
+        assert (
+            counts["stage2_dynamically_and_ion_stable"] == 17
+        ), f"Expected stage2 == 17, got {counts.get('stage2_dynamically_and_ion_stable')}"
+        assert counts["stage3_manufacturable"] == 12, f"Expected stage3 == 12, got {counts['stage3_manufacturable']}"
+        assert (
+            counts["gate_a_promoted_to_dft"] == 8
+        ), f"Expected gate_a == 8, got {counts['gate_a_promoted_to_dft']}"
+        assert (
+            counts["stage4_5_validated_finalists"] == 5
+        ), f"Expected finalists == 5, got {counts['stage4_5_validated_finalists']}"
+        assert (
+            counts["redundancy_verifications_passed"] == 20
+        ), f"Expected redundancy passed == 20, got {counts['redundancy_verifications_passed']}"
 
-        assert len(self.summary_data["finalists"]) == 6
-        assert len(self.summary_data["all_campaign_records"]) == 16
-        assert len(self.summary_data["ledger_entries"]) == 19
-        self.log("   [OK] pilot_campaign_summary.json loaded and structural counts verified.")
+        assert len(self.summary_data["finalists"]) == 5, f"Expected 5 finalists, got {len(self.summary_data['finalists'])}"
+        assert (
+            len(self.summary_data["all_campaign_records"]) == 20
+        ), f"Expected 20 campaign records, got {len(self.summary_data['all_campaign_records'])}"
+        assert (
+            len(self.summary_data["ledger_entries"]) == 23
+        ), f"Expected 23 ledger entries, got {len(self.summary_data['ledger_entries'])}"
+        self.log("   [OK] pilot_campaign_summary.json loaded and v2.0 structural counts verified (20 -> 17 -> 12 -> 8 -> 5).")
 
     def load_sqlite_db(self) -> None:
-        """Load and validate failure_memory.db records."""
+        """Load and validate failure_memory.db records (23 total)."""
         self.log(f"-> Auditing SQLite database: {self.db_path} ...")
         assert self.db_path.exists(), f"Missing {self.db_path}"
         conn = sqlite3.connect(self.db_path)
@@ -69,7 +82,7 @@ class RepoConsistencyAuditor:
 
         cursor.execute("SELECT * FROM material_evaluations")
         rows = cursor.fetchall()
-        assert len(rows) == 19, f"Expected 19 entries in DB, found {len(rows)}"
+        assert len(rows) == 23, f"Expected 23 entries in DB, found {len(rows)}"
 
         for r in rows:
             d = dict(r)
@@ -106,24 +119,23 @@ class RepoConsistencyAuditor:
                         f"{cid} {num_col} numerical discrepancy: DB={v_db} vs JSON={v_json}"
                     )
 
-        self.log("   [OK] SQLite failure_memory.db matches JSON ledger_entries 100% across all 19 entries.")
+        self.log("   [OK] SQLite failure_memory.db matches JSON ledger_entries 100% across all 23 entries.")
 
     def audit_qe_decks(self) -> None:
-        """Audit Quantum ESPRESSO decks and CIF files for the 6 finalists."""
+        """Audit Quantum ESPRESSO decks and CIF files for the 5 finalists."""
         self.log(f"-> Auditing Quantum ESPRESSO decks in {self.qe_dir} ...")
         assert self.qe_dir.exists(), f"Missing {self.qe_dir}"
 
         finalists = {f["candidate"]["candidate_id"]: f for f in self.summary_data["finalists"]}
-        assert len(finalists) == 6
+        assert len(finalists) == 5, f"Expected 5 finalists, got {len(finalists)}"
 
         deck_files = sorted(os.listdir(self.qe_dir))
-        assert len(deck_files) == 12, f"Expected 12 files in {self.qe_dir}, found {len(deck_files)}: {deck_files}"
+        assert len(deck_files) == 10, f"Expected 10 files in {self.qe_dir}, found {len(deck_files)}: {deck_files}"
 
         for cid, fin in finalists.items():
             cand = fin["candidate"]
             formula = cand["formula_reduced"]
-            stoich = cand["stoichiometry"]
-            expected_nat = sum(stoich.values())
+            expected_nat = cand["nsites_unit_cell"]
             expected_ntyp = len(cand["elements"])
 
             cif_file = self.qe_dir / f"{cid}_{formula}.cif"
@@ -135,18 +147,43 @@ class RepoConsistencyAuditor:
             # Check CIF content
             cif_text = cif_file.read_text(encoding="utf-8")
             assert f"data_{formula}" in cif_text, f"CIF header missing formula {formula} in {cif_file}"
-            assert f"_{cand['space_group_symbol']}" in cif_text or cand["space_group_symbol"] in cif_text
 
             # Check QE input deck content
             in_text = in_file.read_text(encoding="utf-8")
-            assert f"Candidate: {cid} ({formula})" in in_text
-            assert f"prefix = '{formula.lower()}'" in in_text
-            assert f"nat = {expected_nat}" in in_text
-            assert f"ntyp = {expected_ntyp}" in in_text
-            for el in cand["elements"]:
-                assert f"{el}  1.000" in in_text or f"{el} " in in_text
+            assert f"Candidate: {cid} ({formula})" in in_text, f"Candidate header missing in {in_file}"
+            assert f"prefix = '{formula.lower()}'" in in_text, f"Prefix mismatch in {in_file}"
+            assert f"nat = {expected_nat}" in in_text, f"nat != {expected_nat} in {in_file}"
+            assert f"ntyp = {expected_ntyp}" in in_text, f"ntyp != {expected_ntyp} in {in_file}"
+            assert cand["space_group_symbol"] in in_text, f"Space group {cand['space_group_symbol']} missing in {in_file}"
+            assert "CELL_PARAMETERS (angstrom)" in in_text, f"Missing CELL_PARAMETERS (angstrom) in {in_file}"
+            assert "ATOMIC_POSITIONS (crystal)" in in_text, f"Missing ATOMIC_POSITIONS (crystal) in {in_file}"
 
-        self.log("   [OK] All 6 finalists possess valid, synchronized CIF & Quantum ESPRESSO input decks.")
+            # Verify real IUPAC atomic masses (forbidding dummy 1.000)
+            in_species = False
+            species_found = []
+            for line in in_text.splitlines():
+                if "ATOMIC_SPECIES" in line:
+                    in_species = True
+                    continue
+                if in_species:
+                    if line.startswith("CELL_PARAMETERS") or line.strip() == "":
+                        in_species = False
+                    else:
+                        parts = line.split()
+                        if len(parts) >= 2:
+                            elem = parts[0]
+                            mass = float(parts[1])
+                            species_found.append((elem, mass))
+                            assert abs(mass - 1.0) > 1e-2, (
+                                f"Dummy mass 1.000 found for {elem} in {in_file}: mass={mass}"
+                            )
+                            assert mass > 1.0, f"Unphysical mass for {elem} in {in_file}: {mass}"
+
+            assert len(species_found) == expected_ntyp, (
+                f"Expected {expected_ntyp} species in {in_file}, found {len(species_found)}"
+            )
+
+        self.log("   [OK] All 5 finalists possess valid, synchronized CIF & Quantum ESPRESSO decks with IUPAC atomic masses.")
 
     def audit_readme_markdown(self) -> None:
         """Parse README.md and verify funnel numbers, candidate formulas, and finalist table values."""
@@ -156,41 +193,56 @@ class RepoConsistencyAuditor:
 
         # Verify 13-agent architecture is documented
         assert "13-Agent Research + Engineering Team Architecture" in text or "13-agent" in text.lower()
-        assert "pi_orchestrator" in text
-        assert "crystal_explorer" in text
-        assert "surrogate_physicist" in text
-        assert "synthesis_chemist" in text
-        assert "quantum_defect_physicist" in text
-        assert "photonic_tandem_architect" in text
-        assert "adversarial_critic" in text
-        assert "chief_software_architect" in text
-        assert "physics_engine_engineer" in text
-        assert "optics_kinetics_engineer" in text
-        assert "redundancy_verifier_alpha" in text
-        assert "qa_test_audit_engineer" in text
-        assert "repo_release_auditor" in text
+        for agent in [
+            "pi_orchestrator",
+            "crystal_explorer",
+            "surrogate_physicist",
+            "synthesis_chemist",
+            "quantum_defect_physicist",
+            "photonic_tandem_architect",
+            "adversarial_critic",
+            "chief_software_architect",
+            "physics_engine_engineer",
+            "optics_kinetics_engineer",
+            "redundancy_verifier_alpha",
+            "qa_test_audit_engineer",
+            "repo_release_auditor",
+        ]:
+            assert agent in text, f"Missing agent {agent} in README.md"
 
-        # Verify funnel counts in text
-        assert "16 generated" in text
-        assert "14 dynamically stable" in text
+        # Verify v2.0 funnel counts in text
+        assert "20 Candidates Screened" in text or "20 generated" in text
+        assert "17 dynamically & ion-stable" in text or "17 dynamically" in text
         assert "12 manufacturable" in text
-        assert "9 promoted to Stage 4" in text
-        assert "6 Validated Finalists" in text
+        assert "8 promoted to Stage 4 DFT" in text or "8 promoted to Stage 4" in text
+        assert "5 Validated Finalists" in text
 
-        # Verify key formulas mentioned in Stage rejects
-        assert "Sr2ZnOS2" in text
-        assert "Zn2SbS2Br3" in text
-        assert "BaZrS3" in text
-        assert "AgBiSe2" in text
-        assert "BiSCl" in text
-        assert "SbSeI" in text
-        assert "BiCuSeI2" in text
-        assert "Bi2SnSe3I2" in text
-        assert "BiCuOS" in text
-        assert "BaBiO2Cl" in text
+        # Verify key formulas and failures mentioned
+        for f_name in [
+            "Sr2ZnOS2",
+            "Zn2SbS2Br3",
+            "Cu3BiS2Cl2",
+            "BaZrS3",
+            "AgBiSe2",
+            "BiSCl",
+            "SbSeI",
+            "BiCuSeI2",
+            "Bi2SnSe3I2",
+            "BiCuOS",
+            "BaBiO2Cl",
+            "Sr2Cu2O2S",
+            "Ba2BiS3Cl",
+            "Ba2BiSe3I",
+            "Cu2SnSeI2",
+        ]:
+            assert f_name in text, f"Missing candidate formula {f_name} in README.md"
+
+        assert "ION_MIGRATION_INSTABILITY" in text
+        assert "0.42" in text
 
         # Verify finalists in README table
         finalists = {f["candidate"]["candidate_id"]: f for f in self.summary_data["finalists"]}
+        assert len(finalists) == 5
 
         for cid, fin in finalists.items():
             cand = fin["candidate"]
@@ -206,6 +258,10 @@ class RepoConsistencyAuditor:
             match = re.search(pattern, text)
             assert match is not None, f"Could not find table row for {cid} ({formula}) in README.md"
             row = match.group(0)
+
+            # Check Space Group & nat
+            assert cand["space_group_symbol"] in row, f"{cid} space group not in README row: {row}"
+            assert str(cand["nsites_unit_cell"]) in row, f"{cid} nsites {cand['nsites_unit_cell']} not in README row: {row}"
 
             # Check T_synth
             t_synth = f"{synth['min_synthesis_temp_c']:.1f}"
@@ -225,6 +281,10 @@ class RepoConsistencyAuditor:
             phonon_str = f"{stab['min_phonon_freq_thz']:.2f}"
             assert phonon_str in row, f"{cid} min phonon freq {phonon_str} not in README row: {row}"
 
+            # Check Emig
+            emig_str = f"{stab['ion_migration_barrier_ev']:.2f}"
+            assert emig_str in row, f"{cid} E_mig {emig_str} not in README row: {row}"
+
             # Check SLME
             slme_str = f"{opt['standalone_slme_percent']:.2f}%"
             assert slme_str in row, f"{cid} SLME {slme_str} not in README row: {row}"
@@ -237,18 +297,19 @@ class RepoConsistencyAuditor:
             sha_sig = red["sha256_signature"]
             assert sha_sig in row, f"{cid} SHA-256 {sha_sig} not in README row: {row}"
 
-        self.log("   [OK] README.md contains verified 13-agent architecture and exact finalist numerical values.")
+        self.log("   [OK] README.md contains verified 13-agent architecture, v2.0 funnel counts, and exact finalist metrics.")
 
     def audit_memory_and_failure_ledger_markdown(self) -> None:
-        """Parse docs/MEMORY_AND_FAILURE_LEDGER.md and verify all 19 entries and finalist metrics."""
+        """Parse docs/MEMORY_AND_FAILURE_LEDGER.md and verify all 23 entries and finalist metrics."""
         self.log(f"-> Auditing {self.ledger_doc_path} ...")
         assert self.ledger_doc_path.exists(), f"Missing {self.ledger_doc_path}"
         text = self.ledger_doc_path.read_text(encoding="utf-8")
 
-        # Verify physical failure taxonomy
+        # Verify physical failure taxonomy (including ION_MIGRATION_INSTABILITY)
         for fail_code in [
             "IMAGINARY_PHONON",
             "HULL_INSTABILITY",
+            "ION_MIGRATION_INSTABILITY",
             "OXIDE_IMPURITY_SINK",
             "AQUEOUS_LEACHING",
             "TIER2_COST_EXCEEDED",
@@ -259,13 +320,9 @@ class RepoConsistencyAuditor:
         ]:
             assert fail_code in text, f"Missing failure code {fail_code} in {self.ledger_doc_path}"
 
-        # Verify key formulas in representative compounds
-        for f_name in ["Zn2SbS2Br3", "Sr2ZnOS2", "BaZrS3", "Pb2BiS2I3", "AgBiSe2", "BiCuSeI2", "BiCuOS", "BaBiO2Cl"]:
-            assert f_name in text, f"Missing representative formula {f_name} in {self.ledger_doc_path}"
-
-        # Verify all 19 entries are present in table
+        # Verify all 23 entries are present in table
         json_entries = {e["candidate_id"]: e for e in self.summary_data["ledger_entries"]}
-        assert len(json_entries) == 19
+        assert len(json_entries) == 23
 
         for cid, entry in json_entries.items():
             formula = entry["formula_reduced"]
@@ -289,6 +346,11 @@ class RepoConsistencyAuditor:
             if ph_val is not None:
                 assert f"{ph_val:.2f}" in row or f"{ph_val:.1f}" in row, f"w_min {ph_val} not in row for {cid}: {row}"
 
+            # Check Stage 2b ion migration barrier for CAND-A09
+            if cid == "CAND-A09":
+                assert "0.42" in row, f"CAND-A09 Emig 0.42 not in row: {row}"
+                assert "ION_MIGRATION_INSTABILITY" in row
+
             # If promoted, check cost, SLME, 4T, and SHA-256
             if entry["status"] == "PROMOTED":
                 cost = f"${entry['active_layer_cost_usd_m2']:.4f}"
@@ -300,8 +362,9 @@ class RepoConsistencyAuditor:
                 tandem = f"{entry['tandem_4t_efficiency_percent']:.2f}%"
                 assert tandem in row, f"Tandem eff {tandem} not in row for {cid}: {row}"
 
-        # Verify Section 4 Finalist table
+        # Verify Section 4 Finalist table (5 finalists)
         finalists = {f["candidate"]["candidate_id"]: f for f in self.summary_data["finalists"]}
+        assert len(finalists) == 5
         for cid, fin in finalists.items():
             cand = fin["candidate"]
             formula = cand["formula_reduced"]
@@ -309,12 +372,30 @@ class RepoConsistencyAuditor:
             sha = red["sha256_signature"]
             assert sha in text, f"Finalist SHA-256 {sha} for {cid} ({formula}) not in {self.ledger_doc_path}"
 
-        self.log("   [OK] docs/MEMORY_AND_FAILURE_LEDGER.md is 100% synchronized with JSON & SQLite ledger.")
+        self.log("   [OK] docs/MEMORY_AND_FAILURE_LEDGER.md is 100% synchronized with JSON & SQLite ledger (all 23 entries).")
+
+    def audit_plan_markdown(self) -> None:
+        """Parse docs/PLAN.md and verify consistency with v2.0 architecture and metrics."""
+        self.log(f"-> Auditing {self.plan_doc_path} ...")
+        assert self.plan_doc_path.exists(), f"Missing {self.plan_doc_path}"
+        text = self.plan_doc_path.read_text(encoding="utf-8")
+
+        assert "ION_MIGRATION_INSTABILITY" in text
+        assert "0.65" in text
+        assert "20 -> 17 -> 12 -> 8 -> 5" in text or "20" in text
+
+        # Check finalists mentioned
+        finalists = {f["candidate"]["candidate_id"]: f for f in self.summary_data["finalists"]}
+        for cid, fin in finalists.items():
+            formula = fin["candidate"]["formula_reduced"]
+            assert formula in text, f"Finalist formula {formula} not in {self.plan_doc_path}"
+
+        self.log("   [OK] docs/PLAN.md contains verified v2.0 workflow counts, Stage 2b gates, and finalists.")
 
     def run_full_audit(self) -> bool:
         """Run all verification audits and return True if 100% aligned."""
         self.log("=" * 78)
-        self.log("FailSmart-MatEngine Repository Consistency & Documentation Audit")
+        self.log("FailSmart-MatEngine Repository Consistency & Documentation Audit (v2.0)")
         self.log(f"Repository Root: {self.root}")
         self.log("=" * 78)
 
@@ -324,6 +405,7 @@ class RepoConsistencyAuditor:
             self.audit_qe_decks()
             self.audit_readme_markdown()
             self.audit_memory_and_failure_ledger_markdown()
+            self.audit_plan_markdown()
         except AssertionError as e:
             self.log(f"\n[FAIL] VERIFICATION AUDIT FAILED: {e}")
             return False

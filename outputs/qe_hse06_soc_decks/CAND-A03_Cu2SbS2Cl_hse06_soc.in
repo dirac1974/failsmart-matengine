@@ -1,5 +1,6 @@
-! FailSmart-MatEngine Auto-Generated Quantum ESPRESSO HSE06+SOC Input Deck
+! FailSmart-MatEngine v2.0 Auto-Generated Quantum ESPRESSO HSE06+SOC Input Deck
 ! Candidate: CAND-A03 (Cu2SbS2Cl) | Target: TOP_ACTIVE_GLASS_185EV
+! Verified Space Group: Pnma (#62) | nat = 24
 &CONTROL
   calculation = 'scf',
   prefix = 'cu2sbs2cl',
@@ -12,7 +13,7 @@
 /
 &SYSTEM
   ibrav = 0,
-  nat = 6,
+  nat = 24,
   ntyp = 4,
   ecutwfc = 70.0,
   ecutfock = 140.0,
@@ -28,9 +29,38 @@
   adaptive_thr = .true.,
 /
 ATOMIC_SPECIES
-  Cu  1.000  Cu_ONCV_PBE_FR-1.2.upf
-  Sb  1.000  Sb_ONCV_PBE_FR-1.2.upf
-  S  1.000  S_ONCV_PBE_FR-1.2.upf
-  Cl  1.000  Cl_ONCV_PBE_FR-1.2.upf
+  Cu      63.5460  Cu_ONCV_PBE_FR-1.2.upf
+  Sb     121.7600  Sb_ONCV_PBE_FR-1.2.upf
+  S       32.0650  S_ONCV_PBE_FR-1.2.upf
+  Cl      35.4530  Cl_ONCV_PBE_FR-1.2.upf
+CELL_PARAMETERS (angstrom)
+      6.34642438      0.00000000      0.00000000
+      0.00000000     13.60497462      0.00000000
+      0.00000000      0.00000000     10.34304774
+ATOMIC_POSITIONS (crystal)
+  Cu     0.85006827    0.89516051    0.79539762
+  Cu     0.64993173    0.10483949    0.29539762
+  Cu     0.14993173    0.39516051    0.20460238
+  Cu     0.35006827    0.60483949    0.70460238
+  Cu     0.14993173    0.10483949    0.20460238
+  Cu     0.35006827    0.89516051    0.70460238
+  Cu     0.85006827    0.60483949    0.79539762
+  Cu     0.64993173    0.39516051    0.29539762
+  Sb     0.00000000    0.00000000    0.00000000
+  Sb     0.50000000    0.00000000    0.50000000
+  Sb     0.00000000    0.50000000    0.00000000
+  Sb     0.50000000    0.50000000    0.50000000
+  S      0.82969877    0.25000000    0.62174856
+  S      0.67030123    0.75000000    0.12174856
+  S      0.17030123    0.75000000    0.37825144
+  S      0.32969877    0.25000000    0.87825144
+  S      0.68836280    0.25000000    0.39271517
+  S      0.81163720    0.75000000    0.89271517
+  S      0.31163720    0.75000000    0.60728483
+  S      0.18836280    0.25000000    0.10728483
+  Cl     0.00000000    0.00000000    0.50000000
+  Cl     0.50000000    0.00000000    0.00000000
+  Cl     0.00000000    0.50000000    0.50000000
+  Cl     0.50000000    0.50000000    0.00000000
 K_POINTS automatic
-  6 6 4 0 0 0
+  4 2 2 0 0 0

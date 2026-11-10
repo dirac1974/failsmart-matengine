@@ -1,21 +1,51 @@
+# generated using failsmart-matengine
+# generated using pymatgen
 data_Cu2SbS2Cl
-_symmetry_space_group_name_H-M   'Pnma'
-_symmetry_Int_Tables_number      62
-_cell_length_a                   6.1400
-_cell_length_b                   7.4200
-_cell_length_c                   8.9100
-_cell_angle_alpha                90.0000
-_cell_angle_beta                 90.0000
-_cell_angle_gamma                90.0000
+_symmetry_space_group_name_H-M   'P 1'
+_cell_length_a   6.34642438
+_cell_length_b   13.60497462
+_cell_length_c   10.34304774
+_cell_angle_alpha   90.00000000
+_cell_angle_beta   90.00000000
+_cell_angle_gamma   90.00000000
+_symmetry_Int_Tables_number   1
+_chemical_formula_structural   Cu2SbS2Cl
+_chemical_formula_sum   'Cu8 Sb4 S8 Cl4'
+_cell_volume   893.04917672
+_cell_formula_units_Z   4
 loop_
- _atom_site_label
+ _symmetry_equiv_pos_site_id
+ _symmetry_equiv_pos_as_xyz
+  1  'x, y, z'
+loop_
  _atom_site_type_symbol
+ _atom_site_label
+ _atom_site_symmetry_multiplicity
  _atom_site_fract_x
  _atom_site_fract_y
  _atom_site_fract_z
-  Cu1  Cu  0.2500  0.1667  0.1667
-  Cu2  Cu  0.7500  0.5000  0.5000
-  Sb1  Sb  0.7500  0.1667  0.8333
-  S1  S  0.2500  0.8333  0.5000
-  S2  S  0.2500  0.5000  0.8333
-  Cl1  Cl  0.7500  0.8333  0.1667
+ _atom_site_occupancy
+  Cl  Cl0  1  0.00000000  0.00000000  0.50000000  1
+  Cl  Cl1  1  0.50000000  -0.00000000  -0.00000000  1
+  Cl  Cl2  1  0.00000000  0.50000000  0.50000000  1
+  Cl  Cl3  1  0.50000000  0.50000000  -0.00000000  1
+  Cu  Cu4  1  0.85006827  0.89516051  0.79539762  1
+  Cu  Cu5  1  -0.35006827  -0.89516051  1.29539762  1
+  Cu  Cu6  1  -0.85006827  1.39516051  -0.79539762  1
+  Cu  Cu7  1  1.35006827  -0.39516051  -0.29539762  1
+  Cu  Cu8  1  -0.85006827  -0.89516051  -0.79539762  1
+  Cu  Cu9  1  1.35006827  0.89516051  -0.29539762  1
+  Cu  Cu10  1  0.85006827  -0.39516051  0.79539762  1
+  Cu  Cu11  1  -0.35006827  1.39516051  1.29539762  1
+  S  S12  1  0.82969877  0.25000000  0.62174856  1
+  S  S13  1  0.67030123  0.75000000  0.12174856  1
+  S  S14  1  0.17030123  0.75000000  0.37825144  1
+  S  S15  1  0.32969877  0.25000000  0.87825144  1
+  S  S16  1  0.68836280  0.25000000  0.39271517  1
+  S  S17  1  0.81163720  0.75000000  0.89271517  1
+  S  S18  1  0.31163720  0.75000000  0.60728483  1
+  S  S19  1  0.18836280  0.25000000  0.10728483  1
+  Sb  Sb20  1  0.00000000  0.00000000  0.00000000  1
+  Sb  Sb21  1  0.50000000  -0.00000000  0.50000000  1
+  Sb  Sb22  1  0.00000000  0.50000000  -0.00000000  1
+  Sb  Sb23  1  0.50000000  0.50000000  0.50000000  1
