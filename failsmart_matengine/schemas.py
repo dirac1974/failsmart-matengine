@@ -26,6 +26,11 @@ class CandidateMaterial(BaseModel):
     tier2_elements_present: List[str]
     cif_content: str
     embedding_128d: List[float]
+    mp_id: Optional[str] = None
+    dft_pbe_band_gap_ev: Optional[float] = None
+    dft_is_gap_direct: Optional[bool] = None
+    is_experimentally_known: Optional[bool] = None
+    data_source: str = "SYNTHETIC_BENCHMARK"
 
 
 class StabilityReport(BaseModel):
@@ -122,3 +127,26 @@ class OpticalTandemReport(BaseModel):
     tandem_4t_total_eff_percent: float
     passed_optical_gate: bool
     failure_reason: Optional[str] = None
+
+
+class CrossLayerTandemPair(BaseModel):
+    pair_id: str
+    top_mp_id: str
+    top_formula: str
+    top_eg_ind_ev: float
+    top_eg_dir_ev: float
+    bottom_mp_id: str
+    bottom_formula: str
+    bottom_eg_ind_ev: float
+    bottom_eg_dir_ev: float
+    top_cell_eff_percent: float
+    sub_bandgap_transmittance_percent: float
+    si_middle_cell_eff_percent: float
+    bottom_ir_std_si_eff_percent: float
+    bottom_ir_low_fca_eff_percent: float
+    tandem_2layer_si_eff_percent: float
+    tandem_4t_std_si_fca_eff_percent: float
+    tandem_4t_low_fca_total_eff_percent: float
+    combined_active_cost_usd_m2: float
+    photon_conservation_verified: bool
+    redundancy_simpson_diff_percent: float

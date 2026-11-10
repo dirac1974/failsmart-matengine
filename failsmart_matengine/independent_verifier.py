@@ -136,12 +136,14 @@ def independently_verify_cif_geometry(
     oxidation_states: Optional[Dict[str, int]] = None,
     expected_nsites: Optional[int] = None,
     expected_reduced_stoich: Optional[Dict[str, int]] = None,
+    min_dist_floor_ang: float = 1.75,
 ) -> Dict[str, Any]:
     """Parse CIF text via pymatgen and independently verify 3D periodic geometry & BVS GII."""
     if not cif_text or not cif_text.strip():
         return {
             "natoms": 0,
             "min_distance_ang": 0.0,
+            "valid_distance": False,
             "valid_geometry": False,
             "passed": False,
             "reason": "Empty CIF content",
@@ -153,6 +155,7 @@ def independently_verify_cif_geometry(
         return {
             "natoms": 0,
             "min_distance_ang": 0.0,
+            "valid_distance": False,
             "valid_geometry": False,
             "passed": False,
             "reason": "CifParser produced no structures",
@@ -172,7 +175,7 @@ def independently_verify_cif_geometry(
     # Periodic self-image distance (minimum lattice translation norm)
     min_self = float(min(struct.lattice.abc))
     min_distance_ang = round(min(min_off_diag, min_self), 3)
-    valid_distance = min_distance_ang >= 2.15
+    valid_distance = bool(min_distance_ang >= min_dist_floor_ang)
 
     # Check atom count if expected_nsites provided
     valid_nsites = True
@@ -216,6 +219,7 @@ def independently_verify_cif_geometry(
         "natoms": natoms,
         "expected_natoms": expected_nsites if expected_nsites is not None else natoms,
         "min_distance_ang": min_distance_ang,
+        "valid_distance": valid_distance,
         "bvs_gii": bvs_gii,
         "valid_geometry": is_valid,
         "passed": is_valid,
@@ -459,6 +463,141 @@ def independently_verify_energy_quadrature_slme(
         "tandem_2layer_si_eff_percent": tandem_2layer,
         "tandem_4t_std_si_fca_eff_percent": tandem_4t_std,
         "tandem_4t_total_eff_percent": tandem_4t_total,
+        "photon_conservation_holds": conservation_passed,
+    }
+
+
+def independently_verify_cross_layer_4t_pair(
+    eg_ind_1: float,
+    eg_dir_1: float,
+    eps_inf_1: float,
+    thickness_nm_1: float,
+    eg_ind_3: float,
+    eg_dir_3: float,
+    eps_inf_3: float,
+    thickness_nm_3: float,
+) -> Dict[str, Any]:
+    """Independently compute and verify sequential 3-layer 4-terminal tandem stack optics.
+
+    Per Section 4.3 of docs/MATHEMATICAL_SPEC_V2.md:
+    Uses the exact Section 4.3 sequential 3-layer 4-terminal stack propagation equations:
+    - Step A — Layer 1 (Top Active Glass): fabs1 = _light_trapping_fabs(alpha1, eps_inf_1, d1_m),
+      a1 = (1.0 - 0.020) * fabs1, r_fresnel_1 = 0.25 * (((n1 - 1.85) / (n1 + 1.85)) ** 2),
+      t_tco = exp(-2.0 * (0.015 + 0.028 * ((LAMBDA_GRID_NM / 1000.0) ** 2))),
+      t_stack_1 = (1.0 - 0.020 - 0.020 - r_fresnel_1) * (1.0 - fabs1) * t_tco,
+      phi2 = SOLAR_PHOTON_FLUX_E * t_stack_1.
+    - Step B — Layer 2 (c-Si Wafer, Eg=1.12 eV, d=160 um, J0=1.2e-12 mA/cm^2):
+      term_si_2l = 49.0 * alpha_si * d_si, fabs_si_2l = term_si_2l / (1.0 + term_si_2l),
+      term_si_3l = 16.0 * alpha_si * d_si, fabs_si_3l = term_si_3l / (1.0 + term_si_3l),
+      t_si_fca_low = exp(-0.08 * ((LAMBDA_GRID_NM / 1200.0) ** 2)),
+      t_si_fca_std = exp(-0.38 * ((LAMBDA_GRID_NM / 1200.0) ** 2)),
+      phi3_low = phi2 * 0.96 * (1.0 - fabs_si_3l) * t_si_fca_low,
+      phi3_std = phi2 * 0.96 * (1.0 - fabs_si_3l) * t_si_fca_std.
+    - Step C — Layer 3 (Bottom IR Scavenger):
+      fabs3 = _light_trapping_fabs(alpha3, eps_inf_3, d3_m),
+      a3 = (1.0 - 0.020) * fabs3, solved under phi3_low and phi3_std.
+    """
+    d1_m = thickness_nm_1 * 1e-9
+    d3_m = thickness_nm_3 * 1e-9
+
+    # Step A — Layer 1
+    n1 = math.sqrt(eps_inf_1)
+    alpha1 = _absorption_coefficient_e(eg_ind_1, eg_dir_1, ENERGY_GRID_EV)
+    fabs1 = _light_trapping_fabs(alpha1, eps_inf_1, d1_m)
+    a1 = (1.0 - 0.020) * fabs1
+    cell1 = _solve_pv_cell_energy_quadrature(
+        absorptance_e=a1,
+        incident_photon_flux_e=SOLAR_PHOTON_FLUX_E,
+        eg_ind_ev=eg_ind_1,
+        eg_dir_ev=eg_dir_1,
+    )
+
+    r_fresnel_1 = 0.25 * (((n1 - 1.85) / (n1 + 1.85)) ** 2)
+    t_tco = np.exp(-2.0 * (0.015 + 0.028 * ((LAMBDA_GRID_NM / 1000.0) ** 2)))
+    t_stack_1 = (1.0 - 0.020 - 0.020 - r_fresnel_1) * (1.0 - fabs1) * t_tco
+    phi2 = SOLAR_PHOTON_FLUX_E * t_stack_1
+
+    # Photon conservation check across energy grid: A_1(E) + T_stack,1(E) < 1.0
+    conservation_passed = bool(np.all(a1 + t_stack_1 < 1.0))
+
+    # Sub-bandgap transmittance of Layer 1 over [0.75, eg_ind_1 - 0.02] eV
+    sub_mask = (ENERGY_GRID_EV >= 0.75) & (ENERGY_GRID_EV <= (eg_ind_1 - 0.02))
+    flux_sub = SOLAR_PHOTON_FLUX_E[sub_mask]
+    e_sub = ENERGY_GRID_EV[sub_mask]
+    if np.any(sub_mask):
+        sub_t_percent = float(
+            scipy.integrate.simpson(t_stack_1[sub_mask] * flux_sub, x=e_sub)
+            / scipy.integrate.simpson(flux_sub, x=e_sub)
+            * 100.0
+        )
+    else:
+        sub_t_percent = 0.0
+
+    # Step B — Layer 2 (Crystalline Silicon Wafer, Eg=1.12 eV, d=160 um, J0=1.2e-12 mA/cm^2)
+    delta_ind_si = np.maximum(0.0, ENERGY_GRID_EV - 1.12)
+    delta_dir_si = np.maximum(0.0, ENERGY_GRID_EV - 3.40)
+    alpha_si = 1.1e5 * (delta_ind_si ** 2) + 1.5e7 * np.sqrt(delta_dir_si)
+    d_si = 160.0 * 1e-6
+
+    term_si_2l = 49.0 * alpha_si * d_si
+    fabs_si_2l = term_si_2l / (1.0 + term_si_2l)
+    a_si_2l = 0.98 * fabs_si_2l
+    cell_si_2l = _solve_pv_cell_energy_quadrature(
+        absorptance_e=a_si_2l,
+        incident_photon_flux_e=phi2,
+        eg_ind_ev=1.12,
+        eg_dir_ev=1.12,
+        j0_rad_fixed=1.2e-12,
+    )
+
+    term_si_3l = 16.0 * alpha_si * d_si
+    fabs_si_3l = term_si_3l / (1.0 + term_si_3l)
+    a_si_3l = 0.98 * fabs_si_3l
+    cell_si_3l = _solve_pv_cell_energy_quadrature(
+        absorptance_e=a_si_3l,
+        incident_photon_flux_e=phi2,
+        eg_ind_ev=1.12,
+        eg_dir_ev=1.12,
+        j0_rad_fixed=1.2e-12,
+    )
+
+    # Silicon Drude FCA & Transmitted Flux to Layer 3
+    t_si_fca_low = np.exp(-0.08 * ((LAMBDA_GRID_NM / 1200.0) ** 2))
+    t_si_fca_std = np.exp(-0.38 * ((LAMBDA_GRID_NM / 1200.0) ** 2))
+    phi3_low = phi2 * 0.96 * (1.0 - fabs_si_3l) * t_si_fca_low
+    phi3_std = phi2 * 0.96 * (1.0 - fabs_si_3l) * t_si_fca_std
+
+    # Step C — Layer 3 (Bottom IR Scavenger)
+    alpha3 = _absorption_coefficient_e(eg_ind_3, eg_dir_3, ENERGY_GRID_EV)
+    fabs3 = _light_trapping_fabs(alpha3, eps_inf_3, d3_m)
+    a3 = (1.0 - 0.020) * fabs3
+    cell3_low = _solve_pv_cell_energy_quadrature(
+        absorptance_e=a3,
+        incident_photon_flux_e=phi3_low,
+        eg_ind_ev=eg_ind_3,
+        eg_dir_ev=eg_dir_3,
+    )
+    cell3_std = _solve_pv_cell_energy_quadrature(
+        absorptance_e=a3,
+        incident_photon_flux_e=phi3_std,
+        eg_ind_ev=eg_ind_3,
+        eg_dir_ev=eg_dir_3,
+    )
+
+    tandem_2layer = round(cell1["eff"] + cell_si_2l["eff"], 2)
+    tandem_4t_std = round(cell1["eff"] + cell_si_3l["eff"] + cell3_std["eff"], 2)
+    tandem_4t_total = round(cell1["eff"] + cell_si_3l["eff"] + cell3_low["eff"], 2)
+
+    return {
+        "top_cell_eff_percent": round(cell1["eff"], 2),
+        "sub_bandgap_transmittance_percent": round(sub_t_percent, 2),
+        "si_middle_cell_eff_percent": round(cell_si_3l["eff"], 2),
+        "bottom_ir_cell_eff_percent": round(cell3_low["eff"], 2),
+        "bottom_ir_std_si_eff_percent": round(cell3_std["eff"], 2),
+        "tandem_2layer_si_eff_percent": tandem_2layer,
+        "tandem_4t_std_si_fca_eff_percent": tandem_4t_std,
+        "tandem_4t_low_fca_total_eff_percent": tandem_4t_total,
+        "total_4t_pce_percent": tandem_4t_total,
         "photon_conservation_holds": conservation_passed,
     }
 

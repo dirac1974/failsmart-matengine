@@ -1,0 +1,51 @@
+! FailSmart-MatEngine v2.0 Auto-Generated Quantum ESPRESSO HSE06+SOC Input Deck
+! Candidate: mp-1078776 (BiInS3) | Target: TOP_ACTIVE_GLASS_185EV
+! Verified Space Group: P2_1/m (#11) | nat = 10
+&CONTROL
+  calculation = 'scf',
+  prefix = 'biins3',
+  outdir = './out/',
+  pseudo_dir = './pseudo_oncv_fr/',
+  tprnfor = .true.,
+  tstress = .true.,
+  etot_conv_thr = 1.0d-6,
+  forc_conv_thr = 1.0d-4,
+/
+&SYSTEM
+  ibrav = 0,
+  nat = 10,
+  ntyp = 3,
+  ecutwfc = 70.0,
+  ecutfock = 140.0,
+  noncolin = .true.,
+  lspinorb = .true.,
+  input_dft = 'hse',
+  nqx1 = 2, nqx2 = 2, nqx3 = 2,
+  x_gamma_extrapolation = .true.,
+/
+&ELECTRONS
+  conv_thr = 1.0d-8,
+  mixing_beta = 0.4,
+  adaptive_thr = .true.,
+/
+ATOMIC_SPECIES
+  Bi     208.9804  Bi_ONCV_PBE_FR-1.2.upf
+  In     114.8180  In_ONCV_PBE_FR-1.2.upf
+  S       32.0650  S_ONCV_PBE_FR-1.2.upf
+CELL_PARAMETERS (angstrom)
+      3.90412981      0.00000000      0.00000000
+      0.00000000      6.59169318      0.16073913
+      0.00000000      0.00000000      9.90746649
+ATOMIC_POSITIONS (crystal)
+  In     0.25000000    0.75539886    0.99577380
+  In     0.75000000    0.24460114    0.00422620
+  Bi     0.25000000    0.39789863    0.34815013
+  Bi     0.75000000    0.60210137    0.65184987
+  S      0.75000000    0.25081918    0.50974274
+  S      0.25000000    0.74918082    0.49025726
+  S      0.25000000    0.42596068    0.85258874
+  S      0.75000000    0.57403932    0.14741126
+  S      0.25000000    0.07974002    0.14417113
+  S      0.75000000    0.92025998    0.85582887
+K_POINTS automatic
+  6 4 2 0 0 0

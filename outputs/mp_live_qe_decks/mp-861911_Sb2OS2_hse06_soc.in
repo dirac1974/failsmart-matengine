@@ -1,0 +1,51 @@
+! FailSmart-MatEngine v2.0 Auto-Generated Quantum ESPRESSO HSE06+SOC Input Deck
+! Candidate: mp-861911 (Sb2OS2) | Target: TOP_ACTIVE_GLASS_185EV
+! Verified Space Group: C2/m (#12) | nat = 10
+&CONTROL
+  calculation = 'scf',
+  prefix = 'sb2os2',
+  outdir = './out/',
+  pseudo_dir = './pseudo_oncv_fr/',
+  tprnfor = .true.,
+  tstress = .true.,
+  etot_conv_thr = 1.0d-6,
+  forc_conv_thr = 1.0d-4,
+/
+&SYSTEM
+  ibrav = 0,
+  nat = 10,
+  ntyp = 3,
+  ecutwfc = 70.0,
+  ecutfock = 140.0,
+  noncolin = .true.,
+  lspinorb = .true.,
+  input_dft = 'hse',
+  nqx1 = 2, nqx2 = 2, nqx3 = 2,
+  x_gamma_extrapolation = .true.,
+/
+&ELECTRONS
+  conv_thr = 1.0d-8,
+  mixing_beta = 0.4,
+  adaptive_thr = .true.,
+/
+ATOMIC_SPECIES
+  Sb     121.7600  Sb_ONCV_PBE_FR-1.2.upf
+  O       15.9994  O_ONCV_PBE_FR-1.2.upf
+  S       32.0650  S_ONCV_PBE_FR-1.2.upf
+CELL_PARAMETERS (angstrom)
+      5.86179094      0.00000000      1.15005694
+      4.46109170      3.80253256      1.15005694
+      0.00000000      0.00000000     10.23815555
+ATOMIC_POSITIONS (crystal)
+  Sb     0.30357716    0.30357716    0.86910182
+  Sb     0.69642284    0.69642284    0.13089818
+  Sb     0.62124341    0.62124341    0.61651399
+  Sb     0.37875659    0.37875659    0.38348601
+  S      0.84194803    0.84194803    0.58368412
+  S      0.15805197    0.15805197    0.41631588
+  S      0.10503069    0.10503069    0.79675987
+  S      0.89496931    0.89496931    0.20324013
+  O      0.76033280    0.76033280    0.93084687
+  O      0.23966720    0.23966720    0.06915313
+K_POINTS automatic
+  4 4 2 0 0 0

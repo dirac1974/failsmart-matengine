@@ -1,0 +1,57 @@
+! FailSmart-MatEngine v2.0 Auto-Generated Quantum ESPRESSO HSE06+SOC Input Deck
+! Candidate: mp-22982 (BiCuS2) | Target: BOTTOM_IR_075EV
+! Verified Space Group: Pnma (#62) | nat = 16
+&CONTROL
+  calculation = 'scf',
+  prefix = 'bicus2',
+  outdir = './out/',
+  pseudo_dir = './pseudo_oncv_fr/',
+  tprnfor = .true.,
+  tstress = .true.,
+  etot_conv_thr = 1.0d-6,
+  forc_conv_thr = 1.0d-4,
+/
+&SYSTEM
+  ibrav = 0,
+  nat = 16,
+  ntyp = 3,
+  ecutwfc = 70.0,
+  ecutfock = 140.0,
+  noncolin = .true.,
+  lspinorb = .true.,
+  input_dft = 'hse',
+  nqx1 = 2, nqx2 = 2, nqx3 = 2,
+  x_gamma_extrapolation = .true.,
+/
+&ELECTRONS
+  conv_thr = 1.0d-8,
+  mixing_beta = 0.4,
+  adaptive_thr = .true.,
+/
+ATOMIC_SPECIES
+  Bi     208.9804  Bi_ONCV_PBE_FR-1.2.upf
+  Cu      63.5460  Cu_ONCV_PBE_FR-1.2.upf
+  S       32.0650  S_ONCV_PBE_FR-1.2.upf
+CELL_PARAMETERS (angstrom)
+      3.91582201      0.00000000      0.00000000
+      0.00000000      6.23006221      0.00000000
+      0.00000000      0.00000000     14.39114777
+ATOMIC_POSITIONS (crystal)
+  Cu     0.25000000    0.24441091    0.82861323
+  Cu     0.25000000    0.74441091    0.67138677
+  Cu     0.75000000    0.75558909    0.17138677
+  Cu     0.75000000    0.25558909    0.32861323
+  Bi     0.25000000    0.73442990    0.43729137
+  Bi     0.75000000    0.26557010    0.56270863
+  Bi     0.25000000    0.23442990    0.06270863
+  Bi     0.75000000    0.76557010    0.93729137
+  S      0.75000000    0.62139032    0.31987216
+  S      0.25000000    0.37860968    0.68012784
+  S      0.75000000    0.12139032    0.18012784
+  S      0.25000000    0.87860968    0.81987216
+  S      0.25000000    0.13914944    0.40076932
+  S      0.75000000    0.36085056    0.90076932
+  S      0.25000000    0.63914944    0.09923068
+  S      0.75000000    0.86085056    0.59923068
+K_POINTS automatic
+  6 4 2 0 0 0

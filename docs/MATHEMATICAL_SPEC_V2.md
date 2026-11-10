@@ -27,9 +27,9 @@
      $$\sum_i n_i z_i \equiv 0$$
    * Canonical reduced formula divides $n_i$ by $\gcd(\{n_i\})$, ordering cations first (in input dictionary key order) and anions second in strict order `["O", "S", "Se", "Te", "N", "P", "Cl", "Br", "I"]`.
 
-2. **Genuine 3D Crystal Generation (`pyxtal` + `pymatgen` + `spglib`):**
-   * Build genuine 3D `pymatgen.core.Structure` crystals using `pyxtal` (trying the target space group with $Z \in \{1, 2, 4\}$ formula units so Wyckoff multiplicities match, or falling back cleanly to a deterministic `pyxtal` / `pymatgen` `P1` 3D lattice if a strained hypothetical stoichiometry has incompatible Wyckoff site multiplicity).
-   * Enforce 3D periodic minimum interatomic distance $d_{\min} \ge 2.18\text{ \AA}$ across all periodic images (`struct.distance_matrix` + self-image lattice vector norm check; isotropically scale lattice volume if needed so $d_{\min} \ge 2.18\text{ \AA}$).
+2. **Genuine 3D Crystal Generation (`pyxtal` + `pymatgen` + `spglib`) & Live MP DFT Structures:**
+   * Build genuine 3D `pymatgen.core.Structure` crystals using `pyxtal` (trying the target space group with $Z \in \{1, 2, 4\}$ formula units so Wyckoff multiplicities match, or falling back cleanly to a deterministic `pyxtal` / `pymatgen` `P1` 3D lattice), OR ingest DFT-relaxed crystal structures directly from the live Materials Project API (`MPRester`).
+   * Enforce 3D periodic minimum interatomic distance across all periodic images (`struct.distance_matrix` + self-image lattice vector norm check): synthetic `PyXtal` non-oxide generators target $d_{\min} \ge 2.18\text{ \AA}$, while real DFT-relaxed oxychalcogenides/chalcohalides (e.g., $\text{Ti–O} \approx 1.81\text{ \AA}$, $\text{Fe–O} \approx 1.93\text{ \AA}$, $\text{Sb–O} \approx 2.05\text{ \AA}$) have true covalent/ionic bond lengths down to $1.75\text{ \AA}$. Therefore, `independently_verify_cif_geometry` validates `min_distance_ang >= 1.75` as physically clash-free across both DFT oxides and synthetic chalcohalides.
    * Analyze actual symmetry via `SpacegroupAnalyzer(struct, symprec=0.1)` so `space_group_symbol`, `space_group_number`, and `nsites_unit_cell = len(struct)` reflect the **true physical crystal structure** inside `cif_content`!
    * Export CIF via `CifWriter(struct)` (explicit unit-cell sites, parseable round-trip via `CifParser.from_str(cif_str).parse_structures(primitive=False)[0]` with exact `len(struct) == nsites_unit_cell` and matching reduced composition).
 
@@ -38,7 +38,7 @@
      `{"Bi": 1.52, "Sb": 1.40, "Sn": 1.42, "Cu": 1.12, "Ag": 1.28, "Zn": 1.18, "Ba": 1.82, "Sr": 1.68, "Ca": 1.54, "Mg": 1.30, "Ti": 1.26, "Zr": 1.42, "Fe": 1.24, "In": 1.38, "Ga": 1.24, "Pb": 1.56, "Cd": 1.36, "O": 0.63, "S": 1.04, "Se": 1.17, "Te": 1.36, "N": 0.70, "P": 1.06, "Cl": 0.99, "Br": 1.14, "I": 1.33}`
    * For each site $i$ with target oxidation state $z_i$, sum over opposite-sign neighbors $j$ within $r_{ij} \le 4.0\text{ \AA}$ (`struct.get_neighbors(site, 4.0)`):
      $$V_i = \sum_{j:\, z_i z_j < 0} \exp\!\left(\frac{R_{0,ij} - r_{ij}}{0.37}\right), \quad \text{GII} = \sqrt{\frac{1}{N_{\text{sites}}} \sum_{i=1}^{N_{\text{sites}}} \left(V_i - |z_i|\right)^2}$$
-     *(Note: calibrate equilibrium lattice volume during structure generation so stable prototypes achieve physically realistic bond lengths and $\text{GII} \lesssim 0.35\text{ v.u.}$).*
+     *(Note: calibrate equilibrium lattice volume during synthetic structure generation so stable prototypes achieve physically realistic bond lengths; for live MP DFT structures, compute exact unscaled GII directly on the DFT lattice).*
 
 4. **Exact Fröhlich Polaron Coupling Constant (`frohlich_alpha`) & Trapping Energy:**
    * Given `electron_eff_mass_m0` ($m_e^*/m_0$), `hole_eff_mass_m0` ($m_h^*/m_0$), `eps_inf` ($\varepsilon_\infty$), `eps_static` ($\varepsilon_s$), and `lo_phonon_freq_thz` ($\nu_{\text{LO}}$ in $\text{THz}$, so $\omega_{\text{LO}} = 2\pi \nu_{\text{LO}} \times 10^{12}\text{ rad/s}$):
@@ -101,6 +101,7 @@ To eliminate perovskite-like $J\text{–}V$ hysteresis and metallic $\text{Cu}^0
    * Reference partner layers when evaluating a single candidate:
      * When `target_layer == "TOP_ACTIVE_GLASS_185EV"`: Layer 1 is the candidate; Layer 3 is `Ref-Bottom` ($E_{g,\text{ind},3} = 0.75\text{ eV}$, $E_{g,\text{dir},3} = 0.79\text{ eV}$, $\varepsilon_{\infty,3} = 8.50$, $d_3 = 350.0\text{ nm}$).
      * When `target_layer == "BOTTOM_IR_075EV"`: Layer 1 is `Ref-Top` ($E_{g,\text{ind},1} = 1.84\text{ eV}$, $E_{g,\text{dir},1} = 1.88\text{ eV}$, $\varepsilon_{\infty,1} = 6.10$, $d_1 = 260.0\text{ nm}$); Layer 3 is the candidate.
+     * **Cross-Layer Discovered Pair (`independently_verify_cross_layer_4t_pair`):** When pairing an arbitrary discovered Track A candidate `(eg_ind_1, eg_dir_1, eps_inf_1, thickness_nm_1)` with an arbitrary discovered Track B candidate `(eg_ind_3, eg_dir_3, eps_inf_3, thickness_nm_3)`, Steps A–C below are evaluated using both candidates' exact parameters simultaneously.
    * **Step A — Layer 1 (Top Active Glass on Soda-Lime Glass):**
      * Incident flux $\Phi_1 = \Phi_{\text{sun}}$, yielding `top_cell_jsc_ma_cm2`, `top_cell_voc_v`, and `top_cell_eff_percent`.
      * Residual Fresnel mismatch & dual-TCO Drude transmittance:
@@ -122,10 +123,10 @@ To eliminate perovskite-like $J\text{–}V$ hysteresis and metallic $\text{Cu}^0
          $$\Phi_{3,\text{low}}(\lambda) = \Phi_2(\lambda) \cdot 0.96 \cdot \left(1.0 - f_{\text{abs,Si,3L}}(E)\right) \cdot T_{\text{Si,FCA,low}}(\lambda)$$
          $$\Phi_{3,\text{std}}(\lambda) = \Phi_2(\lambda) \cdot 0.96 \cdot \left(1.0 - f_{\text{abs,Si,3L}}(E)\right) \cdot T_{\text{Si,FCA,std}}(\lambda)$$
    * **Step C — Layer 3 (Bottom IR Scavenger with $4n_3^2$ Rear Mirror):**
-     * `bottom_ir_cell_eff_percent` $= \eta_3(\Phi_{3,\text{low}})$, and $\eta_{3,\text{std}} = \eta_3(\Phi_{3,\text{std}})$.
+     * `bottom_ir_cell_eff_percent` $= \eta_3(\Phi_{3,\text{low}})$, and `bottom_ir_std_si_eff_percent` $= \eta_3(\Phi_{3,\text{std}})$.
      * Stack totals:
        * `tandem_2layer_si_eff_percent` $= \eta_1(\Phi_1) + \eta_{\text{Si,2L}}(\Phi_2)$
-       * `tandem_4t_std_si_fca_eff_percent` $= \eta_1(\Phi_1) + \eta_{\text{Si,3L}}(\Phi_2) + \eta_{3,\text{std}}$
+       * `tandem_4t_std_si_fca_eff_percent` $= \eta_1(\Phi_1) + \eta_{\text{Si,3L}}(\Phi_2) + \eta_3(\Phi_{3,\text{std}})$
        * `tandem_4t_total_eff_percent` $= \eta_1(\Phi_1) + \eta_{\text{Si,3L}}(\Phi_2) + \eta_3(\Phi_{3,\text{low}})$
    * **Optical Gate (`passed_optical_gate`):**
      * Track A: `sub_bandgap_transmittance_percent >= 85.0 and standalone_slme_percent >= 20.0`
@@ -135,10 +136,10 @@ To eliminate perovskite-like $J\text{–}V$ hysteresis and metallic $\text{Cu}^0
 
 ## 5. Quadrature Separation & Redundancy Tolerances
 
-* **Primary Engineers (`kinetics_and_optics.py`):** Integrate in **wavelength space** ($\lambda \in [280, 4000]\text{ nm}$) on `pvlib`'s native ASTM G173-03 grid using `numpy.trapezoid`.
-* **Blinded Independent Verifier (`independent_verifier.py`):** Integrate in **photon-energy space** ($E \in [hc/(4000 q), hc/(280 q)]\text{ eV}$, $N = 8001$ uniform points) using `scipy.integrate.simpson` and exact Jacobian $\left|\frac{d\lambda}{dE}\right| = \frac{hc/q \times 10^9}{E^2}$.
+* **Primary Engineers (`kinetics_and_optics.py` & `mp_live_discovery.py`):** Integrate in **wavelength space** ($\lambda \in [280, 4000]\text{ nm}$) on `pvlib`'s native ASTM G173-03 grid using `numpy.trapezoid`.
+* **Blinded Independent Verifier (`independent_verifier.py`):** Integrate in **photon-energy space** ($E \in [hc/(4000 q), hc/(280 q)]\text{ eV}$, $N = 8001$ uniform points) using `scipy.integrate.simpson` and exact Jacobian $\left|\frac{d\lambda}{dE}\right| = \frac{hc/q \times 10^9}{E^2}$ — **strictly zero imports** from `physics_calculators`, `kinetics_and_optics`, `tools`, or `mp_live_discovery`.
 * **Required Agreement:**
   * $|\eta_{\text{SLME, wl}} - \eta_{\text{SLME, E}}| \le 0.10\%$
-  * $|\eta_{\text{4T, wl}} - \eta_{\text{4T, E}}| \le 0.10\%$
+  * $|\eta_{\text{4T, wl}} - \eta_{\text{4T, E}}| \le 0.10\%$ (both single-candidate reference partner and cross-layer `(Top, c-Si, Bottom)` pairs)
   * $|\alpha_{F,\text{primary}} - \alpha_{F,\text{verifier}}| \le 10^{-3}$
   * `standalone_slme_percent <= shockley_queisser_limit_percent` (0 violations tolerated).

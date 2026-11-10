@@ -89,7 +89,11 @@ from failsmart_matengine.independent_verifier import (
     independently_verify_energy_quadrature_slme,
     compute_frohlich_alpha_exact,
     verify_candidate_dossier,
+    independently_verify_cross_layer_4t_pair,
 )
+from pymatgen.core import Structure
+import subprocess
+from failsmart_matengine.mp_live_discovery import compute_covalent_dimensionality_from_structure
 from failsmart_matengine.tools import (
     ContrastiveFailureLedger,
     build_candidate_from_spec,
@@ -129,7 +133,7 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
         with open(iv_path, "r", encoding="utf-8") as f:
             iv_tree = ast.parse(f.read(), filename="independent_verifier.py")
 
-        banned_modules = {"physics_calculators", "kinetics_and_optics", "tools"}
+        banned_modules = {"physics_calculators", "kinetics_and_optics", "tools", "mp_live_discovery"}
         for node in ast.walk(iv_tree):
             if isinstance(node, ast.Import):
                 for alias in node.names:
@@ -615,6 +619,276 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
                     comms_entries.append(json.loads(line.strip()))
         self.assertGreaterEqual(len(comms_entries), 20, f"Expected >= 20 comms entries, got {len(comms_entries)}")
 
+    def test_zero_api_key_or_secret_leakage(self):
+        """Test 11: Verify .env is git-ignored and MP_API_KEY/known hash fragments never appear in repo text files outside .env."""
+        # 1. Verify .env is strictly ignored by git
+        res = subprocess.run(
+            ["git", "check-ignore", ".env"],
+            cwd=self.repo_root,
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(
+            res.returncode,
+            0,
+            ".env must be strictly git-ignored (git check-ignore .env returned non-zero)",
+        )
+        self.assertIn(".env", res.stdout)
+
+        # 2. Extract MP_API_KEY and its 8-char prefix dynamically from .env if it exists
+        env_path = os.path.join(self.repo_root, ".env")
+        banned_tokens = []
+        if os.path.exists(env_path):
+            with open(env_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line.startswith("MP_API_KEY=") or line.startswith("MP_API_KEY ="):
+                        val = line.split("=", 1)[1].strip().strip('"').strip("'")
+                        if val and len(val) >= 12:
+                            banned_tokens.append(val)
+                            banned_tokens.append(val[:10])
+
+        # 3. Recursively scan repo text files outside .env
+        exts = (".py", ".json", ".md", ".jsonl", ".in", ".cif")
+        leaks = []
+        for root, dirs, files in os.walk(self.repo_root):
+            if any(skip in root for skip in [".git", ".venv", "__pycache__", ".pytest_cache"]):
+                continue
+            for fname in files:
+                if fname.endswith(exts):
+                    fpath = os.path.join(root, fname)
+                    relpath = os.path.relpath(fpath, self.repo_root)
+                    if relpath == ".env":
+                        continue
+                    try:
+                        with open(fpath, "r", encoding="utf-8", errors="ignore") as f:
+                            content = f.read()
+                            for tok in banned_tokens:
+                                if tok in content:
+                                    leaks.append((relpath, tok))
+                    except Exception:
+                        pass
+
+        self.assertEqual(
+            leaks,
+            [],
+            f"Zero-trust credential leak detected outside .env: {leaks}",
+        )
+
+    def test_lbnl_80k_impurity_and_alab_precursor_genome_priors(self):
+        """Test 12: Verify LBNL 80k impurity and A-Lab precursor genome negative priors dataset provenance and failure sink counts."""
+        priors_path = os.path.join(self.repo_root, "data", "negative_synthesis_priors.json")
+        self.assertTrue(os.path.exists(priors_path), "data/negative_synthesis_priors.json must exist")
+
+        with open(priors_path, "r", encoding="utf-8") as f:
+            priors_data = json.load(f)
+
+        prov = priors_data.get("dataset_provenance", {})
+        lbnl_prov = prov.get("lbnl_solid_state_impurity_dataset") or prov.get("lbnl_80k_impurity_dataset", {})
+        alab_prov = prov.get("alab_precursor_genome_dataset") or prov.get("alab_precursor_genome", {})
+
+        lbnl_total = lbnl_prov.get("total_reactions_parsed") or lbnl_prov.get("total_recipes")
+        lbnl_impure = lbnl_prov.get("impure_failed_reactions_count") or lbnl_prov.get("phase_impure_failed_recipes")
+        alab_total = alab_prov.get("total_pairwise_reactions_parsed") or alab_prov.get("total_pairwise_reactions")
+        alab_neg = alab_prov.get("negative_stalled_or_impure_count") or alab_prov.get("negative_or_stalled_reactions")
+
+        self.assertEqual(lbnl_total, 80806, f"Expected 80806 LBNL reactions, got {lbnl_total}")
+        self.assertEqual(lbnl_impure, 18869, f"Expected 18869 impure failed recipes, got {lbnl_impure}")
+        self.assertEqual(alab_total, 1035, f"Expected 1035 A-Lab pairwise reactions, got {alab_total}")
+        self.assertEqual(alab_neg, 892, f"Expected 892 negative/stalled reactions, got {alab_neg}")
+
+        chemsys_priors = priors_data.get("chemsys_impurity_priors", {})
+        self.assertGreaterEqual(len(chemsys_priors), 4000, f"Expected >= 4000 chemsys impurity priors, got {len(chemsys_priors)}")
+
+        live_sum_path = os.path.join(self.repo_root, "outputs", "live_mp_discovery_summary.json")
+        self.assertTrue(os.path.exists(live_sum_path), "outputs/live_mp_discovery_summary.json must exist")
+        with open(live_sum_path, "r", encoding="utf-8") as f:
+            live_sum = json.load(f)
+
+        fmode_breakdown = live_sum.get("failure_mode_breakdown", {})
+        self.assertEqual(
+            fmode_breakdown.get("OXIDE_IMPURITY_SINK"),
+            26,
+            f"Expected 26 OXIDE_IMPURITY_SINK rejections, got {fmode_breakdown.get('OXIDE_IMPURITY_SINK')}",
+        )
+
+    def test_live_mp_covalent_dimensionality_and_100_candidates_blinded_verification(self):
+        """Test 13: Verify covalent dimensionality (BiSCl/SbSI as 1D-Chain), RoHS compliance, and 100/100 blinded verification."""
+        cache_path = os.path.join(self.repo_root, "data", "mp_live_candidates_cache.json")
+        self.assertTrue(os.path.exists(cache_path), "data/mp_live_candidates_cache.json must exist")
+        with open(cache_path, "r", encoding="utf-8") as f:
+            cache_list = json.load(f)
+        cache_by_id = {c["mp_id"]: c for c in cache_list}
+
+        self.assertIn("mp-23318", cache_by_id, "mp-23318 (BiSCl) missing from MP cache")
+        self.assertIn("mp-23041", cache_by_id, "mp-23041 (SbSI) missing from MP cache")
+
+        st_biscl = Structure.from_dict(cache_by_id["mp-23318"]["structure_dict"])
+        st_sbsi = Structure.from_dict(cache_by_id["mp-23041"]["structure_dict"])
+
+        dim_biscl = compute_covalent_dimensionality_from_structure(st_biscl)
+        dim_sbsi = compute_covalent_dimensionality_from_structure(st_sbsi)
+        self.assertEqual(dim_biscl, "1D-Chain", f"BiSCl expected 1D-Chain, got {dim_biscl}")
+        self.assertEqual(dim_sbsi, "1D-Chain", f"SbSI expected 1D-Chain, got {dim_sbsi}")
+
+        live_sum_path = os.path.join(self.repo_root, "outputs", "live_mp_discovery_summary.json")
+        with open(live_sum_path, "r", encoding="utf-8") as f:
+            live_sum = json.load(f)
+
+        all_mp_recs = live_sum.get("all_mp_records", [])
+        self.assertEqual(len(all_mp_recs), 100, f"Expected 100 live MP candidate records, got {len(all_mp_recs)}")
+
+        banned_rohs = {"Pb", "Cd", "Hg", "Tl", "As", "Te", "P"}
+        for rec in all_mp_recs:
+            cand = rec["candidate"]
+            cid = cand["candidate_id"]
+            stoich = cand["stoichiometry"]
+            rohs_intersection = banned_rohs.intersection(stoich.keys())
+            self.assertEqual(
+                rohs_intersection,
+                set(),
+                f"Candidate {cid} violates RoHS whitelist with toxic elements: {rohs_intersection}",
+            )
+
+            ox = cand["oxidation_states"]
+            net_charge = sum(stoich[el] * ox[el] for el in stoich)
+            self.assertEqual(net_charge, 0, f"Candidate {cid} violates charge neutrality: net_charge={net_charge}")
+
+            verif = verify_candidate_dossier(rec, raise_on_error=True)
+            self.assertTrue(
+                verif.get("passed_all_redundancy_checks"),
+                f"Candidate {cid} failed blinded redundancy verification: {verif.get('mismatches')}",
+            )
+
+        fc = live_sum.get("funnel_counts", {})
+        self.assertEqual(fc.get("stage1_live_mp_ingested"), 100)
+        self.assertEqual(fc.get("stage4_5_validated_finalists"), 8)
+        self.assertEqual(fc.get("top_active_glass_finalists"), 3)
+        self.assertEqual(fc.get("bottom_ir_scavenger_finalists"), 5)
+
+    def test_cross_layer_discovered_mp_4t_tandem_stacks(self):
+        """Test 14: Verify all 15 cross-layer (mp-Top, c-Si, mp-Bottom) 4T stacks match independent_verifier within <= 0.05%."""
+        live_sum_path = os.path.join(self.repo_root, "outputs", "live_mp_discovery_summary.json")
+        with open(live_sum_path, "r", encoding="utf-8") as f:
+            live_sum = json.load(f)
+
+        pairs = live_sum.get("cross_layer_4t_tandem_pairs", [])
+        self.assertEqual(len(pairs), 15, f"Expected 15 cross-layer 4T pairs, got {len(pairs)}")
+
+        finalists_by_id = {fin["candidate"]["candidate_id"]: fin for fin in live_sum.get("finalists", [])}
+        self.assertEqual(len(finalists_by_id), 8, f"Expected 8 promoted finalists, got {len(finalists_by_id)}")
+
+        for p in pairs:
+            pid = p["pair_id"]
+            self.assertTrue(
+                p.get("photon_conservation_verified"),
+                f"Pair {pid} photon conservation check failed",
+            )
+            simpson_diff = p.get("redundancy_simpson_diff_percent", 999.0)
+            self.assertLessEqual(
+                simpson_diff,
+                0.05,
+                f"Pair {pid} simpson_diff {simpson_diff}% > 0.05%",
+            )
+            simpson_verification_passed = (simpson_diff <= 0.05) and (p.get("photon_conservation_verified") is True)
+            self.assertTrue(simpson_verification_passed)
+
+            top_f = finalists_by_id[p["top_mp_id"]]
+            bot_f = finalists_by_id[p["bottom_mp_id"]]
+
+            iv = independently_verify_cross_layer_4t_pair(
+                eg_ind_1=p["top_eg_ind_ev"],
+                eg_dir_1=p["top_eg_dir_ev"],
+                eps_inf_1=top_f["electronics"]["eps_inf"],
+                thickness_nm_1=top_f["optics"]["film_thickness_nm"],
+                eg_ind_3=p["bottom_eg_ind_ev"],
+                eg_dir_3=p["bottom_eg_dir_ev"],
+                eps_inf_3=bot_f["electronics"]["eps_inf"],
+                thickness_nm_3=bot_f["optics"]["film_thickness_nm"],
+            )
+
+            diff_eff = abs(p["tandem_4t_low_fca_total_eff_percent"] - iv["tandem_4t_low_fca_total_eff_percent"])
+            self.assertLessEqual(
+                diff_eff,
+                0.05,
+                f"Pair {pid} independent verification mismatch: summary={p['tandem_4t_low_fca_total_eff_percent']}%, "
+                f"iv={iv['tandem_4t_low_fca_total_eff_percent']}%, diff={diff_eff:.4f}% > 0.05%",
+            )
+
+    def test_live_mp_finalist_qe_hse06_soc_decks(self):
+        """Test 15: Verify all 8 promoted live MP finalists have runnable .in/.cif files with non-placeholder IUPAC masses and det(cell) > 50."""
+        live_decks_dir = os.path.join(self.repo_root, "outputs", "mp_live_qe_decks")
+        self.assertTrue(os.path.exists(live_decks_dir), f"Directory {live_decks_dir} does not exist")
+
+        deck_files = sorted(glob.glob(os.path.join(live_decks_dir, "*_hse06_soc.in")))
+        self.assertEqual(len(deck_files), 8, f"Expected 8 live MP finalist QE input decks, got {len(deck_files)}")
+
+        for dpath in deck_files:
+            cif_path = dpath.replace("_hse06_soc.in", ".cif")
+            self.assertTrue(os.path.exists(cif_path), f"Matching CIF file not found for deck {dpath}")
+
+            with open(dpath, "r", encoding="utf-8") as f:
+                deck_text = f.read()
+
+            species_masses = {}
+            cell_rows = []
+            atom_positions = []
+            lines = deck_text.splitlines()
+            i = 0
+            nat_in_header = None
+
+            while i < len(lines):
+                line = lines[i].strip()
+                if "nat" in line and "=" in line:
+                    for part in line.replace(",", " ").split():
+                        if part.startswith("nat="):
+                            nat_in_header = int(part.split("=")[1])
+                if line.startswith("ATOMIC_SPECIES"):
+                    i += 1
+                    while i < len(lines) and lines[i].strip() and not lines[i].strip().startswith(("CELL_PARAMETERS", "ATOMIC_POSITIONS", "K_POINTS", "&")):
+                        parts = lines[i].strip().split()
+                        if len(parts) >= 2:
+                            sym = parts[0]
+                            mass = float(parts[1])
+                            species_masses[sym] = mass
+                            self.assertGreater(mass, 14.0, f"{dpath}: Atomic mass for {sym} ({mass}) is unphysically low")
+                            self.assertNotEqual(mass, 1.000, f"{dpath}: Atomic mass for {sym} is dummy placeholder 1.000!")
+                        i += 1
+                    continue
+                elif line.startswith("CELL_PARAMETERS (angstrom)"):
+                    i += 1
+                    for _ in range(3):
+                        cell_rows.append([float(x) for x in lines[i].strip().split()])
+                        i += 1
+                    continue
+                elif line.startswith("ATOMIC_POSITIONS (crystal)"):
+                    i += 1
+                    while i < len(lines) and lines[i].strip() and not lines[i].strip().startswith(("K_POINTS", "&")):
+                        parts = lines[i].strip().split()
+                        if len(parts) >= 4:
+                            atom_positions.append(parts)
+                        i += 1
+                    continue
+                i += 1
+
+            self.assertEqual(len(cell_rows), 3, f"{dpath}: CELL_PARAMETERS did not parse 3 rows")
+            det_cell = float(np.linalg.det(cell_rows))
+            self.assertGreater(abs(det_cell), 50.0, f"{dpath}: CELL_PARAMETERS determinant {det_cell} <= 50.0")
+
+            cif_struct = CifParser(cif_path).parse_structures(primitive=False)[0]
+            self.assertEqual(
+                len(atom_positions),
+                len(cif_struct),
+                f"{dpath}: Deck nat ({len(atom_positions)}) != CIF nat ({len(cif_struct)})",
+            )
+            if nat_in_header is not None:
+                self.assertEqual(
+                    nat_in_header,
+                    len(atom_positions),
+                    f"{dpath}: Header nat ({nat_in_header}) != parsed positions ({len(atom_positions)})",
+                )
+
 
 if __name__ == "__main__":
     unittest.main()
+
