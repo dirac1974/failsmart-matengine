@@ -1,0 +1,36 @@
+! FailSmart-MatEngine Auto-Generated Quantum ESPRESSO HSE06+SOC Input Deck
+! Candidate: CAND-A09 (Cu3BiS2Cl2) | Target: TOP_ACTIVE_GLASS_185EV
+&CONTROL
+  calculation = 'scf',
+  prefix = 'cu3bis2cl2',
+  outdir = './out/',
+  pseudo_dir = './pseudo_oncv_fr/',
+  tprnfor = .true.,
+  tstress = .true.,
+  etot_conv_thr = 1.0d-6,
+  forc_conv_thr = 1.0d-4,
+/
+&SYSTEM
+  ibrav = 0,
+  nat = 8,
+  ntyp = 4,
+  ecutwfc = 70.0,
+  ecutfock = 140.0,
+  noncolin = .true.,
+  lspinorb = .true.,
+  input_dft = 'hse',
+  nqx1 = 2, nqx2 = 2, nqx3 = 2,
+  x_gamma_extrapolation = .true.,
+/
+&ELECTRONS
+  conv_thr = 1.0d-8,
+  mixing_beta = 0.4,
+  adaptive_thr = .true.,
+/
+ATOMIC_SPECIES
+  Cu  1.000  Cu_ONCV_PBE_FR-1.2.upf
+  Bi  1.000  Bi_ONCV_PBE_FR-1.2.upf
+  S  1.000  S_ONCV_PBE_FR-1.2.upf
+  Cl  1.000  Cl_ONCV_PBE_FR-1.2.upf
+K_POINTS automatic
+  6 6 4 0 0 0
