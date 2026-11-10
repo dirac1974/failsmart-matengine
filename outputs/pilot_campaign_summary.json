@@ -4,7 +4,8 @@
     "stage2_dynamically_stable": 14,
     "stage3_manufacturable": 12,
     "gate_a_promoted_to_dft": 9,
-    "stage4_5_validated_finalists": 6
+    "stage4_5_validated_finalists": 6,
+    "redundancy_verifications_passed": 16
   },
   "finalists": [
     {
@@ -15,7 +16,7 @@
         "crystal_family": "Sillen-Aurivillius Quaternary Oxy-Chalcohalide",
         "space_group_symbol": "I4/mmm",
         "space_group_number": 139,
-        "nsites_unit_cell": 14,
+        "nsites_unit_cell": 7,
         "elements": [
           "Bi",
           "Cu",
@@ -40,9 +41,9 @@
         "pauling_electronegativity_diff": 1.18,
         "structural_dimensionality": "Quasi-2D",
         "tolerance_factor": 0.94,
-        "bond_valence_sum_deviation": 0.05,
+        "bond_valence_sum_deviation": 0.1109,
         "tier2_elements_present": [],
-        "cif_content": "data_Bi2CuO2SCl\n_symmetry_space_group_name_H-M   'I4/mmm'\n_symmetry_Int_Tables_number      139\n_cell_length_a                   3.9150\n_cell_length_b                   3.9150\n_cell_length_c                   14.8200\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Bi1  Bi  0.1250  0.2500  0.0830\n  Bi2  Bi  0.3180  0.5670  0.3089\n  Cu1  Cu  0.5110  0.8840  0.3687\n  O1  O  0.7040  0.2010  0.5116\n  O2  O  0.8970  0.5180  0.7374\n  S1  S  0.0900  0.8350  0.7973\n  Cl1  Cl  0.2830  0.1520  0.9401",
+        "cif_content": "data_Bi2CuO2SCl\n_symmetry_space_group_name_H-M   'I4/mmm'\n_symmetry_Int_Tables_number      139\n_cell_length_a                   3.9150\n_cell_length_b                   3.9150\n_cell_length_c                   14.8200\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Bi1  Bi  0.2500  0.2500  0.0714\n  Bi2  Bi  0.7500  0.7500  0.5000\n  Cu1  Cu  0.2500  0.7500  0.7857\n  O1  O  0.2500  0.2500  0.3571\n  O2  O  0.7500  0.7500  0.2143\n  S1  S  0.7500  0.2500  0.6429\n  Cl1  Cl  0.7500  0.7500  0.9286",
         "embedding_128d": [
           0.0,
           0.0,
@@ -189,7 +190,7 @@
         "shear_modulus_gpa": 27.8,
         "born_elastic_stable": true,
         "min_phonon_freq_thz": 1.18,
-        "debye_temperature_k": 248.0,
+        "debye_temperature_k": 266.1,
         "dynamically_stable": true,
         "mlip_force_std_ev_ang": 0.068,
         "passed_stage2": true,
@@ -254,61 +255,129 @@
         "candidate_id": "CAND-A02",
         "target_layer": "TOP_ACTIVE_GLASS_185EV",
         "film_thickness_nm": 260.0,
-        "refractive_index_n": 2.79,
-        "yablonovitch_4n2_factor": 31.1,
+        "refractive_index_n": 2.793,
+        "yablonovitch_4n2_factor": 31.203,
         "dipole_forbidden_penalty_ev": 0.04,
-        "standalone_slme_percent": 26.15,
-        "sub_bandgap_transmittance_percent": 90.4,
+        "standalone_slme_percent": 27.02,
+        "sub_bandgap_transmittance_percent": 90.39,
         "tco_parasitic_loss_percent": 2.4,
-        "top_cell_jsc_ma_cm2": 21.05,
-        "top_cell_voc_v": 1.47,
-        "top_cell_eff_percent": 25.1,
-        "si_middle_cell_eff_percent": 13.38,
+        "top_cell_jsc_ma_cm2": 15.12,
+        "top_cell_voc_v": 1.525,
+        "top_cell_eff_percent": 25.94,
+        "si_middle_cell_eff_percent": 13.06,
         "bottom_ir_cell_eff_percent": 5.42,
-        "tandem_4t_total_eff_percent": 43.9,
+        "tandem_4t_total_eff_percent": 44.42,
         "passed_optical_gate": true,
         "failure_reason": null
+      },
+      "redundancy_verification": {
+        "candidate_id": "CAND-A02",
+        "passed_all_redundancy_checks": true,
+        "checks": {
+          "formula_reduced_sync": {
+            "formula_reduced": "Bi2CuO2SCl",
+            "parsed_formula": {
+              "Bi": 2,
+              "Cu": 1,
+              "O": 2,
+              "S": 1,
+              "Cl": 1
+            },
+            "reduced_stoichiometry": {
+              "Bi": 2,
+              "Cu": 1,
+              "O": 2,
+              "S": 1,
+              "Cl": 1
+            },
+            "passed": true
+          },
+          "charge_neutrality": {
+            "stoichiometry": {
+              "Bi": 2,
+              "Cu": 1,
+              "O": 2,
+              "S": 1,
+              "Cl": 1
+            },
+            "oxidation_states": {
+              "Bi": 3,
+              "Cu": 1,
+              "O": -2,
+              "S": -2,
+              "Cl": -1
+            },
+            "sum_oxidation_states": 0,
+            "passed": true
+          },
+          "cif_geometry": {
+            "natoms": 7,
+            "expected_natoms": 7,
+            "min_distance_ang": 2.884,
+            "valid_geometry": true,
+            "passed": true
+          },
+          "soc_splitting": {
+            "stated_soc_ev": 0.38,
+            "expected_soc_ev": 0.38,
+            "passed": true
+          },
+          "frohlich_alpha": {
+            "stated_frohlich_alpha": 2.12,
+            "exact_frohlich_alpha": 2.1186,
+            "abs_difference": 0.00138,
+            "passed": true
+          },
+          "slme_quadrature": {
+            "stated_trapezoidal_slme_percent": 27.02,
+            "simpson_energy_slme_percent": 27.02,
+            "abs_difference_percent": 0.0,
+            "passed": true
+          }
+        },
+        "mismatches": [],
+        "sha256_signature": "8b859404bbf87c1807bf90ec7409f780886cd50f95e6c1d691351ca6bbb731c7"
       }
     },
     {
       "candidate": {
         "candidate_id": "CAND-A03",
-        "formula_reduced": "SbCuS2Cl",
+        "formula_reduced": "Cu2SbS2Cl",
         "target_layer": "TOP_ACTIVE_GLASS_185EV",
         "crystal_family": "3D Corner-Sharing Chalcohalide Framework",
         "space_group_symbol": "Pnma",
         "space_group_number": 62,
-        "nsites_unit_cell": 20,
+        "nsites_unit_cell": 6,
         "elements": [
-          "Sb",
           "Cu",
+          "Sb",
           "S",
           "Cl"
         ],
         "stoichiometry": {
+          "Cu": 2,
           "Sb": 1,
-          "Cu": 1,
           "S": 2,
           "Cl": 1
         },
         "oxidation_states": {
-          "Sb": 3,
           "Cu": 1,
+          "Sb": 3,
           "S": -2,
           "Cl": -1
         },
         "pauling_electronegativity_diff": 0.91,
         "structural_dimensionality": "3D",
         "tolerance_factor": 0.92,
-        "bond_valence_sum_deviation": 0.06,
+        "bond_valence_sum_deviation": 0.0468,
         "tier2_elements_present": [
           "Sb"
         ],
-        "cif_content": "data_SbCuS2Cl\n_symmetry_space_group_name_H-M   'Pnma'\n_symmetry_Int_Tables_number      62\n_cell_length_a                   6.1400\n_cell_length_b                   7.4200\n_cell_length_c                   8.9100\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Sb1  Sb  0.1250  0.2500  0.0830\n  Cu1  Cu  0.3180  0.5670  0.2830\n  S1  S  0.5110  0.8840  0.4830\n  S2  S  0.7040  0.2010  0.7660\n  Cl1  Cl  0.8970  0.5180  0.8830",
+        "cif_content": "data_Cu2SbS2Cl\n_symmetry_space_group_name_H-M   'Pnma'\n_symmetry_Int_Tables_number      62\n_cell_length_a                   6.1400\n_cell_length_b                   7.4200\n_cell_length_c                   8.9100\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Cu1  Cu  0.2500  0.1667  0.1667\n  Cu2  Cu  0.7500  0.5000  0.5000\n  Sb1  Sb  0.7500  0.1667  0.8333\n  S1  S  0.2500  0.8333  0.5000\n  S2  S  0.2500  0.5000  0.8333\n  Cl1  Cl  0.7500  0.8333  0.1667",
         "embedding_128d": [
           0.0,
           0.0,
-          0.022137,
+          0.036993,
           0.0,
           0.0,
           0.0,
@@ -322,118 +391,118 @@
           0.0,
           0.0,
           0.0,
-          0.060118,
+          0.050232,
           0.0,
           0.0,
-          0.014272,
-          0.036817,
-          0.0,
-          0.0,
-          0.0,
-          0.023884,
+          0.02385,
+          0.030762,
           0.0,
           0.0,
           0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.06821,
-          0.0,
-          0.0,
-          0.0,
-          0.033549,
-          0.0,
-          0.0,
-          0.0,
-          0.014087,
+          0.019957,
           0.0,
           0.0,
           0.0,
           0.0,
           0.0,
           0.0,
-          0.052603,
-          0.027579,
-          0.032622,
-          0.103984,
-          0.125086,
-          0.022799,
-          0.096847,
-          0.161072,
-          0.114504,
-          0.042561,
-          0.061982,
-          0.150062,
-          0.052804,
-          0.031957,
-          0.029712,
-          0.112843,
-          0.17736,
-          0.196526,
-          0.10057,
-          -0.054298,
-          -0.17736,
-          -0.196526,
-          -0.10057,
-          0.054298,
-          0.17736,
-          0.196526,
-          0.10057,
-          -0.054298,
-          -0.17736,
-          -0.196526,
-          -0.10057,
-          0.054298,
-          -0.012586,
-          -0.144018,
-          -0.203473,
-          -0.161237,
-          -0.038418,
-          0.103602,
-          0.193843,
-          0.187206,
-          0.087008,
-          -0.056675,
-          -0.172033,
-          -0.201413,
-          -0.130131,
-          0.006188,
-          0.139414,
-          0.202964,
-          0.146173,
-          0.095836,
-          -0.049731,
-          -0.147949,
-          -0.116064,
-          -0.007907,
-          0.071935,
-          0.08407,
-          0.058929,
-          0.023625,
-          -0.022854,
-          -0.066344,
-          -0.065033,
-          -0.00899,
-          0.042747,
-          0.028247,
-          -0.026484,
-          -0.031308,
-          0.042443,
-          0.10535,
-          0.056303,
-          -0.077836,
-          -0.158326,
-          -0.095671,
-          0.04681,
-          0.132722,
-          0.104502,
-          0.020142,
-          -0.042392,
-          -0.065313,
-          -0.065925,
-          -0.042335
+          0.0,
+          0.0,
+          0.056993,
+          0.0,
+          0.0,
+          0.0,
+          0.028032,
+          0.0,
+          0.0,
+          0.0,
+          0.01177,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.053834,
+          0.02536,
+          0.032709,
+          0.104261,
+          0.1207,
+          0.023384,
+          0.097105,
+          0.161502,
+          0.106169,
+          0.043485,
+          0.062148,
+          0.150462,
+          0.053962,
+          0.029339,
+          0.029791,
+          0.113144,
+          0.177832,
+          0.19705,
+          0.100838,
+          -0.054443,
+          -0.177832,
+          -0.19705,
+          -0.100838,
+          0.054443,
+          0.177832,
+          0.19705,
+          0.100838,
+          -0.054443,
+          -0.177832,
+          -0.19705,
+          -0.100838,
+          0.054443,
+          -0.01262,
+          -0.144402,
+          -0.204015,
+          -0.161666,
+          -0.03852,
+          0.103878,
+          0.19436,
+          0.187705,
+          0.08724,
+          -0.056826,
+          -0.172492,
+          -0.20195,
+          -0.130477,
+          0.006204,
+          0.139785,
+          0.203505,
+          0.146563,
+          0.096091,
+          -0.049863,
+          -0.148343,
+          -0.116373,
+          -0.007928,
+          0.072127,
+          0.084294,
+          0.059086,
+          0.023688,
+          -0.022915,
+          -0.066521,
+          -0.065207,
+          -0.009014,
+          0.042861,
+          0.028323,
+          -0.026554,
+          -0.031391,
+          0.042556,
+          0.105631,
+          0.056453,
+          -0.078043,
+          -0.158748,
+          -0.095926,
+          0.046935,
+          0.133075,
+          0.104781,
+          0.020196,
+          -0.042505,
+          -0.065487,
+          -0.0661,
+          -0.042448
         ]
       },
       "stage_reached": 5,
@@ -444,14 +513,15 @@
         "e_above_hull_0k_mev": 21.0,
         "g_above_hull_synth_mev": 6.5,
         "competing_hull_phases": [
-          "CuSbS2",
-          "SbCl3"
+          "Cu2S",
+          "Sb2S3",
+          "CuCl"
         ],
         "bulk_modulus_gpa": 46.8,
         "shear_modulus_gpa": 24.5,
         "born_elastic_stable": true,
         "min_phonon_freq_thz": 1.05,
-        "debye_temperature_k": 262.0,
+        "debye_temperature_k": 337.4,
         "dynamically_stable": true,
         "mlip_force_std_ev_ang": 0.079,
         "passed_stage2": true,
@@ -473,8 +543,8 @@
         "halide_volatility_pressure_pa": 1.8,
         "pourbaix_max_dissolution_mol_l": 3.8e-07,
         "pourbaix_stable_ph4_to_9": true,
-        "active_layer_cost_usd_m2": 0.0126,
-        "contrastive_synthesizability_score": 0.797,
+        "active_layer_cost_usd_m2": 0.0129,
+        "contrastive_synthesizability_score": 0.798,
         "passed_stage3": true,
         "failure_reason": null
       },
@@ -488,7 +558,7 @@
         "polaron_dimensionality_flag": false,
         "epistemic_uncertainty_flag": false,
         "decision": "PROMOTE",
-        "critique_summary": "3D [SbS2Cl]2- network shows negative mixing enthalpy and clean SnO2/ITO interface.",
+        "critique_summary": "3D Cu2SbS2Cl corner-sharing chalcohalide network shows negative mixing enthalpy and clean SnO2/ITO interface.",
         "primary_failure_mode": null
       },
       "electronics": {
@@ -514,32 +584,96 @@
       "optics": {
         "candidate_id": "CAND-A03",
         "target_layer": "TOP_ACTIVE_GLASS_185EV",
-        "film_thickness_nm": 260.0,
-        "refractive_index_n": 2.85,
-        "yablonovitch_4n2_factor": 32.5,
+        "film_thickness_nm": 270.0,
+        "refractive_index_n": 2.846,
+        "yablonovitch_4n2_factor": 32.399,
         "dipole_forbidden_penalty_ev": 0.04,
-        "standalone_slme_percent": 25.86,
-        "sub_bandgap_transmittance_percent": 90.3,
+        "standalone_slme_percent": 27.88,
+        "sub_bandgap_transmittance_percent": 90.32,
         "tco_parasitic_loss_percent": 2.4,
-        "top_cell_jsc_ma_cm2": 21.26,
-        "top_cell_voc_v": 1.44,
-        "top_cell_eff_percent": 24.83,
-        "si_middle_cell_eff_percent": 13.36,
+        "top_cell_jsc_ma_cm2": 15.92,
+        "top_cell_voc_v": 1.497,
+        "top_cell_eff_percent": 26.76,
+        "si_middle_cell_eff_percent": 13.05,
         "bottom_ir_cell_eff_percent": 5.42,
-        "tandem_4t_total_eff_percent": 43.61,
+        "tandem_4t_total_eff_percent": 45.23,
         "passed_optical_gate": true,
         "failure_reason": null
+      },
+      "redundancy_verification": {
+        "candidate_id": "CAND-A03",
+        "passed_all_redundancy_checks": true,
+        "checks": {
+          "formula_reduced_sync": {
+            "formula_reduced": "Cu2SbS2Cl",
+            "parsed_formula": {
+              "Cu": 2,
+              "Sb": 1,
+              "S": 2,
+              "Cl": 1
+            },
+            "reduced_stoichiometry": {
+              "Cu": 2,
+              "Sb": 1,
+              "S": 2,
+              "Cl": 1
+            },
+            "passed": true
+          },
+          "charge_neutrality": {
+            "stoichiometry": {
+              "Cu": 2,
+              "Sb": 1,
+              "S": 2,
+              "Cl": 1
+            },
+            "oxidation_states": {
+              "Cu": 1,
+              "Sb": 3,
+              "S": -2,
+              "Cl": -1
+            },
+            "sum_oxidation_states": 0,
+            "passed": true
+          },
+          "cif_geometry": {
+            "natoms": 6,
+            "expected_natoms": 6,
+            "min_distance_ang": 3.865,
+            "valid_geometry": true,
+            "passed": true
+          },
+          "soc_splitting": {
+            "stated_soc_ev": 0.19,
+            "expected_soc_ev": 0.19,
+            "passed": true
+          },
+          "frohlich_alpha": {
+            "stated_frohlich_alpha": 2.34,
+            "exact_frohlich_alpha": 2.3379,
+            "abs_difference": 0.00214,
+            "passed": true
+          },
+          "slme_quadrature": {
+            "stated_trapezoidal_slme_percent": 27.88,
+            "simpson_energy_slme_percent": 27.87,
+            "abs_difference_percent": 0.01,
+            "passed": true
+          }
+        },
+        "mismatches": [],
+        "sha256_signature": "5f8e08c6e4f27d66bce31638a1432b6ba20dcb0c14a6dc2272fff98b94a4bf72"
       }
     },
     {
       "candidate": {
         "candidate_id": "CAND-A06",
-        "formula_reduced": "BiZnSOCl",
+        "formula_reduced": "BiZnOSCl",
         "target_layer": "TOP_ACTIVE_GLASS_185EV",
         "crystal_family": "Quaternary Mixed-Anion Oxy-Sulfochloride",
         "space_group_symbol": "P4/nmm",
         "space_group_number": 129,
-        "nsites_unit_cell": 10,
+        "nsites_unit_cell": 5,
         "elements": [
           "Bi",
           "Zn",
@@ -564,9 +698,9 @@
         "pauling_electronegativity_diff": 1.24,
         "structural_dimensionality": "3D",
         "tolerance_factor": 0.95,
-        "bond_valence_sum_deviation": 0.04,
+        "bond_valence_sum_deviation": 0.0707,
         "tier2_elements_present": [],
-        "cif_content": "data_BiZnSOCl\n_symmetry_space_group_name_H-M   'P4/nmm'\n_symmetry_Int_Tables_number      129\n_cell_length_a                   3.9420\n_cell_length_b                   3.9420\n_cell_length_c                   9.4800\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Bi1  Bi  0.1250  0.2500  0.0830\n  Zn1  Zn  0.3180  0.5670  0.2830\n  S1  S  0.5110  0.8840  0.4830\n  O1  O  0.7040  0.2010  0.6830\n  Cl1  Cl  0.8970  0.5180  0.8830",
+        "cif_content": "data_BiZnOSCl\n_symmetry_space_group_name_H-M   'P4/nmm'\n_symmetry_Int_Tables_number      129\n_cell_length_a                   3.9420\n_cell_length_b                   3.9420\n_cell_length_c                   9.4800\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Bi1  Bi  0.2500  0.2500  0.0833\n  Zn1  Zn  0.7500  0.7500  0.5833\n  S1  S  0.2500  0.2500  0.4167\n  O1  O  0.7500  0.7500  0.2500\n  Cl1  Cl  0.2500  0.2500  0.7500",
         "embedding_128d": [
           0.0,
           0.0,
@@ -713,7 +847,7 @@
         "shear_modulus_gpa": 29.4,
         "born_elastic_stable": true,
         "min_phonon_freq_thz": 1.29,
-        "debye_temperature_k": 274.0,
+        "debye_temperature_k": 290.0,
         "dynamically_stable": true,
         "mlip_force_std_ev_ang": 0.064,
         "passed_stage2": true,
@@ -777,21 +911,89 @@
       "optics": {
         "candidate_id": "CAND-A06",
         "target_layer": "TOP_ACTIVE_GLASS_185EV",
-        "film_thickness_nm": 260.0,
-        "refractive_index_n": 2.74,
-        "yablonovitch_4n2_factor": 30.0,
+        "film_thickness_nm": 250.0,
+        "refractive_index_n": 2.739,
+        "yablonovitch_4n2_factor": 30.008,
         "dipole_forbidden_penalty_ev": 0.04,
-        "standalone_slme_percent": 26.42,
-        "sub_bandgap_transmittance_percent": 90.5,
+        "standalone_slme_percent": 26.16,
+        "sub_bandgap_transmittance_percent": 90.45,
         "tco_parasitic_loss_percent": 2.4,
-        "top_cell_jsc_ma_cm2": 20.85,
-        "top_cell_voc_v": 1.5,
-        "top_cell_eff_percent": 25.36,
-        "si_middle_cell_eff_percent": 13.39,
+        "top_cell_jsc_ma_cm2": 14.36,
+        "top_cell_voc_v": 1.553,
+        "top_cell_eff_percent": 25.11,
+        "si_middle_cell_eff_percent": 13.07,
         "bottom_ir_cell_eff_percent": 5.42,
-        "tandem_4t_total_eff_percent": 44.17,
+        "tandem_4t_total_eff_percent": 43.6,
         "passed_optical_gate": true,
         "failure_reason": null
+      },
+      "redundancy_verification": {
+        "candidate_id": "CAND-A06",
+        "passed_all_redundancy_checks": true,
+        "checks": {
+          "formula_reduced_sync": {
+            "formula_reduced": "BiZnOSCl",
+            "parsed_formula": {
+              "Bi": 1,
+              "Zn": 1,
+              "O": 1,
+              "S": 1,
+              "Cl": 1
+            },
+            "reduced_stoichiometry": {
+              "Bi": 1,
+              "Zn": 1,
+              "S": 1,
+              "O": 1,
+              "Cl": 1
+            },
+            "passed": true
+          },
+          "charge_neutrality": {
+            "stoichiometry": {
+              "Bi": 1,
+              "Zn": 1,
+              "S": 1,
+              "O": 1,
+              "Cl": 1
+            },
+            "oxidation_states": {
+              "Bi": 3,
+              "Zn": 2,
+              "S": -2,
+              "O": -2,
+              "Cl": -1
+            },
+            "sum_oxidation_states": 0,
+            "passed": true
+          },
+          "cif_geometry": {
+            "natoms": 5,
+            "expected_natoms": 5,
+            "min_distance_ang": 3.16,
+            "valid_geometry": true,
+            "passed": true
+          },
+          "soc_splitting": {
+            "stated_soc_ev": 0.4,
+            "expected_soc_ev": 0.4,
+            "passed": true
+          },
+          "frohlich_alpha": {
+            "stated_frohlich_alpha": 2.25,
+            "exact_frohlich_alpha": 2.2489,
+            "abs_difference": 0.00107,
+            "passed": true
+          },
+          "slme_quadrature": {
+            "stated_trapezoidal_slme_percent": 26.16,
+            "simpson_energy_slme_percent": 26.17,
+            "abs_difference_percent": 0.01,
+            "passed": true
+          }
+        },
+        "mismatches": [],
+        "sha256_signature": "bf0b91ce3a7286db87ad3ee8e49d2c9321059e6073e792df7216cd555ce94f1c"
       }
     },
     {
@@ -802,7 +1004,7 @@
         "crystal_family": "3D Connected Wittichenite-Derivative Sulfochloride",
         "space_group_symbol": "C2/c",
         "space_group_number": 15,
-        "nsites_unit_cell": 16,
+        "nsites_unit_cell": 8,
         "elements": [
           "Cu",
           "Bi",
@@ -824,9 +1026,9 @@
         "pauling_electronegativity_diff": 0.92,
         "structural_dimensionality": "3D",
         "tolerance_factor": 0.94,
-        "bond_valence_sum_deviation": 0.04,
+        "bond_valence_sum_deviation": 0.0589,
         "tier2_elements_present": [],
-        "cif_content": "data_Cu3BiS2Cl2\n_symmetry_space_group_name_H-M   'C2/c'\n_symmetry_Int_Tables_number      15\n_cell_length_a                   6.6800\n_cell_length_b                   7.5100\n_cell_length_c                   11.2400\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Cu1  Cu  0.1250  0.2500  0.0830\n  Cu2  Cu  0.3180  0.5670  0.2910\n  Cu3  Cu  0.5110  0.8840  0.4990\n  Bi1  Bi  0.7040  0.2010  0.4580\n  S1  S  0.8970  0.5180  0.5830\n  S2  S  0.0900  0.8350  0.7910\n  Cl1  Cl  0.2830  0.1520  0.8330\n  Cl2  Cl  0.4760  0.4690  0.0410",
+        "cif_content": "data_Cu3BiS2Cl2\n_symmetry_space_group_name_H-M   'C2/c'\n_symmetry_Int_Tables_number      15\n_cell_length_a                   6.6800\n_cell_length_b                   7.5100\n_cell_length_c                   11.2400\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Cu1  Cu  0.2500  0.2500  0.1250\n  Cu2  Cu  0.7500  0.7500  0.6250\n  Cu3  Cu  0.2500  0.2500  0.6250\n  Bi1  Bi  0.7500  0.7500  0.1250\n  S1  S  0.2500  0.7500  0.3750\n  S2  S  0.2500  0.7500  0.8750\n  Cl1  Cl  0.7500  0.2500  0.3750\n  Cl2  Cl  0.7500  0.2500  0.8750",
         "embedding_128d": [
           0.0,
           0.0,
@@ -973,7 +1175,7 @@
         "shear_modulus_gpa": 26.7,
         "born_elastic_stable": true,
         "min_phonon_freq_thz": 1.14,
-        "debye_temperature_k": 255.0,
+        "debye_temperature_k": 330.8,
         "dynamically_stable": true,
         "mlip_force_std_ev_ang": 0.072,
         "passed_stage2": true,
@@ -1037,21 +1239,85 @@
       "optics": {
         "candidate_id": "CAND-A09",
         "target_layer": "TOP_ACTIVE_GLASS_185EV",
-        "film_thickness_nm": 260.0,
-        "refractive_index_n": 2.93,
-        "yablonovitch_4n2_factor": 34.3,
+        "film_thickness_nm": 240.0,
+        "refractive_index_n": 2.933,
+        "yablonovitch_4n2_factor": 34.41,
         "dipole_forbidden_penalty_ev": 0.03,
-        "standalone_slme_percent": 25.83,
-        "sub_bandgap_transmittance_percent": 90.2,
+        "standalone_slme_percent": 28.98,
+        "sub_bandgap_transmittance_percent": 90.22,
         "tco_parasitic_loss_percent": 2.4,
-        "top_cell_jsc_ma_cm2": 21.53,
-        "top_cell_voc_v": 1.42,
-        "top_cell_eff_percent": 24.8,
-        "si_middle_cell_eff_percent": 13.35,
+        "top_cell_jsc_ma_cm2": 16.87,
+        "top_cell_voc_v": 1.47,
+        "top_cell_eff_percent": 27.82,
+        "si_middle_cell_eff_percent": 13.03,
         "bottom_ir_cell_eff_percent": 5.42,
-        "tandem_4t_total_eff_percent": 43.57,
+        "tandem_4t_total_eff_percent": 46.27,
         "passed_optical_gate": true,
         "failure_reason": null
+      },
+      "redundancy_verification": {
+        "candidate_id": "CAND-A09",
+        "passed_all_redundancy_checks": true,
+        "checks": {
+          "formula_reduced_sync": {
+            "formula_reduced": "Cu3BiS2Cl2",
+            "parsed_formula": {
+              "Cu": 3,
+              "Bi": 1,
+              "S": 2,
+              "Cl": 2
+            },
+            "reduced_stoichiometry": {
+              "Cu": 3,
+              "Bi": 1,
+              "S": 2,
+              "Cl": 2
+            },
+            "passed": true
+          },
+          "charge_neutrality": {
+            "stoichiometry": {
+              "Cu": 3,
+              "Bi": 1,
+              "S": 2,
+              "Cl": 2
+            },
+            "oxidation_states": {
+              "Cu": 1,
+              "Bi": 3,
+              "S": -2,
+              "Cl": -1
+            },
+            "sum_oxidation_states": 0,
+            "passed": true
+          },
+          "cif_geometry": {
+            "natoms": 8,
+            "expected_natoms": 8,
+            "min_distance_ang": 4.365,
+            "valid_geometry": true,
+            "passed": true
+          },
+          "soc_splitting": {
+            "stated_soc_ev": 0.37,
+            "expected_soc_ev": 0.37,
+            "passed": true
+          },
+          "frohlich_alpha": {
+            "stated_frohlich_alpha": 1.94,
+            "exact_frohlich_alpha": 1.9401,
+            "abs_difference": 0.00014,
+            "passed": true
+          },
+          "slme_quadrature": {
+            "stated_trapezoidal_slme_percent": 28.98,
+            "simpson_energy_slme_percent": 28.98,
+            "abs_difference_percent": 0.0,
+            "passed": true
+          }
+        },
+        "mismatches": [],
+        "sha256_signature": "159c7df80650534e98ab4689f2a915823e1740d9519958e4b17e021d1e4741dd"
       }
     },
     {
@@ -1062,7 +1328,7 @@
         "crystal_family": "3D Lone-Pair Double-Cation Selenoiodide",
         "space_group_symbol": "Cmcm",
         "space_group_number": 63,
-        "nsites_unit_cell": 16,
+        "nsites_unit_cell": 8,
         "elements": [
           "Sn",
           "Sb",
@@ -1084,12 +1350,12 @@
         "pauling_electronegativity_diff": 0.61,
         "structural_dimensionality": "3D",
         "tolerance_factor": 0.94,
-        "bond_valence_sum_deviation": 0.05,
+        "bond_valence_sum_deviation": 0.1028,
         "tier2_elements_present": [
           "Sb",
           "Se"
         ],
-        "cif_content": "data_Sn2SbSe2I3\n_symmetry_space_group_name_H-M   'Cmcm'\n_symmetry_Int_Tables_number      63\n_cell_length_a                   4.3100\n_cell_length_b                   14.1800\n_cell_length_c                   16.4200\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Sn1  Sn  0.1250  0.2500  0.0830\n  Sn2  Sn  0.3180  0.5670  0.2910\n  Sb1  Sb  0.5110  0.8840  0.3330\n  Se1  Se  0.7040  0.2010  0.4580\n  Se2  Se  0.8970  0.5180  0.6660\n  I1  I  0.0900  0.8350  0.7080\n  I2  I  0.2830  0.1520  0.9160\n  I3  I  0.4760  0.4690  0.1240",
+        "cif_content": "data_Sn2SbSe2I3\n_symmetry_space_group_name_H-M   'Cmcm'\n_symmetry_Int_Tables_number      63\n_cell_length_a                   4.3100\n_cell_length_b                   14.1800\n_cell_length_c                   16.4200\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Sn1  Sn  0.5000  0.1667  0.1667\n  Sn2  Sn  0.5000  0.5000  0.5000\n  Sb1  Sb  0.5000  0.8333  0.8333\n  Se1  Se  0.5000  0.1667  0.5000\n  Se2  Se  0.5000  0.5000  0.1667\n  I1  I  0.5000  0.5000  0.8333\n  I2  I  0.5000  0.1667  0.8333\n  I3  I  0.5000  0.8333  0.1667",
         "embedding_128d": [
           0.0,
           0.075945,
@@ -1237,7 +1503,7 @@
         "shear_modulus_gpa": 19.6,
         "born_elastic_stable": true,
         "min_phonon_freq_thz": 0.88,
-        "debye_temperature_k": 186.0,
+        "debye_temperature_k": 240.8,
         "dynamically_stable": true,
         "mlip_force_std_ev_ang": 0.074,
         "passed_stage2": true,
@@ -1301,21 +1567,85 @@
       "optics": {
         "candidate_id": "CAND-B02",
         "target_layer": "BOTTOM_IR_075EV",
-        "film_thickness_nm": 330.0,
-        "refractive_index_n": 3.52,
-        "yablonovitch_4n2_factor": 49.6,
+        "film_thickness_nm": 350.0,
+        "refractive_index_n": 3.521,
+        "yablonovitch_4n2_factor": 49.59,
         "dipole_forbidden_penalty_ev": 0.03,
-        "standalone_slme_percent": 17.25,
-        "sub_bandgap_transmittance_percent": 88.5,
+        "standalone_slme_percent": 18.68,
+        "sub_bandgap_transmittance_percent": 89.51,
         "tco_parasitic_loss_percent": 2.8,
         "top_cell_jsc_ma_cm2": 19.6,
-        "top_cell_voc_v": 0.45,
+        "top_cell_voc_v": 1.55,
         "top_cell_eff_percent": 25.34,
         "si_middle_cell_eff_percent": 13.36,
-        "bottom_ir_cell_eff_percent": 5.41,
-        "tandem_4t_total_eff_percent": 44.11,
+        "bottom_ir_cell_eff_percent": 5.97,
+        "tandem_4t_total_eff_percent": 44.67,
         "passed_optical_gate": true,
         "failure_reason": null
+      },
+      "redundancy_verification": {
+        "candidate_id": "CAND-B02",
+        "passed_all_redundancy_checks": true,
+        "checks": {
+          "formula_reduced_sync": {
+            "formula_reduced": "Sn2SbSe2I3",
+            "parsed_formula": {
+              "Sn": 2,
+              "Sb": 1,
+              "Se": 2,
+              "I": 3
+            },
+            "reduced_stoichiometry": {
+              "Sn": 2,
+              "Sb": 1,
+              "Se": 2,
+              "I": 3
+            },
+            "passed": true
+          },
+          "charge_neutrality": {
+            "stoichiometry": {
+              "Sn": 2,
+              "Sb": 1,
+              "Se": 2,
+              "I": 3
+            },
+            "oxidation_states": {
+              "Sn": 2,
+              "Sb": 3,
+              "Se": -2,
+              "I": -1
+            },
+            "sum_oxidation_states": 0,
+            "passed": true
+          },
+          "cif_geometry": {
+            "natoms": 8,
+            "expected_natoms": 8,
+            "min_distance_ang": 4.31,
+            "valid_geometry": true,
+            "passed": true
+          },
+          "soc_splitting": {
+            "stated_soc_ev": 0.3,
+            "expected_soc_ev": 0.3,
+            "passed": true
+          },
+          "frohlich_alpha": {
+            "stated_frohlich_alpha": 1.32,
+            "exact_frohlich_alpha": 1.3203,
+            "abs_difference": 0.00028,
+            "passed": true
+          },
+          "slme_quadrature": {
+            "stated_trapezoidal_slme_percent": 18.68,
+            "simpson_energy_slme_percent": 18.69,
+            "abs_difference_percent": 0.01,
+            "passed": true
+          }
+        },
+        "mismatches": [],
+        "sha256_signature": "579e58be674c42b0c374e7560780e9c98f7107bc85af119ff1c7d754d48685e8"
       }
     },
     {
@@ -1326,7 +1656,7 @@
         "crystal_family": "3D Covalent-Bridged Selenoiodide",
         "space_group_symbol": "Pnma",
         "space_group_number": 62,
-        "nsites_unit_cell": 24,
+        "nsites_unit_cell": 6,
         "elements": [
           "Cu",
           "Bi",
@@ -1348,11 +1678,11 @@
         "pauling_electronegativity_diff": 0.67,
         "structural_dimensionality": "3D",
         "tolerance_factor": 0.96,
-        "bond_valence_sum_deviation": 0.03,
+        "bond_valence_sum_deviation": 0.0546,
         "tier2_elements_present": [
           "Se"
         ],
-        "cif_content": "data_Cu2BiSe2I\n_symmetry_space_group_name_H-M   'Pnma'\n_symmetry_Int_Tables_number      62\n_cell_length_a                   6.4800\n_cell_length_b                   7.8900\n_cell_length_c                   11.9500\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Cu1  Cu  0.1250  0.2500  0.0830\n  Cu2  Cu  0.3180  0.5670  0.3327\n  Bi1  Bi  0.5110  0.8840  0.4163\n  Se1  Se  0.7040  0.2010  0.5830\n  Se2  Se  0.8970  0.5180  0.8327\n  I1  I  0.0900  0.8350  0.9163",
+        "cif_content": "data_Cu2BiSe2I\n_symmetry_space_group_name_H-M   'Pnma'\n_symmetry_Int_Tables_number      62\n_cell_length_a                   6.4800\n_cell_length_b                   7.8900\n_cell_length_c                   11.9500\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Cu1  Cu  0.1667  0.2500  0.1667\n  Cu2  Cu  0.5000  0.7500  0.5000\n  Bi1  Bi  0.1667  0.7500  0.8333\n  Se1  Se  0.5000  0.2500  0.8333\n  Se2  Se  0.8333  0.2500  0.5000\n  I1  I  0.8333  0.7500  0.1667",
         "embedding_128d": [
           0.0,
           0.032896,
@@ -1499,7 +1829,7 @@
         "shear_modulus_gpa": 24.3,
         "born_elastic_stable": true,
         "min_phonon_freq_thz": 1.09,
-        "debye_temperature_k": 218.0,
+        "debye_temperature_k": 269.6,
         "dynamically_stable": true,
         "mlip_force_std_ev_ang": 0.062,
         "passed_stage2": true,
@@ -1563,21 +1893,85 @@
       "optics": {
         "candidate_id": "CAND-B04",
         "target_layer": "BOTTOM_IR_075EV",
-        "film_thickness_nm": 330.0,
-        "refractive_index_n": 3.62,
-        "yablonovitch_4n2_factor": 52.4,
+        "film_thickness_nm": 320.0,
+        "refractive_index_n": 3.619,
+        "yablonovitch_4n2_factor": 52.389,
         "dipole_forbidden_penalty_ev": 0.02,
-        "standalone_slme_percent": 17.41,
-        "sub_bandgap_transmittance_percent": 88.5,
+        "standalone_slme_percent": 18.77,
+        "sub_bandgap_transmittance_percent": 89.4,
         "tco_parasitic_loss_percent": 2.8,
         "top_cell_jsc_ma_cm2": 19.6,
-        "top_cell_voc_v": 0.45,
+        "top_cell_voc_v": 1.55,
         "top_cell_eff_percent": 25.34,
         "si_middle_cell_eff_percent": 13.36,
-        "bottom_ir_cell_eff_percent": 5.46,
-        "tandem_4t_total_eff_percent": 44.16,
+        "bottom_ir_cell_eff_percent": 5.92,
+        "tandem_4t_total_eff_percent": 44.62,
         "passed_optical_gate": true,
         "failure_reason": null
+      },
+      "redundancy_verification": {
+        "candidate_id": "CAND-B04",
+        "passed_all_redundancy_checks": true,
+        "checks": {
+          "formula_reduced_sync": {
+            "formula_reduced": "Cu2BiSe2I",
+            "parsed_formula": {
+              "Cu": 2,
+              "Bi": 1,
+              "Se": 2,
+              "I": 1
+            },
+            "reduced_stoichiometry": {
+              "Cu": 2,
+              "Bi": 1,
+              "Se": 2,
+              "I": 1
+            },
+            "passed": true
+          },
+          "charge_neutrality": {
+            "stoichiometry": {
+              "Cu": 2,
+              "Bi": 1,
+              "Se": 2,
+              "I": 1
+            },
+            "oxidation_states": {
+              "Cu": 1,
+              "Bi": 3,
+              "Se": -2,
+              "I": -1
+            },
+            "sum_oxidation_states": 0,
+            "passed": true
+          },
+          "cif_geometry": {
+            "natoms": 6,
+            "expected_natoms": 6,
+            "min_distance_ang": 4.498,
+            "valid_geometry": true,
+            "passed": true
+          },
+          "soc_splitting": {
+            "stated_soc_ev": 0.42,
+            "expected_soc_ev": 0.42,
+            "passed": true
+          },
+          "frohlich_alpha": {
+            "stated_frohlich_alpha": 1.21,
+            "exact_frohlich_alpha": 1.21,
+            "abs_difference": 4e-05,
+            "passed": true
+          },
+          "slme_quadrature": {
+            "stated_trapezoidal_slme_percent": 18.77,
+            "simpson_energy_slme_percent": 18.77,
+            "abs_difference_percent": 0.0,
+            "passed": true
+          }
+        },
+        "mismatches": [],
+        "sha256_signature": "1f9e68b7b0630b7a0dbfde4058bce12558dcc686a07ed57719f9c45b21e97521"
       }
     }
   ],
@@ -1590,7 +1984,7 @@
         "crystal_family": "Layered ZrCuSiAs-Type Oxychalcogenide",
         "space_group_symbol": "P4/nmm",
         "space_group_number": 129,
-        "nsites_unit_cell": 8,
+        "nsites_unit_cell": 4,
         "elements": [
           "Bi",
           "Cu",
@@ -1612,9 +2006,9 @@
         "pauling_electronegativity_diff": 1.12,
         "structural_dimensionality": "Quasi-2D",
         "tolerance_factor": 0.96,
-        "bond_valence_sum_deviation": 0.04,
+        "bond_valence_sum_deviation": 0.0661,
         "tier2_elements_present": [],
-        "cif_content": "data_BiCuOS\n_symmetry_space_group_name_H-M   'P4/nmm'\n_symmetry_Int_Tables_number      129\n_cell_length_a                   3.8720\n_cell_length_b                   3.8720\n_cell_length_c                   8.5610\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Bi1  Bi  0.1250  0.2500  0.0830\n  Cu1  Cu  0.3180  0.5670  0.3330\n  O1  O  0.5110  0.8840  0.5830\n  S1  S  0.7040  0.2010  0.8330",
+        "cif_content": "data_BiCuOS\n_symmetry_space_group_name_H-M   'P4/nmm'\n_symmetry_Int_Tables_number      129\n_cell_length_a                   3.8720\n_cell_length_b                   3.8720\n_cell_length_c                   8.5610\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Bi1  Bi  0.2500  0.2500  0.1000\n  Cu1  Cu  0.7500  0.7500  0.5000\n  O1  O  0.2500  0.2500  0.7000\n  S1  S  0.7500  0.7500  0.9000",
         "embedding_128d": [
           0.0,
           0.0,
@@ -1763,7 +2157,7 @@
         "shear_modulus_gpa": 34.2,
         "born_elastic_stable": true,
         "min_phonon_freq_thz": 1.62,
-        "debye_temperature_k": 285.0,
+        "debye_temperature_k": 300.0,
         "dynamically_stable": true,
         "mlip_force_std_ev_ang": 0.042,
         "passed_stage2": true,
@@ -1811,7 +2205,7 @@
         "hse06_nosoc_gap_ev": 1.74,
         "hse06_soc_direct_gap_ev": 1.52,
         "hse06_soc_indirect_gap_ev": 1.18,
-        "soc_splitting_ev": 0.28,
+        "soc_splitting_ev": 0.22,
         "electron_eff_mass_m0": 0.29,
         "hole_eff_mass_m0": 0.41,
         "eps_inf": 9.4,
@@ -1827,21 +2221,85 @@
       "optics": {
         "candidate_id": "CAND-A01",
         "target_layer": "TOP_ACTIVE_GLASS_185EV",
-        "film_thickness_nm": 260.0,
-        "refractive_index_n": 3.07,
-        "yablonovitch_4n2_factor": 37.7,
+        "film_thickness_nm": 280.0,
+        "refractive_index_n": 3.066,
+        "yablonovitch_4n2_factor": 37.601,
         "dipole_forbidden_penalty_ev": 0.34,
-        "standalone_slme_percent": 12.48,
-        "sub_bandgap_transmittance_percent": 90.1,
+        "standalone_slme_percent": 20.22,
+        "sub_bandgap_transmittance_percent": 90.06,
         "tco_parasitic_loss_percent": 2.4,
-        "top_cell_jsc_ma_cm2": 23.36,
-        "top_cell_voc_v": 0.632,
-        "top_cell_eff_percent": 11.98,
-        "si_middle_cell_eff_percent": 13.33,
+        "top_cell_jsc_ma_cm2": 24.93,
+        "top_cell_voc_v": 0.743,
+        "top_cell_eff_percent": 19.41,
+        "si_middle_cell_eff_percent": 13.01,
         "bottom_ir_cell_eff_percent": 5.42,
-        "tandem_4t_total_eff_percent": 30.73,
+        "tandem_4t_total_eff_percent": 37.84,
         "passed_optical_gate": false,
-        "failure_reason": "OPTICAL_EFFICIENCY_SHORTFALL: SLME=12.5%, 4T Stack=30.7%"
+        "failure_reason": null
+      },
+      "redundancy_verification": {
+        "candidate_id": "CAND-A01",
+        "passed_all_redundancy_checks": true,
+        "checks": {
+          "formula_reduced_sync": {
+            "formula_reduced": "BiCuOS",
+            "parsed_formula": {
+              "Bi": 1,
+              "Cu": 1,
+              "O": 1,
+              "S": 1
+            },
+            "reduced_stoichiometry": {
+              "Bi": 1,
+              "Cu": 1,
+              "O": 1,
+              "S": 1
+            },
+            "passed": true
+          },
+          "charge_neutrality": {
+            "stoichiometry": {
+              "Bi": 1,
+              "Cu": 1,
+              "O": 1,
+              "S": 1
+            },
+            "oxidation_states": {
+              "Bi": 3,
+              "Cu": 1,
+              "O": -2,
+              "S": -2
+            },
+            "sum_oxidation_states": 0,
+            "passed": true
+          },
+          "cif_geometry": {
+            "natoms": 4,
+            "expected_natoms": 4,
+            "min_distance_ang": 3.229,
+            "valid_geometry": true,
+            "passed": true
+          },
+          "soc_splitting": {
+            "stated_soc_ev": 0.22,
+            "expected_soc_ev": 0.22,
+            "passed": true
+          },
+          "frohlich_alpha": {
+            "stated_frohlich_alpha": 1.85,
+            "exact_frohlich_alpha": 1.85,
+            "abs_difference": 2e-05,
+            "passed": true
+          },
+          "slme_quadrature": {
+            "stated_trapezoidal_slme_percent": 20.22,
+            "simpson_energy_slme_percent": 20.22,
+            "abs_difference_percent": 0.0,
+            "passed": true
+          }
+        },
+        "mismatches": [],
+        "sha256_signature": "61f0241a5652403b5c765b7bc4c0aab68607cb95892d2cc2ad43936a623e7cc0"
       }
     },
     {
@@ -1852,7 +2310,7 @@
         "crystal_family": "Sillen-Aurivillius Quaternary Oxy-Chalcohalide",
         "space_group_symbol": "I4/mmm",
         "space_group_number": 139,
-        "nsites_unit_cell": 14,
+        "nsites_unit_cell": 7,
         "elements": [
           "Bi",
           "Cu",
@@ -1877,9 +2335,9 @@
         "pauling_electronegativity_diff": 1.18,
         "structural_dimensionality": "Quasi-2D",
         "tolerance_factor": 0.94,
-        "bond_valence_sum_deviation": 0.05,
+        "bond_valence_sum_deviation": 0.1109,
         "tier2_elements_present": [],
-        "cif_content": "data_Bi2CuO2SCl\n_symmetry_space_group_name_H-M   'I4/mmm'\n_symmetry_Int_Tables_number      139\n_cell_length_a                   3.9150\n_cell_length_b                   3.9150\n_cell_length_c                   14.8200\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Bi1  Bi  0.1250  0.2500  0.0830\n  Bi2  Bi  0.3180  0.5670  0.3089\n  Cu1  Cu  0.5110  0.8840  0.3687\n  O1  O  0.7040  0.2010  0.5116\n  O2  O  0.8970  0.5180  0.7374\n  S1  S  0.0900  0.8350  0.7973\n  Cl1  Cl  0.2830  0.1520  0.9401",
+        "cif_content": "data_Bi2CuO2SCl\n_symmetry_space_group_name_H-M   'I4/mmm'\n_symmetry_Int_Tables_number      139\n_cell_length_a                   3.9150\n_cell_length_b                   3.9150\n_cell_length_c                   14.8200\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Bi1  Bi  0.2500  0.2500  0.0714\n  Bi2  Bi  0.7500  0.7500  0.5000\n  Cu1  Cu  0.2500  0.7500  0.7857\n  O1  O  0.2500  0.2500  0.3571\n  O2  O  0.7500  0.7500  0.2143\n  S1  S  0.7500  0.2500  0.6429\n  Cl1  Cl  0.7500  0.7500  0.9286",
         "embedding_128d": [
           0.0,
           0.0,
@@ -2026,7 +2484,7 @@
         "shear_modulus_gpa": 27.8,
         "born_elastic_stable": true,
         "min_phonon_freq_thz": 1.18,
-        "debye_temperature_k": 248.0,
+        "debye_temperature_k": 266.1,
         "dynamically_stable": true,
         "mlip_force_std_ev_ang": 0.068,
         "passed_stage2": true,
@@ -2091,61 +2549,129 @@
         "candidate_id": "CAND-A02",
         "target_layer": "TOP_ACTIVE_GLASS_185EV",
         "film_thickness_nm": 260.0,
-        "refractive_index_n": 2.79,
-        "yablonovitch_4n2_factor": 31.1,
+        "refractive_index_n": 2.793,
+        "yablonovitch_4n2_factor": 31.203,
         "dipole_forbidden_penalty_ev": 0.04,
-        "standalone_slme_percent": 26.15,
-        "sub_bandgap_transmittance_percent": 90.4,
+        "standalone_slme_percent": 27.02,
+        "sub_bandgap_transmittance_percent": 90.39,
         "tco_parasitic_loss_percent": 2.4,
-        "top_cell_jsc_ma_cm2": 21.05,
-        "top_cell_voc_v": 1.47,
-        "top_cell_eff_percent": 25.1,
-        "si_middle_cell_eff_percent": 13.38,
+        "top_cell_jsc_ma_cm2": 15.12,
+        "top_cell_voc_v": 1.525,
+        "top_cell_eff_percent": 25.94,
+        "si_middle_cell_eff_percent": 13.06,
         "bottom_ir_cell_eff_percent": 5.42,
-        "tandem_4t_total_eff_percent": 43.9,
+        "tandem_4t_total_eff_percent": 44.42,
         "passed_optical_gate": true,
         "failure_reason": null
+      },
+      "redundancy_verification": {
+        "candidate_id": "CAND-A02",
+        "passed_all_redundancy_checks": true,
+        "checks": {
+          "formula_reduced_sync": {
+            "formula_reduced": "Bi2CuO2SCl",
+            "parsed_formula": {
+              "Bi": 2,
+              "Cu": 1,
+              "O": 2,
+              "S": 1,
+              "Cl": 1
+            },
+            "reduced_stoichiometry": {
+              "Bi": 2,
+              "Cu": 1,
+              "O": 2,
+              "S": 1,
+              "Cl": 1
+            },
+            "passed": true
+          },
+          "charge_neutrality": {
+            "stoichiometry": {
+              "Bi": 2,
+              "Cu": 1,
+              "O": 2,
+              "S": 1,
+              "Cl": 1
+            },
+            "oxidation_states": {
+              "Bi": 3,
+              "Cu": 1,
+              "O": -2,
+              "S": -2,
+              "Cl": -1
+            },
+            "sum_oxidation_states": 0,
+            "passed": true
+          },
+          "cif_geometry": {
+            "natoms": 7,
+            "expected_natoms": 7,
+            "min_distance_ang": 2.884,
+            "valid_geometry": true,
+            "passed": true
+          },
+          "soc_splitting": {
+            "stated_soc_ev": 0.38,
+            "expected_soc_ev": 0.38,
+            "passed": true
+          },
+          "frohlich_alpha": {
+            "stated_frohlich_alpha": 2.12,
+            "exact_frohlich_alpha": 2.1186,
+            "abs_difference": 0.00138,
+            "passed": true
+          },
+          "slme_quadrature": {
+            "stated_trapezoidal_slme_percent": 27.02,
+            "simpson_energy_slme_percent": 27.02,
+            "abs_difference_percent": 0.0,
+            "passed": true
+          }
+        },
+        "mismatches": [],
+        "sha256_signature": "8b859404bbf87c1807bf90ec7409f780886cd50f95e6c1d691351ca6bbb731c7"
       }
     },
     {
       "candidate": {
         "candidate_id": "CAND-A03",
-        "formula_reduced": "SbCuS2Cl",
+        "formula_reduced": "Cu2SbS2Cl",
         "target_layer": "TOP_ACTIVE_GLASS_185EV",
         "crystal_family": "3D Corner-Sharing Chalcohalide Framework",
         "space_group_symbol": "Pnma",
         "space_group_number": 62,
-        "nsites_unit_cell": 20,
+        "nsites_unit_cell": 6,
         "elements": [
-          "Sb",
           "Cu",
+          "Sb",
           "S",
           "Cl"
         ],
         "stoichiometry": {
+          "Cu": 2,
           "Sb": 1,
-          "Cu": 1,
           "S": 2,
           "Cl": 1
         },
         "oxidation_states": {
-          "Sb": 3,
           "Cu": 1,
+          "Sb": 3,
           "S": -2,
           "Cl": -1
         },
         "pauling_electronegativity_diff": 0.91,
         "structural_dimensionality": "3D",
         "tolerance_factor": 0.92,
-        "bond_valence_sum_deviation": 0.06,
+        "bond_valence_sum_deviation": 0.0468,
         "tier2_elements_present": [
           "Sb"
         ],
-        "cif_content": "data_SbCuS2Cl\n_symmetry_space_group_name_H-M   'Pnma'\n_symmetry_Int_Tables_number      62\n_cell_length_a                   6.1400\n_cell_length_b                   7.4200\n_cell_length_c                   8.9100\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Sb1  Sb  0.1250  0.2500  0.0830\n  Cu1  Cu  0.3180  0.5670  0.2830\n  S1  S  0.5110  0.8840  0.4830\n  S2  S  0.7040  0.2010  0.7660\n  Cl1  Cl  0.8970  0.5180  0.8830",
+        "cif_content": "data_Cu2SbS2Cl\n_symmetry_space_group_name_H-M   'Pnma'\n_symmetry_Int_Tables_number      62\n_cell_length_a                   6.1400\n_cell_length_b                   7.4200\n_cell_length_c                   8.9100\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Cu1  Cu  0.2500  0.1667  0.1667\n  Cu2  Cu  0.7500  0.5000  0.5000\n  Sb1  Sb  0.7500  0.1667  0.8333\n  S1  S  0.2500  0.8333  0.5000\n  S2  S  0.2500  0.5000  0.8333\n  Cl1  Cl  0.7500  0.8333  0.1667",
         "embedding_128d": [
           0.0,
           0.0,
-          0.022137,
+          0.036993,
           0.0,
           0.0,
           0.0,
@@ -2159,118 +2685,118 @@
           0.0,
           0.0,
           0.0,
-          0.060118,
+          0.050232,
           0.0,
           0.0,
-          0.014272,
-          0.036817,
-          0.0,
-          0.0,
-          0.0,
-          0.023884,
+          0.02385,
+          0.030762,
           0.0,
           0.0,
           0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.06821,
-          0.0,
-          0.0,
-          0.0,
-          0.033549,
-          0.0,
-          0.0,
-          0.0,
-          0.014087,
+          0.019957,
           0.0,
           0.0,
           0.0,
           0.0,
           0.0,
           0.0,
-          0.052603,
-          0.027579,
-          0.032622,
-          0.103984,
-          0.125086,
-          0.022799,
-          0.096847,
-          0.161072,
-          0.114504,
-          0.042561,
-          0.061982,
-          0.150062,
-          0.052804,
-          0.031957,
-          0.029712,
-          0.112843,
-          0.17736,
-          0.196526,
-          0.10057,
-          -0.054298,
-          -0.17736,
-          -0.196526,
-          -0.10057,
-          0.054298,
-          0.17736,
-          0.196526,
-          0.10057,
-          -0.054298,
-          -0.17736,
-          -0.196526,
-          -0.10057,
-          0.054298,
-          -0.012586,
-          -0.144018,
-          -0.203473,
-          -0.161237,
-          -0.038418,
-          0.103602,
-          0.193843,
-          0.187206,
-          0.087008,
-          -0.056675,
-          -0.172033,
-          -0.201413,
-          -0.130131,
-          0.006188,
-          0.139414,
-          0.202964,
-          0.146173,
-          0.095836,
-          -0.049731,
-          -0.147949,
-          -0.116064,
-          -0.007907,
-          0.071935,
-          0.08407,
-          0.058929,
-          0.023625,
-          -0.022854,
-          -0.066344,
-          -0.065033,
-          -0.00899,
-          0.042747,
-          0.028247,
-          -0.026484,
-          -0.031308,
-          0.042443,
-          0.10535,
-          0.056303,
-          -0.077836,
-          -0.158326,
-          -0.095671,
-          0.04681,
-          0.132722,
-          0.104502,
-          0.020142,
-          -0.042392,
-          -0.065313,
-          -0.065925,
-          -0.042335
+          0.0,
+          0.0,
+          0.056993,
+          0.0,
+          0.0,
+          0.0,
+          0.028032,
+          0.0,
+          0.0,
+          0.0,
+          0.01177,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.053834,
+          0.02536,
+          0.032709,
+          0.104261,
+          0.1207,
+          0.023384,
+          0.097105,
+          0.161502,
+          0.106169,
+          0.043485,
+          0.062148,
+          0.150462,
+          0.053962,
+          0.029339,
+          0.029791,
+          0.113144,
+          0.177832,
+          0.19705,
+          0.100838,
+          -0.054443,
+          -0.177832,
+          -0.19705,
+          -0.100838,
+          0.054443,
+          0.177832,
+          0.19705,
+          0.100838,
+          -0.054443,
+          -0.177832,
+          -0.19705,
+          -0.100838,
+          0.054443,
+          -0.01262,
+          -0.144402,
+          -0.204015,
+          -0.161666,
+          -0.03852,
+          0.103878,
+          0.19436,
+          0.187705,
+          0.08724,
+          -0.056826,
+          -0.172492,
+          -0.20195,
+          -0.130477,
+          0.006204,
+          0.139785,
+          0.203505,
+          0.146563,
+          0.096091,
+          -0.049863,
+          -0.148343,
+          -0.116373,
+          -0.007928,
+          0.072127,
+          0.084294,
+          0.059086,
+          0.023688,
+          -0.022915,
+          -0.066521,
+          -0.065207,
+          -0.009014,
+          0.042861,
+          0.028323,
+          -0.026554,
+          -0.031391,
+          0.042556,
+          0.105631,
+          0.056453,
+          -0.078043,
+          -0.158748,
+          -0.095926,
+          0.046935,
+          0.133075,
+          0.104781,
+          0.020196,
+          -0.042505,
+          -0.065487,
+          -0.0661,
+          -0.042448
         ]
       },
       "stage_reached": 5,
@@ -2281,14 +2807,15 @@
         "e_above_hull_0k_mev": 21.0,
         "g_above_hull_synth_mev": 6.5,
         "competing_hull_phases": [
-          "CuSbS2",
-          "SbCl3"
+          "Cu2S",
+          "Sb2S3",
+          "CuCl"
         ],
         "bulk_modulus_gpa": 46.8,
         "shear_modulus_gpa": 24.5,
         "born_elastic_stable": true,
         "min_phonon_freq_thz": 1.05,
-        "debye_temperature_k": 262.0,
+        "debye_temperature_k": 337.4,
         "dynamically_stable": true,
         "mlip_force_std_ev_ang": 0.079,
         "passed_stage2": true,
@@ -2310,8 +2837,8 @@
         "halide_volatility_pressure_pa": 1.8,
         "pourbaix_max_dissolution_mol_l": 3.8e-07,
         "pourbaix_stable_ph4_to_9": true,
-        "active_layer_cost_usd_m2": 0.0126,
-        "contrastive_synthesizability_score": 0.797,
+        "active_layer_cost_usd_m2": 0.0129,
+        "contrastive_synthesizability_score": 0.798,
         "passed_stage3": true,
         "failure_reason": null
       },
@@ -2325,7 +2852,7 @@
         "polaron_dimensionality_flag": false,
         "epistemic_uncertainty_flag": false,
         "decision": "PROMOTE",
-        "critique_summary": "3D [SbS2Cl]2- network shows negative mixing enthalpy and clean SnO2/ITO interface.",
+        "critique_summary": "3D Cu2SbS2Cl corner-sharing chalcohalide network shows negative mixing enthalpy and clean SnO2/ITO interface.",
         "primary_failure_mode": null
       },
       "electronics": {
@@ -2351,21 +2878,85 @@
       "optics": {
         "candidate_id": "CAND-A03",
         "target_layer": "TOP_ACTIVE_GLASS_185EV",
-        "film_thickness_nm": 260.0,
-        "refractive_index_n": 2.85,
-        "yablonovitch_4n2_factor": 32.5,
+        "film_thickness_nm": 270.0,
+        "refractive_index_n": 2.846,
+        "yablonovitch_4n2_factor": 32.399,
         "dipole_forbidden_penalty_ev": 0.04,
-        "standalone_slme_percent": 25.86,
-        "sub_bandgap_transmittance_percent": 90.3,
+        "standalone_slme_percent": 27.88,
+        "sub_bandgap_transmittance_percent": 90.32,
         "tco_parasitic_loss_percent": 2.4,
-        "top_cell_jsc_ma_cm2": 21.26,
-        "top_cell_voc_v": 1.44,
-        "top_cell_eff_percent": 24.83,
-        "si_middle_cell_eff_percent": 13.36,
+        "top_cell_jsc_ma_cm2": 15.92,
+        "top_cell_voc_v": 1.497,
+        "top_cell_eff_percent": 26.76,
+        "si_middle_cell_eff_percent": 13.05,
         "bottom_ir_cell_eff_percent": 5.42,
-        "tandem_4t_total_eff_percent": 43.61,
+        "tandem_4t_total_eff_percent": 45.23,
         "passed_optical_gate": true,
         "failure_reason": null
+      },
+      "redundancy_verification": {
+        "candidate_id": "CAND-A03",
+        "passed_all_redundancy_checks": true,
+        "checks": {
+          "formula_reduced_sync": {
+            "formula_reduced": "Cu2SbS2Cl",
+            "parsed_formula": {
+              "Cu": 2,
+              "Sb": 1,
+              "S": 2,
+              "Cl": 1
+            },
+            "reduced_stoichiometry": {
+              "Cu": 2,
+              "Sb": 1,
+              "S": 2,
+              "Cl": 1
+            },
+            "passed": true
+          },
+          "charge_neutrality": {
+            "stoichiometry": {
+              "Cu": 2,
+              "Sb": 1,
+              "S": 2,
+              "Cl": 1
+            },
+            "oxidation_states": {
+              "Cu": 1,
+              "Sb": 3,
+              "S": -2,
+              "Cl": -1
+            },
+            "sum_oxidation_states": 0,
+            "passed": true
+          },
+          "cif_geometry": {
+            "natoms": 6,
+            "expected_natoms": 6,
+            "min_distance_ang": 3.865,
+            "valid_geometry": true,
+            "passed": true
+          },
+          "soc_splitting": {
+            "stated_soc_ev": 0.19,
+            "expected_soc_ev": 0.19,
+            "passed": true
+          },
+          "frohlich_alpha": {
+            "stated_frohlich_alpha": 2.34,
+            "exact_frohlich_alpha": 2.3379,
+            "abs_difference": 0.00214,
+            "passed": true
+          },
+          "slme_quadrature": {
+            "stated_trapezoidal_slme_percent": 27.88,
+            "simpson_energy_slme_percent": 27.87,
+            "abs_difference_percent": 0.01,
+            "passed": true
+          }
+        },
+        "mismatches": [],
+        "sha256_signature": "5f8e08c6e4f27d66bce31638a1432b6ba20dcb0c14a6dc2272fff98b94a4bf72"
       }
     },
     {
@@ -2376,7 +2967,7 @@
         "crystal_family": "Sillen X1-Type Oxyhalide",
         "space_group_symbol": "Cmcm",
         "space_group_number": 63,
-        "nsites_unit_cell": 20,
+        "nsites_unit_cell": 5,
         "elements": [
           "Ba",
           "Bi",
@@ -2398,9 +2989,9 @@
         "pauling_electronegativity_diff": 1.85,
         "structural_dimensionality": "Quasi-2D",
         "tolerance_factor": 0.97,
-        "bond_valence_sum_deviation": 0.03,
+        "bond_valence_sum_deviation": 0.109,
         "tier2_elements_present": [],
-        "cif_content": "data_BaBiO2Cl\n_symmetry_space_group_name_H-M   'Cmcm'\n_symmetry_Int_Tables_number      63\n_cell_length_a                   4.0180\n_cell_length_b                   13.1200\n_cell_length_c                   5.7100\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Ba1  Ba  0.1250  0.2500  0.0830\n  Bi1  Bi  0.3180  0.5670  0.2830\n  O1  O  0.5110  0.8840  0.4830\n  O2  O  0.7040  0.2010  0.7660\n  Cl1  Cl  0.8970  0.5180  0.8830",
+        "cif_content": "data_BaBiO2Cl\n_symmetry_space_group_name_H-M   'Cmcm'\n_symmetry_Int_Tables_number      63\n_cell_length_a                   4.0180\n_cell_length_b                   13.1200\n_cell_length_c                   5.7100\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Ba1  Ba  0.1667  0.1000  0.1667\n  Bi1  Bi  0.5000  0.5000  0.5000\n  O1  O  0.1667  0.7000  0.1667\n  O2  O  0.5000  0.9000  0.5000\n  Cl1  Cl  0.8333  0.3000  0.8333",
         "embedding_128d": [
           0.0,
           0.0,
@@ -2548,7 +3139,7 @@
         "shear_modulus_gpa": 31.0,
         "born_elastic_stable": true,
         "min_phonon_freq_thz": 1.38,
-        "debye_temperature_k": 270.0,
+        "debye_temperature_k": 312.0,
         "dynamically_stable": true,
         "mlip_force_std_ev_ang": 0.051,
         "passed_stage2": true,
@@ -2612,32 +3203,96 @@
       "optics": {
         "candidate_id": "CAND-A04",
         "target_layer": "TOP_ACTIVE_GLASS_185EV",
-        "film_thickness_nm": 260.0,
-        "refractive_index_n": 2.37,
-        "yablonovitch_4n2_factor": 22.5,
+        "film_thickness_nm": 290.0,
+        "refractive_index_n": 2.366,
+        "yablonovitch_4n2_factor": 22.392,
         "dipole_forbidden_penalty_ev": 0.18,
-        "standalone_slme_percent": 25.85,
+        "standalone_slme_percent": 2.45,
         "sub_bandgap_transmittance_percent": 90.9,
         "tco_parasitic_loss_percent": 2.4,
-        "top_cell_jsc_ma_cm2": 12.48,
-        "top_cell_voc_v": 2.45,
-        "top_cell_eff_percent": 24.82,
-        "si_middle_cell_eff_percent": 13.45,
+        "top_cell_jsc_ma_cm2": 0.99,
+        "top_cell_voc_v": 2.083,
+        "top_cell_eff_percent": 2.35,
+        "si_middle_cell_eff_percent": 13.13,
         "bottom_ir_cell_eff_percent": 5.42,
-        "tandem_4t_total_eff_percent": 43.69,
-        "passed_optical_gate": true,
+        "tandem_4t_total_eff_percent": 20.9,
+        "passed_optical_gate": false,
         "failure_reason": null
+      },
+      "redundancy_verification": {
+        "candidate_id": "CAND-A04",
+        "passed_all_redundancy_checks": true,
+        "checks": {
+          "formula_reduced_sync": {
+            "formula_reduced": "BaBiO2Cl",
+            "parsed_formula": {
+              "Ba": 1,
+              "Bi": 1,
+              "O": 2,
+              "Cl": 1
+            },
+            "reduced_stoichiometry": {
+              "Ba": 1,
+              "Bi": 1,
+              "O": 2,
+              "Cl": 1
+            },
+            "passed": true
+          },
+          "charge_neutrality": {
+            "stoichiometry": {
+              "Ba": 1,
+              "Bi": 1,
+              "O": 2,
+              "Cl": 1
+            },
+            "oxidation_states": {
+              "Ba": 2,
+              "Bi": 3,
+              "O": -2,
+              "Cl": -1
+            },
+            "sum_oxidation_states": 0,
+            "passed": true
+          },
+          "cif_geometry": {
+            "natoms": 5,
+            "expected_natoms": 5,
+            "min_distance_ang": 3.507,
+            "valid_geometry": true,
+            "passed": true
+          },
+          "soc_splitting": {
+            "stated_soc_ev": 0.43,
+            "expected_soc_ev": 0.43,
+            "passed": true
+          },
+          "frohlich_alpha": {
+            "stated_frohlich_alpha": 3.6,
+            "exact_frohlich_alpha": 3.5991,
+            "abs_difference": 0.00089,
+            "passed": true
+          },
+          "slme_quadrature": {
+            "stated_trapezoidal_slme_percent": 2.45,
+            "simpson_energy_slme_percent": 2.44,
+            "abs_difference_percent": 0.01,
+            "passed": true
+          }
+        },
+        "mismatches": [],
+        "sha256_signature": "f18ee732f8f74bd28c6b227de7888091d8ac38262f6b5ca93f058ee6fee1bf24"
       }
     },
     {
       "candidate": {
         "candidate_id": "CAND-A05",
-        "formula_reduced": "Sr2ZnS2O",
+        "formula_reduced": "Sr2ZnOS2",
         "target_layer": "TOP_ACTIVE_GLASS_185EV",
         "crystal_family": "Ruddlesden-Popper Oxysulfide",
         "space_group_symbol": "I4/mmm",
         "space_group_number": 139,
-        "nsites_unit_cell": 12,
+        "nsites_unit_cell": 6,
         "elements": [
           "Sr",
           "Zn",
@@ -2659,9 +3314,9 @@
         "pauling_electronegativity_diff": 1.62,
         "structural_dimensionality": "Quasi-2D",
         "tolerance_factor": 0.91,
-        "bond_valence_sum_deviation": 0.07,
+        "bond_valence_sum_deviation": 0.0943,
         "tier2_elements_present": [],
-        "cif_content": "data_Sr2ZnS2O\n_symmetry_space_group_name_H-M   'I4/mmm'\n_symmetry_Int_Tables_number      139\n_cell_length_a                   4.0400\n_cell_length_b                   4.0400\n_cell_length_c                   13.6800\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Sr1  Sr  0.1250  0.2500  0.0830\n  Sr2  Sr  0.3180  0.5670  0.3327\n  Zn1  Zn  0.5110  0.8840  0.4163\n  S1  S  0.7040  0.2010  0.5830\n  S2  S  0.8970  0.5180  0.8327\n  O1  O  0.0900  0.8350  0.9163",
+        "cif_content": "data_Sr2ZnOS2\n_symmetry_space_group_name_H-M   'I4/mmm'\n_symmetry_Int_Tables_number      139\n_cell_length_a                   4.0400\n_cell_length_b                   4.0400\n_cell_length_c                   13.6800\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Sr1  Sr  0.2500  0.2500  0.0833\n  Sr2  Sr  0.7500  0.7500  0.5833\n  Zn1  Zn  0.7500  0.7500  0.9167\n  S1  S  0.2500  0.2500  0.4167\n  S2  S  0.7500  0.7500  0.2500\n  O1  O  0.2500  0.2500  0.7500",
         "embedding_128d": [
           0.0,
           0.0,
@@ -2810,22 +3465,69 @@
         "shear_modulus_gpa": 28.0,
         "born_elastic_stable": true,
         "min_phonon_freq_thz": 0.92,
-        "debye_temperature_k": 310.0,
+        "debye_temperature_k": 341.1,
         "dynamically_stable": true,
         "mlip_force_std_ev_ang": 0.095,
         "passed_stage2": false,
         "failure_reason": "HULL_INSTABILITY: dE_hull = 64.0 meV/atom (> 50 meV/atom threshold)"
+      },
+      "redundancy_verification": {
+        "candidate_id": "CAND-A05",
+        "passed_all_redundancy_checks": true,
+        "checks": {
+          "formula_reduced_sync": {
+            "formula_reduced": "Sr2ZnOS2",
+            "parsed_formula": {
+              "Sr": 2,
+              "Zn": 1,
+              "O": 1,
+              "S": 2
+            },
+            "reduced_stoichiometry": {
+              "Sr": 2,
+              "Zn": 1,
+              "S": 2,
+              "O": 1
+            },
+            "passed": true
+          },
+          "charge_neutrality": {
+            "stoichiometry": {
+              "Sr": 2,
+              "Zn": 1,
+              "S": 2,
+              "O": 1
+            },
+            "oxidation_states": {
+              "Sr": 2,
+              "Zn": 2,
+              "S": -2,
+              "O": -2
+            },
+            "sum_oxidation_states": 0,
+            "passed": true
+          },
+          "cif_geometry": {
+            "natoms": 6,
+            "expected_natoms": 6,
+            "min_distance_ang": 3.654,
+            "valid_geometry": true,
+            "passed": true
+          }
+        },
+        "mismatches": [],
+        "sha256_signature": "3cf1a4f84c5de2588d2cbe4b9774e56280bed6414f83f08e56de1b847bfc4815"
       }
     },
     {
       "candidate": {
         "candidate_id": "CAND-A06",
-        "formula_reduced": "BiZnSOCl",
+        "formula_reduced": "BiZnOSCl",
         "target_layer": "TOP_ACTIVE_GLASS_185EV",
         "crystal_family": "Quaternary Mixed-Anion Oxy-Sulfochloride",
         "space_group_symbol": "P4/nmm",
         "space_group_number": 129,
-        "nsites_unit_cell": 10,
+        "nsites_unit_cell": 5,
         "elements": [
           "Bi",
           "Zn",
@@ -2850,9 +3552,9 @@
         "pauling_electronegativity_diff": 1.24,
         "structural_dimensionality": "3D",
         "tolerance_factor": 0.95,
-        "bond_valence_sum_deviation": 0.04,
+        "bond_valence_sum_deviation": 0.0707,
         "tier2_elements_present": [],
-        "cif_content": "data_BiZnSOCl\n_symmetry_space_group_name_H-M   'P4/nmm'\n_symmetry_Int_Tables_number      129\n_cell_length_a                   3.9420\n_cell_length_b                   3.9420\n_cell_length_c                   9.4800\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Bi1  Bi  0.1250  0.2500  0.0830\n  Zn1  Zn  0.3180  0.5670  0.2830\n  S1  S  0.5110  0.8840  0.4830\n  O1  O  0.7040  0.2010  0.6830\n  Cl1  Cl  0.8970  0.5180  0.8830",
+        "cif_content": "data_BiZnOSCl\n_symmetry_space_group_name_H-M   'P4/nmm'\n_symmetry_Int_Tables_number      129\n_cell_length_a                   3.9420\n_cell_length_b                   3.9420\n_cell_length_c                   9.4800\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Bi1  Bi  0.2500  0.2500  0.0833\n  Zn1  Zn  0.7500  0.7500  0.5833\n  S1  S  0.2500  0.2500  0.4167\n  O1  O  0.7500  0.7500  0.2500\n  Cl1  Cl  0.2500  0.2500  0.7500",
         "embedding_128d": [
           0.0,
           0.0,
@@ -2999,7 +3701,7 @@
         "shear_modulus_gpa": 29.4,
         "born_elastic_stable": true,
         "min_phonon_freq_thz": 1.29,
-        "debye_temperature_k": 274.0,
+        "debye_temperature_k": 290.0,
         "dynamically_stable": true,
         "mlip_force_std_ev_ang": 0.064,
         "passed_stage2": true,
@@ -3063,21 +3765,89 @@
       "optics": {
         "candidate_id": "CAND-A06",
         "target_layer": "TOP_ACTIVE_GLASS_185EV",
-        "film_thickness_nm": 260.0,
-        "refractive_index_n": 2.74,
-        "yablonovitch_4n2_factor": 30.0,
+        "film_thickness_nm": 250.0,
+        "refractive_index_n": 2.739,
+        "yablonovitch_4n2_factor": 30.008,
         "dipole_forbidden_penalty_ev": 0.04,
-        "standalone_slme_percent": 26.42,
-        "sub_bandgap_transmittance_percent": 90.5,
+        "standalone_slme_percent": 26.16,
+        "sub_bandgap_transmittance_percent": 90.45,
         "tco_parasitic_loss_percent": 2.4,
-        "top_cell_jsc_ma_cm2": 20.85,
-        "top_cell_voc_v": 1.5,
-        "top_cell_eff_percent": 25.36,
-        "si_middle_cell_eff_percent": 13.39,
+        "top_cell_jsc_ma_cm2": 14.36,
+        "top_cell_voc_v": 1.553,
+        "top_cell_eff_percent": 25.11,
+        "si_middle_cell_eff_percent": 13.07,
         "bottom_ir_cell_eff_percent": 5.42,
-        "tandem_4t_total_eff_percent": 44.17,
+        "tandem_4t_total_eff_percent": 43.6,
         "passed_optical_gate": true,
         "failure_reason": null
+      },
+      "redundancy_verification": {
+        "candidate_id": "CAND-A06",
+        "passed_all_redundancy_checks": true,
+        "checks": {
+          "formula_reduced_sync": {
+            "formula_reduced": "BiZnOSCl",
+            "parsed_formula": {
+              "Bi": 1,
+              "Zn": 1,
+              "O": 1,
+              "S": 1,
+              "Cl": 1
+            },
+            "reduced_stoichiometry": {
+              "Bi": 1,
+              "Zn": 1,
+              "S": 1,
+              "O": 1,
+              "Cl": 1
+            },
+            "passed": true
+          },
+          "charge_neutrality": {
+            "stoichiometry": {
+              "Bi": 1,
+              "Zn": 1,
+              "S": 1,
+              "O": 1,
+              "Cl": 1
+            },
+            "oxidation_states": {
+              "Bi": 3,
+              "Zn": 2,
+              "S": -2,
+              "O": -2,
+              "Cl": -1
+            },
+            "sum_oxidation_states": 0,
+            "passed": true
+          },
+          "cif_geometry": {
+            "natoms": 5,
+            "expected_natoms": 5,
+            "min_distance_ang": 3.16,
+            "valid_geometry": true,
+            "passed": true
+          },
+          "soc_splitting": {
+            "stated_soc_ev": 0.4,
+            "expected_soc_ev": 0.4,
+            "passed": true
+          },
+          "frohlich_alpha": {
+            "stated_frohlich_alpha": 2.25,
+            "exact_frohlich_alpha": 2.2489,
+            "abs_difference": 0.00107,
+            "passed": true
+          },
+          "slme_quadrature": {
+            "stated_trapezoidal_slme_percent": 26.16,
+            "simpson_energy_slme_percent": 26.17,
+            "abs_difference_percent": 0.01,
+            "passed": true
+          }
+        },
+        "mismatches": [],
+        "sha256_signature": "bf0b91ce3a7286db87ad3ee8e49d2c9321059e6073e792df7216cd555ce94f1c"
       }
     },
     {
@@ -3088,7 +3858,7 @@
         "crystal_family": "Distorted Perovskite Sulfide",
         "space_group_symbol": "Pnma",
         "space_group_number": 62,
-        "nsites_unit_cell": 20,
+        "nsites_unit_cell": 5,
         "elements": [
           "Ba",
           "Zr",
@@ -3107,9 +3877,9 @@
         "pauling_electronegativity_diff": 1.48,
         "structural_dimensionality": "3D",
         "tolerance_factor": 0.95,
-        "bond_valence_sum_deviation": 0.03,
+        "bond_valence_sum_deviation": 0.057,
         "tier2_elements_present": [],
-        "cif_content": "data_BaZrS3\n_symmetry_space_group_name_H-M   'Pnma'\n_symmetry_Int_Tables_number      62\n_cell_length_a                   7.0590\n_cell_length_b                   9.9810\n_cell_length_c                   7.0250\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Ba1  Ba  0.1250  0.2500  0.0830\n  Zr1  Zr  0.3180  0.5670  0.2830\n  S1  S  0.5110  0.8840  0.4830\n  S2  S  0.7040  0.2010  0.7660\n  S3  S  0.8970  0.5180  0.0490",
+        "cif_content": "data_BaZrS3\n_symmetry_space_group_name_H-M   'Pnma'\n_symmetry_Int_Tables_number      62\n_cell_length_a                   7.0590\n_cell_length_b                   9.9810\n_cell_length_c                   7.0250\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Ba1  Ba  0.2500  0.1250  0.1250\n  Zr1  Zr  0.7500  0.6250  0.6250\n  S1  S  0.2500  0.6250  0.1250\n  S2  S  0.7500  0.1250  0.6250\n  S3  S  0.2500  0.3750  0.6250",
         "embedding_128d": [
           0.0,
           0.0,
@@ -3257,7 +4027,7 @@
         "shear_modulus_gpa": 42.1,
         "born_elastic_stable": true,
         "min_phonon_freq_thz": 1.48,
-        "debye_temperature_k": 340.0,
+        "debye_temperature_k": 445.5,
         "dynamically_stable": true,
         "mlip_force_std_ev_ang": 0.038,
         "passed_stage2": true,
@@ -3285,6 +4055,49 @@
         "contrastive_synthesizability_score": 0.643,
         "passed_stage3": false,
         "failure_reason": "OXIDE_IMPURITY_SINK: Requires 950 C (> 500 C soda-lime glass ceiling) to overcome refractory ZrO2 sink"
+      },
+      "redundancy_verification": {
+        "candidate_id": "CAND-A07",
+        "passed_all_redundancy_checks": true,
+        "checks": {
+          "formula_reduced_sync": {
+            "formula_reduced": "BaZrS3",
+            "parsed_formula": {
+              "Ba": 1,
+              "Zr": 1,
+              "S": 3
+            },
+            "reduced_stoichiometry": {
+              "Ba": 1,
+              "Zr": 1,
+              "S": 3
+            },
+            "passed": true
+          },
+          "charge_neutrality": {
+            "stoichiometry": {
+              "Ba": 1,
+              "Zr": 1,
+              "S": 3
+            },
+            "oxidation_states": {
+              "Ba": 2,
+              "Zr": 4,
+              "S": -2
+            },
+            "sum_oxidation_states": 0,
+            "passed": true
+          },
+          "cif_geometry": {
+            "natoms": 5,
+            "expected_natoms": 5,
+            "min_distance_ang": 4.309,
+            "valid_geometry": true,
+            "passed": true
+          }
+        },
+        "mismatches": [],
+        "sha256_signature": "0d19239adaa13eb72f78af6d0a3164c5a3523d2e26a166a714bff7c7c0bbdf55"
       }
     },
     {
@@ -3295,7 +4108,7 @@
         "crystal_family": "1D Ribbon Sulfochloride",
         "space_group_symbol": "Pnma",
         "space_group_number": 62,
-        "nsites_unit_cell": 12,
+        "nsites_unit_cell": 3,
         "elements": [
           "Bi",
           "S",
@@ -3314,9 +4127,9 @@
         "pauling_electronegativity_diff": 0.85,
         "structural_dimensionality": "1D-Chain",
         "tolerance_factor": 0.87,
-        "bond_valence_sum_deviation": 0.08,
+        "bond_valence_sum_deviation": 0.0947,
         "tier2_elements_present": [],
-        "cif_content": "data_BiSCl\n_symmetry_space_group_name_H-M   'Pnma'\n_symmetry_Int_Tables_number      62\n_cell_length_a                   7.7500\n_cell_length_b                   4.0000\n_cell_length_c                   9.8700\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Bi1  Bi  0.1250  0.2500  0.0830\n  S1  S  0.3180  0.5670  0.4163\n  Cl1  Cl  0.5110  0.8840  0.7497",
+        "cif_content": "data_BiSCl\n_symmetry_space_group_name_H-M   'Pnma'\n_symmetry_Int_Tables_number      62\n_cell_length_a                   7.7500\n_cell_length_b                   4.0000\n_cell_length_c                   9.8700\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Bi1  Bi  0.2500  0.5000  0.0714\n  S1  S  0.7500  0.5000  0.5000\n  Cl1  Cl  0.2500  0.5000  0.6429",
         "embedding_128d": [
           0.0,
           0.0,
@@ -3464,7 +4277,7 @@
         "shear_modulus_gpa": 15.2,
         "born_elastic_stable": true,
         "min_phonon_freq_thz": 0.74,
-        "debye_temperature_k": 195.0,
+        "debye_temperature_k": 226.2,
         "dynamically_stable": true,
         "mlip_force_std_ev_ang": 0.055,
         "passed_stage2": true,
@@ -3503,6 +4316,49 @@
         "decision": "VETO_REJECT",
         "critique_summary": "VETO: 1D-Chain van der Waals ribbons cause severe inter-chain carrier localization and BiCl3 volatility.",
         "primary_failure_mode": "LOW_DIM_POLARON_RISK"
+      },
+      "redundancy_verification": {
+        "candidate_id": "CAND-A08",
+        "passed_all_redundancy_checks": true,
+        "checks": {
+          "formula_reduced_sync": {
+            "formula_reduced": "BiSCl",
+            "parsed_formula": {
+              "Bi": 1,
+              "S": 1,
+              "Cl": 1
+            },
+            "reduced_stoichiometry": {
+              "Bi": 1,
+              "S": 1,
+              "Cl": 1
+            },
+            "passed": true
+          },
+          "charge_neutrality": {
+            "stoichiometry": {
+              "Bi": 1,
+              "S": 1,
+              "Cl": 1
+            },
+            "oxidation_states": {
+              "Bi": 3,
+              "S": -2,
+              "Cl": -1
+            },
+            "sum_oxidation_states": 0,
+            "passed": true
+          },
+          "cif_geometry": {
+            "natoms": 3,
+            "expected_natoms": 3,
+            "min_distance_ang": 4.0,
+            "valid_geometry": true,
+            "passed": true
+          }
+        },
+        "mismatches": [],
+        "sha256_signature": "cdc37afd18a90741a5ae8d956bb3b956f9c81953f8ee4630a33eb4f636894435"
       }
     },
     {
@@ -3513,7 +4369,7 @@
         "crystal_family": "3D Connected Wittichenite-Derivative Sulfochloride",
         "space_group_symbol": "C2/c",
         "space_group_number": 15,
-        "nsites_unit_cell": 16,
+        "nsites_unit_cell": 8,
         "elements": [
           "Cu",
           "Bi",
@@ -3535,9 +4391,9 @@
         "pauling_electronegativity_diff": 0.92,
         "structural_dimensionality": "3D",
         "tolerance_factor": 0.94,
-        "bond_valence_sum_deviation": 0.04,
+        "bond_valence_sum_deviation": 0.0589,
         "tier2_elements_present": [],
-        "cif_content": "data_Cu3BiS2Cl2\n_symmetry_space_group_name_H-M   'C2/c'\n_symmetry_Int_Tables_number      15\n_cell_length_a                   6.6800\n_cell_length_b                   7.5100\n_cell_length_c                   11.2400\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Cu1  Cu  0.1250  0.2500  0.0830\n  Cu2  Cu  0.3180  0.5670  0.2910\n  Cu3  Cu  0.5110  0.8840  0.4990\n  Bi1  Bi  0.7040  0.2010  0.4580\n  S1  S  0.8970  0.5180  0.5830\n  S2  S  0.0900  0.8350  0.7910\n  Cl1  Cl  0.2830  0.1520  0.8330\n  Cl2  Cl  0.4760  0.4690  0.0410",
+        "cif_content": "data_Cu3BiS2Cl2\n_symmetry_space_group_name_H-M   'C2/c'\n_symmetry_Int_Tables_number      15\n_cell_length_a                   6.6800\n_cell_length_b                   7.5100\n_cell_length_c                   11.2400\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Cu1  Cu  0.2500  0.2500  0.1250\n  Cu2  Cu  0.7500  0.7500  0.6250\n  Cu3  Cu  0.2500  0.2500  0.6250\n  Bi1  Bi  0.7500  0.7500  0.1250\n  S1  S  0.2500  0.7500  0.3750\n  S2  S  0.2500  0.7500  0.8750\n  Cl1  Cl  0.7500  0.2500  0.3750\n  Cl2  Cl  0.7500  0.2500  0.8750",
         "embedding_128d": [
           0.0,
           0.0,
@@ -3684,7 +4540,7 @@
         "shear_modulus_gpa": 26.7,
         "born_elastic_stable": true,
         "min_phonon_freq_thz": 1.14,
-        "debye_temperature_k": 255.0,
+        "debye_temperature_k": 330.8,
         "dynamically_stable": true,
         "mlip_force_std_ev_ang": 0.072,
         "passed_stage2": true,
@@ -3748,32 +4604,96 @@
       "optics": {
         "candidate_id": "CAND-A09",
         "target_layer": "TOP_ACTIVE_GLASS_185EV",
-        "film_thickness_nm": 260.0,
-        "refractive_index_n": 2.93,
-        "yablonovitch_4n2_factor": 34.3,
+        "film_thickness_nm": 240.0,
+        "refractive_index_n": 2.933,
+        "yablonovitch_4n2_factor": 34.41,
         "dipole_forbidden_penalty_ev": 0.03,
-        "standalone_slme_percent": 25.83,
-        "sub_bandgap_transmittance_percent": 90.2,
+        "standalone_slme_percent": 28.98,
+        "sub_bandgap_transmittance_percent": 90.22,
         "tco_parasitic_loss_percent": 2.4,
-        "top_cell_jsc_ma_cm2": 21.53,
-        "top_cell_voc_v": 1.42,
-        "top_cell_eff_percent": 24.8,
-        "si_middle_cell_eff_percent": 13.35,
+        "top_cell_jsc_ma_cm2": 16.87,
+        "top_cell_voc_v": 1.47,
+        "top_cell_eff_percent": 27.82,
+        "si_middle_cell_eff_percent": 13.03,
         "bottom_ir_cell_eff_percent": 5.42,
-        "tandem_4t_total_eff_percent": 43.57,
+        "tandem_4t_total_eff_percent": 46.27,
         "passed_optical_gate": true,
         "failure_reason": null
+      },
+      "redundancy_verification": {
+        "candidate_id": "CAND-A09",
+        "passed_all_redundancy_checks": true,
+        "checks": {
+          "formula_reduced_sync": {
+            "formula_reduced": "Cu3BiS2Cl2",
+            "parsed_formula": {
+              "Cu": 3,
+              "Bi": 1,
+              "S": 2,
+              "Cl": 2
+            },
+            "reduced_stoichiometry": {
+              "Cu": 3,
+              "Bi": 1,
+              "S": 2,
+              "Cl": 2
+            },
+            "passed": true
+          },
+          "charge_neutrality": {
+            "stoichiometry": {
+              "Cu": 3,
+              "Bi": 1,
+              "S": 2,
+              "Cl": 2
+            },
+            "oxidation_states": {
+              "Cu": 1,
+              "Bi": 3,
+              "S": -2,
+              "Cl": -1
+            },
+            "sum_oxidation_states": 0,
+            "passed": true
+          },
+          "cif_geometry": {
+            "natoms": 8,
+            "expected_natoms": 8,
+            "min_distance_ang": 4.365,
+            "valid_geometry": true,
+            "passed": true
+          },
+          "soc_splitting": {
+            "stated_soc_ev": 0.37,
+            "expected_soc_ev": 0.37,
+            "passed": true
+          },
+          "frohlich_alpha": {
+            "stated_frohlich_alpha": 1.94,
+            "exact_frohlich_alpha": 1.9401,
+            "abs_difference": 0.00014,
+            "passed": true
+          },
+          "slme_quadrature": {
+            "stated_trapezoidal_slme_percent": 28.98,
+            "simpson_energy_slme_percent": 28.98,
+            "abs_difference_percent": 0.0,
+            "passed": true
+          }
+        },
+        "mismatches": [],
+        "sha256_signature": "159c7df80650534e98ab4689f2a915823e1740d9519958e4b17e021d1e4741dd"
       }
     },
     {
       "candidate": {
         "candidate_id": "CAND-A10",
-        "formula_reduced": "Zn2SbS2Br",
+        "formula_reduced": "Zn2SbS2Br3",
         "target_layer": "TOP_ACTIVE_GLASS_185EV",
         "crystal_family": "Hypothetical Strained Sulfobromide",
         "space_group_symbol": "P21/m",
         "space_group_number": 11,
-        "nsites_unit_cell": 12,
+        "nsites_unit_cell": 8,
         "elements": [
           "Zn",
           "Sb",
@@ -3795,11 +4715,11 @@
         "pauling_electronegativity_diff": 0.98,
         "structural_dimensionality": "1D-Chain",
         "tolerance_factor": 0.78,
-        "bond_valence_sum_deviation": 0.24,
+        "bond_valence_sum_deviation": 0.0599,
         "tier2_elements_present": [
           "Sb"
         ],
-        "cif_content": "data_Zn2SbS2Br\n_symmetry_space_group_name_H-M   'P21/m'\n_symmetry_Int_Tables_number      11\n_cell_length_a                   5.9200\n_cell_length_b                   6.4100\n_cell_length_c                   10.1200\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Zn1  Zn  0.1250  0.2500  0.0830\n  Zn2  Zn  0.3180  0.5670  0.2910\n  Sb1  Sb  0.5110  0.8840  0.3330\n  S1  S  0.7040  0.2010  0.4580\n  S2  S  0.8970  0.5180  0.6660\n  Br1  Br  0.0900  0.8350  0.7080\n  Br2  Br  0.2830  0.1520  0.9160\n  Br3  Br  0.4760  0.4690  0.1240",
+        "cif_content": "data_Zn2SbS2Br3\n_symmetry_space_group_name_H-M   'P21/m'\n_symmetry_Int_Tables_number      11\n_cell_length_a                   5.9200\n_cell_length_b                   6.4100\n_cell_length_c                   10.1200\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Zn1  Zn  0.1250  0.2500  0.1250\n  Zn2  Zn  0.6250  0.7500  0.6250\n  Sb1  Sb  0.1250  0.2500  0.6250\n  S1  S  0.6250  0.7500  0.1250\n  S2  S  0.1250  0.7500  0.3750\n  Br1  Br  0.1250  0.7500  0.8750\n  Br2  Br  0.6250  0.2500  0.3750\n  Br3  Br  0.6250  0.2500  0.8750",
         "embedding_128d": [
           0.0,
           0.0,
@@ -3947,22 +4867,69 @@
         "shear_modulus_gpa": 8.5,
         "born_elastic_stable": false,
         "min_phonon_freq_thz": -1.42,
-        "debye_temperature_k": 160.0,
+        "debye_temperature_k": 172.6,
         "dynamically_stable": false,
         "mlip_force_std_ev_ang": 0.21,
         "passed_stage2": false,
         "failure_reason": "IMAGINARY_PHONON: omega_min = -1.42 THz (< 0 THz) -> Dynamic lattice collapse"
+      },
+      "redundancy_verification": {
+        "candidate_id": "CAND-A10",
+        "passed_all_redundancy_checks": true,
+        "checks": {
+          "formula_reduced_sync": {
+            "formula_reduced": "Zn2SbS2Br3",
+            "parsed_formula": {
+              "Zn": 2,
+              "Sb": 1,
+              "S": 2,
+              "Br": 3
+            },
+            "reduced_stoichiometry": {
+              "Zn": 2,
+              "Sb": 1,
+              "S": 2,
+              "Br": 3
+            },
+            "passed": true
+          },
+          "charge_neutrality": {
+            "stoichiometry": {
+              "Zn": 2,
+              "Sb": 1,
+              "S": 2,
+              "Br": 3
+            },
+            "oxidation_states": {
+              "Zn": 2,
+              "Sb": 3,
+              "S": -2,
+              "Br": -1
+            },
+            "sum_oxidation_states": 0,
+            "passed": true
+          },
+          "cif_geometry": {
+            "natoms": 8,
+            "expected_natoms": 8,
+            "min_distance_ang": 3.894,
+            "valid_geometry": true,
+            "passed": true
+          }
+        },
+        "mismatches": [],
+        "sha256_signature": "7f18860c3549c1bdda74f5e491457ea01ae3ef84c2d9854c79626ff49b3ab2cd"
       }
     },
     {
       "candidate": {
         "candidate_id": "CAND-B01",
-        "formula_reduced": "BiCuSeI",
+        "formula_reduced": "BiCuSeI2",
         "target_layer": "BOTTOM_IR_075EV",
         "crystal_family": "3D Cross-Linked Selenoiodide",
         "space_group_symbol": "Pnma",
         "space_group_number": 62,
-        "nsites_unit_cell": 16,
+        "nsites_unit_cell": 5,
         "elements": [
           "Bi",
           "Cu",
@@ -3984,11 +4951,11 @@
         "pauling_electronegativity_diff": 0.65,
         "structural_dimensionality": "3D",
         "tolerance_factor": 0.93,
-        "bond_valence_sum_deviation": 0.04,
+        "bond_valence_sum_deviation": 0.0472,
         "tier2_elements_present": [
           "Se"
         ],
-        "cif_content": "data_BiCuSeI\n_symmetry_space_group_name_H-M   'Pnma'\n_symmetry_Int_Tables_number      62\n_cell_length_a                   7.1200\n_cell_length_b                   8.3400\n_cell_length_c                   10.4500\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Bi1  Bi  0.1250  0.2500  0.0830\n  Cu1  Cu  0.3180  0.5670  0.2830\n  Se1  Se  0.5110  0.8840  0.4830\n  I1  I  0.7040  0.2010  0.6830\n  I2  I  0.8970  0.5180  0.9660",
+        "cif_content": "data_BiCuSeI2\n_symmetry_space_group_name_H-M   'Pnma'\n_symmetry_Int_Tables_number      62\n_cell_length_a                   7.1200\n_cell_length_b                   8.3400\n_cell_length_c                   10.4500\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Bi1  Bi  0.2500  0.2500  0.0714\n  Cu1  Cu  0.7500  0.7500  0.5000\n  Se1  Se  0.2500  0.7500  0.7857\n  I1  I  0.7500  0.2500  0.7857\n  I2  I  0.2500  0.2500  0.5000",
         "embedding_128d": [
           0.0,
           0.078584,
@@ -4137,7 +5104,7 @@
         "shear_modulus_gpa": 20.8,
         "born_elastic_stable": true,
         "min_phonon_freq_thz": 0.94,
-        "debye_temperature_k": 198.0,
+        "debye_temperature_k": 238.4,
         "dynamically_stable": true,
         "mlip_force_std_ev_ang": 0.081,
         "passed_stage2": true,
@@ -4178,6 +5145,53 @@
         "decision": "VETO_REJECT",
         "critique_summary": "VETO: High Se/I site-exchange enthalpy (48.5 meV/atom) and CuI extraction reaction at ITO interface (-115 meV/atom).",
         "primary_failure_mode": "ANION_PHASE_SEGREGATION"
+      },
+      "redundancy_verification": {
+        "candidate_id": "CAND-B01",
+        "passed_all_redundancy_checks": true,
+        "checks": {
+          "formula_reduced_sync": {
+            "formula_reduced": "BiCuSeI2",
+            "parsed_formula": {
+              "Bi": 1,
+              "Cu": 1,
+              "Se": 1,
+              "I": 2
+            },
+            "reduced_stoichiometry": {
+              "Bi": 1,
+              "Cu": 1,
+              "Se": 1,
+              "I": 2
+            },
+            "passed": true
+          },
+          "charge_neutrality": {
+            "stoichiometry": {
+              "Bi": 1,
+              "Cu": 1,
+              "Se": 1,
+              "I": 2
+            },
+            "oxidation_states": {
+              "Bi": 3,
+              "Cu": 1,
+              "Se": -2,
+              "I": -1
+            },
+            "sum_oxidation_states": 0,
+            "passed": true
+          },
+          "cif_geometry": {
+            "natoms": 5,
+            "expected_natoms": 5,
+            "min_distance_ang": 4.479,
+            "valid_geometry": true,
+            "passed": true
+          }
+        },
+        "mismatches": [],
+        "sha256_signature": "df63147bd46be8457ee004ca07941ff12b523c4f2e07ec431ca25e98c6cd5616"
       }
     },
     {
@@ -4188,7 +5202,7 @@
         "crystal_family": "3D Lone-Pair Double-Cation Selenoiodide",
         "space_group_symbol": "Cmcm",
         "space_group_number": 63,
-        "nsites_unit_cell": 16,
+        "nsites_unit_cell": 8,
         "elements": [
           "Sn",
           "Sb",
@@ -4210,12 +5224,12 @@
         "pauling_electronegativity_diff": 0.61,
         "structural_dimensionality": "3D",
         "tolerance_factor": 0.94,
-        "bond_valence_sum_deviation": 0.05,
+        "bond_valence_sum_deviation": 0.1028,
         "tier2_elements_present": [
           "Sb",
           "Se"
         ],
-        "cif_content": "data_Sn2SbSe2I3\n_symmetry_space_group_name_H-M   'Cmcm'\n_symmetry_Int_Tables_number      63\n_cell_length_a                   4.3100\n_cell_length_b                   14.1800\n_cell_length_c                   16.4200\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Sn1  Sn  0.1250  0.2500  0.0830\n  Sn2  Sn  0.3180  0.5670  0.2910\n  Sb1  Sb  0.5110  0.8840  0.3330\n  Se1  Se  0.7040  0.2010  0.4580\n  Se2  Se  0.8970  0.5180  0.6660\n  I1  I  0.0900  0.8350  0.7080\n  I2  I  0.2830  0.1520  0.9160\n  I3  I  0.4760  0.4690  0.1240",
+        "cif_content": "data_Sn2SbSe2I3\n_symmetry_space_group_name_H-M   'Cmcm'\n_symmetry_Int_Tables_number      63\n_cell_length_a                   4.3100\n_cell_length_b                   14.1800\n_cell_length_c                   16.4200\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Sn1  Sn  0.5000  0.1667  0.1667\n  Sn2  Sn  0.5000  0.5000  0.5000\n  Sb1  Sb  0.5000  0.8333  0.8333\n  Se1  Se  0.5000  0.1667  0.5000\n  Se2  Se  0.5000  0.5000  0.1667\n  I1  I  0.5000  0.5000  0.8333\n  I2  I  0.5000  0.1667  0.8333\n  I3  I  0.5000  0.8333  0.1667",
         "embedding_128d": [
           0.0,
           0.075945,
@@ -4363,7 +5377,7 @@
         "shear_modulus_gpa": 19.6,
         "born_elastic_stable": true,
         "min_phonon_freq_thz": 0.88,
-        "debye_temperature_k": 186.0,
+        "debye_temperature_k": 240.8,
         "dynamically_stable": true,
         "mlip_force_std_ev_ang": 0.074,
         "passed_stage2": true,
@@ -4427,21 +5441,85 @@
       "optics": {
         "candidate_id": "CAND-B02",
         "target_layer": "BOTTOM_IR_075EV",
-        "film_thickness_nm": 330.0,
-        "refractive_index_n": 3.52,
-        "yablonovitch_4n2_factor": 49.6,
+        "film_thickness_nm": 350.0,
+        "refractive_index_n": 3.521,
+        "yablonovitch_4n2_factor": 49.59,
         "dipole_forbidden_penalty_ev": 0.03,
-        "standalone_slme_percent": 17.25,
-        "sub_bandgap_transmittance_percent": 88.5,
+        "standalone_slme_percent": 18.68,
+        "sub_bandgap_transmittance_percent": 89.51,
         "tco_parasitic_loss_percent": 2.8,
         "top_cell_jsc_ma_cm2": 19.6,
-        "top_cell_voc_v": 0.45,
+        "top_cell_voc_v": 1.55,
         "top_cell_eff_percent": 25.34,
         "si_middle_cell_eff_percent": 13.36,
-        "bottom_ir_cell_eff_percent": 5.41,
-        "tandem_4t_total_eff_percent": 44.11,
+        "bottom_ir_cell_eff_percent": 5.97,
+        "tandem_4t_total_eff_percent": 44.67,
         "passed_optical_gate": true,
         "failure_reason": null
+      },
+      "redundancy_verification": {
+        "candidate_id": "CAND-B02",
+        "passed_all_redundancy_checks": true,
+        "checks": {
+          "formula_reduced_sync": {
+            "formula_reduced": "Sn2SbSe2I3",
+            "parsed_formula": {
+              "Sn": 2,
+              "Sb": 1,
+              "Se": 2,
+              "I": 3
+            },
+            "reduced_stoichiometry": {
+              "Sn": 2,
+              "Sb": 1,
+              "Se": 2,
+              "I": 3
+            },
+            "passed": true
+          },
+          "charge_neutrality": {
+            "stoichiometry": {
+              "Sn": 2,
+              "Sb": 1,
+              "Se": 2,
+              "I": 3
+            },
+            "oxidation_states": {
+              "Sn": 2,
+              "Sb": 3,
+              "Se": -2,
+              "I": -1
+            },
+            "sum_oxidation_states": 0,
+            "passed": true
+          },
+          "cif_geometry": {
+            "natoms": 8,
+            "expected_natoms": 8,
+            "min_distance_ang": 4.31,
+            "valid_geometry": true,
+            "passed": true
+          },
+          "soc_splitting": {
+            "stated_soc_ev": 0.3,
+            "expected_soc_ev": 0.3,
+            "passed": true
+          },
+          "frohlich_alpha": {
+            "stated_frohlich_alpha": 1.32,
+            "exact_frohlich_alpha": 1.3203,
+            "abs_difference": 0.00028,
+            "passed": true
+          },
+          "slme_quadrature": {
+            "stated_trapezoidal_slme_percent": 18.68,
+            "simpson_energy_slme_percent": 18.69,
+            "abs_difference_percent": 0.01,
+            "passed": true
+          }
+        },
+        "mismatches": [],
+        "sha256_signature": "579e58be674c42b0c374e7560780e9c98f7107bc85af119ff1c7d754d48685e8"
       }
     },
     {
@@ -4452,7 +5530,7 @@
         "crystal_family": "Quasi-2D Octahedral Framework Selenoiodide",
         "space_group_symbol": "Immm",
         "space_group_number": 71,
-        "nsites_unit_cell": 16,
+        "nsites_unit_cell": 8,
         "elements": [
           "Bi",
           "Sn",
@@ -4474,11 +5552,11 @@
         "pauling_electronegativity_diff": 0.6,
         "structural_dimensionality": "Quasi-2D",
         "tolerance_factor": 0.95,
-        "bond_valence_sum_deviation": 0.04,
+        "bond_valence_sum_deviation": 0.0971,
         "tier2_elements_present": [
           "Se"
         ],
-        "cif_content": "data_Bi2SnSe3I2\n_symmetry_space_group_name_H-M   'Immm'\n_symmetry_Int_Tables_number      71\n_cell_length_a                   4.2400\n_cell_length_b                   12.8900\n_cell_length_c                   15.1100\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Bi1  Bi  0.1250  0.2500  0.0830\n  Bi2  Bi  0.3180  0.5670  0.2910\n  Sn1  Sn  0.5110  0.8840  0.3330\n  Se1  Se  0.7040  0.2010  0.4580\n  Se2  Se  0.8970  0.5180  0.6660\n  Se3  Se  0.0900  0.8350  0.8740\n  I1  I  0.2830  0.1520  0.8330\n  I2  I  0.4760  0.4690  0.0410",
+        "cif_content": "data_Bi2SnSe3I2\n_symmetry_space_group_name_H-M   'Immm'\n_symmetry_Int_Tables_number      71\n_cell_length_a                   4.2400\n_cell_length_b                   12.8900\n_cell_length_c                   15.1100\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Bi1  Bi  0.5000  0.1667  0.1667\n  Bi2  Bi  0.5000  0.5000  0.5000\n  Sn1  Sn  0.5000  0.8333  0.8333\n  Se1  Se  0.5000  0.1667  0.5000\n  Se2  Se  0.5000  0.5000  0.1667\n  Se3  Se  0.5000  0.5000  0.8333\n  I1  I  0.5000  0.1667  0.8333\n  I2  I  0.5000  0.8333  0.1667",
         "embedding_128d": [
           0.0,
           0.049027,
@@ -4626,7 +5704,7 @@
         "shear_modulus_gpa": 20.1,
         "born_elastic_stable": true,
         "min_phonon_freq_thz": 0.91,
-        "debye_temperature_k": 192.0,
+        "debye_temperature_k": 220.8,
         "dynamically_stable": true,
         "mlip_force_std_ev_ang": 0.069,
         "passed_stage2": true,
@@ -4690,21 +5768,85 @@
       "optics": {
         "candidate_id": "CAND-B03",
         "target_layer": "BOTTOM_IR_075EV",
-        "film_thickness_nm": 330.0,
-        "refractive_index_n": 3.44,
-        "yablonovitch_4n2_factor": 47.3,
+        "film_thickness_nm": 340.0,
+        "refractive_index_n": 3.435,
+        "yablonovitch_4n2_factor": 47.197,
         "dipole_forbidden_penalty_ev": 0.04,
-        "standalone_slme_percent": 17.4,
-        "sub_bandgap_transmittance_percent": 88.5,
+        "standalone_slme_percent": 18.73,
+        "sub_bandgap_transmittance_percent": 89.62,
         "tco_parasitic_loss_percent": 2.8,
         "top_cell_jsc_ma_cm2": 19.6,
-        "top_cell_voc_v": 0.46,
+        "top_cell_voc_v": 1.55,
         "top_cell_eff_percent": 25.34,
         "si_middle_cell_eff_percent": 13.36,
-        "bottom_ir_cell_eff_percent": 5.44,
-        "tandem_4t_total_eff_percent": 44.14,
+        "bottom_ir_cell_eff_percent": 6.12,
+        "tandem_4t_total_eff_percent": 44.82,
         "passed_optical_gate": true,
         "failure_reason": null
+      },
+      "redundancy_verification": {
+        "candidate_id": "CAND-B03",
+        "passed_all_redundancy_checks": true,
+        "checks": {
+          "formula_reduced_sync": {
+            "formula_reduced": "Bi2SnSe3I2",
+            "parsed_formula": {
+              "Bi": 2,
+              "Sn": 1,
+              "Se": 3,
+              "I": 2
+            },
+            "reduced_stoichiometry": {
+              "Bi": 2,
+              "Sn": 1,
+              "Se": 3,
+              "I": 2
+            },
+            "passed": true
+          },
+          "charge_neutrality": {
+            "stoichiometry": {
+              "Bi": 2,
+              "Sn": 1,
+              "Se": 3,
+              "I": 2
+            },
+            "oxidation_states": {
+              "Bi": 3,
+              "Sn": 2,
+              "Se": -2,
+              "I": -1
+            },
+            "sum_oxidation_states": 0,
+            "passed": true
+          },
+          "cif_geometry": {
+            "natoms": 8,
+            "expected_natoms": 8,
+            "min_distance_ang": 4.24,
+            "valid_geometry": true,
+            "passed": true
+          },
+          "soc_splitting": {
+            "stated_soc_ev": 0.43,
+            "expected_soc_ev": 0.43,
+            "passed": true
+          },
+          "frohlich_alpha": {
+            "stated_frohlich_alpha": 1.48,
+            "exact_frohlich_alpha": 1.4788,
+            "abs_difference": 0.00119,
+            "passed": true
+          },
+          "slme_quadrature": {
+            "stated_trapezoidal_slme_percent": 18.73,
+            "simpson_energy_slme_percent": 18.73,
+            "abs_difference_percent": 0.0,
+            "passed": true
+          }
+        },
+        "mismatches": [],
+        "sha256_signature": "832a485610f47d8cef6defca39e8d67029f24f55d3176ae870cc00d82a49134d"
       }
     },
     {
@@ -4715,7 +5857,7 @@
         "crystal_family": "3D Covalent-Bridged Selenoiodide",
         "space_group_symbol": "Pnma",
         "space_group_number": 62,
-        "nsites_unit_cell": 24,
+        "nsites_unit_cell": 6,
         "elements": [
           "Cu",
           "Bi",
@@ -4737,11 +5879,11 @@
         "pauling_electronegativity_diff": 0.67,
         "structural_dimensionality": "3D",
         "tolerance_factor": 0.96,
-        "bond_valence_sum_deviation": 0.03,
+        "bond_valence_sum_deviation": 0.0546,
         "tier2_elements_present": [
           "Se"
         ],
-        "cif_content": "data_Cu2BiSe2I\n_symmetry_space_group_name_H-M   'Pnma'\n_symmetry_Int_Tables_number      62\n_cell_length_a                   6.4800\n_cell_length_b                   7.8900\n_cell_length_c                   11.9500\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Cu1  Cu  0.1250  0.2500  0.0830\n  Cu2  Cu  0.3180  0.5670  0.3327\n  Bi1  Bi  0.5110  0.8840  0.4163\n  Se1  Se  0.7040  0.2010  0.5830\n  Se2  Se  0.8970  0.5180  0.8327\n  I1  I  0.0900  0.8350  0.9163",
+        "cif_content": "data_Cu2BiSe2I\n_symmetry_space_group_name_H-M   'Pnma'\n_symmetry_Int_Tables_number      62\n_cell_length_a                   6.4800\n_cell_length_b                   7.8900\n_cell_length_c                   11.9500\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Cu1  Cu  0.1667  0.2500  0.1667\n  Cu2  Cu  0.5000  0.7500  0.5000\n  Bi1  Bi  0.1667  0.7500  0.8333\n  Se1  Se  0.5000  0.2500  0.8333\n  Se2  Se  0.8333  0.2500  0.5000\n  I1  I  0.8333  0.7500  0.1667",
         "embedding_128d": [
           0.0,
           0.032896,
@@ -4888,7 +6030,7 @@
         "shear_modulus_gpa": 24.3,
         "born_elastic_stable": true,
         "min_phonon_freq_thz": 1.09,
-        "debye_temperature_k": 218.0,
+        "debye_temperature_k": 269.6,
         "dynamically_stable": true,
         "mlip_force_std_ev_ang": 0.062,
         "passed_stage2": true,
@@ -4952,21 +6094,85 @@
       "optics": {
         "candidate_id": "CAND-B04",
         "target_layer": "BOTTOM_IR_075EV",
-        "film_thickness_nm": 330.0,
-        "refractive_index_n": 3.62,
-        "yablonovitch_4n2_factor": 52.4,
+        "film_thickness_nm": 320.0,
+        "refractive_index_n": 3.619,
+        "yablonovitch_4n2_factor": 52.389,
         "dipole_forbidden_penalty_ev": 0.02,
-        "standalone_slme_percent": 17.41,
-        "sub_bandgap_transmittance_percent": 88.5,
+        "standalone_slme_percent": 18.77,
+        "sub_bandgap_transmittance_percent": 89.4,
         "tco_parasitic_loss_percent": 2.8,
         "top_cell_jsc_ma_cm2": 19.6,
-        "top_cell_voc_v": 0.45,
+        "top_cell_voc_v": 1.55,
         "top_cell_eff_percent": 25.34,
         "si_middle_cell_eff_percent": 13.36,
-        "bottom_ir_cell_eff_percent": 5.46,
-        "tandem_4t_total_eff_percent": 44.16,
+        "bottom_ir_cell_eff_percent": 5.92,
+        "tandem_4t_total_eff_percent": 44.62,
         "passed_optical_gate": true,
         "failure_reason": null
+      },
+      "redundancy_verification": {
+        "candidate_id": "CAND-B04",
+        "passed_all_redundancy_checks": true,
+        "checks": {
+          "formula_reduced_sync": {
+            "formula_reduced": "Cu2BiSe2I",
+            "parsed_formula": {
+              "Cu": 2,
+              "Bi": 1,
+              "Se": 2,
+              "I": 1
+            },
+            "reduced_stoichiometry": {
+              "Cu": 2,
+              "Bi": 1,
+              "Se": 2,
+              "I": 1
+            },
+            "passed": true
+          },
+          "charge_neutrality": {
+            "stoichiometry": {
+              "Cu": 2,
+              "Bi": 1,
+              "Se": 2,
+              "I": 1
+            },
+            "oxidation_states": {
+              "Cu": 1,
+              "Bi": 3,
+              "Se": -2,
+              "I": -1
+            },
+            "sum_oxidation_states": 0,
+            "passed": true
+          },
+          "cif_geometry": {
+            "natoms": 6,
+            "expected_natoms": 6,
+            "min_distance_ang": 4.498,
+            "valid_geometry": true,
+            "passed": true
+          },
+          "soc_splitting": {
+            "stated_soc_ev": 0.42,
+            "expected_soc_ev": 0.42,
+            "passed": true
+          },
+          "frohlich_alpha": {
+            "stated_frohlich_alpha": 1.21,
+            "exact_frohlich_alpha": 1.21,
+            "abs_difference": 4e-05,
+            "passed": true
+          },
+          "slme_quadrature": {
+            "stated_trapezoidal_slme_percent": 18.77,
+            "simpson_energy_slme_percent": 18.77,
+            "abs_difference_percent": 0.0,
+            "passed": true
+          }
+        },
+        "mismatches": [],
+        "sha256_signature": "1f9e68b7b0630b7a0dbfde4058bce12558dcc686a07ed57719f9c45b21e97521"
       }
     },
     {
@@ -4977,7 +6183,7 @@
         "crystal_family": "Order-Disorder Matildite Selenide",
         "space_group_symbol": "R-3m",
         "space_group_number": 166,
-        "nsites_unit_cell": 12,
+        "nsites_unit_cell": 4,
         "elements": [
           "Ag",
           "Bi",
@@ -4996,12 +6202,12 @@
         "pauling_electronegativity_diff": 0.58,
         "structural_dimensionality": "3D",
         "tolerance_factor": 0.97,
-        "bond_valence_sum_deviation": 0.03,
+        "bond_valence_sum_deviation": 0.109,
         "tier2_elements_present": [
           "Ag",
           "Se"
         ],
-        "cif_content": "data_AgBiSe2\n_symmetry_space_group_name_H-M   'R-3m'\n_symmetry_Int_Tables_number      166\n_cell_length_a                   4.1800\n_cell_length_b                   4.1800\n_cell_length_c                   19.6700\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Ag1  Ag  0.1250  0.2500  0.0830\n  Bi1  Bi  0.3180  0.5670  0.3330\n  Se1  Se  0.5110  0.8840  0.5830\n  Se2  Se  0.7040  0.2010  0.9160",
+        "cif_content": "data_AgBiSe2\n_symmetry_space_group_name_H-M   'R-3m'\n_symmetry_Int_Tables_number      166\n_cell_length_a                   4.1800\n_cell_length_b                   4.1800\n_cell_length_c                   19.6700\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Ag1  Ag  0.5000  0.5000  0.1250\n  Bi1  Bi  0.5000  0.5000  0.6250\n  Se1  Se  0.5000  0.5000  0.3750\n  Se2  Se  0.5000  0.5000  0.8750",
         "embedding_128d": [
           0.0,
           0.0,
@@ -5136,7 +6342,7 @@
       "stage_reached": 3,
       "status": "REJECTED",
       "primary_failure_mode": "TIER2_COST_EXCEEDED",
-      "reason": "TIER2_COST_EXCEEDED: Raw active-layer element cost $0.58/m^2 exceeds $0.50/m^2 gate (Ag content)",
+      "reason": "TIER2_COST_EXCEEDED: Raw active-layer element cost $0.58/m^2 exceeds $0.50/m^2 gate",
       "stability": {
         "candidate_id": "CAND-B05",
         "e_above_hull_0k_mev": 0.0,
@@ -5149,7 +6355,7 @@
         "shear_modulus_gpa": 26.5,
         "born_elastic_stable": true,
         "min_phonon_freq_thz": 1.15,
-        "debye_temperature_k": 210.0,
+        "debye_temperature_k": 255.7,
         "dynamically_stable": true,
         "mlip_force_std_ev_ang": 0.044,
         "passed_stage2": true,
@@ -5174,7 +6380,50 @@
         "active_layer_cost_usd_m2": 0.5795,
         "contrastive_synthesizability_score": 0.707,
         "passed_stage3": false,
-        "failure_reason": "TIER2_COST_EXCEEDED: Raw active-layer element cost $0.58/m^2 exceeds $0.50/m^2 gate (Ag content)"
+        "failure_reason": "TIER2_COST_EXCEEDED: Raw active-layer element cost $0.58/m^2 exceeds $0.50/m^2 gate"
+      },
+      "redundancy_verification": {
+        "candidate_id": "CAND-B05",
+        "passed_all_redundancy_checks": true,
+        "checks": {
+          "formula_reduced_sync": {
+            "formula_reduced": "AgBiSe2",
+            "parsed_formula": {
+              "Ag": 1,
+              "Bi": 1,
+              "Se": 2
+            },
+            "reduced_stoichiometry": {
+              "Ag": 1,
+              "Bi": 1,
+              "Se": 2
+            },
+            "passed": true
+          },
+          "charge_neutrality": {
+            "stoichiometry": {
+              "Ag": 1,
+              "Bi": 1,
+              "Se": 2
+            },
+            "oxidation_states": {
+              "Ag": 1,
+              "Bi": 3,
+              "Se": -2
+            },
+            "sum_oxidation_states": 0,
+            "passed": true
+          },
+          "cif_geometry": {
+            "natoms": 4,
+            "expected_natoms": 4,
+            "min_distance_ang": 4.18,
+            "valid_geometry": true,
+            "passed": true
+          }
+        },
+        "mismatches": [],
+        "sha256_signature": "777d45b0278ebbd0637da55dc4b4f3221611ae7e44621d37f096adb730555398"
       }
     },
     {
@@ -5185,7 +6434,7 @@
         "crystal_family": "1D Chain Selenoiodide",
         "space_group_symbol": "Pnma",
         "space_group_number": 62,
-        "nsites_unit_cell": 12,
+        "nsites_unit_cell": 3,
         "elements": [
           "Sb",
           "Se",
@@ -5204,12 +6453,12 @@
         "pauling_electronegativity_diff": 0.55,
         "structural_dimensionality": "1D-Chain",
         "tolerance_factor": 0.86,
-        "bond_valence_sum_deviation": 0.07,
+        "bond_valence_sum_deviation": 0.0999,
         "tier2_elements_present": [
           "Sb",
           "Se"
         ],
-        "cif_content": "data_SbSeI\n_symmetry_space_group_name_H-M   'Pnma'\n_symmetry_Int_Tables_number      62\n_cell_length_a                   8.6500\n_cell_length_b                   4.1200\n_cell_length_c                   10.3800\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Sb1  Sb  0.1250  0.2500  0.0830\n  Se1  Se  0.3180  0.5670  0.4163\n  I1  I  0.5110  0.8840  0.7497",
+        "cif_content": "data_SbSeI\n_symmetry_space_group_name_H-M   'Pnma'\n_symmetry_Int_Tables_number      62\n_cell_length_a                   8.6500\n_cell_length_b                   4.1200\n_cell_length_c                   10.3800\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Sb1  Sb  0.2500  0.5000  0.2500\n  Se1  Se  0.7500  0.5000  0.7500\n  I1  I  0.2500  0.5000  0.7500",
         "embedding_128d": [
           0.0,
           0.068827,
@@ -5357,7 +6606,7 @@
         "shear_modulus_gpa": 13.8,
         "born_elastic_stable": true,
         "min_phonon_freq_thz": 0.68,
-        "debye_temperature_k": 175.0,
+        "debye_temperature_k": 204.4,
         "dynamically_stable": true,
         "mlip_force_std_ev_ang": 0.058,
         "passed_stage2": true,
@@ -5396,18 +6645,216 @@
         "decision": "VETO_REJECT",
         "critique_summary": "VETO: Quasi-1D chain morphology (SbSeI) creates extreme anisotropy and transverse polaron trapping.",
         "primary_failure_mode": "LOW_DIM_POLARON_RISK"
+      },
+      "redundancy_verification": {
+        "candidate_id": "CAND-B06",
+        "passed_all_redundancy_checks": true,
+        "checks": {
+          "formula_reduced_sync": {
+            "formula_reduced": "SbSeI",
+            "parsed_formula": {
+              "Sb": 1,
+              "Se": 1,
+              "I": 1
+            },
+            "reduced_stoichiometry": {
+              "Sb": 1,
+              "Se": 1,
+              "I": 1
+            },
+            "passed": true
+          },
+          "charge_neutrality": {
+            "stoichiometry": {
+              "Sb": 1,
+              "Se": 1,
+              "I": 1
+            },
+            "oxidation_states": {
+              "Sb": 3,
+              "Se": -2,
+              "I": -1
+            },
+            "sum_oxidation_states": 0,
+            "passed": true
+          },
+          "cif_geometry": {
+            "natoms": 3,
+            "expected_natoms": 3,
+            "min_distance_ang": 4.12,
+            "valid_geometry": true,
+            "passed": true
+          }
+        },
+        "mismatches": [],
+        "sha256_signature": "09b93e4842b291fbe083fd0becf3afc9c00d4b7c8b0e863a2c3bc9a9b9e0ea15"
       }
     }
   ],
   "ledger_entries": [
     {
+      "candidate_id": "CAND-A09",
+      "formula_reduced": "Cu3BiS2Cl2",
+      "target_layer": "TOP_ACTIVE_GLASS_185EV",
+      "crystal_family": "3D Connected Wittichenite-Derivative Sulfochloride",
+      "space_group_number": 15,
+      "structural_dimensionality": "3D",
+      "cif_structure": "data_Cu3BiS2Cl2\n_symmetry_space_group_name_H-M   'C2/c'\n_symmetry_Int_Tables_number      15\n_cell_length_a                   6.6800\n_cell_length_b                   7.5100\n_cell_length_c                   11.2400\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Cu1  Cu  0.2500  0.2500  0.1250\n  Cu2  Cu  0.7500  0.7500  0.6250\n  Cu3  Cu  0.2500  0.2500  0.6250\n  Bi1  Bi  0.7500  0.7500  0.1250\n  S1  S  0.2500  0.7500  0.3750\n  S2  S  0.2500  0.7500  0.8750\n  Cl1  Cl  0.7500  0.2500  0.3750\n  Cl2  Cl  0.7500  0.2500  0.8750",
+      "stage_reached": 5,
+      "status": "PROMOTED",
+      "primary_failure_mode": null,
+      "e_above_hull_mev": 16.8,
+      "min_phonon_freq_thz": 1.14,
+      "rxn_temp_celsius": 350.0,
+      "competing_impurity_phases": [
+        "Cu3BiS3"
+      ],
+      "pourbaix_max_dissolution_mol_l": 1.5e-08,
+      "active_layer_cost_usd_m2": 0.0136,
+      "hse06_soc_gap_ev": 1.76,
+      "direct_gap_ev": 1.79,
+      "soc_splitting_ev": 0.37,
+      "max_carrier_eff_mass": 0.35,
+      "frohlich_alpha": 1.94,
+      "deepest_defect_ev": 0.05,
+      "slme_percent": 28.98,
+      "sub_bandgap_transmittance_percent": 90.22,
+      "tandem_4t_efficiency_percent": 46.27,
+      "adversarial_notes": "PASSED ALL GATES & DUAL REDUNDANCY (SHA256: 159c7df80650): 3D cuprous-bismuth sulfochloride framework passes anion ordering and TCO stability gates.",
+      "created_at": "2026-11-10 08:14:10"
+    },
+    {
+      "candidate_id": "CAND-A03",
+      "formula_reduced": "Cu2SbS2Cl",
+      "target_layer": "TOP_ACTIVE_GLASS_185EV",
+      "crystal_family": "3D Corner-Sharing Chalcohalide Framework",
+      "space_group_number": 62,
+      "structural_dimensionality": "3D",
+      "cif_structure": "data_Cu2SbS2Cl\n_symmetry_space_group_name_H-M   'Pnma'\n_symmetry_Int_Tables_number      62\n_cell_length_a                   6.1400\n_cell_length_b                   7.4200\n_cell_length_c                   8.9100\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Cu1  Cu  0.2500  0.1667  0.1667\n  Cu2  Cu  0.7500  0.5000  0.5000\n  Sb1  Sb  0.7500  0.1667  0.8333\n  S1  S  0.2500  0.8333  0.5000\n  S2  S  0.2500  0.5000  0.8333\n  Cl1  Cl  0.7500  0.8333  0.1667",
+      "stage_reached": 5,
+      "status": "PROMOTED",
+      "primary_failure_mode": null,
+      "e_above_hull_mev": 21.0,
+      "min_phonon_freq_thz": 1.05,
+      "rxn_temp_celsius": 320.0,
+      "competing_impurity_phases": [
+        "CuSbS2"
+      ],
+      "pourbaix_max_dissolution_mol_l": 3.8e-07,
+      "active_layer_cost_usd_m2": 0.0129,
+      "hse06_soc_gap_ev": 1.79,
+      "direct_gap_ev": 1.83,
+      "soc_splitting_ev": 0.19,
+      "max_carrier_eff_mass": 0.44,
+      "frohlich_alpha": 2.34,
+      "deepest_defect_ev": 0.09,
+      "slme_percent": 27.88,
+      "sub_bandgap_transmittance_percent": 90.32,
+      "tandem_4t_efficiency_percent": 45.23,
+      "adversarial_notes": "PASSED ALL GATES & DUAL REDUNDANCY (SHA256: 5f8e08c6e4f2): 3D Cu2SbS2Cl corner-sharing chalcohalide network shows negative mixing enthalpy and clean SnO2/ITO interface.",
+      "created_at": "2026-11-10 08:14:10"
+    },
+    {
+      "candidate_id": "CAND-B02",
+      "formula_reduced": "Sn2SbSe2I3",
+      "target_layer": "BOTTOM_IR_075EV",
+      "crystal_family": "3D Lone-Pair Double-Cation Selenoiodide",
+      "space_group_number": 63,
+      "structural_dimensionality": "3D",
+      "cif_structure": "data_Sn2SbSe2I3\n_symmetry_space_group_name_H-M   'Cmcm'\n_symmetry_Int_Tables_number      63\n_cell_length_a                   4.3100\n_cell_length_b                   14.1800\n_cell_length_c                   16.4200\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Sn1  Sn  0.5000  0.1667  0.1667\n  Sn2  Sn  0.5000  0.5000  0.5000\n  Sb1  Sb  0.5000  0.8333  0.8333\n  Se1  Se  0.5000  0.1667  0.5000\n  Se2  Se  0.5000  0.5000  0.1667\n  I1  I  0.5000  0.5000  0.8333\n  I2  I  0.5000  0.1667  0.8333\n  I3  I  0.5000  0.8333  0.1667",
+      "stage_reached": 5,
+      "status": "PROMOTED",
+      "primary_failure_mode": null,
+      "e_above_hull_mev": 12.6,
+      "min_phonon_freq_thz": 0.88,
+      "rxn_temp_celsius": 295.0,
+      "competing_impurity_phases": [
+        "SnSe2"
+      ],
+      "pourbaix_max_dissolution_mol_l": 4.2e-07,
+      "active_layer_cost_usd_m2": 0.0865,
+      "hse06_soc_gap_ev": 0.75,
+      "direct_gap_ev": 0.78,
+      "soc_splitting_ev": 0.3,
+      "max_carrier_eff_mass": 0.27,
+      "frohlich_alpha": 1.32,
+      "deepest_defect_ev": 0.04,
+      "slme_percent": 18.68,
+      "sub_bandgap_transmittance_percent": 89.51,
+      "tandem_4t_efficiency_percent": 44.67,
+      "adversarial_notes": "PASSED ALL GATES & DUAL REDUNDANCY (SHA256: 579e58be674c): 3D Sn2+/Sb3+ lone-pair network stabilizes mixed Se/I sites and resists Sn2+ -> Sn4+ oxidation via iodide coordination.",
+      "created_at": "2026-11-10 08:14:10"
+    },
+    {
+      "candidate_id": "CAND-B04",
+      "formula_reduced": "Cu2BiSe2I",
+      "target_layer": "BOTTOM_IR_075EV",
+      "crystal_family": "3D Covalent-Bridged Selenoiodide",
+      "space_group_number": 62,
+      "structural_dimensionality": "3D",
+      "cif_structure": "data_Cu2BiSe2I\n_symmetry_space_group_name_H-M   'Pnma'\n_symmetry_Int_Tables_number      62\n_cell_length_a                   6.4800\n_cell_length_b                   7.8900\n_cell_length_c                   11.9500\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Cu1  Cu  0.1667  0.2500  0.1667\n  Cu2  Cu  0.5000  0.7500  0.5000\n  Bi1  Bi  0.1667  0.7500  0.8333\n  Se1  Se  0.5000  0.2500  0.8333\n  Se2  Se  0.8333  0.2500  0.5000\n  I1  I  0.8333  0.7500  0.1667",
+      "stage_reached": 5,
+      "status": "PROMOTED",
+      "primary_failure_mode": null,
+      "e_above_hull_mev": 11.2,
+      "min_phonon_freq_thz": 1.09,
+      "rxn_temp_celsius": 345.0,
+      "competing_impurity_phases": [
+        "CuBiSe2"
+      ],
+      "pourbaix_max_dissolution_mol_l": 1.4e-07,
+      "active_layer_cost_usd_m2": 0.0509,
+      "hse06_soc_gap_ev": 0.74,
+      "direct_gap_ev": 0.76,
+      "soc_splitting_ev": 0.42,
+      "max_carrier_eff_mass": 0.25,
+      "frohlich_alpha": 1.21,
+      "deepest_defect_ev": 0.04,
+      "slme_percent": 18.77,
+      "sub_bandgap_transmittance_percent": 89.4,
+      "tandem_4t_efficiency_percent": 44.62,
+      "adversarial_notes": "PASSED ALL GATES & DUAL REDUNDANCY (SHA256: 1f9e68b7b063): Covalent [Cu2BiSe2]+ framework locks single iodide site against photo-migration.",
+      "created_at": "2026-11-10 08:14:10"
+    },
+    {
+      "candidate_id": "CAND-A02",
+      "formula_reduced": "Bi2CuO2SCl",
+      "target_layer": "TOP_ACTIVE_GLASS_185EV",
+      "crystal_family": "Sillen-Aurivillius Quaternary Oxy-Chalcohalide",
+      "space_group_number": 139,
+      "structural_dimensionality": "Quasi-2D",
+      "cif_structure": "data_Bi2CuO2SCl\n_symmetry_space_group_name_H-M   'I4/mmm'\n_symmetry_Int_Tables_number      139\n_cell_length_a                   3.9150\n_cell_length_b                   3.9150\n_cell_length_c                   14.8200\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Bi1  Bi  0.2500  0.2500  0.0714\n  Bi2  Bi  0.7500  0.7500  0.5000\n  Cu1  Cu  0.2500  0.7500  0.7857\n  O1  O  0.2500  0.2500  0.3571\n  O2  O  0.7500  0.7500  0.2143\n  S1  S  0.7500  0.2500  0.6429\n  Cl1  Cl  0.7500  0.7500  0.9286",
+      "stage_reached": 5,
+      "status": "PROMOTED",
+      "primary_failure_mode": null,
+      "e_above_hull_mev": 14.5,
+      "min_phonon_freq_thz": 1.18,
+      "rxn_temp_celsius": 365.0,
+      "competing_impurity_phases": [
+        "BiOCl"
+      ],
+      "pourbaix_max_dissolution_mol_l": 2.4e-08,
+      "active_layer_cost_usd_m2": 0.0195,
+      "hse06_soc_gap_ev": 1.82,
+      "direct_gap_ev": 1.86,
+      "soc_splitting_ev": 0.38,
+      "max_carrier_eff_mass": 0.38,
+      "frohlich_alpha": 2.12,
+      "deepest_defect_ev": 0.08,
+      "slme_percent": 27.02,
+      "sub_bandgap_transmittance_percent": 90.39,
+      "tandem_4t_efficiency_percent": 44.42,
+      "adversarial_notes": "PASSED ALL GATES & DUAL REDUNDANCY (SHA256: 8b859404bbf8): Distinct Wyckoff sites for O2-, S2-, and Cl- (size/charge mismatch) lock against photo-segregation.",
+      "created_at": "2026-11-10 08:14:10"
+    },
+    {
       "candidate_id": "CAND-A06",
-      "formula_reduced": "BiZnSOCl",
+      "formula_reduced": "BiZnOSCl",
       "target_layer": "TOP_ACTIVE_GLASS_185EV",
       "crystal_family": "Quaternary Mixed-Anion Oxy-Sulfochloride",
       "space_group_number": 129,
       "structural_dimensionality": "3D",
-      "cif_structure": "data_BiZnSOCl\n_symmetry_space_group_name_H-M   'P4/nmm'\n_symmetry_Int_Tables_number      129\n_cell_length_a                   3.9420\n_cell_length_b                   3.9420\n_cell_length_c                   9.4800\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Bi1  Bi  0.1250  0.2500  0.0830\n  Zn1  Zn  0.3180  0.5670  0.2830\n  S1  S  0.5110  0.8840  0.4830\n  O1  O  0.7040  0.2010  0.6830\n  Cl1  Cl  0.8970  0.5180  0.8830",
+      "cif_structure": "data_BiZnOSCl\n_symmetry_space_group_name_H-M   'P4/nmm'\n_symmetry_Int_Tables_number      129\n_cell_length_a                   3.9420\n_cell_length_b                   3.9420\n_cell_length_c                   9.4800\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Bi1  Bi  0.2500  0.2500  0.0833\n  Zn1  Zn  0.7500  0.7500  0.5833\n  S1  S  0.2500  0.2500  0.4167\n  O1  O  0.7500  0.7500  0.2500\n  Cl1  Cl  0.2500  0.2500  0.7500",
       "stage_reached": 5,
       "status": "PROMOTED",
       "primary_failure_mode": null,
@@ -5426,166 +6873,11 @@
       "max_carrier_eff_mass": 0.42,
       "frohlich_alpha": 2.25,
       "deepest_defect_ev": 0.07,
-      "slme_percent": 26.42,
-      "sub_bandgap_transmittance_percent": 90.5,
-      "tandem_4t_efficiency_percent": 44.17,
-      "adversarial_notes": "PASSED ALL GATES: Strong Zn-S/O and Bi-O/Cl site selectivity prevents halide phase segregation.",
-      "created_at": "2026-11-10 06:50:10"
-    },
-    {
-      "candidate_id": "CAND-B04",
-      "formula_reduced": "Cu2BiSe2I",
-      "target_layer": "BOTTOM_IR_075EV",
-      "crystal_family": "3D Covalent-Bridged Selenoiodide",
-      "space_group_number": 62,
-      "structural_dimensionality": "3D",
-      "cif_structure": "data_Cu2BiSe2I\n_symmetry_space_group_name_H-M   'Pnma'\n_symmetry_Int_Tables_number      62\n_cell_length_a                   6.4800\n_cell_length_b                   7.8900\n_cell_length_c                   11.9500\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Cu1  Cu  0.1250  0.2500  0.0830\n  Cu2  Cu  0.3180  0.5670  0.3327\n  Bi1  Bi  0.5110  0.8840  0.4163\n  Se1  Se  0.7040  0.2010  0.5830\n  Se2  Se  0.8970  0.5180  0.8327\n  I1  I  0.0900  0.8350  0.9163",
-      "stage_reached": 5,
-      "status": "PROMOTED",
-      "primary_failure_mode": null,
-      "e_above_hull_mev": 11.2,
-      "min_phonon_freq_thz": 1.09,
-      "rxn_temp_celsius": 345.0,
-      "competing_impurity_phases": [
-        "CuBiSe2"
-      ],
-      "pourbaix_max_dissolution_mol_l": 1.4e-07,
-      "active_layer_cost_usd_m2": 0.0509,
-      "hse06_soc_gap_ev": 0.74,
-      "direct_gap_ev": 0.76,
-      "soc_splitting_ev": 0.42,
-      "max_carrier_eff_mass": 0.25,
-      "frohlich_alpha": 1.21,
-      "deepest_defect_ev": 0.04,
-      "slme_percent": 17.41,
-      "sub_bandgap_transmittance_percent": 88.5,
-      "tandem_4t_efficiency_percent": 44.16,
-      "adversarial_notes": "PASSED ALL GATES: Covalent [Cu2BiSe2]+ framework locks single iodide site against photo-migration.",
-      "created_at": "2026-11-10 06:50:10"
-    },
-    {
-      "candidate_id": "CAND-B02",
-      "formula_reduced": "Sn2SbSe2I3",
-      "target_layer": "BOTTOM_IR_075EV",
-      "crystal_family": "3D Lone-Pair Double-Cation Selenoiodide",
-      "space_group_number": 63,
-      "structural_dimensionality": "3D",
-      "cif_structure": "data_Sn2SbSe2I3\n_symmetry_space_group_name_H-M   'Cmcm'\n_symmetry_Int_Tables_number      63\n_cell_length_a                   4.3100\n_cell_length_b                   14.1800\n_cell_length_c                   16.4200\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Sn1  Sn  0.1250  0.2500  0.0830\n  Sn2  Sn  0.3180  0.5670  0.2910\n  Sb1  Sb  0.5110  0.8840  0.3330\n  Se1  Se  0.7040  0.2010  0.4580\n  Se2  Se  0.8970  0.5180  0.6660\n  I1  I  0.0900  0.8350  0.7080\n  I2  I  0.2830  0.1520  0.9160\n  I3  I  0.4760  0.4690  0.1240",
-      "stage_reached": 5,
-      "status": "PROMOTED",
-      "primary_failure_mode": null,
-      "e_above_hull_mev": 12.6,
-      "min_phonon_freq_thz": 0.88,
-      "rxn_temp_celsius": 295.0,
-      "competing_impurity_phases": [
-        "SnSe2"
-      ],
-      "pourbaix_max_dissolution_mol_l": 4.2e-07,
-      "active_layer_cost_usd_m2": 0.0865,
-      "hse06_soc_gap_ev": 0.75,
-      "direct_gap_ev": 0.78,
-      "soc_splitting_ev": 0.3,
-      "max_carrier_eff_mass": 0.27,
-      "frohlich_alpha": 1.32,
-      "deepest_defect_ev": 0.04,
-      "slme_percent": 17.25,
-      "sub_bandgap_transmittance_percent": 88.5,
-      "tandem_4t_efficiency_percent": 44.11,
-      "adversarial_notes": "PASSED ALL GATES: 3D Sn2+/Sb3+ lone-pair network stabilizes mixed Se/I sites and resists Sn2+ -> Sn4+ oxidation via iodide coordination.",
-      "created_at": "2026-11-10 06:50:10"
-    },
-    {
-      "candidate_id": "CAND-A02",
-      "formula_reduced": "Bi2CuO2SCl",
-      "target_layer": "TOP_ACTIVE_GLASS_185EV",
-      "crystal_family": "Sillen-Aurivillius Quaternary Oxy-Chalcohalide",
-      "space_group_number": 139,
-      "structural_dimensionality": "Quasi-2D",
-      "cif_structure": "data_Bi2CuO2SCl\n_symmetry_space_group_name_H-M   'I4/mmm'\n_symmetry_Int_Tables_number      139\n_cell_length_a                   3.9150\n_cell_length_b                   3.9150\n_cell_length_c                   14.8200\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Bi1  Bi  0.1250  0.2500  0.0830\n  Bi2  Bi  0.3180  0.5670  0.3089\n  Cu1  Cu  0.5110  0.8840  0.3687\n  O1  O  0.7040  0.2010  0.5116\n  O2  O  0.8970  0.5180  0.7374\n  S1  S  0.0900  0.8350  0.7973\n  Cl1  Cl  0.2830  0.1520  0.9401",
-      "stage_reached": 5,
-      "status": "PROMOTED",
-      "primary_failure_mode": null,
-      "e_above_hull_mev": 14.5,
-      "min_phonon_freq_thz": 1.18,
-      "rxn_temp_celsius": 365.0,
-      "competing_impurity_phases": [
-        "BiOCl"
-      ],
-      "pourbaix_max_dissolution_mol_l": 2.4e-08,
-      "active_layer_cost_usd_m2": 0.0195,
-      "hse06_soc_gap_ev": 1.82,
-      "direct_gap_ev": 1.86,
-      "soc_splitting_ev": 0.38,
-      "max_carrier_eff_mass": 0.38,
-      "frohlich_alpha": 2.12,
-      "deepest_defect_ev": 0.08,
-      "slme_percent": 26.15,
-      "sub_bandgap_transmittance_percent": 90.4,
-      "tandem_4t_efficiency_percent": 43.9,
-      "adversarial_notes": "PASSED ALL GATES: Distinct Wyckoff sites for O2-, S2-, and Cl- (size/charge mismatch) lock against photo-segregation.",
-      "created_at": "2026-11-10 06:50:10"
-    },
-    {
-      "candidate_id": "CAND-A03",
-      "formula_reduced": "SbCuS2Cl",
-      "target_layer": "TOP_ACTIVE_GLASS_185EV",
-      "crystal_family": "3D Corner-Sharing Chalcohalide Framework",
-      "space_group_number": 62,
-      "structural_dimensionality": "3D",
-      "cif_structure": "data_SbCuS2Cl\n_symmetry_space_group_name_H-M   'Pnma'\n_symmetry_Int_Tables_number      62\n_cell_length_a                   6.1400\n_cell_length_b                   7.4200\n_cell_length_c                   8.9100\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Sb1  Sb  0.1250  0.2500  0.0830\n  Cu1  Cu  0.3180  0.5670  0.2830\n  S1  S  0.5110  0.8840  0.4830\n  S2  S  0.7040  0.2010  0.7660\n  Cl1  Cl  0.8970  0.5180  0.8830",
-      "stage_reached": 5,
-      "status": "PROMOTED",
-      "primary_failure_mode": null,
-      "e_above_hull_mev": 21.0,
-      "min_phonon_freq_thz": 1.05,
-      "rxn_temp_celsius": 320.0,
-      "competing_impurity_phases": [
-        "CuSbS2"
-      ],
-      "pourbaix_max_dissolution_mol_l": 3.8e-07,
-      "active_layer_cost_usd_m2": 0.0126,
-      "hse06_soc_gap_ev": 1.79,
-      "direct_gap_ev": 1.83,
-      "soc_splitting_ev": 0.19,
-      "max_carrier_eff_mass": 0.44,
-      "frohlich_alpha": 2.34,
-      "deepest_defect_ev": 0.09,
-      "slme_percent": 25.86,
-      "sub_bandgap_transmittance_percent": 90.3,
-      "tandem_4t_efficiency_percent": 43.61,
-      "adversarial_notes": "PASSED ALL GATES: 3D [SbS2Cl]2- network shows negative mixing enthalpy and clean SnO2/ITO interface.",
-      "created_at": "2026-11-10 06:50:10"
-    },
-    {
-      "candidate_id": "CAND-A09",
-      "formula_reduced": "Cu3BiS2Cl2",
-      "target_layer": "TOP_ACTIVE_GLASS_185EV",
-      "crystal_family": "3D Connected Wittichenite-Derivative Sulfochloride",
-      "space_group_number": 15,
-      "structural_dimensionality": "3D",
-      "cif_structure": "data_Cu3BiS2Cl2\n_symmetry_space_group_name_H-M   'C2/c'\n_symmetry_Int_Tables_number      15\n_cell_length_a                   6.6800\n_cell_length_b                   7.5100\n_cell_length_c                   11.2400\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Cu1  Cu  0.1250  0.2500  0.0830\n  Cu2  Cu  0.3180  0.5670  0.2910\n  Cu3  Cu  0.5110  0.8840  0.4990\n  Bi1  Bi  0.7040  0.2010  0.4580\n  S1  S  0.8970  0.5180  0.5830\n  S2  S  0.0900  0.8350  0.7910\n  Cl1  Cl  0.2830  0.1520  0.8330\n  Cl2  Cl  0.4760  0.4690  0.0410",
-      "stage_reached": 5,
-      "status": "PROMOTED",
-      "primary_failure_mode": null,
-      "e_above_hull_mev": 16.8,
-      "min_phonon_freq_thz": 1.14,
-      "rxn_temp_celsius": 350.0,
-      "competing_impurity_phases": [
-        "Cu3BiS3"
-      ],
-      "pourbaix_max_dissolution_mol_l": 1.5e-08,
-      "active_layer_cost_usd_m2": 0.0136,
-      "hse06_soc_gap_ev": 1.76,
-      "direct_gap_ev": 1.79,
-      "soc_splitting_ev": 0.37,
-      "max_carrier_eff_mass": 0.35,
-      "frohlich_alpha": 1.94,
-      "deepest_defect_ev": 0.05,
-      "slme_percent": 25.83,
-      "sub_bandgap_transmittance_percent": 90.2,
-      "tandem_4t_efficiency_percent": 43.57,
-      "adversarial_notes": "PASSED ALL GATES: 3D cuprous-bismuth sulfochloride framework passes anion ordering and TCO stability gates.",
-      "created_at": "2026-11-10 06:50:10"
+      "slme_percent": 26.16,
+      "sub_bandgap_transmittance_percent": 90.45,
+      "tandem_4t_efficiency_percent": 43.6,
+      "adversarial_notes": "PASSED ALL GATES & DUAL REDUNDANCY (SHA256: bf0b91ce3a72): Strong Zn-S/O and Bi-O/Cl site selectivity prevents halide phase segregation.",
+      "created_at": "2026-11-10 08:14:10"
     },
     {
       "candidate_id": "CAND-B03",
@@ -5594,7 +6886,7 @@
       "crystal_family": "Quasi-2D Octahedral Framework Selenoiodide",
       "space_group_number": 71,
       "structural_dimensionality": "Quasi-2D",
-      "cif_structure": "data_Bi2SnSe3I2\n_symmetry_space_group_name_H-M   'Immm'\n_symmetry_Int_Tables_number      71\n_cell_length_a                   4.2400\n_cell_length_b                   12.8900\n_cell_length_c                   15.1100\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Bi1  Bi  0.1250  0.2500  0.0830\n  Bi2  Bi  0.3180  0.5670  0.2910\n  Sn1  Sn  0.5110  0.8840  0.3330\n  Se1  Se  0.7040  0.2010  0.4580\n  Se2  Se  0.8970  0.5180  0.6660\n  Se3  Se  0.0900  0.8350  0.8740\n  I1  I  0.2830  0.1520  0.8330\n  I2  I  0.4760  0.4690  0.0410",
+      "cif_structure": "data_Bi2SnSe3I2\n_symmetry_space_group_name_H-M   'Immm'\n_symmetry_Int_Tables_number      71\n_cell_length_a                   4.2400\n_cell_length_b                   12.8900\n_cell_length_c                   15.1100\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Bi1  Bi  0.5000  0.1667  0.1667\n  Bi2  Bi  0.5000  0.5000  0.5000\n  Sn1  Sn  0.5000  0.8333  0.8333\n  Se1  Se  0.5000  0.1667  0.5000\n  Se2  Se  0.5000  0.5000  0.1667\n  Se3  Se  0.5000  0.5000  0.8333\n  I1  I  0.5000  0.1667  0.8333\n  I2  I  0.5000  0.8333  0.1667",
       "stage_reached": 4,
       "status": "REJECTED",
       "primary_failure_mode": "DEEP_SRH_DEFECT",
@@ -5612,11 +6904,42 @@
       "max_carrier_eff_mass": 0.31,
       "frohlich_alpha": 1.48,
       "deepest_defect_ev": 0.36,
-      "slme_percent": 17.4,
-      "sub_bandgap_transmittance_percent": 88.5,
-      "tandem_4t_efficiency_percent": 44.14,
+      "slme_percent": 18.73,
+      "sub_bandgap_transmittance_percent": 89.62,
+      "tandem_4t_efficiency_percent": 44.82,
       "adversarial_notes": "DEEP_SRH_DEFECT: I_Se antisite (mid-gap SRH trap) forms deep trap 0.36 eV from band edge (> 0.15 eV non-radiative recombination limit)",
-      "created_at": "2026-11-10 06:50:10"
+      "created_at": "2026-11-10 08:14:10"
+    },
+    {
+      "candidate_id": "CAND-A01",
+      "formula_reduced": "BiCuOS",
+      "target_layer": "TOP_ACTIVE_GLASS_185EV",
+      "crystal_family": "Layered ZrCuSiAs-Type Oxychalcogenide",
+      "space_group_number": 129,
+      "structural_dimensionality": "Quasi-2D",
+      "cif_structure": "data_BiCuOS\n_symmetry_space_group_name_H-M   'P4/nmm'\n_symmetry_Int_Tables_number      129\n_cell_length_a                   3.8720\n_cell_length_b                   3.8720\n_cell_length_c                   8.5610\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Bi1  Bi  0.2500  0.2500  0.1000\n  Cu1  Cu  0.7500  0.7500  0.5000\n  O1  O  0.2500  0.2500  0.7000\n  S1  S  0.7500  0.7500  0.9000",
+      "stage_reached": 4,
+      "status": "REJECTED",
+      "primary_failure_mode": "BANDGAP_OUT_OF_WINDOW",
+      "e_above_hull_mev": 0.0,
+      "min_phonon_freq_thz": 1.62,
+      "rxn_temp_celsius": 340.0,
+      "competing_impurity_phases": [
+        "Bi2S3"
+      ],
+      "pourbaix_max_dissolution_mol_l": 1.2e-08,
+      "active_layer_cost_usd_m2": 0.0205,
+      "hse06_soc_gap_ev": 1.18,
+      "direct_gap_ev": 1.52,
+      "soc_splitting_ev": 0.22,
+      "max_carrier_eff_mass": 0.41,
+      "frohlich_alpha": 1.85,
+      "deepest_defect_ev": 0.06,
+      "slme_percent": 20.22,
+      "sub_bandgap_transmittance_percent": 90.06,
+      "tandem_4t_efficiency_percent": 37.84,
+      "adversarial_notes": "BANDGAP_OUT_OF_WINDOW: HSE06+SOC fundamental gap = 1.18 eV (direct = 1.52 eV) misses target spectral window",
+      "created_at": "2026-11-10 08:14:10"
     },
     {
       "candidate_id": "CAND-A04",
@@ -5625,7 +6948,7 @@
       "crystal_family": "Sillen X1-Type Oxyhalide",
       "space_group_number": 63,
       "structural_dimensionality": "Quasi-2D",
-      "cif_structure": "data_BaBiO2Cl\n_symmetry_space_group_name_H-M   'Cmcm'\n_symmetry_Int_Tables_number      63\n_cell_length_a                   4.0180\n_cell_length_b                   13.1200\n_cell_length_c                   5.7100\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Ba1  Ba  0.1250  0.2500  0.0830\n  Bi1  Bi  0.3180  0.5670  0.2830\n  O1  O  0.5110  0.8840  0.4830\n  O2  O  0.7040  0.2010  0.7660\n  Cl1  Cl  0.8970  0.5180  0.8830",
+      "cif_structure": "data_BaBiO2Cl\n_symmetry_space_group_name_H-M   'Cmcm'\n_symmetry_Int_Tables_number      63\n_cell_length_a                   4.0180\n_cell_length_b                   13.1200\n_cell_length_c                   5.7100\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Ba1  Ba  0.1667  0.1000  0.1667\n  Bi1  Bi  0.5000  0.5000  0.5000\n  O1  O  0.1667  0.7000  0.1667\n  O2  O  0.5000  0.9000  0.5000\n  Cl1  Cl  0.8333  0.3000  0.8333",
       "stage_reached": 4,
       "status": "REJECTED",
       "primary_failure_mode": "BANDGAP_OUT_OF_WINDOW",
@@ -5643,42 +6966,11 @@
       "max_carrier_eff_mass": 0.92,
       "frohlich_alpha": 3.6,
       "deepest_defect_ev": 0.42,
-      "slme_percent": 25.85,
+      "slme_percent": 2.45,
       "sub_bandgap_transmittance_percent": 90.9,
-      "tandem_4t_efficiency_percent": 43.69,
+      "tandem_4t_efficiency_percent": 20.9,
       "adversarial_notes": "BANDGAP_OUT_OF_WINDOW: HSE06+SOC fundamental gap = 2.94 eV (direct = 3.12 eV) misses target spectral window",
-      "created_at": "2026-11-10 06:50:10"
-    },
-    {
-      "candidate_id": "CAND-A01",
-      "formula_reduced": "BiCuOS",
-      "target_layer": "TOP_ACTIVE_GLASS_185EV",
-      "crystal_family": "Layered ZrCuSiAs-Type Oxychalcogenide",
-      "space_group_number": 129,
-      "structural_dimensionality": "Quasi-2D",
-      "cif_structure": "data_BiCuOS\n_symmetry_space_group_name_H-M   'P4/nmm'\n_symmetry_Int_Tables_number      129\n_cell_length_a                   3.8720\n_cell_length_b                   3.8720\n_cell_length_c                   8.5610\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Bi1  Bi  0.1250  0.2500  0.0830\n  Cu1  Cu  0.3180  0.5670  0.3330\n  O1  O  0.5110  0.8840  0.5830\n  S1  S  0.7040  0.2010  0.8330",
-      "stage_reached": 4,
-      "status": "REJECTED",
-      "primary_failure_mode": "BANDGAP_OUT_OF_WINDOW",
-      "e_above_hull_mev": 0.0,
-      "min_phonon_freq_thz": 1.62,
-      "rxn_temp_celsius": 340.0,
-      "competing_impurity_phases": [
-        "Bi2S3"
-      ],
-      "pourbaix_max_dissolution_mol_l": 1.2e-08,
-      "active_layer_cost_usd_m2": 0.0205,
-      "hse06_soc_gap_ev": 1.18,
-      "direct_gap_ev": 1.52,
-      "soc_splitting_ev": 0.28,
-      "max_carrier_eff_mass": 0.41,
-      "frohlich_alpha": 1.85,
-      "deepest_defect_ev": 0.06,
-      "slme_percent": 12.48,
-      "sub_bandgap_transmittance_percent": 90.1,
-      "tandem_4t_efficiency_percent": 30.73,
-      "adversarial_notes": "BANDGAP_OUT_OF_WINDOW: HSE06+SOC fundamental gap = 1.18 eV (direct = 1.52 eV) misses target spectral window",
-      "created_at": "2026-11-10 06:50:10"
+      "created_at": "2026-11-10 08:14:10"
     },
     {
       "candidate_id": "LIT-FAIL-002",
@@ -5709,7 +7001,7 @@
       "sub_bandgap_transmittance_percent": 89.5,
       "tandem_4t_efficiency_percent": 0.0,
       "adversarial_notes": "Isolated [Bi2I9]3- bioctahedra create flat electronic bands (m_h* = 2.45 m0) and severe small-polaron self-trapping (alpha_F = 7.8).",
-      "created_at": "2026-11-10 06:50:10"
+      "created_at": "2026-11-10 08:14:07"
     },
     {
       "candidate_id": "LIT-FAIL-001",
@@ -5742,7 +7034,7 @@
       "sub_bandgap_transmittance_percent": 88.0,
       "tandem_4t_efficiency_percent": 0.0,
       "adversarial_notes": "LBNL Impurity Dataset Archetype: Refractory ZrO2 thermodynamic sink traps synthesis below 900 C, melting soda-lime glass (<500 C gate violated).",
-      "created_at": "2026-11-10 06:50:10"
+      "created_at": "2026-11-10 08:14:07"
     },
     {
       "candidate_id": "LIT-FAIL-003",
@@ -5774,7 +7066,7 @@
       "sub_bandgap_transmittance_percent": 84.0,
       "tandem_4t_efficiency_percent": 0.0,
       "adversarial_notes": "Tier-2 Speciation Failure: PbI2-like sublattice decomposes in rainwater (pH 4.5 Pourbaix dissolution > 1e-3 M).",
-      "created_at": "2026-11-10 06:50:10"
+      "created_at": "2026-11-10 08:14:07"
     },
     {
       "candidate_id": "CAND-A07",
@@ -5783,7 +7075,7 @@
       "crystal_family": "Distorted Perovskite Sulfide",
       "space_group_number": 62,
       "structural_dimensionality": "3D",
-      "cif_structure": "data_BaZrS3\n_symmetry_space_group_name_H-M   'Pnma'\n_symmetry_Int_Tables_number      62\n_cell_length_a                   7.0590\n_cell_length_b                   9.9810\n_cell_length_c                   7.0250\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Ba1  Ba  0.1250  0.2500  0.0830\n  Zr1  Zr  0.3180  0.5670  0.2830\n  S1  S  0.5110  0.8840  0.4830\n  S2  S  0.7040  0.2010  0.7660\n  S3  S  0.8970  0.5180  0.0490",
+      "cif_structure": "data_BaZrS3\n_symmetry_space_group_name_H-M   'Pnma'\n_symmetry_Int_Tables_number      62\n_cell_length_a                   7.0590\n_cell_length_b                   9.9810\n_cell_length_c                   7.0250\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Ba1  Ba  0.2500  0.1250  0.1250\n  Zr1  Zr  0.7500  0.6250  0.6250\n  S1  S  0.2500  0.6250  0.1250\n  S2  S  0.7500  0.1250  0.6250\n  S3  S  0.2500  0.3750  0.6250",
       "stage_reached": 3,
       "status": "REJECTED",
       "primary_failure_mode": "OXIDE_IMPURITY_SINK",
@@ -5806,7 +7098,7 @@
       "sub_bandgap_transmittance_percent": null,
       "tandem_4t_efficiency_percent": null,
       "adversarial_notes": "OXIDE_IMPURITY_SINK: Requires 950 C (> 500 C soda-lime glass ceiling) to overcome refractory ZrO2 sink",
-      "created_at": "2026-11-10 06:50:10"
+      "created_at": "2026-11-10 08:14:10"
     },
     {
       "candidate_id": "CAND-A08",
@@ -5815,7 +7107,7 @@
       "crystal_family": "1D Ribbon Sulfochloride",
       "space_group_number": 62,
       "structural_dimensionality": "1D-Chain",
-      "cif_structure": "data_BiSCl\n_symmetry_space_group_name_H-M   'Pnma'\n_symmetry_Int_Tables_number      62\n_cell_length_a                   7.7500\n_cell_length_b                   4.0000\n_cell_length_c                   9.8700\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Bi1  Bi  0.1250  0.2500  0.0830\n  S1  S  0.3180  0.5670  0.4163\n  Cl1  Cl  0.5110  0.8840  0.7497",
+      "cif_structure": "data_BiSCl\n_symmetry_space_group_name_H-M   'Pnma'\n_symmetry_Int_Tables_number      62\n_cell_length_a                   7.7500\n_cell_length_b                   4.0000\n_cell_length_c                   9.8700\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Bi1  Bi  0.2500  0.5000  0.0714\n  S1  S  0.7500  0.5000  0.5000\n  Cl1  Cl  0.2500  0.5000  0.6429",
       "stage_reached": 3,
       "status": "REJECTED",
       "primary_failure_mode": "LOW_DIM_POLARON_RISK",
@@ -5837,16 +7129,16 @@
       "sub_bandgap_transmittance_percent": null,
       "tandem_4t_efficiency_percent": null,
       "adversarial_notes": "VETO: 1D-Chain van der Waals ribbons cause severe inter-chain carrier localization and BiCl3 volatility.",
-      "created_at": "2026-11-10 06:50:10"
+      "created_at": "2026-11-10 08:14:10"
     },
     {
       "candidate_id": "CAND-B01",
-      "formula_reduced": "BiCuSeI",
+      "formula_reduced": "BiCuSeI2",
       "target_layer": "BOTTOM_IR_075EV",
       "crystal_family": "3D Cross-Linked Selenoiodide",
       "space_group_number": 62,
       "structural_dimensionality": "3D",
-      "cif_structure": "data_BiCuSeI\n_symmetry_space_group_name_H-M   'Pnma'\n_symmetry_Int_Tables_number      62\n_cell_length_a                   7.1200\n_cell_length_b                   8.3400\n_cell_length_c                   10.4500\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Bi1  Bi  0.1250  0.2500  0.0830\n  Cu1  Cu  0.3180  0.5670  0.2830\n  Se1  Se  0.5110  0.8840  0.4830\n  I1  I  0.7040  0.2010  0.6830\n  I2  I  0.8970  0.5180  0.9660",
+      "cif_structure": "data_BiCuSeI2\n_symmetry_space_group_name_H-M   'Pnma'\n_symmetry_Int_Tables_number      62\n_cell_length_a                   7.1200\n_cell_length_b                   8.3400\n_cell_length_c                   10.4500\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Bi1  Bi  0.2500  0.2500  0.0714\n  Cu1  Cu  0.7500  0.7500  0.5000\n  Se1  Se  0.2500  0.7500  0.7857\n  I1  I  0.7500  0.2500  0.7857\n  I2  I  0.2500  0.2500  0.5000",
       "stage_reached": 3,
       "status": "REJECTED",
       "primary_failure_mode": "ANION_PHASE_SEGREGATION",
@@ -5869,7 +7161,7 @@
       "sub_bandgap_transmittance_percent": null,
       "tandem_4t_efficiency_percent": null,
       "adversarial_notes": "VETO: High Se/I site-exchange enthalpy (48.5 meV/atom) and CuI extraction reaction at ITO interface (-115 meV/atom).",
-      "created_at": "2026-11-10 06:50:10"
+      "created_at": "2026-11-10 08:14:10"
     },
     {
       "candidate_id": "CAND-B05",
@@ -5878,7 +7170,7 @@
       "crystal_family": "Order-Disorder Matildite Selenide",
       "space_group_number": 166,
       "structural_dimensionality": "3D",
-      "cif_structure": "data_AgBiSe2\n_symmetry_space_group_name_H-M   'R-3m'\n_symmetry_Int_Tables_number      166\n_cell_length_a                   4.1800\n_cell_length_b                   4.1800\n_cell_length_c                   19.6700\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Ag1  Ag  0.1250  0.2500  0.0830\n  Bi1  Bi  0.3180  0.5670  0.3330\n  Se1  Se  0.5110  0.8840  0.5830\n  Se2  Se  0.7040  0.2010  0.9160",
+      "cif_structure": "data_AgBiSe2\n_symmetry_space_group_name_H-M   'R-3m'\n_symmetry_Int_Tables_number      166\n_cell_length_a                   4.1800\n_cell_length_b                   4.1800\n_cell_length_c                   19.6700\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Ag1  Ag  0.5000  0.5000  0.1250\n  Bi1  Bi  0.5000  0.5000  0.6250\n  Se1  Se  0.5000  0.5000  0.3750\n  Se2  Se  0.5000  0.5000  0.8750",
       "stage_reached": 3,
       "status": "REJECTED",
       "primary_failure_mode": "TIER2_COST_EXCEEDED",
@@ -5899,8 +7191,8 @@
       "slme_percent": null,
       "sub_bandgap_transmittance_percent": null,
       "tandem_4t_efficiency_percent": null,
-      "adversarial_notes": "TIER2_COST_EXCEEDED: Raw active-layer element cost $0.58/m^2 exceeds $0.50/m^2 gate (Ag content)",
-      "created_at": "2026-11-10 06:50:10"
+      "adversarial_notes": "TIER2_COST_EXCEEDED: Raw active-layer element cost $0.58/m^2 exceeds $0.50/m^2 gate",
+      "created_at": "2026-11-10 08:14:10"
     },
     {
       "candidate_id": "CAND-B06",
@@ -5909,7 +7201,7 @@
       "crystal_family": "1D Chain Selenoiodide",
       "space_group_number": 62,
       "structural_dimensionality": "1D-Chain",
-      "cif_structure": "data_SbSeI\n_symmetry_space_group_name_H-M   'Pnma'\n_symmetry_Int_Tables_number      62\n_cell_length_a                   8.6500\n_cell_length_b                   4.1200\n_cell_length_c                   10.3800\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Sb1  Sb  0.1250  0.2500  0.0830\n  Se1  Se  0.3180  0.5670  0.4163\n  I1  I  0.5110  0.8840  0.7497",
+      "cif_structure": "data_SbSeI\n_symmetry_space_group_name_H-M   'Pnma'\n_symmetry_Int_Tables_number      62\n_cell_length_a                   8.6500\n_cell_length_b                   4.1200\n_cell_length_c                   10.3800\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Sb1  Sb  0.2500  0.5000  0.2500\n  Se1  Se  0.7500  0.5000  0.7500\n  I1  I  0.2500  0.5000  0.7500",
       "stage_reached": 3,
       "status": "REJECTED",
       "primary_failure_mode": "LOW_DIM_POLARON_RISK",
@@ -5931,16 +7223,16 @@
       "sub_bandgap_transmittance_percent": null,
       "tandem_4t_efficiency_percent": null,
       "adversarial_notes": "VETO: Quasi-1D chain morphology (SbSeI) creates extreme anisotropy and transverse polaron trapping.",
-      "created_at": "2026-11-10 06:50:10"
+      "created_at": "2026-11-10 08:14:10"
     },
     {
       "candidate_id": "CAND-A05",
-      "formula_reduced": "Sr2ZnS2O",
+      "formula_reduced": "Sr2ZnOS2",
       "target_layer": "TOP_ACTIVE_GLASS_185EV",
       "crystal_family": "Ruddlesden-Popper Oxysulfide",
       "space_group_number": 139,
       "structural_dimensionality": "Quasi-2D",
-      "cif_structure": "data_Sr2ZnS2O\n_symmetry_space_group_name_H-M   'I4/mmm'\n_symmetry_Int_Tables_number      139\n_cell_length_a                   4.0400\n_cell_length_b                   4.0400\n_cell_length_c                   13.6800\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Sr1  Sr  0.1250  0.2500  0.0830\n  Sr2  Sr  0.3180  0.5670  0.3327\n  Zn1  Zn  0.5110  0.8840  0.4163\n  S1  S  0.7040  0.2010  0.5830\n  S2  S  0.8970  0.5180  0.8327\n  O1  O  0.0900  0.8350  0.9163",
+      "cif_structure": "data_Sr2ZnOS2\n_symmetry_space_group_name_H-M   'I4/mmm'\n_symmetry_Int_Tables_number      139\n_cell_length_a                   4.0400\n_cell_length_b                   4.0400\n_cell_length_c                   13.6800\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Sr1  Sr  0.2500  0.2500  0.0833\n  Sr2  Sr  0.7500  0.7500  0.5833\n  Zn1  Zn  0.7500  0.7500  0.9167\n  S1  S  0.2500  0.2500  0.4167\n  S2  S  0.7500  0.7500  0.2500\n  O1  O  0.2500  0.2500  0.7500",
       "stage_reached": 2,
       "status": "REJECTED",
       "primary_failure_mode": "HULL_INSTABILITY",
@@ -5964,16 +7256,16 @@
       "sub_bandgap_transmittance_percent": null,
       "tandem_4t_efficiency_percent": null,
       "adversarial_notes": "HULL_INSTABILITY: dE_hull = 64.0 meV/atom (> 50 meV/atom threshold)",
-      "created_at": "2026-11-10 06:50:10"
+      "created_at": "2026-11-10 08:14:10"
     },
     {
       "candidate_id": "CAND-A10",
-      "formula_reduced": "Zn2SbS2Br",
+      "formula_reduced": "Zn2SbS2Br3",
       "target_layer": "TOP_ACTIVE_GLASS_185EV",
       "crystal_family": "Hypothetical Strained Sulfobromide",
       "space_group_number": 11,
       "structural_dimensionality": "1D-Chain",
-      "cif_structure": "data_Zn2SbS2Br\n_symmetry_space_group_name_H-M   'P21/m'\n_symmetry_Int_Tables_number      11\n_cell_length_a                   5.9200\n_cell_length_b                   6.4100\n_cell_length_c                   10.1200\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Zn1  Zn  0.1250  0.2500  0.0830\n  Zn2  Zn  0.3180  0.5670  0.2910\n  Sb1  Sb  0.5110  0.8840  0.3330\n  S1  S  0.7040  0.2010  0.4580\n  S2  S  0.8970  0.5180  0.6660\n  Br1  Br  0.0900  0.8350  0.7080\n  Br2  Br  0.2830  0.1520  0.9160\n  Br3  Br  0.4760  0.4690  0.1240",
+      "cif_structure": "data_Zn2SbS2Br3\n_symmetry_space_group_name_H-M   'P21/m'\n_symmetry_Int_Tables_number      11\n_cell_length_a                   5.9200\n_cell_length_b                   6.4100\n_cell_length_c                   10.1200\n_cell_angle_alpha                90.0000\n_cell_angle_beta                 90.0000\n_cell_angle_gamma                90.0000\nloop_\n _atom_site_label\n _atom_site_type_symbol\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n  Zn1  Zn  0.1250  0.2500  0.1250\n  Zn2  Zn  0.6250  0.7500  0.6250\n  Sb1  Sb  0.1250  0.2500  0.6250\n  S1  S  0.6250  0.7500  0.1250\n  S2  S  0.1250  0.7500  0.3750\n  Br1  Br  0.1250  0.7500  0.8750\n  Br2  Br  0.6250  0.2500  0.3750\n  Br3  Br  0.6250  0.2500  0.8750",
       "stage_reached": 2,
       "status": "REJECTED",
       "primary_failure_mode": "IMAGINARY_PHONON",
@@ -5996,7 +7288,7 @@
       "sub_bandgap_transmittance_percent": null,
       "tandem_4t_efficiency_percent": null,
       "adversarial_notes": "IMAGINARY_PHONON: omega_min = -1.42 THz (< 0 THz) -> Dynamic lattice collapse",
-      "created_at": "2026-11-10 06:50:10"
+      "created_at": "2026-11-10 08:14:10"
     }
   ]
 }

@@ -199,3 +199,33 @@ We can build and execute this architecture in modular phases right inside this w
    * **Track A (Top Active Glass, $1.75\text{–}1.95\text{ eV}$):** $\text{Bi/Sb–Cu/Zn–S/O–Cl/Br}$ oxy-/chalcohalides.
    * **Track B (Bottom IR Scavenger, $0.70\text{–}0.85\text{ eV}$):** $\text{Bi/Sb–Sn/Cu–Se/S–I}$ heavy chalcohalides.
 2. **Launch an Interactive Discovery & Failure-Ledger Dashboard** (HTML artifact) visualizing the screening funnel, Pareto frontier ($\eta_{\text{4T}}$ vs. synthesis temperature vs. $/m^2$ cost), 3-layer spectral absorption curves, and the live Contrastive Failure Memory Ledger.
+
+---
+
+## 6. Scientific Software Engineering Division, Model Assignments & Triple-Gate Redundancy Architecture
+
+To guarantee **zero misstated or unverified results**, the 7-agent Research Division is paired with a 6-agent **Scientific Software Engineering & Redundancy Verification Division** operating under a strict zero-trust protocol.
+
+### 13-Agent Roster & Model Tier Assignments
+
+| Division | Agent ID | Role | Assigned Model | Primary Responsibility |
+| :--- | :--- | :--- | :--- | :--- |
+| **Research** | `pi_orchestrator` | Principal Investigator & Campaign Director | **`pro`** | Multi-objective Pareto optimization & campaign orchestration |
+| **Research** | `crystal_explorer` | Solid-State Chemist & Inverse-Design Explorer | **`pro`** | Valence-neutral stoichiometry (`SMACT`), Wyckoff symmetry & 3-Tier Policy |
+| **Research** | `surrogate_physicist` | Lattice Dynamics & MLIP Surrogate Physicist | **`pro`** | Convex hull $\Delta E_{\text{hull}}$, Born elasticity $C_{ij}$ & `phonopy` dynamics |
+| **Research** | `synthesis_chemist` | Retrosynthesis, Kinetics & Speciation Chemist | **`pro`** | $\le 500^\circ\text{C}$ reaction networks, halide volatility & Pourbaix leaching |
+| **Research** | `quantum_defect_physicist` | Quantum Electronic & Defect-Transport Physicist | **`pro`** | Relativistic `HSE06+SOC`, Fröhlich polarons & `doped` SRH defects |
+| **Research** | `photonic_tandem_architect` | Nanophotonics & 4T Tandem Device Architect | **`pro`** | AM1.5G spectral integration, $4n^2$ light trapping & 4T stack efficiency |
+| **Research** | `adversarial_critic` | Adversarial Scientific Red-Team Critic | **`pro`** | Physical falsification (anion phase segregation, TCO reactions, 0D/1D polarons) |
+| **Engineering** | `chief_software_architect` | Lead Scientific Software Architect & Bridge | **`pro`** | Inter-team communication bus (`inter_team_bus.py`) & schema enforcement |
+| **Engineering** | `physics_engine_engineer` | Primary Computational Physics Engineer | **`pro`** | Crystallography, 3D PBC distance matrices, BVS, Anderson Debye & Fröhlich solvers |
+| **Engineering** | `optics_kinetics_engineer` | Primary Retrosynthesis & Photonics Engineer | **`pro`** | Gibbs $\Delta G(T)$ reaction networks, Pourbaix & wavelength-grid AM1.5G quadrature |
+| **Engineering** | `redundancy_verifier_alpha` | Independent Mathematical Verifier (**Redundancy #1**) | **`pro`** | Independent CIF geometry, stoichiometry/valence & Simpson energy-space quadrature check |
+| **Engineering** | `qa_test_audit_engineer` | Automated Test & Audit Logger (**Redundancy #2**) | **`pro`** | Automated test suite (`tests/test_scientific_integrity.py`) & SHA-256 JSONL audit logs |
+| **Engineering** | `repo_release_auditor` | Repository Consistency & Release Gatekeeper | **`flash`** | Cross-file SQLite/JSON/Markdown/QE-deck bit-for-bit numerical consistency verification |
+
+### Triple-Gate Redundancy & Logged Verification Flow
+1. **Gate R1 (Chemical & Crystallographic Invariants):** Every candidate is mathematically verified for exact oxidation-state neutrality ($\sum n_i z_i \equiv 0$), GCD-reduced formula-to-stoichiometry equivalence, and 3D periodic minimum interatomic distance $d_{ij} \ge 2.15\text{ \AA}$.
+2. **Gate R2 (Dual-Algorithm Independent Re-Computation):** `redundancy_verifier_alpha` independently re-computes crystallographic geometry, relativistic spin-orbit splitting, Fröhlich coupling $\alpha_F$, and 1-sun AM1.5G SLME (using Simpson's 1/3 rule in photon-energy space vs. trapezoidal integration in wavelength space) and blocks promotion on any mismatch $> 0.15\%$.
+3. **Gate R3 (Automated Test Suite & Cryptographic Audit Trail):** `qa_test_audit_engineer` executes the full test suite and logs every test assertion and SHA-256 dossier signature to `logs/verification_audit_log.jsonl`, `logs/inter_team_communication.jsonl`, and `docs/VERIFICATION_AND_TEST_REPORT.md`.
+

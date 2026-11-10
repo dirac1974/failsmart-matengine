@@ -1,8 +1,8 @@
 ! FailSmart-MatEngine Auto-Generated Quantum ESPRESSO HSE06+SOC Input Deck
-! Candidate: CAND-A06 (BiZnSOCl) | Target: TOP_ACTIVE_GLASS_185EV
+! Candidate: CAND-A06 (BiZnOSCl) | Target: TOP_ACTIVE_GLASS_185EV
 &CONTROL
   calculation = 'scf',
-  prefix = 'biznsocl',
+  prefix = 'biznoscl',
   outdir = './out/',
   pseudo_dir = './pseudo_oncv_fr/',
   tprnfor = .true.,

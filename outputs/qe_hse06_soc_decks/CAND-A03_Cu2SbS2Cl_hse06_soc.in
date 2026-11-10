@@ -1,8 +1,8 @@
 ! FailSmart-MatEngine Auto-Generated Quantum ESPRESSO HSE06+SOC Input Deck
-! Candidate: CAND-A03 (SbCuS2Cl) | Target: TOP_ACTIVE_GLASS_185EV
+! Candidate: CAND-A03 (Cu2SbS2Cl) | Target: TOP_ACTIVE_GLASS_185EV
 &CONTROL
   calculation = 'scf',
-  prefix = 'sbcus2cl',
+  prefix = 'cu2sbs2cl',
   outdir = './out/',
   pseudo_dir = './pseudo_oncv_fr/',
   tprnfor = .true.,
@@ -12,7 +12,7 @@
 /
 &SYSTEM
   ibrav = 0,
-  nat = 5,
+  nat = 6,
   ntyp = 4,
   ecutwfc = 70.0,
   ecutfock = 140.0,
@@ -28,8 +28,8 @@
   adaptive_thr = .true.,
 /
 ATOMIC_SPECIES
-  Sb  1.000  Sb_ONCV_PBE_FR-1.2.upf
   Cu  1.000  Cu_ONCV_PBE_FR-1.2.upf
+  Sb  1.000  Sb_ONCV_PBE_FR-1.2.upf
   S  1.000  S_ONCV_PBE_FR-1.2.upf
   Cl  1.000  Cl_ONCV_PBE_FR-1.2.upf
 K_POINTS automatic
