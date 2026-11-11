@@ -1184,6 +1184,7 @@ def run_live_mp_discovery_campaign(
         evaluate_phase9a_lab_synthesis_and_defect_supercell,
         evaluate_phase9b_contrastive_classifier_audit,
         evaluate_phase9c_real_world_lcoe_stress_test,
+        evaluate_phase10_bifacial_and_string_dossier,
     )
 
     defect_deck_dir = out_path / "mp_live_doped_supercell_decks"
@@ -1222,6 +1223,7 @@ def run_live_mp_discovery_campaign(
     coherent_tmm_stacks: List[Dict[str, Any]] = []
     graded_arc_te_stacks: List[Dict[str, Any]] = []
     real_world_lcoe_stacks: List[Dict[str, Any]] = []
+    phase10_bifacial_string_stacks: List[Dict[str, Any]] = []
     for tf in top_finalists:
         for bf in bot_finalists:
             pair_model = compute_cross_layer_4t_stack_wavelength(tf, bf)
@@ -1240,15 +1242,23 @@ def run_live_mp_discovery_campaign(
             lcoe_model = evaluate_phase9c_real_world_lcoe_stress_test(tf, bf, graded_model)
             real_world_lcoe_stacks.append(lcoe_model.model_dump())
 
+            # Phase 10 (v7.0): 2^4=16 Thickness/ARC Optimization, Bifacial Albedo Harvesting & SPICE String Matching
+            p10_model = evaluate_phase10_bifacial_and_string_dossier(tf, bf, graded_model.pair_id)
+            phase10_bifacial_string_stacks.append(p10_model.model_dump())
+
     cross_pairs.sort(key=lambda x: (-x["tandem_4t_low_fca_total_eff_percent"], x["combined_active_cost_usd_m2"]))
     coherent_tmm_stacks.sort(key=lambda x: (-x["tmm_4t_low_fca_pce_percent"], x["combined_active_cost_usd_m2"]))
     graded_arc_te_stacks.sort(key=lambda x: (-x["graded_4t_low_fca_pce_percent"], x["combined_raw_cost_usd_m2"]))
     real_world_lcoe_stacks.sort(key=lambda x: (x["lcoe_3layer_4t_cents_kwh"], -x["pce_4t_0deg_25c_percent"]))
+    phase10_bifacial_string_stacks.sort(
+        key=lambda x: (-x["bifacial_20pct_albedo_4t_pce_percent"], x["bifacial_20pct_lcoe_cents_kwh"])
+    )
 
     summary = {
         "version": "4.0.0",
         "v5_graded_arc_and_techno_economics_enabled": True,
         "v6_phase9_lab_contrastive_lcoe_enabled": True,
+        "v7_phase10_bifacial_and_string_enabled": True,
         "data_provenance": {
             "materials_project_live_api": True,
             "negative_synthesis_datasets": neg_priors.get("dataset_provenance", {}),
@@ -1258,6 +1268,7 @@ def run_live_mp_discovery_campaign(
             "phase9a_lab_synthesis_and_doped_supercells": True,
             "phase9b_extended_117_mp_and_contrastive_audit": True,
             "phase9c_oblique_thermal_arrhenius_lcoe": True,
+            "phase10_thickness_opt_bifacial_and_string_matching": True,
         },
         "funnel_counts": funnel_counts,
         "failure_mode_breakdown": failure_mode_breakdown,
@@ -1269,6 +1280,7 @@ def run_live_mp_discovery_campaign(
         "coherent_tmm_4t_stacks": coherent_tmm_stacks,
         "graded_arc_techno_economic_stacks": graded_arc_te_stacks,
         "real_world_lcoe_stress_test_stacks": real_world_lcoe_stacks,
+        "phase10_bifacial_and_string_dossiers": phase10_bifacial_string_stacks,
         "all_mp_records": all_dossiers,
     }
     (out_path / "live_mp_discovery_summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
@@ -1277,28 +1289,19 @@ def run_live_mp_discovery_campaign(
 
 if __name__ == "__main__":
     res = run_live_mp_discovery_campaign()
-    print("Live MP v4.0/v5.0/v6.0 Funnel Counts:", json.dumps(res["funnel_counts"], indent=2))
+    print("Live MP v4.0/v5.0/v6.0/v7.0 Funnel Counts:", json.dumps(res["funnel_counts"], indent=2))
     print("Phase 9B Contrastive Audit (117 MP Candidates):", json.dumps(res["contrastive_classifier_audit"], indent=2))
-    print("\n=== Phase 9A: 10.0 mmol Lab Synthesis Recipes & Stage 5 doped Defect Supercells (8 Finalists) ===")
-    for ld in res["lab_synthesis_and_defect_dossiers"]:
+    print(f"\n=== Phase 10: 2D Thickness/ARC Optimization, Bifacial Albedo & String Matching ({len(res['phase10_bifacial_and_string_dossiers'])} Verified) ===")
+    for p10 in res["phase10_bifacial_and_string_dossiers"][:8]:
         print(
-            f"  * {ld['candidate_id']} ({ld['formula_reduced']}): M_FU={ld['formula_unit_molar_mass_g_mol']:.2f} g/mol, "
-            f"10mmol_product={ld['target_product_mass_g']:.3f} g, T={ld['synthesis_temperature_c']:.0f} C ({ld['dwell_time_hours']:.1f} h), "
-            f"supercell={ld['supercell_dims']} ({ld['supercell_total_sites']} sites, L_min={ld['supercell_min_image_dist_ang']:.2f} A), "
-            f"FNV(q=1/q=2)={ld['fnv_charge_correction_q1_ev']:.3f}/{ld['fnv_charge_correction_q2_ev']:.3f} eV "
-            f"[SHA256: {ld['sha256_signature'][:8]}]"
-        )
-    print(f"\n=== Phase 9C: Oblique (0-60 deg) S/P TMM, Operating Temp (25-65 C) & 25-Year Arrhenius LCOE ({len(res['real_world_lcoe_stress_test_stacks'])} Verified) ===")
-    for rw in res["real_world_lcoe_stress_test_stacks"][:8]:
-        print(
-            f"  * {rw['pair_id']} ({rw['top_formula']} + c-Si + {rw['bottom_formula']}): "
-            f"R(0/30/45/60 deg)={rw['r_front_0deg_percent']:.2f}%/{rw['r_front_30deg_percent']:.2f}%/{rw['r_front_45deg_percent']:.2f}%/{rw['r_front_60deg_percent']:.2f}% "
-            f"(R_hemi={rw['r_front_hemispheric_percent']:.2f}%), "
-            f"PCE(0/60 deg)={rw['pce_4t_0deg_25c_percent']:.2f}%/{rw['pce_4t_60deg_25c_percent']:.2f}% (IAM_60={rw['iam_60deg_ratio']:.3f}), "
-            f"PCE(45C NOCT / 65C)={rw['pce_4t_noct_45c_percent']:.2f}%/{rw['pce_4t_desert_65c_percent']:.2f}% (beta={rw['temp_coeff_rel_pct_per_k']:.3f}%/K), "
-            f"Yr25_ret={rw['year25_retained_power_fraction_percent']:.2f}%, "
-            f"LCOE(Si/2L/3L)={rw['lcoe_baseline_si_cents_kwh']:.3f}/{rw['lcoe_2layer_cents_kwh']:.3f}/{rw['lcoe_3layer_4t_cents_kwh']:.3f} c/kWh "
-            f"({rw['lcoe_3layer_vs_si_reduction_percent']:+.2f}% vs Si) [SHA256: {rw['sha256_signature'][:8]}]"
+            f"  * {p10['pair_id']} ({p10['top_formula']} + c-Si + {p10['bottom_formula']}): "
+            f"Opt_d=(MgF2={p10['opt_mgf2_nm']:.0f}, TiO2={p10['opt_tio2_nm']:.0f}, Top={p10['opt_top_nm']:.0f}, Bot={p10['opt_bot_nm']:.0f} nm), "
+            f"PCE(Mono/Bif20/Bif30)={p10['opt_monofacial_4t_pce_percent']:.2f}%/{p10['bifacial_20pct_albedo_4t_pce_percent']:.2f}%/{p10['bifacial_30pct_albedo_4t_pce_percent']:.2f}% "
+            f"({p10['bifacial_20pct_power_w_sqft']:.2f}/{p10['bifacial_30pct_power_w_sqft']:.2f} W/ft^2, Gain20=+{p10['bifacial_20pct_gain_percent']:.2f}%), "
+            f"LCOE_Bif20={p10['bifacial_20pct_lcoe_cents_kwh']:.3f} c/kWh, "
+            f"Strings(Top:Si:Bot)={p10['n_cells_top_matched']}:{p10['n_cells_si_ref']}:{p10['n_cells_bot_matched']} "
+            f"@ V_bus={p10['v_bus_si_v']:.2f} V (mismatch={p10['top_string_mismatch_percent']:.2f}%/{p10['bot_string_mismatch_percent']:.2f}%) "
+            f"[SHA256: {p10['sha256_signature'][:8]}]"
         )
 
 

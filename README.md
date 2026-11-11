@@ -236,6 +236,22 @@ We simultaneously evaluate all 4 Techno-Economic Figures of Merit against a sing
 | `mp-861911__mp-22982` | `Sb2OS2 + c-Si + BiCuS2` | $11.90\% \rightarrow \mathbf{3.33\%}$ | 38.50% ($35.8\text{ W/ft}^2$) | **41.89%** ($38.9\text{ W/ft}^2$) | $3.010$ / **$4.308$** | **$\$0.0002$** / **$\$0.0656$** | $1.505$ / $1.436$ | $1.672$ / **$1.742$** |
 | `mp-1227486__mp-22982` | `BiSbS3 + c-Si + BiCuS2` | $11.97\% \rightarrow \mathbf{3.22\%}$ | 38.42% ($35.7\text{ W/ft}^2$) | **41.81%** ($38.8\text{ W/ft}^2$) | $3.003$ / **$4.300$** | **$\$0.0002$** / **$\$0.0658$** | $1.502$ / $1.433$ | $1.669$ / **$1.738$** |
 
+### 6. Phase 9 (`v6.0`): 10 mmol Lab Synthesis & `doped` Supercells (9A), 117-MP Contrastive Margin Audit (9B), and Oblique/Thermal/25-Year LCOE Stress-Test (9C)
+- **Phase 9A (10.0 mmol Stoichiometric Lab Batch & Stage 5 `doped` Defect Supercell Decks):** Generates exact elemental mass-balanced precursor recipes (`elemental_mass_conservation_diff_g == 0.0 g`), $5\%$ sulfur/selenium volatile overpressure ampoule charges, and runnable Stage 5 `doped` / Quantum ESPRESSO defect supercell decks (`outputs/mp_live_doped_supercell_decks/`, $L_{\min} \ge 10.0\text{ \AA}$, Freysoldt-Neugebauer-Van de Walle electrostatic corrections $E_{\text{FNV}}(q=\pm 1) \in [0.090, 0.190]\text{ eV}$).
+- **Phase 9B (Extended 117-Candidate Live MP Contrastive Failure Classifier Audit):** Sweeps all `117` RoHS-clean semiconductors in `data/mp_live_candidates_cache.json`, confirming positive separation $\Delta M = +0.1605$ between promoted finalists ($\bar{M}_{\mathcal{P}} = +0.0850$) and rejected failures ($\bar{M}_{\mathcal{N}} = -0.0755$).
+- **Phase 9C (Oblique $0^\circ\text{–}60^\circ$ S/P Coherent TMM, Operating Temp $25^\circ\text{C}\text{–}65^\circ\text{C}$ & 25-Year Arrhenius LCOE):** Evaluates unpolarized $\frac{1}{2}(|r_s|^2+|r_p|^2)$ oblique optics ($\text{IAM}_{60^\circ} = 0.954$), NOCT ($45^\circ\text{C}$) and desert peak ($65^\circ\text{C}$) thermal derating ($\beta_{\text{4T}} = -0.361\%/\text{K}$ vs. $-0.409\%/\text{K}$ c-Si), and 25-year discounted LCOE (**$3.172\text{ \cent/kWh}$**, a **$-35.74\%$ reduction** vs. $4.936\text{ \cent/kWh}$ standalone c-Si).
+
+### 7. Phase 10 (`v7.0`): $2^4=16$ Thickness/ARC Global Coherent Optimization (10A), Bifacial Ground-Albedo Harvesting (10B), and SPICE Subcell $J\text{–}V$ String Voltage Matching (10C)
+
+| Pair ID | Stack (`Top + c-Si + Bot`) | Opt Thicknesses `(MgF2, TiO2, Top, Bot)` | Opt Mono 4T PCE | **Bifacial 20% Albedo PCE ($\text{W/ft}^2$)** | **Bifacial 30% Albedo PCE ($\text{W/ft}^2$)** | **25-Yr Bifacial LCOE (20% Alb)** | Matched String Ratio ($N_{\text{top}} : N_{\text{Si}} : N_{\text{bot}}$) | Bus Voltage $V_{\text{bus,Si}}$ (Mismatch Top / Bot) |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| `mp-861911__mp-1223998` | `Sb2OS2 + c-Si + Bi3InSe6` | `(94, 48, 260, 391 nm)` | 42.45% | **46.17%** ($42.89\text{ W/ft}^2$, $+8.76\%$) | **48.06%** ($44.65\text{ W/ft}^2$) | **$3.002\text{ \cent/kWh}$** | **`37 : 72 : 120`** | $50.08\text{ V}$ ($1.18\% / 0.04\%$) |
+| `mp-861911__mp-1224922` | `Sb2OS2 + c-Si + CuGaSnSe4` | `(94, 48, 299, 391 nm)` | 42.02% | **46.09%** ($42.82\text{ W/ft}^2$, $+9.69\%$) | **48.17%** ($44.75\text{ W/ft}^2$) | **$3.001\text{ \cent/kWh}$** | **`37 : 72 : 100`** | $50.05\text{ V}$ ($1.15\% / 0.02\%$) |
+| `mp-1227486__mp-1223998` | `BiSbS3 + c-Si + Bi3InSe6` | `(94, 48, 299, 391 nm)` | 42.37% | **46.09%** ($42.82\text{ W/ft}^2$, $+8.78\%$) | **47.98%** ($44.58\text{ W/ft}^2$) | **$3.005\text{ \cent/kWh}$** | **`36 : 72 : 120`** | $50.12\text{ V}$ ($0.19\% / 0.08\%$) |
+| `mp-1227486__mp-1224922` | `BiSbS3 + c-Si + CuGaSnSe4` | `(94, 48, 299, 391 nm)` | 42.01% | **46.08%** ($42.81\text{ W/ft}^2$, $+9.69\%$) | **48.16%** ($44.74\text{ W/ft}^2$) | **$3.001\text{ \cent/kWh}$** | **`36 : 72 : 100`** | $50.12\text{ V}$ ($0.19\% / 0.16\%$) |
+| `mp-861911__mp-22982` | `Sb2OS2 + c-Si + BiCuS2` | `(94, 48, 299, 391 nm)` | 41.97% | **46.02%** ($42.75\text{ W/ft}^2$, $+9.64\%$) | **48.08%** ($44.67\text{ W/ft}^2$) | **$3.002\text{ \cent/kWh}$** | **`37 : 72 : 100`** | $50.05\text{ V}$ ($1.15\% / 0.44\%$) |
+| `mp-1227486__mp-22982` | `BiSbS3 + c-Si + BiCuS2` | `(94, 48, 299, 391 nm)` | 41.96% | **46.01%** ($42.74\text{ W/ft}^2$, $+9.64\%$) | **48.07%** ($44.66\text{ W/ft}^2$) | **$3.002\text{ \cent/kWh}$** | **`36 : 72 : 101`** | $50.12\text{ V}$ ($0.19\% / 0.41\%$) |
+
 ---
 
 ## Quick Start & Cross-Repository Verification
@@ -245,12 +261,12 @@ We simultaneously evaluate all 4 Techno-Economic Figures of Merit against a sing
 python3 -m failsmart_matengine.orchestrator
 ```
 
-### Run the Live Materials Project Discovery + 3D Phonon/NEB, Graded-ARC TMM & Techno-Economic Engine
+### Run the Live Materials Project Discovery + 3D Phonon/NEB, Graded-ARC TMM, LCOE & Bifacial/String Engine
 ```bash
 python3 -m failsmart_matengine.mp_live_discovery
 ```
 
-### Run the Comprehensive Automated Scientific Test Suite (18/18 Tests)
+### Run the Comprehensive Automated Scientific Test Suite (20/20 Tests Passing, expanded from 18/18)
 ```bash
 pytest -v
 ```
@@ -259,5 +275,3 @@ pytest -v
 ```bash
 python3 -m failsmart_matengine.repo_auditor
 ```
-
-

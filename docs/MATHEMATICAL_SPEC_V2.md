@@ -362,5 +362,49 @@ For both 2-Layer ($\eta = \eta_{\text{2L}}, N=2, \Delta C = \Delta C_{\text{2L}}
        $$\text{LCOE}_{\text{cents/kWh}} = 100.0 \times \frac{\text{CAPEX}_{\text{m2}} + \text{OM}_{\text{disc,25yr}}}{E_{\text{disc,25yr}}}$$
      *(Compared directly against standalone $22.0\%$ single-junction c-Si baseline $\text{LCOE}_{\text{Si,ref}}$ under identical $45^\circ\text{C}$ NOCT and $0.45\%/\text{yr}$ c-Si degradation).*
 
+---
 
+## 10. Phase 10 Engineering Extensions: 2D Thickness & Graded-ARC Global Optimization (10A), Bifacial Albedo Harvesting (10B), and SPICE Subcell $J\text{–}V$ String Architecture (10C) (v7.0)
+
+### 10.1 Phase 10A — 2D Thickness & Graded-ARC Global Coherent Optimization
+1. **7-Layer Coherent Stack Parameter Space ($2^4 = 16$ Full-Factorial Design Grid):**
+   * Given baseline candidate film thicknesses $d_{1,0}\text{ [nm]}$ (Top Active Glass) and $d_{3,0}\text{ [nm]}$ (Bottom IR Scavenger), we evaluate the coherent 7-medium optical stack (`Air / d_MgF2 / 80 nm ITO / d_TiO2 / d_top Absorber / 82 nm Buffer / Couplant -> 160 um c-Si -> d_bot Absorber / 4n^2 Ag Mirror`) over the $2^4 = 16$ full-factorial design grid:
+     $$d_{\text{MgF}_2} \in \{88.0, 94.0\}\text{ nm}, \quad d_{\text{TiO}_2} \in \{42.0, 48.0\}\text{ nm}$$
+     $$d_{\text{top}} \in \{d_{1,0},\; \text{round}(1.15\,d_{1,0}, 1)\}\text{ nm}, \quad d_{\text{bot}} \in \{d_{3,0},\; \text{round}(1.15\,d_{3,0}, 1)\}\text{ nm}$$
+   * Note that front window parasitic attenuation in Layer 2 ($80\text{ nm}$ ITO) and Layer 3 ($d_{\text{TiO}_2}$ $\text{TiO}_2$) scales with the actual $\text{TiO}_2$ thickness:
+     $$T_{\text{win,front}}(\lambda) = \exp\!\left(-\frac{4\pi\left(k_{\text{ITO}}(\lambda)\cdot 80.0 + k_{\text{TiO}_2}(\lambda)\cdot d_{\text{TiO}_2}\right)}{\lambda_{\text{nm}}}\right)$$
+   * **Optimization Objective:** Maximize the unrounded 1-sun AM1.5G coherent 4T low-FCA stack efficiency $\eta_{\text{4T,opt}}(d_{\text{MgF}_2}^*, d_{\text{TiO}_2}^*, d_{\text{top}}^*, d_{\text{bot}}^*)$ subject to strict photon conservation $A_1(\lambda) + T_1(\lambda) + R_1(\lambda) \le 1.0 + 10^{-9}$ at every wavelength.
+   * **Dual-Redundancy Cross-Check:** Primary engine (`atomistic_and_tmm.py`) finds and evaluates $\eta_{\text{4T,opt}}$ via $2\times 2$ Abeles matrix multiplication (`np.trapezoid`), while the blinded verifier (`independent_verifier.py`) independently evaluates the 16-point factorial grid via Recursive Rouard/Airy amplitude addition (`scipy.integrate.simpson`), verifying agreement within $\le 0.05\%$.
+
+### 10.2 Phase 10B — Bifacial Ground-Albedo ($R_{\text{albedo}} \in \{0.00, 0.20, 0.30\}$) Rear-Side IR Harvesting
+1. **Bifacial Rear-Side Illumination Physics (at Optimal Thickness Tuple $(d_{\text{MgF}_2}^*, d_{\text{TiO}_2}^*, d_{\text{top}}^*, d_{\text{bot}}^*)$):**
+   * In a 4-Terminal Silicon-Sandwich with a transparent conductive rear electrode + dielectric/grid aperture ($f_{\text{rear,aperture}} = 0.78$, rear TCO transmittance $T_{\text{ITO,rear}} = 0.92$), diffuse ground-reflected AM1.5G solar photon flux entering the rear of the Bottom IR Scavenger under ground albedo $R_{\text{albedo}} \in \{0.00, 0.20, 0.30\}$ is:
+     $$\Phi_{\text{rear}}(\lambda) = R_{\text{albedo}} \cdot f_{\text{rear,aperture}} \cdot \Phi_{\text{sun}}(\lambda) = 0.78\,R_{\text{albedo}}\,\Phi_{\text{sun}}(\lambda)$$
+   * The Bottom IR Scavenger receives combined front-transmitted + rear-albedo photon flux:
+     $$\Phi_{3,\text{tot}}(\lambda, R_{\text{albedo}}) = \Phi_{3,\text{front}}(\lambda) + \Phi_{\text{rear}}(\lambda)$$
+     and harvests it with external absorptance $A_{\text{ARC},3}(\lambda) = (1.0 - R_{\text{int},23})\,f_{\text{abs},3}(\lambda, d_{\text{bot}}^*)$.
+   * Unabsorbed rear-albedo photons transmit upward through the Bottom IR Scavenger and rear TCO ($T_{\text{ITO,rear}} = 0.92$) into the bifacial $160\text{ }\mu\text{m}$ c-Si wafer:
+     $$\Phi_{2,\text{rear}}(\lambda, R_{\text{albedo}}) = \Phi_{\text{rear}}(\lambda)\cdot\left(1.0 - f_{\text{abs},3}(\lambda, d_{\text{bot}}^*)\right)\cdot 0.92$$
+     so the middle c-Si wafer receives total photon flux:
+     $$\Phi_{2,\text{tot}}(\lambda, R_{\text{albedo}}) = \Phi_{2,\text{front}}(\lambda) + \Phi_{2,\text{rear}}(\lambda, R_{\text{albedo}})$$
+     and harvests it with external absorptance $0.98\,f_{\text{abs,Si,3L}}(\lambda)$.
+   * **Equivalent Bifacial 1-Sun Efficiency ($\text{PCE}_{\text{bifacial}}$), Power Density ($\text{W/ft}^2$), Bifacial Gain ($\%$), and 25-Year Bifacial LCOE ($\text{cents/kWh}$):**
+     $$\eta_{\text{4T,bifacial}}(R_{\text{albedo}}) = \eta_{\text{top}}^* + \eta_{\text{Si}}^*(R_{\text{albedo}}) + \eta_{\text{bot}}^*(R_{\text{albedo}})$$
+     $$P_{\text{sqft}}(R_{\text{albedo}}) = 10.0 \cdot \eta_{\text{4T,bifacial}}(R_{\text{albedo}}) \cdot 0.09290304\text{ [W/ft}^2\text{]}$$
+     $$\text{Gain}_{\text{bifacial},20\%}(\%) = \frac{\eta_{\text{4T,bifacial}}(0.20) - \eta_{\text{4T,bifacial}}(0.00)}{\eta_{\text{4T,bifacial}}(0.00)} \times 100$$
+   * **25-Year Bifacial LCOE at $R_{\text{albedo}} = 0.20$:** Evaluated using the exact Section 9.3 discounted 25-year LCOE formula (`_compute_lcoe_cents_kwh`) with $P_{\text{m2,bifacial}} = 10.0 \cdot \text{round}(\eta_{\text{4T,bifacial}}(0.20), 2)\text{ [W}_{\text{p}}\text{/m}^2\text{]}$, active layer material costs scaled to the optimized thicknesses $(d_{\text{top}}^* / d_{1,0})\cdot C_{\text{raw,top}}$ and $(d_{\text{bot}}^* / d_{3,0})\cdot C_{\text{raw,bot}}$, NOCT derating factor $f_{\text{NOCT,3L}}$, and Arrhenius degradation rate $r_{\text{deg}}$ (whilst keeping nameplate inverter/power BOS scaled to $P_{\text{m2,bifacial}}$).
+
+### 10.3 Phase 10C — Subcell $J\text{–}V$ Operating-Point (`J_sc`, `V_oc`, `FF`, `V_mp`) & Integer Parallel-String Voltage-Matching Dossier
+1. **Exact Subcell $J\text{–}V$ Operating Point Decomposition:**
+   * At the optimal 7-medium Graded-ARC stack configuration ($R_{\text{albedo}} = 0.00$, $T = 300\text{ K}$, $V_{\text{th}} = 0.02585199\text{ V}$), both primary and blinded engines extract the full 1-sun operating point for all 3 subcells ($k \in \{\text{Top}, \text{Si}, \text{Bot}\}$):
+     * Short-circuit current density $J_{\text{sc},k}\text{ [mA/cm}^2\text{]}$,
+     * Open-circuit voltage $V_{\text{oc},k}\text{ [V]}$,
+     * Fill factor $\text{FF}_k = \frac{v_k - \ln(v_k + 0.72)}{v_k + 1.0}$ where $v_k = V_{\text{oc},k} / V_{\text{th}}$,
+     * Maximum-power-point voltage $V_{\text{mp},k}\text{ [V]}$ from the analytical single-diode maximum power condition:
+       $$V_{\text{mp},k} = V_{\text{oc},k} - V_{\text{th}}\ln\!\left(\frac{V_{\text{oc},k}}{V_{\text{th}}} + 0.72\right)$$
+2. **4-Terminal Module Integer Series-Cell String Voltage Matching ($N_{\text{top}} : N_{\text{Si}} : N_{\text{bot}}$):**
+   * Given a standard $N_{\text{Si}} = 72$-cell crystalline silicon string with bus voltage $V_{\text{bus,Si}} = N_{\text{Si}} \cdot V_{\text{mp,Si}}$ (using unrounded $V_{\text{mp},k}$ before final rounding), the optimal integer series cell counts $N_{\text{top}}$ and $N_{\text{bot}}$ for parallel DC-bus coupling without DC-DC converter step-up loss are:
+     $$N_{\text{top}} = \text{int}\!\left(\text{round}\!\left(\frac{72 \cdot V_{\text{mp,Si}}}{V_{\text{mp,top}}}\right)\right), \quad N_{\text{bot}} = \text{int}\!\left(\text{round}\!\left(\frac{72 \cdot V_{\text{mp,Si}}}{V_{\text{mp,bot}}}\right)\right)$$
+   * The string voltage mismatch percentage for parallel string connection is:
+     $$\Delta V_{\text{mismatch,top}}(\%) = \frac{|N_{\text{top}} V_{\text{mp,top}} - V_{\text{bus,Si}}|}{V_{\text{bus,Si}}} \times 100, \quad \Delta V_{\text{mismatch,bot}}(\%) = \frac{|N_{\text{bot}} V_{\text{mp,bot}} - V_{\text{bus,Si}}|}{V_{\text{bus,Si}}} \times 100$$
 

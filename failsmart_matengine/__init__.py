@@ -12,6 +12,7 @@ from .independent_verifier import (
     independently_verify_phase9a_lab_and_defect_dossier,
     independently_verify_phase9b_contrastive_audit,
     independently_verify_phase9c_oblique_thermal_lcoe,
+    independently_verify_phase10_bifacial_and_string_dossier,
     simpson_13,
     verify_candidate_dossier,
 )

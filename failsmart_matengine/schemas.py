@@ -319,4 +319,47 @@ class RealWorldLCOEStressTestReport(BaseModel):
     sha256_signature: str
 
 
+class Phase10BifacialLossAndStringDossier(BaseModel):
+    """Phase 10A/10B/10C: Thickness/ARC Global Optimization, Bifacial Albedo Harvesting & SPICE String Dossier (v7.0)."""
+    pair_id: str
+    top_mp_id: str
+    top_formula: str
+    bottom_mp_id: str
+    bottom_formula: str
+    opt_mgf2_nm: float
+    opt_tio2_nm: float
+    opt_top_nm: float
+    opt_bot_nm: float
+    opt_r_front_percent: float
+    opt_monofacial_4t_pce_percent: float
+    bifacial_20pct_albedo_4t_pce_percent: float
+    bifacial_20pct_power_w_sqft: float
+    bifacial_30pct_albedo_4t_pce_percent: float
+    bifacial_30pct_power_w_sqft: float
+    bifacial_20pct_gain_percent: float
+    bifacial_20pct_lcoe_cents_kwh: float
+    top_jsc_ma_cm2: float
+    top_voc_v: float
+    top_ff: float
+    top_vmp_v: float
+    si_jsc_ma_cm2: float
+    si_voc_v: float
+    si_ff: float
+    si_vmp_v: float
+    bot_jsc_ma_cm2: float
+    bot_voc_v: float
+    bot_ff: float
+    bot_vmp_v: float
+    n_cells_si_ref: int
+    n_cells_top_matched: int
+    n_cells_bot_matched: int
+    v_bus_si_v: float
+    top_string_mismatch_percent: float
+    bot_string_mismatch_percent: float
+    rouard_opt_diff_percent: float
+    phase10_redundancy_verified: bool
+    sha256_signature: str
+
+
+
 

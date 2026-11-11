@@ -40,6 +40,7 @@ from .schemas import (
     ContrastiveClassifierAuditReport,
     GradedARCTechnoEconomicReport,
     LabSynthesisAndDefectDossier,
+    Phase10BifacialLossAndStringDossier,
     RealWorldLCOEStressTestReport,
 )
 
@@ -1287,5 +1288,349 @@ def evaluate_phase9c_real_world_lcoe_stress_test(
         lcoe_redundancy_verified=lcoe_ok,
         sha256_signature=blind_9c["sha256_signature"],
     )
+
+
+def compute_abeles_7medium_custom_tmm(
+    wl_nm: np.ndarray,
+    e_ev: np.ndarray,
+    eg_ind_1: float,
+    eg_dir_1: float,
+    eps_inf_1: float,
+    d_mgf2_nm: float,
+    d_tio2_nm: float,
+    d_top_nm: float,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Method A (Section 10.1): Vectorized 2x2 Abeles TMM on 7-Medium Stack with custom (d_MgF2, d_TiO2, d_top)."""
+    wl_um = wl_nm / 1000.0
+    n_pts = len(wl_nm)
+
+    n0 = np.ones_like(wl_nm, dtype=np.complex128)
+    n1 = (1.377 + 0.0032 / (wl_um**2)).astype(np.complex128)
+
+    n_ito_real = np.maximum(1.45, 1.92 - 0.085 * (wl_um**2))
+    k_ito = 0.0018 + 0.0065 * (wl_um**3)
+    n2 = n_ito_real + 1j * k_ito
+
+    n_tio2_real = 2.380 + 0.0180 / (wl_um**2)
+    k_tio2 = 0.0004 * (wl_um**2)
+    n3 = n_tio2_real + 1j * k_tio2
+
+    alpha1 = 1.2e5 * (np.maximum(0.0, e_ev - eg_ind_1) ** 2) + 2.8e7 * np.sqrt(
+        np.maximum(0.0, e_ev - eg_dir_1)
+    )
+    n_act_real = math.sqrt(eps_inf_1) + 0.035 / (wl_um**2)
+    k_act = (alpha1 * (wl_nm * 1.0e-9)) / (4.0 * math.pi)
+    n4 = n_act_real + 1j * k_act
+
+    n_buf_real = 1.720 + 0.0040 / (wl_um**2)
+    k_buf = 0.0012 * (wl_um**2)
+    n5 = n_buf_real + 1j * k_buf
+    n6 = np.full_like(wl_nm, 1.520, dtype=np.complex128)
+
+    n_list = [n0, n1, n2, n3, n4, n5, n6]
+    d_list_nm = [0.0, float(d_mgf2_nm), 80.0, float(d_tio2_nm), float(d_top_nm), 82.0, 0.0]
+
+    m_tot = np.zeros((n_pts, 2, 2), dtype=np.complex128)
+    m_tot[:, 0, 0] = 1.0
+    m_tot[:, 1, 1] = 1.0
+
+    for m in range(6):
+        nm_curr = n_list[m]
+        nm_next = n_list[m + 1]
+        r_m = (nm_curr - nm_next) / (nm_curr + nm_next)
+        t_m = (2.0 * nm_curr) / (nm_curr + nm_next)
+
+        i_mat = np.zeros((n_pts, 2, 2), dtype=np.complex128)
+        i_mat[:, 0, 0] = 1.0 / t_m
+        i_mat[:, 0, 1] = r_m / t_m
+        i_mat[:, 1, 0] = r_m / t_m
+        i_mat[:, 1, 1] = 1.0 / t_m
+        m_tot = np.matmul(m_tot, i_mat)
+
+        if m + 1 <= 5:
+            beta = (2.0 * math.pi * n_list[m + 1] * d_list_nm[m + 1]) / wl_nm
+            p_mat = np.zeros((n_pts, 2, 2), dtype=np.complex128)
+            p_mat[:, 0, 0] = np.exp(-1j * beta)
+            p_mat[:, 1, 1] = np.exp(1j * beta)
+            m_tot = np.matmul(m_tot, p_mat)
+
+    r_tot = m_tot[:, 1, 0] / m_tot[:, 0, 0]
+    t_tot = 1.0 / m_tot[:, 0, 0]
+
+    r_arc_1 = np.abs(r_tot) ** 2
+    t_arc_1 = (np.real(n6) / np.real(n0)) * (np.abs(t_tot) ** 2)
+    t_win_front = np.exp(-4.0 * math.pi * (k_ito * 80.0 + k_tio2 * float(d_tio2_nm)) / wl_nm)
+
+    return r_arc_1, t_arc_1, t_win_front, alpha1
+
+
+def evaluate_phase10_bifacial_and_string_dossier(
+    top_dossier: Dict[str, Any],
+    bottom_dossier: Dict[str, Any],
+    pair_id: str,
+) -> Phase10BifacialLossAndStringDossier:
+    """Phase 10A/10B/10C: Evaluate 2^4=16 Thickness/ARC Optimization, Bifacial Albedo & String Matching."""
+    from .independent_verifier import independently_verify_phase10_bifacial_and_string_dossier
+
+    c_top = top_dossier["candidate"]
+    e_top = top_dossier["electronics"]
+    o_top = top_dossier["optics"]
+    s_top = top_dossier["synthesis"]
+    at_top = top_dossier["atomistic_phonon_neb"]
+
+    c_bot = bottom_dossier["candidate"]
+    e_bot = bottom_dossier["electronics"]
+    o_bot = bottom_dossier["optics"]
+    s_bot = bottom_dossier["synthesis"]
+    at_bot = bottom_dossier["atomistic_phonon_neb"]
+
+    eg_ind_1 = float(e_top["hse06_soc_indirect_gap_ev"])
+    eg_dir_1 = float(e_top["hse06_soc_direct_gap_ev"])
+    eps_inf_1 = float(e_top["eps_inf"])
+    d1_base = float(o_top["film_thickness_nm"])
+
+    eg_ind_3 = float(e_bot["hse06_soc_indirect_gap_ev"])
+    eg_dir_3 = float(e_bot["hse06_soc_direct_gap_ev"])
+    eps_inf_3 = float(e_bot["eps_inf"])
+    d3_base = float(o_bot["film_thickness_nm"])
+
+    raw_top = float(s_top["active_layer_cost_usd_m2"])
+    raw_bot = float(s_bot["active_layer_cost_usd_m2"])
+    e_mig_lim = min(float(at_top["neb_saddle_barrier_ev"]), float(at_bot["neb_saddle_barrier_ev"]))
+
+    d_si_m = 160.0e-6
+    alpha_si = 1.1e5 * (np.maximum(0.0, _AM15G_E_EV - 1.12) ** 2) + 1.5e7 * np.sqrt(
+        np.maximum(0.0, _AM15G_E_EV - 3.40)
+    )
+    fabs_si_3l = (16.0 * alpha_si * d_si_m) / (1.0 + 16.0 * alpha_si * d_si_m)
+    t_si_fca_low = np.exp(-0.08 * ((_AM15G_WL_NM / 1200.0) ** 2))
+
+    n3_bot = math.sqrt(eps_inf_3)
+    r_int_23 = 0.20 * (((n3_bot - 1.72) / (n3_bot + 1.72)) ** 2)
+    yab3 = 4.0 * eps_inf_3
+    alpha3 = 1.2e5 * (np.maximum(0.0, _AM15G_E_EV - eg_ind_3) ** 2) + 2.8e7 * np.sqrt(
+        np.maximum(0.0, _AM15G_E_EV - eg_dir_3)
+    )
+
+    mgf2_grid = [88.0, 94.0]
+    tio2_grid = [42.0, 48.0]
+    top_grid = [d1_base, round(1.15 * d1_base, 1)]
+    bot_grid = [d3_base, round(1.15 * d3_base, 1)]
+
+    best_eta_4t = -1.0
+    best_tuple = (94.0, 48.0, d1_base, d3_base)
+    photon_ok_all = True
+
+    for d_mgf2 in mgf2_grid:
+        for d_tio2 in tio2_grid:
+            for d_top in top_grid:
+                r_arc_1, t_arc_1, t_win, alpha1 = compute_abeles_7medium_custom_tmm(
+                    wl_nm=_AM15G_WL_NM,
+                    e_ev=_AM15G_E_EV,
+                    eg_ind_1=eg_ind_1,
+                    eg_dir_1=eg_dir_1,
+                    eps_inf_1=eps_inf_1,
+                    d_mgf2_nm=d_mgf2,
+                    d_tio2_nm=d_tio2,
+                    d_top_nm=d_top,
+                )
+                yab1 = 4.0 * eps_inf_1
+                fabs1 = (yab1 * alpha1 * (d_top * 1.0e-9)) / (1.0 + yab1 * alpha1 * (d_top * 1.0e-9))
+                a_arc_1 = (1.0 - r_arc_1) * t_win * fabs1
+                t_stack_1 = t_arc_1 * (1.0 - fabs1)
+                if float(np.max(a_arc_1 + t_stack_1 + r_arc_1)) > 1.0 + 1.0e-9:
+                    photon_ok_all = False
+
+                _, _, _, eta_top = _solve_cell_iv(a_arc_1, _AM15G_PHI_SUN, eg_dir_1, eg_ind_1)
+                phi2_front = _AM15G_PHI_SUN * t_stack_1
+                _, _, _, eta_si = _solve_cell_iv(
+                    0.98 * fabs_si_3l, phi2_front, 1.12, 1.12, j0_fixed=1.2e-12
+                )
+                phi3_front = phi2_front * 0.96 * (1.0 - fabs_si_3l) * t_si_fca_low
+
+                for d_bot in bot_grid:
+                    fabs3 = (yab3 * alpha3 * (d_bot * 1.0e-9)) / (
+                        1.0 + yab3 * alpha3 * (d_bot * 1.0e-9)
+                    )
+                    a_arc_3 = (1.0 - r_int_23) * fabs3
+                    _, _, _, eta_bot = _solve_cell_iv(a_arc_3, phi3_front, eg_dir_3, eg_ind_3)
+                    eta_tot = eta_top + eta_si + eta_bot
+                    if eta_tot > best_eta_4t:
+                        best_eta_4t = eta_tot
+                        best_tuple = (d_mgf2, d_tio2, d_top, d_bot)
+
+    opt_mgf2, opt_tio2, opt_top, opt_bot = best_tuple
+    r_arc_1, t_arc_1, t_win, alpha1 = compute_abeles_7medium_custom_tmm(
+        wl_nm=_AM15G_WL_NM,
+        e_ev=_AM15G_E_EV,
+        eg_ind_1=eg_ind_1,
+        eg_dir_1=eg_dir_1,
+        eps_inf_1=eps_inf_1,
+        d_mgf2_nm=opt_mgf2,
+        d_tio2_nm=opt_tio2,
+        d_top_nm=opt_top,
+    )
+    yab1 = 4.0 * eps_inf_1
+    fabs1 = (yab1 * alpha1 * (opt_top * 1.0e-9)) / (1.0 + yab1 * alpha1 * (opt_top * 1.0e-9))
+    a_arc_1 = (1.0 - r_arc_1) * t_win * fabs1
+    t_stack_1 = t_arc_1 * (1.0 - fabs1)
+
+    mask_above = (_AM15G_E_EV >= eg_ind_1) & (_AM15G_E_EV <= 3.50)
+    flux_above = float(np.trapezoid(_AM15G_PHI_SUN[mask_above], _AM15G_WL_NM[mask_above]))
+    opt_r_front = float(
+        np.trapezoid(r_arc_1[mask_above] * _AM15G_PHI_SUN[mask_above], _AM15G_WL_NM[mask_above])
+        / max(1.0e-12, flux_above)
+        * 100.0
+    )
+
+    fabs3_opt = (yab3 * alpha3 * (opt_bot * 1.0e-9)) / (1.0 + yab3 * alpha3 * (opt_bot * 1.0e-9))
+    a_arc_3_opt = (1.0 - r_int_23) * fabs3_opt
+
+    top_jsc, top_voc, top_ff, eta_top_opt = _solve_cell_iv(
+        a_arc_1, _AM15G_PHI_SUN, eg_dir_1, eg_ind_1
+    )
+    phi2_front = _AM15G_PHI_SUN * t_stack_1
+    si_jsc_0, si_voc_0, si_ff_0, eta_si_0 = _solve_cell_iv(
+        0.98 * fabs_si_3l, phi2_front, 1.12, 1.12, j0_fixed=1.2e-12
+    )
+    phi3_front = phi2_front * 0.96 * (1.0 - fabs_si_3l) * t_si_fca_low
+    bot_jsc_0, bot_voc_0, bot_ff_0, eta_bot_0 = _solve_cell_iv(
+        a_arc_3_opt, phi3_front, eg_dir_3, eg_ind_3
+    )
+    eta_4t_0 = eta_top_opt + eta_si_0 + eta_bot_0
+
+    # Phase 10B: Bifacial Albedo Harvesting (R_albedo = 0.20 and 0.30)
+    def _eval_albedo(r_alb: float) -> float:
+        phi_rear = 0.78 * r_alb * _AM15G_PHI_SUN
+        phi3_tot = phi3_front + phi_rear
+        _, _, _, e_bot_alb = _solve_cell_iv(a_arc_3_opt, phi3_tot, eg_dir_3, eg_ind_3)
+        phi2_rear = phi_rear * (1.0 - fabs3_opt) * 0.92
+        phi2_tot = phi2_front + phi2_rear
+        _, _, _, e_si_alb = _solve_cell_iv(
+            0.98 * fabs_si_3l, phi2_tot, 1.12, 1.12, j0_fixed=1.2e-12
+        )
+        return eta_top_opt + e_si_alb + e_bot_alb
+
+    eta_4t_20 = _eval_albedo(0.20)
+    eta_4t_30 = _eval_albedo(0.30)
+
+    p_sqft_20 = 10.0 * eta_4t_20 * SQFT_TO_M2
+    p_sqft_30 = 10.0 * eta_4t_30 * SQFT_TO_M2
+    bifacial_gain_20 = ((eta_4t_20 - eta_4t_0) / max(1e-9, eta_4t_0)) * 100.0
+
+    # 25-Year Bifacial LCOE at R_albedo = 0.20
+    gamma_top = -0.00440 / (eg_ind_1**0.65)
+    gamma_si = -0.00440 / (1.12**0.65)
+    gamma_bot = -0.00440 / (eg_ind_3**0.65)
+    f_noct_3l = (
+        eta_top_opt * (1.0 + gamma_top * 20.0)
+        + eta_si_0 * (1.0 + gamma_si * 20.0)
+        + eta_bot_0 * (1.0 + gamma_bot * 20.0)
+    ) / max(1e-9, eta_4t_0)
+
+    kb_t_318 = (KB_J * 318.15) / E_CHARGE
+    r_deg = 0.0035 + 0.0010 * math.exp(-max(0.0, e_mig_lim - 0.65) / kb_t_318)
+
+    c_top_opt = raw_top * (opt_top / d1_base)
+    c_bot_opt = raw_bot * (opt_bot / d3_base)
+    c_mod_3l = 40.00 + c_top_opt + c_bot_opt + 2.0 * SUBCELL_PROCESS_TCO_COST_USD_M2
+
+    p_m2_bif20 = 10.0 * round(eta_4t_20, 2)
+    capex_m2 = c_mod_3l + BOS_AREA_COST_USD_M2 + 0.22 * p_m2_bif20
+    om_disc = sum(2.50 / ((1.0 + 0.06) ** t) for t in range(1, 26))
+    e_disc = sum(
+        ((p_m2_bif20 / 1000.0) * 1800.0 * f_noct_3l * ((1.0 - r_deg) ** (t - 1)))
+        / ((1.0 + 0.06) ** t)
+        for t in range(1, 26)
+    )
+    lcoe_bif20 = 100.0 * (capex_m2 + om_disc) / max(1e-9, e_disc)
+
+    # Phase 10C: Subcell J-V Operating Point & Integer Parallel-String Voltage Matching
+    v_th = 0.02585199
+    top_vmp_raw = top_voc - v_th * math.log((top_voc / v_th) + 0.72)
+    si_vmp_raw = si_voc_0 - v_th * math.log((si_voc_0 / v_th) + 0.72)
+    bot_vmp_raw = bot_voc_0 - v_th * math.log((bot_voc_0 / v_th) + 0.72)
+
+    n_si_ref = 72
+    v_bus_si = n_si_ref * si_vmp_raw
+    n_top_match = int(round(v_bus_si / top_vmp_raw))
+    n_bot_match = int(round(v_bus_si / bot_vmp_raw))
+
+    mismatch_top_pct = abs(n_top_match * top_vmp_raw - v_bus_si) / v_bus_si * 100.0
+    mismatch_bot_pct = abs(n_bot_match * bot_vmp_raw - v_bus_si) / v_bus_si * 100.0
+
+    blind_10 = independently_verify_phase10_bifacial_and_string_dossier(
+        eg_ind_1=eg_ind_1,
+        eg_dir_1=eg_dir_1,
+        eps_inf_1=eps_inf_1,
+        thickness_nm_1=d1_base,
+        eg_ind_3=eg_ind_3,
+        eg_dir_3=eg_dir_3,
+        eps_inf_3=eps_inf_3,
+        thickness_nm_3=d3_base,
+        raw_cost_top_usd_m2=raw_top,
+        raw_cost_bot_usd_m2=raw_bot,
+        limiting_neb_barrier_ev=e_mig_lim,
+    )
+
+    rouard_opt_diff = round(
+        abs(round(eta_4t_0, 2) - blind_10["opt_monofacial_4t_pce_percent"]), 4
+    )
+    ok_10 = bool(
+        photon_ok_all
+        and blind_10["photon_conservation_holds"]
+        and rouard_opt_diff <= 0.05
+        and abs(round(eta_4t_20, 2) - blind_10["bifacial_20pct_albedo_4t_pce_percent"]) <= 0.05
+        and abs(round(lcoe_bif20, 4) - blind_10["bifacial_20pct_lcoe_cents_kwh"]) <= 0.01
+        and n_top_match == blind_10["n_cells_top_matched"]
+        and n_bot_match == blind_10["n_cells_bot_matched"]
+    )
+    if not ok_10:
+        raise AssertionError(
+            f"REDUNDANCY_MISMATCH_BLOCK: Phase 10 mismatch on {pair_id}: "
+            f"rouard_opt_diff={rouard_opt_diff:.4f}%, ok_10={ok_10}"
+        )
+
+    return Phase10BifacialLossAndStringDossier(
+        pair_id=pair_id,
+        top_mp_id=c_top["candidate_id"],
+        top_formula=c_top["formula_reduced"],
+        bottom_mp_id=c_bot["candidate_id"],
+        bottom_formula=c_bot["formula_reduced"],
+        opt_mgf2_nm=opt_mgf2,
+        opt_tio2_nm=opt_tio2,
+        opt_top_nm=opt_top,
+        opt_bot_nm=opt_bot,
+        opt_r_front_percent=round(opt_r_front, 2),
+        opt_monofacial_4t_pce_percent=round(eta_4t_0, 2),
+        bifacial_20pct_albedo_4t_pce_percent=round(eta_4t_20, 2),
+        bifacial_20pct_power_w_sqft=round(p_sqft_20, 2),
+        bifacial_30pct_albedo_4t_pce_percent=round(eta_4t_30, 2),
+        bifacial_30pct_power_w_sqft=round(p_sqft_30, 2),
+        bifacial_20pct_gain_percent=round(bifacial_gain_20, 2),
+        bifacial_20pct_lcoe_cents_kwh=round(lcoe_bif20, 4),
+        top_jsc_ma_cm2=round(top_jsc, 2),
+        top_voc_v=round(top_voc, 4),
+        top_ff=round(top_ff, 4),
+        top_vmp_v=round(top_vmp_raw, 4),
+        si_jsc_ma_cm2=round(si_jsc_0, 2),
+        si_voc_v=round(si_voc_0, 4),
+        si_ff=round(si_ff_0, 4),
+        si_vmp_v=round(si_vmp_raw, 4),
+        bot_jsc_ma_cm2=round(bot_jsc_0, 2),
+        bot_voc_v=round(bot_voc_0, 4),
+        bot_ff=round(bot_ff_0, 4),
+        bot_vmp_v=round(bot_vmp_raw, 4),
+        n_cells_si_ref=n_si_ref,
+        n_cells_top_matched=n_top_match,
+        n_cells_bot_matched=n_bot_match,
+        v_bus_si_v=round(v_bus_si, 2),
+        top_string_mismatch_percent=round(mismatch_top_pct, 2),
+        bot_string_mismatch_percent=round(mismatch_bot_pct, 2),
+        rouard_opt_diff_percent=rouard_opt_diff,
+        phase10_redundancy_verified=ok_10,
+        sha256_signature=blind_10["sha256_signature"],
+    )
+
 
 

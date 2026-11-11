@@ -323,7 +323,18 @@ class RepoConsistencyAuditor:
             assert rw["lcoe_redundancy_verified"] is True
             assert rw["lcoe_3layer_vs_si_reduction_percent"] > 32.0
 
-        self.log("   [OK] live_mp_discovery_summary.json verified: 100 -> 91 -> 52 -> 40 -> 8 finalists, 8 D-matrix/NEB & Lab/Defect dossiers, 117-MP Contrastive Audit, 15 Single-ARC, 15 Graded-ARC & 15 Real-World LCOE stacks.")
+        # v7.0 Phase 10A, 10B, and 10C Checks
+        assert self.live_summary_data.get("v7_phase10_bifacial_and_string_enabled") is True
+        p10_stacks = self.live_summary_data.get("phase10_bifacial_and_string_dossiers", [])
+        assert len(p10_stacks) == 15, f"Expected 15 phase10_bifacial_and_string_dossiers, got {len(p10_stacks)}"
+        for p10 in p10_stacks:
+            assert p10["phase10_redundancy_verified"] is True
+            assert p10["rouard_opt_diff_percent"] <= 0.05
+            assert p10["bifacial_20pct_albedo_4t_pce_percent"] > p10["opt_monofacial_4t_pce_percent"]
+            assert p10["bifacial_30pct_albedo_4t_pce_percent"] > p10["bifacial_20pct_albedo_4t_pce_percent"]
+            assert p10["n_cells_si_ref"] == 72
+
+        self.log("   [OK] live_mp_discovery_summary.json verified: 100 -> 91 -> 52 -> 40 -> 8 finalists, 8 D-matrix/NEB & Lab/Defect dossiers, 117-MP Contrastive Audit, 15 Single-ARC, 15 Graded-ARC, 15 Real-World LCOE & 15 Phase 10 Bifacial/String stacks.")
 
     def audit_negative_synthesis_priors(self) -> None:
         """Audit LBNL 80k solid-state recipes and A-Lab precursor genome negative priors."""

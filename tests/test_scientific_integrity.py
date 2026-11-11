@@ -96,6 +96,7 @@ from failsmart_matengine.independent_verifier import (
     independently_verify_phase9a_lab_and_defect_dossier,
     independently_verify_phase9b_contrastive_audit,
     independently_verify_phase9c_oblique_thermal_lcoe,
+    independently_verify_phase10_bifacial_and_string_dossier,
 )
 from pymatgen.core import Structure
 import subprocess
@@ -1147,6 +1148,74 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
                 0.01,
                 f"{pid}: 3L LCOE diff > 0.01 c/kWh",
             )
+
+    def test_step5_phase10_opt_thickness_bifacial_and_string_matching(self):
+        """Test 20: Verify Phase 10A (16-grid Thickness/ARC Optimization), Phase 10B (Bifacial Albedo 20%/30% & LCOE), and Phase 10C (Subcell J-V & String Matching)."""
+        live_sum_path = os.path.join(self.repo_root, "outputs", "live_mp_discovery_summary.json")
+        with open(live_sum_path, "r", encoding="utf-8") as f:
+            live_sum = json.load(f)
+
+        self.assertTrue(live_sum.get("v7_phase10_bifacial_and_string_enabled"))
+        p10_stacks = live_sum.get("phase10_bifacial_and_string_dossiers", [])
+        self.assertEqual(len(p10_stacks), 15, f"Expected 15 phase10_bifacial_and_string_dossiers, got {len(p10_stacks)}")
+
+        finalists_by_id = {f["candidate"]["candidate_id"]: f for f in live_sum.get("finalists", [])}
+        graded_by_id = {g["pair_id"]: g for g in live_sum.get("graded_arc_techno_economic_stacks", [])}
+
+        for p10 in p10_stacks:
+            pid = p10["pair_id"]
+            self.assertTrue(p10["phase10_redundancy_verified"], f"{pid}: Phase 10 redundancy check failed")
+            self.assertLessEqual(p10["rouard_opt_diff_percent"], 0.05, f"{pid}: Rouard opt diff > 0.05%")
+            self.assertGreaterEqual(
+                p10["opt_monofacial_4t_pce_percent"],
+                graded_by_id[pid]["graded_4t_low_fca_pce_percent"],
+                f"{pid}: Optimized monofacial PCE must be >= baseline Graded-ARC 4T PCE",
+            )
+            self.assertGreater(
+                p10["bifacial_20pct_albedo_4t_pce_percent"],
+                p10["opt_monofacial_4t_pce_percent"],
+                f"{pid}: 20% albedo bifacial PCE must exceed monofacial PCE",
+            )
+            self.assertGreater(
+                p10["bifacial_30pct_albedo_4t_pce_percent"],
+                p10["bifacial_20pct_albedo_4t_pce_percent"],
+                f"{pid}: 30% albedo bifacial PCE must exceed 20% albedo PCE",
+            )
+            self.assertEqual(p10["n_cells_si_ref"], 72)
+            self.assertLess(p10["top_string_mismatch_percent"], 2.0, f"{pid}: Top string mismatch >= 2.0%")
+            self.assertLess(p10["bot_string_mismatch_percent"], 2.0, f"{pid}: Bottom string mismatch >= 2.0%")
+
+            top_f = finalists_by_id[p10["top_mp_id"]]
+            bot_f = finalists_by_id[p10["bottom_mp_id"]]
+            e_mig_lim = min(
+                top_f["atomistic_phonon_neb"]["neb_saddle_barrier_ev"],
+                bot_f["atomistic_phonon_neb"]["neb_saddle_barrier_ev"],
+            )
+            iv_10 = independently_verify_phase10_bifacial_and_string_dossier(
+                eg_ind_1=top_f["electronics"]["hse06_soc_indirect_gap_ev"],
+                eg_dir_1=top_f["electronics"]["hse06_soc_direct_gap_ev"],
+                eps_inf_1=top_f["electronics"]["eps_inf"],
+                thickness_nm_1=top_f["optics"]["film_thickness_nm"],
+                eg_ind_3=bot_f["electronics"]["hse06_soc_indirect_gap_ev"],
+                eg_dir_3=bot_f["electronics"]["hse06_soc_direct_gap_ev"],
+                eps_inf_3=bot_f["electronics"]["eps_inf"],
+                thickness_nm_3=bot_f["optics"]["film_thickness_nm"],
+                raw_cost_top_usd_m2=top_f["synthesis"]["active_layer_cost_usd_m2"],
+                raw_cost_bot_usd_m2=bot_f["synthesis"]["active_layer_cost_usd_m2"],
+                limiting_neb_barrier_ev=e_mig_lim,
+            )
+            self.assertLessEqual(
+                abs(p10["bifacial_20pct_albedo_4t_pce_percent"] - iv_10["bifacial_20pct_albedo_4t_pce_percent"]),
+                0.05,
+                f"{pid}: Bifacial 20% PCE diff > 0.05%",
+            )
+            self.assertLessEqual(
+                abs(p10["bifacial_20pct_lcoe_cents_kwh"] - iv_10["bifacial_20pct_lcoe_cents_kwh"]),
+                0.01,
+                f"{pid}: Bifacial 20% LCOE diff > 0.01 c/kWh",
+            )
+            self.assertEqual(p10["n_cells_top_matched"], iv_10["n_cells_top_matched"])
+            self.assertEqual(p10["n_cells_bot_matched"], iv_10["n_cells_bot_matched"])
 
 
 if __name__ == "__main__":
