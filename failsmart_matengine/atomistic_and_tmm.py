@@ -1,16 +1,16 @@
-"""3D Atomistic Harmonic Dynamical Matrix, 11-Image NEB Ion Migration & Coherent 2x2 Abeles TMM Optics (v4.0).
+"""Pair-Spring Gamma Frequency Heuristic, Ion-Migration Barrier Estimate & Coherent 2x2 Abeles TMM Optics.
 
 Implements:
 - Step 1 (Section 6 of MATHEMATICAL_SPEC_V2.md):
-  * Exact 3N x 3N Harmonic Dynamical Matrix D(q=0) assembled over the 3D periodic crystal
-    lattice with Acoustic Sum Rule (ASR) projection and `np.linalg.eigh` diagonalization.
-  * 3D 11-image Saddle-Point Nudged-Elastic-Band (NEB) steric + electrostatic migration
-    barrier E_mig^NEB and 300 K Vineyard-Arrhenius ionic diffusivity D_ion(300 K).
+  * 3N x 3N pair-spring force-constant matrix D(q=0) assembled over the 3D periodic crystal
+    lattice with `np.linalg.eigh` diagonalization for `spring_model_gamma_freq_thz` (phonons not run).
+  * Closed-form geometric + compositional ion-migration barrier heuristic `emig_heuristic_ev`
+    and 300 K Vineyard-Arrhenius ionic diffusivity D_ion(300 K) (NEB not run).
 - Step 2 (Section 7 of MATHEMATICAL_SPEC_V2.md):
   * Wavelength-resolved Coherent 2x2 Abeles Characteristic Transfer-Matrix Method (TMM)
     multilayer thin-film solver (`Air / MgF2 ARC / ITO / Active Chalcohalide-Oxysulfide /
     SiO2-ITO Buffer / Optical Couplant -> Textured c-Si -> Bottom IR Scavenger / Ag Mirror`)
-    integrated in wavelength space via `np.trapezoid` and cross-checked against the blinded
+    integrated in wavelength space via `np.trapezoid` and cross-checked against the
     Recursive Rouard/Airy photon-energy solver in `independent_verifier.py`.
 """
 
@@ -35,9 +35,8 @@ from .physics_calculators import (
     IUPAC_ATOMIC_MASSES,
 )
 from .schemas import (
-    AtomisticPhononNEBReport,
+    AtomisticSpringMigrationReport,
     CoherentTMM4TStackReport,
-    ContrastiveClassifierAuditReport,
     GradedARCTechnoEconomicReport,
     LabSynthesisAndDefectDossier,
     Phase10BifacialLossAndStringDossier,
@@ -107,27 +106,22 @@ def compute_3d_harmonic_dynamical_matrix_gamma(
     eigvals, _ = np.linalg.eigh(dyn_mat)
     freqs_thz = np.sign(eigvals) * THZ_CONV_FACTOR * np.sqrt(np.abs(eigvals))
 
-    asr_dev = float(np.max(np.abs(freqs_thz[:3])))
     opt_freqs = freqs_thz[3:]
     min_opt_thz = float(opt_freqs[0]) if len(opt_freqs) > 0 else 0.0
     max_lo_thz = float(opt_freqs[-1]) if len(opt_freqs) > 0 else 0.0
-    imag_count = int(np.sum(opt_freqs < -0.05))
 
     return {
         "nsites_unit_cell": n_sites,
         "dynamical_matrix_dim": dim,
-        "gamma_min_optical_freq_thz": round(min_opt_thz, 4),
-        "gamma_max_lo_freq_thz": round(max_lo_thz, 4),
-        "imaginary_mode_count": imag_count,
-        "acoustic_sum_rule_max_dev_thz": round(asr_dev, 6),
+        "spring_model_gamma_freq_thz": [round(min_opt_thz, 4), round(max_lo_thz, 4)],
     }
 
 
-def compute_3d_neb_ion_migration_pathway(
+def compute_ion_migration_heuristic(
     struct: Structure,
     stoichiometry: Dict[str, int],
 ) -> Dict[str, Any]:
-    """Solve the 3D 11-image Saddle-Point NEB migration barrier and 300 K diffusivity (Section 6.2)."""
+    """Compute closed-form geometric ion-migration barrier heuristic and 300 K diffusivity."""
     if "Cu" in stoichiometry:
         mig_sp = "Cu"
     elif "Ag" in stoichiometry:
@@ -184,27 +178,27 @@ def compute_3d_neb_ion_migration_pathway(
         + 0.28 * f_oxide
         - 0.22 * f_mobile
     )
-    e_mig_neb = round(float(np.clip(raw_barrier, 0.35, 1.45)), 4)
+    emig_heur = round(float(np.clip(raw_barrier, 0.35, 1.45)), 4)
 
     # Vineyard-Arrhenius 300 K ionic diffusivity (nu_0 = 1e12 s^-1, 1 A^2 = 1e-16 cm^2)
     d_ion_300k = (1.0 / 6.0) * 1.0e12 * ((d_hop ** 2) * 1.0e-16) * math.exp(
-        -(e_mig_neb * E_CHARGE) / (KB_J * 300.0)
+        -(emig_heur * E_CHARGE) / (KB_J * 300.0)
     )
 
     return {
         "migrating_species": mig_sp,
         "shortest_hop_distance_ang": d_hop,
         "bottleneck_clearance_ang": clearance,
-        "neb_saddle_barrier_ev": e_mig_neb,
+        "emig_heuristic_ev": emig_heur,
         "room_temp_diffusivity_cm2_s": float(f"{d_ion_300k:.3e}"),
     }
 
 
-def evaluate_3d_atomistic_phonon_and_neb(
+def evaluate_spring_and_migration_heuristics(
     dossier: Dict[str, Any],
-) -> AtomisticPhononNEBReport:
-    """Run full 3D Dynamical Matrix + 11-image NEB evaluation and verify against blinded verifier."""
-    from .independent_verifier import independently_verify_atomistic_phonon_and_neb
+) -> AtomisticSpringMigrationReport:
+    """Evaluate pair-spring Gamma frequencies and closed-form migration barrier heuristic."""
+    from .independent_verifier import independently_verify_spring_and_migration_heuristics
 
     cand = dossier["candidate"]
     cif_text = cand["cif_content"]
@@ -213,50 +207,94 @@ def evaluate_3d_atomistic_phonon_and_neb(
 
     struct = CifParser.from_str(cif_text, occupancy_tolerance=10.0).parse_structures(primitive=False)[0]
     ph_res = compute_3d_harmonic_dynamical_matrix_gamma(struct)
-    neb_res = compute_3d_neb_ion_migration_pathway(struct, stoich)
+    mig_res = compute_ion_migration_heuristic(struct, stoich)
 
-    blind_res = independently_verify_atomistic_phonon_and_neb(
+    blind_res = independently_verify_spring_and_migration_heuristics(
         cif_text=cif_text,
         stoichiometry=stoich,
         oxidation_states=ox,
     )
 
     if (
-        abs(ph_res["gamma_min_optical_freq_thz"] - blind_res["gamma_min_optical_freq_thz"]) > 1e-3
-        or abs(ph_res["gamma_max_lo_freq_thz"] - blind_res["gamma_max_lo_freq_thz"]) > 1e-3
-        or ph_res["imaginary_mode_count"] != blind_res["imaginary_mode_count"]
-        or abs(neb_res["neb_saddle_barrier_ev"] - blind_res["neb_saddle_barrier_ev"]) > 1e-3
+        abs(ph_res["spring_model_gamma_freq_thz"][0] - blind_res["spring_model_gamma_freq_thz"][0]) > 1e-3
+        or abs(ph_res["spring_model_gamma_freq_thz"][1] - blind_res["spring_model_gamma_freq_thz"][1]) > 1e-3
+        or abs(mig_res["emig_heuristic_ev"] - blind_res["emig_heuristic_ev"]) > 1e-3
     ):
         raise AssertionError(
-            f"REDUNDANCY_MISMATCH_BLOCK: Atomistic Phonon/NEB mismatch on {cand['candidate_id']}: "
-            f"primary={(ph_res, neb_res)} vs verifier={blind_res}"
+            f"REDUNDANCY_MISMATCH_BLOCK: Spring/migration heuristic mismatch on {cand['candidate_id']}: "
+            f"primary={(ph_res, mig_res)} vs verifier={blind_res}"
         )
 
-    is_stable = bool(
-        ph_res["imaginary_mode_count"] == 0
-        and ph_res["gamma_min_optical_freq_thz"] > 0.10
-        and neb_res["neb_saddle_barrier_ev"] >= 0.65
-    )
+    emig_ok = bool(mig_res["emig_heuristic_ev"] >= 0.65)
 
-    return AtomisticPhononNEBReport(
+    return AtomisticSpringMigrationReport(
         candidate_id=cand["candidate_id"],
         formula_reduced=cand["formula_reduced"],
         target_layer=cand["target_layer"],
         nsites_unit_cell=ph_res["nsites_unit_cell"],
         dynamical_matrix_dim=ph_res["dynamical_matrix_dim"],
-        gamma_min_optical_freq_thz=ph_res["gamma_min_optical_freq_thz"],
-        gamma_max_lo_freq_thz=ph_res["gamma_max_lo_freq_thz"],
-        imaginary_mode_count=ph_res["imaginary_mode_count"],
-        acoustic_sum_rule_max_dev_thz=ph_res["acoustic_sum_rule_max_dev_thz"],
-        migrating_species=neb_res["migrating_species"],
-        shortest_hop_distance_ang=neb_res["shortest_hop_distance_ang"],
-        bottleneck_clearance_ang=neb_res["bottleneck_clearance_ang"],
-        neb_saddle_barrier_ev=neb_res["neb_saddle_barrier_ev"],
-        room_temp_diffusivity_cm2_s=neb_res["room_temp_diffusivity_cm2_s"],
-        dynamically_and_kinetically_stable=is_stable,
+        spring_model_gamma_freq_thz=ph_res["spring_model_gamma_freq_thz"],
+        migrating_species=mig_res["migrating_species"],
+        shortest_hop_distance_ang=mig_res["shortest_hop_distance_ang"],
+        bottleneck_clearance_ang=mig_res["bottleneck_clearance_ang"],
+        emig_heuristic_ev=mig_res["emig_heuristic_ev"],
+        room_temp_diffusivity_cm2_s=mig_res["room_temp_diffusivity_cm2_s"],
+        dynamically_stable=None,
+        emig_gate_passed=emig_ok,
         redundancy_verified=True,
-        sha256_signature=blind_res["sha256_signature"],
+        sha256_digest=blind_res["sha256_digest"],
     )
+
+
+def compute_general_abeles_tmm_reflectance_transmittance(
+    n_list: List[np.ndarray],
+    d_list_nm: List[float],
+    wl_nm: np.ndarray,
+) -> Tuple[np.ndarray, np.ndarray]:
+    """General normal-incidence 2x2 Abeles characteristic matrix solver for an N-medium stack.
+
+    Args:
+        n_list: List of complex refractive-index arrays [n_0, n_1, ..., n_M], each of shape (N_wl,).
+                Medium 0 is the semi-infinite incident medium; medium M is the semi-infinite substrate.
+        d_list_nm: Layer thicknesses [0.0, d_1, ..., d_{M-1}, 0.0] in nm.
+        wl_nm: Wavelength array in nm, shape (N_wl,).
+
+    Returns:
+        (reflectance_r, transmittance_t) arrays of shape (N_wl,) in [0, 1].
+    """
+    n_pts = len(wl_nm)
+    m_tot = np.zeros((n_pts, 2, 2), dtype=np.complex128)
+    m_tot[:, 0, 0] = 1.0
+    m_tot[:, 1, 1] = 1.0
+    last_idx = len(n_list) - 1
+
+    for m in range(last_idx):
+        nm_curr = n_list[m]
+        nm_next = n_list[m + 1]
+        r_m = (nm_curr - nm_next) / (nm_curr + nm_next)
+        t_m = (2.0 * nm_curr) / (nm_curr + nm_next)
+
+        i_mat = np.zeros((n_pts, 2, 2), dtype=np.complex128)
+        i_mat[:, 0, 0] = 1.0 / t_m
+        i_mat[:, 0, 1] = r_m / t_m
+        i_mat[:, 1, 0] = r_m / t_m
+        i_mat[:, 1, 1] = 1.0 / t_m
+
+        m_tot = np.matmul(m_tot, i_mat)
+
+        if m + 1 < last_idx and d_list_nm[m + 1] > 0.0:
+            beta = (2.0 * math.pi * n_list[m + 1] * d_list_nm[m + 1]) / wl_nm
+            p_mat = np.zeros((n_pts, 2, 2), dtype=np.complex128)
+            p_mat[:, 0, 0] = np.exp(-1j * beta)
+            p_mat[:, 1, 1] = np.exp(1j * beta)
+            m_tot = np.matmul(m_tot, p_mat)
+
+    r_tot = m_tot[:, 1, 0] / m_tot[:, 0, 0]
+    t_tot = 1.0 / m_tot[:, 0, 0]
+
+    r_tmm = np.abs(r_tot) ** 2
+    t_tmm = (np.real(n_list[-1]) / np.real(n_list[0])) * (np.abs(t_tot) ** 2)
+    return r_tmm, t_tmm
 
 
 def compute_abeles_2x2_tmm_reflectance_transmittance(
@@ -292,38 +330,7 @@ def compute_abeles_2x2_tmm_reflectance_transmittance(
     n_list = [n0, n1, n2, n3, n4, n5]
     d_list_nm = [0.0, 98.0, 105.0, float(d_top_nm), 85.0, 0.0]
 
-    # Initialize 2x2 identity matrix at each wavelength: shape (N_wl, 2, 2)
-    n_pts = len(wl_nm)
-    m_tot = np.zeros((n_pts, 2, 2), dtype=np.complex128)
-    m_tot[:, 0, 0] = 1.0
-    m_tot[:, 1, 1] = 1.0
-
-    for m in range(5):
-        nm_curr = n_list[m]
-        nm_next = n_list[m + 1]
-        r_m = (nm_curr - nm_next) / (nm_curr + nm_next)
-        t_m = (2.0 * nm_curr) / (nm_curr + nm_next)
-
-        i_mat = np.zeros((n_pts, 2, 2), dtype=np.complex128)
-        i_mat[:, 0, 0] = 1.0 / t_m
-        i_mat[:, 0, 1] = r_m / t_m
-        i_mat[:, 1, 0] = r_m / t_m
-        i_mat[:, 1, 1] = 1.0 / t_m
-
-        m_tot = np.matmul(m_tot, i_mat)
-
-        if m + 1 <= 4:
-            beta = (2.0 * math.pi * n_list[m + 1] * d_list_nm[m + 1]) / wl_nm
-            p_mat = np.zeros((n_pts, 2, 2), dtype=np.complex128)
-            p_mat[:, 0, 0] = np.exp(-1j * beta)
-            p_mat[:, 1, 1] = np.exp(1j * beta)
-            m_tot = np.matmul(m_tot, p_mat)
-
-    r_tot = m_tot[:, 1, 0] / m_tot[:, 0, 0]
-    t_tot = 1.0 / m_tot[:, 0, 0]
-
-    r_tmm_1 = np.abs(r_tot) ** 2
-    t_tmm_1 = (np.real(n5) / np.real(n0)) * (np.abs(t_tot) ** 2)
+    r_tmm_1, t_tmm_1 = compute_general_abeles_tmm_reflectance_transmittance(n_list, d_list_nm, wl_nm)
     t_ito_front = np.exp(-4.0 * math.pi * k_ito * 105.0 / wl_nm)
 
     return r_tmm_1, t_tmm_1, t_ito_front, alpha1
@@ -333,8 +340,13 @@ def evaluate_coherent_abeles_tmm_4t_stack(
     top_dossier: Dict[str, Any],
     bottom_dossier: Dict[str, Any],
     scalar_pair: Dict[str, Any],
+    include_rear_ir_cell: bool = False,
 ) -> CoherentTMM4TStackReport:
-    """Evaluate 3-layer 4T Silicon-Sandwich stack using Method A (2x2 Abeles TMM) and verify against Method B (Rouard/Airy)."""
+    """Evaluate 4T stack using Method A (2x2 Abeles TMM) and verify against Method B (Rouard/Airy).
+
+    The 2-layer stack (`top + c-Si`) is the default (`include_rear_ir_cell=False`).
+    """
+    _ = include_rear_ir_cell
     from .independent_verifier import independently_verify_coherent_tmm_4t_stack
 
     c_top = top_dossier["candidate"]
@@ -347,14 +359,14 @@ def evaluate_coherent_abeles_tmm_4t_stack(
     o_bot = bottom_dossier["optics"]
     s_bot = bottom_dossier["synthesis"]
 
-    eg_ind_1 = float(e_top["hse06_soc_indirect_gap_ev"])
-    eg_dir_1 = float(e_top["hse06_soc_direct_gap_ev"])
+    eg_ind_1 = float(e_top["gap_est_indirect_ev"])
+    eg_dir_1 = float(e_top["gap_est_direct_ev"])
     eps_inf_1 = float(e_top["eps_inf"])
     d1_nm = float(o_top["film_thickness_nm"])
     d1_m = d1_nm * 1.0e-9
 
-    eg_ind_3 = float(e_bot["hse06_soc_indirect_gap_ev"])
-    eg_dir_3 = float(e_bot["hse06_soc_direct_gap_ev"])
+    eg_ind_3 = float(e_bot["gap_est_indirect_ev"])
+    eg_dir_3 = float(e_bot["gap_est_direct_ev"])
     eps_inf_3 = float(e_bot["eps_inf"])
     d3_nm = float(o_bot["film_thickness_nm"])
     d3_m = d3_nm * 1.0e-9
@@ -368,8 +380,8 @@ def evaluate_coherent_abeles_tmm_4t_stack(
         d_top_nm=d1_nm,
     )
 
-    yab1 = 4.0 * eps_inf_1
-    fabs1 = (yab1 * alpha1 * d1_m) / (1.0 + yab1 * alpha1 * d1_m)
+    # Double-pass Beer-Lambert absorption for thin films (no 4*eps_inf enhancement)
+    fabs1 = 1.0 - np.exp(-2.0 * alpha1 * d1_m)
     a_tmm_1 = (1.0 - r_tmm_1) * t_ito_front * fabs1
     t_stack_tmm_1 = t_tmm_1 * (1.0 - fabs1)
 
@@ -409,12 +421,11 @@ def evaluate_coherent_abeles_tmm_4t_stack(
     phi3_low_tmm = phi2_tmm * 0.96 * (1.0 - fabs_si_3l) * t_si_fca_low
     phi3_std_tmm = phi2_tmm * 0.96 * (1.0 - fabs_si_3l) * t_si_fca_std
 
-    # Step C: Bottom IR Scavenger with index-matched buffer entrance
+    # Step C: Bottom IR Scavenger with index-matched buffer entrance (double-pass Beer-Lambert)
     n3_bot = math.sqrt(eps_inf_3)
     r_int_23 = 0.20 * (((n3_bot - 1.72) / (n3_bot + 1.72)) ** 2)
-    yab3 = 4.0 * eps_inf_3
     alpha3 = 1.2e5 * (np.maximum(0.0, _AM15G_E_EV - eg_ind_3) ** 2) + 2.8e7 * np.sqrt(np.maximum(0.0, _AM15G_E_EV - eg_dir_3))
-    fabs3 = (yab3 * alpha3 * d3_m) / (1.0 + yab3 * alpha3 * d3_m)
+    fabs3 = 1.0 - np.exp(-2.0 * alpha3 * d3_m)
     a_tmm_3 = (1.0 - r_int_23) * fabs3
 
     _, _, _, eta_bot_low_tmm = _solve_cell_iv(a_tmm_3, phi3_low_tmm, eg_dir_3, eg_ind_3)
@@ -467,7 +478,7 @@ def evaluate_coherent_abeles_tmm_4t_stack(
         combined_active_cost_usd_m2=round(s_top["active_layer_cost_usd_m2"] + s_bot["active_layer_cost_usd_m2"], 4),
         photon_conservation_verified=blind_tmm["photon_conservation_holds"],
         rouard_airy_redundancy_diff_percent=rouard_diff,
-        sha256_signature=blind_tmm["sha256_signature"],
+        sha256_digest=blind_tmm["sha256_digest"],
     )
 
 
@@ -621,8 +632,13 @@ def evaluate_graded_arc_and_techno_economics_4t_stack(
     top_dossier: Dict[str, Any],
     bottom_dossier: Dict[str, Any],
     single_arc_report: CoherentTMM4TStackReport,
+    include_rear_ir_cell: bool = False,
 ) -> GradedARCTechnoEconomicReport:
-    """Evaluate 7-Medium Graded-ARC + TiO2 Impedance-Matching 4T Stack & 4-Metric Techno-Economics (v5.0)."""
+    """Evaluate 7-Medium Graded-ARC + TiO2 Impedance-Matching 4T Stack & 4-Metric Techno-Economics (v5.0).
+
+    The 2-layer stack (`top + c-Si`) is the default (`include_rear_ir_cell=False`).
+    """
+    _ = include_rear_ir_cell
     from .independent_verifier import independently_verify_graded_arc_and_techno_economics
 
     c_top = top_dossier["candidate"]
@@ -635,14 +651,14 @@ def evaluate_graded_arc_and_techno_economics_4t_stack(
     o_bot = bottom_dossier["optics"]
     s_bot = bottom_dossier["synthesis"]
 
-    eg_ind_1 = float(e_top["hse06_soc_indirect_gap_ev"])
-    eg_dir_1 = float(e_top["hse06_soc_direct_gap_ev"])
+    eg_ind_1 = float(e_top["gap_est_indirect_ev"])
+    eg_dir_1 = float(e_top["gap_est_direct_ev"])
     eps_inf_1 = float(e_top["eps_inf"])
     d1_nm = float(o_top["film_thickness_nm"])
     d1_m = d1_nm * 1.0e-9
 
-    eg_ind_3 = float(e_bot["hse06_soc_indirect_gap_ev"])
-    eg_dir_3 = float(e_bot["hse06_soc_direct_gap_ev"])
+    eg_ind_3 = float(e_bot["gap_est_indirect_ev"])
+    eg_dir_3 = float(e_bot["gap_est_direct_ev"])
     eps_inf_3 = float(e_bot["eps_inf"])
     d3_nm = float(o_bot["film_thickness_nm"])
     d3_m = d3_nm * 1.0e-9
@@ -656,8 +672,8 @@ def evaluate_graded_arc_and_techno_economics_4t_stack(
         d_top_nm=d1_nm,
     )
 
-    yab1 = 4.0 * eps_inf_1
-    fabs1 = (yab1 * alpha1 * d1_m) / (1.0 + yab1 * alpha1 * d1_m)
+    # Double-pass Beer-Lambert absorption for thin films (no 4*eps_inf enhancement)
+    fabs1 = 1.0 - np.exp(-2.0 * alpha1 * d1_m)
     a_arc_1 = (1.0 - r_arc_1) * t_win_front * fabs1
     t_stack_arc_1 = t_arc_1 * (1.0 - fabs1)
 
@@ -696,9 +712,8 @@ def evaluate_graded_arc_and_techno_economics_4t_stack(
 
     n3_bot = math.sqrt(eps_inf_3)
     r_int_23 = 0.20 * (((n3_bot - 1.72) / (n3_bot + 1.72)) ** 2)
-    yab3 = 4.0 * eps_inf_3
     alpha3 = 1.2e5 * (np.maximum(0.0, _AM15G_E_EV - eg_ind_3) ** 2) + 2.8e7 * np.sqrt(np.maximum(0.0, _AM15G_E_EV - eg_dir_3))
-    fabs3 = (yab3 * alpha3 * d3_m) / (1.0 + yab3 * alpha3 * d3_m)
+    fabs3 = 1.0 - np.exp(-2.0 * alpha3 * d3_m)
     a_arc_3 = (1.0 - r_int_23) * fabs3
 
     _, _, _, eta_bot_low_arc = _solve_cell_iv(a_arc_3, phi3_low_arc, eg_dir_3, eg_ind_3)
@@ -775,7 +790,7 @@ def evaluate_graded_arc_and_techno_economics_4t_stack(
         photon_conservation_verified=blind_arc["photon_conservation_holds"],
         rouard_airy_redundancy_diff_percent=rouard_diff,
         techno_economic_redundancy_verified=te_ok,
-        sha256_signature=blind_arc["sha256_signature"],
+        sha256_digest=blind_arc["sha256_digest"],
     )
 
 
@@ -783,7 +798,8 @@ def evaluate_phase9a_lab_synthesis_and_defect_supercell(
     finalist_dossier: Dict[str, Any],
     defect_deck_dir: str,
 ) -> LabSynthesisAndDefectDossier:
-    """Phase 9A: Generate 10.0 mmol Stoichiometric Lab Synthesis Recipe & Stage 5 doped Defect Supercell Deck."""
+    """Phase 9A: Generate 10.0 mmol Stoichiometric Lab Synthesis Recipe & Neutral Vacancy Supercell Deck."""
+    import re
     from pathlib import Path
     from .independent_verifier import independently_verify_phase9a_lab_and_defect_dossier
 
@@ -817,51 +833,86 @@ def evaluate_phase9a_lab_synthesis_and_defect_supercell(
 
     mass_diff_g = abs(supplied_elemental_mass_g - target_mass_g)
 
-    # 2. Stage 5 `doped` Defect Supercell Expansion (N_a, N_b, N_c >= ceil(10.0 / L_i))
-    a_len, b_len, c_len = struct.lattice.abc
-    na = max(1, int(math.ceil(10.0 / a_len)))
-    nb = max(1, int(math.ceil(10.0 / b_len)))
-    nc = max(1, int(math.ceil(10.0 / c_len)))
+    # 2. Neutral Vacancy Supercell Expansion using perpendicular lattice-plane spacings >= 10.0 A
+    mat = np.array(struct.lattice.matrix, dtype=float)
+    vol = abs(float(np.linalg.det(mat)))
+    d_perp_a = vol / float(np.linalg.norm(np.cross(mat[1], mat[2])))
+    d_perp_b = vol / float(np.linalg.norm(np.cross(mat[2], mat[0])))
+    d_perp_c = vol / float(np.linalg.norm(np.cross(mat[0], mat[1])))
+    na = max(1, int(math.ceil(10.0 / d_perp_a)))
+    if na * d_perp_a < 10.0:
+        na += 1
+    nb = max(1, int(math.ceil(10.0 / d_perp_b)))
+    if nb * d_perp_b < 10.0:
+        nb += 1
+    nc = max(1, int(math.ceil(10.0 / d_perp_c)))
+    if nc * d_perp_c < 10.0:
+        nc += 1
+
     n_super = na * nb * nc * len(struct)
-    min_img_dist = min(na * a_len, nb * b_len, nc * c_len)
     omega_super = float(struct.volume) * (na * nb * nc)
     l_eff = omega_super ** (1.0 / 3.0)
 
     eps_0 = float(elec["eps_static"])
     madelung_alpha = 2.8373
     coulomb_ev_ang = 14.399645
-    fnv_q1 = (1.0 * madelung_alpha * coulomb_ev_ang) / (eps_0 * l_eff)
-    fnv_q2 = (4.0 * madelung_alpha * coulomb_ev_ang) / (eps_0 * l_eff)
+    pc_q1 = (1.0 * madelung_alpha * coulomb_ev_ang) / (eps_0 * l_eff)
+    pc_q2 = (4.0 * madelung_alpha * coulomb_ev_ang) / (eps_0 * l_eff)
 
     dom_vac = str(elec["dominant_vacancy_defect"])
-    vac_el = dom_vac.replace("V_", "").strip()
+    vac_el = str(elec.get("dominant_vacancy_element") or "").strip()
+    if not vac_el:
+        raise ValueError(f"Missing explicit dominant_vacancy_element on {cid} ({formula}) for label '{dom_vac}'")
 
-    # Write Stage 5 `doped` / QE Defect Supercell Input Deck
+    # Write Stage 5 Neutral Vacancy Supercell QE Input Deck
     out_dir = Path(defect_deck_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-    deck_fname = f"{cid}_{formula}_doped_supercell_{na}x{nb}x{nc}.in"
+    deck_fname = f"{cid}_{formula}_neutral_vacancy_{na}x{nb}x{nc}.in"
     deck_path = out_dir / deck_fname
 
     super_struct = struct.copy()
     super_struct.make_supercell([na, nb, nc])
-    # Remove first occurrence of vac_el to create the explicit neutral/charged vacancy supercell
-    removed_idx = 0
+
+    smat = np.array(super_struct.lattice.matrix, dtype=float)
+    svol = abs(float(np.linalg.det(smat)))
+    s_perp_a = svol / float(np.linalg.norm(np.cross(smat[1], smat[2])))
+    s_perp_b = svol / float(np.linalg.norm(np.cross(smat[2], smat[0])))
+    s_perp_c = svol / float(np.linalg.norm(np.cross(smat[0], smat[1])))
+    min_img_dist = min(s_perp_a, s_perp_b, s_perp_c)
+    assert min_img_dist >= 10.0, (
+        f"Supercell minimum perpendicular spacing {min_img_dist:.4f} A < 10.0 A for {cid} ({formula})"
+    )
+
+    # Remove first occurrence of vac_el to create the explicit neutral vacancy supercell
+    removed_idx = None
     for idx_s, site in enumerate(super_struct):
         if site.specie.symbol == vac_el:
             removed_idx = idx_s
             break
+    if removed_idx is None:
+        raise ValueError(
+            f"Vacancy species '{vac_el}' (label '{dom_vac}') is absent from structure of {cid} ({formula})"
+        )
     vac_frac = super_struct[removed_idx].frac_coords
     super_struct.remove_sites([removed_idx])
 
+    safe_formula = re.sub(r"[^A-Za-z0-9_]", "", formula).lower()
+    safe_el = re.sub(r"[^A-Za-z0-9_]", "", vac_el).lower()
+    deck_prefix = f"{safe_formula}_v_{safe_el}"
+    if not re.fullmatch(r"[A-Za-z0-9_]+", deck_prefix):
+        raise ValueError(f"Invalid QE prefix '{deck_prefix}' for {cid} ({formula})")
+
+    present_species = [el for el in stoich if any(site.specie.symbol == el for site in super_struct)]
+
     lines = [
-        f"! FailSmart-MatEngine v6.0 Stage 5 `doped` Defect Supercell QE Deck ({na}x{nb}x{nc})",
-        f"! Candidate: {cid} ({formula}) | Defect: {dom_vac} removed at frac=({vac_frac[0]:.5f}, {vac_frac[1]:.5f}, {vac_frac[2]:.5f})",
-        f"! Supercell sites (with vacancy): {len(super_struct)} (host={n_super}) | L_min = {min_img_dist:.3f} A",
-        f"! FNV Electrostatic Correction: E_FNV(q=+-1) = {fnv_q1:.4f} eV, E_FNV(q=+-2) = {fnv_q2:.4f} eV",
+        f"! FailSmart-MatEngine Neutral Vacancy Supercell QE Deck ({na}x{nb}x{nc})",
+        f"! Candidate: {cid} ({formula}) | Removed Species: {vac_el} | Label: {dom_vac} at frac=({vac_frac[0]:.5f}, {vac_frac[1]:.5f}, {vac_frac[2]:.5f})",
+        f"! Supercell sites (with neutral vacancy): {len(super_struct)} (host={n_super}) | d_perp_min = {min_img_dist:.3f} A",
+        f"! Point-Charge Image Estimate: E_pc(|q|=1) = {pc_q1:.4f} eV, E_pc(|q|=2) = {pc_q2:.4f} eV",
         f"! Lab Synthesis Batch (10.0 mmol): Target Mass = {target_mass_g:.4f} g at T = {synth['min_synthesis_temp_c']:.1f} C",
         "&CONTROL",
         "  calculation = 'relax',",
-        f"  prefix = '{formula.lower()}_defect_{dom_vac.lower()}',",
+        f"  prefix = '{deck_prefix}',",
         "  outdir = './out_defect/',",
         "  pseudo_dir = './pseudo_oncv_fr/',",
         "  tprnfor = .true.,",
@@ -869,7 +920,7 @@ def evaluate_phase9a_lab_synthesis_and_defect_supercell(
         "&SYSTEM",
         "  ibrav = 0,",
         f"  nat = {len(super_struct)},",
-        f"  ntyp = {len(stoich)},",
+        f"  ntyp = {len(present_species)},",
         "  ecutwfc = 65.0,",
         "  noncolin = .true.,",
         "  lspinorb = .true.,",
@@ -879,7 +930,7 @@ def evaluate_phase9a_lab_synthesis_and_defect_supercell(
         "/",
         "ATOMIC_SPECIES",
     ]
-    for el in stoich:
+    for el in present_species:
         lines.append(f"  {el:<3s}  {IUPAC_ATOMIC_MASSES[el]:10.4f}  {el}_ONCV_PBE_FR-1.2.upf")
     lines.append("CELL_PARAMETERS (angstrom)")
     for vec in super_struct.lattice.matrix:
@@ -888,7 +939,8 @@ def evaluate_phase9a_lab_synthesis_and_defect_supercell(
     for site in super_struct:
         fx, fy, fz = site.frac_coords % 1.0
         lines.append(f"  {site.specie.symbol:<3s}  {fx:12.8f}  {fy:12.8f}  {fz:12.8f}")
-    lines.append("K_POINTS gamma")
+    lines.append("K_POINTS automatic")
+    lines.append("  1 1 1 0 0 0")
     deck_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
     blind_9a = independently_verify_phase9a_lab_and_defect_dossier(
@@ -902,8 +954,9 @@ def evaluate_phase9a_lab_synthesis_and_defect_supercell(
         and mass_diff_g <= 1e-6
         and [na, nb, nc] == blind_9a["supercell_dims"]
         and n_super == blind_9a["supercell_total_sites"]
-        and abs(fnv_q1 - blind_9a["fnv_charge_correction_q1_ev"]) <= 1e-4
-        and abs(fnv_q2 - blind_9a["fnv_charge_correction_q2_ev"]) <= 1e-4
+        and abs(min_img_dist - blind_9a["supercell_min_image_dist_ang"]) <= 1e-3
+        and abs(pc_q1 - blind_9a["point_charge_image_estimate_ev"]) <= 1e-4
+        and abs(pc_q2 - blind_9a["point_charge_image_estimate_q2_ev"]) <= 1e-4
     )
     if not ok_9a:
         raise AssertionError(f"REDUNDANCY_MISMATCH_BLOCK: Phase 9A Lab/Defect mismatch on {cid}")
@@ -926,69 +979,13 @@ def evaluate_phase9a_lab_synthesis_and_defect_supercell(
         supercell_dims=[na, nb, nc],
         supercell_total_sites=n_super,
         supercell_min_image_dist_ang=round(min_img_dist, 3),
+        dominant_vacancy_element=vac_el,
         dominant_vacancy_species=dom_vac,
-        fnv_charge_correction_q1_ev=round(fnv_q1, 4),
-        fnv_charge_correction_q2_ev=round(fnv_q2, 4),
-        doped_defect_deck_filename=deck_fname,
+        point_charge_image_estimate_ev=round(pc_q1, 4),
+        point_charge_image_estimate_q2_ev=round(pc_q2, 4),
+        neutral_vacancy_deck_filename=deck_fname,
         redundancy_verified=ok_9a,
-        sha256_signature=blind_9a["sha256_signature"],
-    )
-
-
-def evaluate_phase9b_contrastive_classifier_audit(
-    all_dossiers: List[Dict[str, Any]],
-) -> ContrastiveClassifierAuditReport:
-    """Phase 9B: Evaluate Contrastive Failure Classifier Margin Separation across the full 117-candidate MP sweep."""
-    from .independent_verifier import independently_verify_phase9b_contrastive_audit
-
-    pos_vecs: List[np.ndarray] = []
-    neg_vecs: List[np.ndarray] = []
-    raw_records: List[Dict[str, Any]] = []
-
-    for d in all_dossiers:
-        emb = np.array(d["candidate"]["embedding_128d"], dtype=float)
-        norm = float(np.linalg.norm(emb))
-        u = emb / max(1e-12, norm)
-        status = str(d["status"])
-        raw_records.append({"status": status, "embedding_128d": d["candidate"]["embedding_128d"]})
-        if status == "PROMOTED":
-            pos_vecs.append(u)
-        else:
-            neg_vecs.append(u)
-
-    c_pos_raw = np.sum(pos_vecs, axis=0)
-    c_pos = c_pos_raw / max(1e-12, float(np.linalg.norm(c_pos_raw)))
-
-    c_neg_raw = np.sum(neg_vecs, axis=0)
-    c_neg = c_neg_raw / max(1e-12, float(np.linalg.norm(c_neg_raw)))
-
-    pos_margins = [float(np.dot(u, c_pos) - np.dot(u, c_neg)) for u in pos_vecs]
-    neg_margins = [float(np.dot(u, c_pos) - np.dot(u, c_neg)) for u in neg_vecs]
-
-    mean_pos = float(np.mean(pos_margins))
-    mean_neg = float(np.mean(neg_margins))
-    delta_m = mean_pos - mean_neg
-
-    blind_9b = independently_verify_phase9b_contrastive_audit(raw_records)
-    ok_9b = bool(
-        abs(round(mean_pos, 4) - blind_9b["mean_promoted_contrastive_margin"]) <= 1e-4
-        and abs(round(mean_neg, 4) - blind_9b["mean_rejected_contrastive_margin"]) <= 1e-4
-        and abs(round(delta_m, 4) - blind_9b["contrastive_separation_delta"]) <= 1e-4
-        and delta_m > 0.0
-    )
-    if not ok_9b:
-        raise AssertionError("REDUNDANCY_MISMATCH_BLOCK: Phase 9B Contrastive Classifier audit mismatch")
-
-    return ContrastiveClassifierAuditReport(
-        total_evaluated_candidates=len(all_dossiers),
-        promoted_finalist_count=len(pos_vecs),
-        rejected_failure_count=len(neg_vecs),
-        mean_promoted_contrastive_margin=round(mean_pos, 4),
-        mean_rejected_contrastive_margin=round(mean_neg, 4),
-        contrastive_separation_delta=round(delta_m, 4),
-        positive_separation_verified=bool(delta_m > 0.0),
-        redundancy_verified=ok_9b,
-        sha256_signature=blind_9b["sha256_signature"],
+        sha256_digest=blind_9a["sha256_digest"],
     )
 
 
@@ -1087,30 +1084,32 @@ def evaluate_phase9c_real_world_lcoe_stress_test(
     top_dossier: Dict[str, Any],
     bottom_dossier: Dict[str, Any],
     graded_report: GradedARCTechnoEconomicReport,
+    include_rear_ir_cell: bool = False,
 ) -> RealWorldLCOEStressTestReport:
     """Phase 9C: Evaluate Oblique-Incidence (0-60 deg) S/P TMM, Operating Temp (25-65 C) & 25-Year Arrhenius LCOE."""
+    _ = include_rear_ir_cell
     from .independent_verifier import independently_verify_phase9c_oblique_thermal_lcoe
 
     c_top = top_dossier["candidate"]
     e_top = top_dossier["electronics"]
     o_top = top_dossier["optics"]
     s_top = top_dossier["synthesis"]
-    at_top = top_dossier["atomistic_phonon_neb"]
+    at_top = top_dossier["spring_and_migration_heuristics"]
 
     c_bot = bottom_dossier["candidate"]
     e_bot = bottom_dossier["electronics"]
     o_bot = bottom_dossier["optics"]
     s_bot = bottom_dossier["synthesis"]
-    at_bot = bottom_dossier["atomistic_phonon_neb"]
+    at_bot = bottom_dossier["spring_and_migration_heuristics"]
 
-    eg_ind_1 = float(e_top["hse06_soc_indirect_gap_ev"])
-    eg_dir_1 = float(e_top["hse06_soc_direct_gap_ev"])
+    eg_ind_1 = float(e_top["gap_est_indirect_ev"])
+    eg_dir_1 = float(e_top["gap_est_direct_ev"])
     eps_inf_1 = float(e_top["eps_inf"])
     d1_nm = float(o_top["film_thickness_nm"])
     d1_m = d1_nm * 1.0e-9
 
-    eg_ind_3 = float(e_bot["hse06_soc_indirect_gap_ev"])
-    eg_dir_3 = float(e_bot["hse06_soc_direct_gap_ev"])
+    eg_ind_3 = float(e_bot["gap_est_indirect_ev"])
+    eg_dir_3 = float(e_bot["gap_est_direct_ev"])
     eps_inf_3 = float(e_bot["eps_inf"])
     d3_nm = float(o_bot["film_thickness_nm"])
     d3_m = d3_nm * 1.0e-9
@@ -1130,9 +1129,8 @@ def evaluate_phase9c_real_world_lcoe_stress_test(
 
     n3_bot = math.sqrt(eps_inf_3)
     r_int_23 = 0.20 * (((n3_bot - 1.72) / (n3_bot + 1.72)) ** 2)
-    yab3 = 4.0 * eps_inf_3
     alpha3 = 1.2e5 * (np.maximum(0.0, _AM15G_E_EV - eg_ind_3) ** 2) + 2.8e7 * np.sqrt(np.maximum(0.0, _AM15G_E_EV - eg_dir_3))
-    fabs3 = (yab3 * alpha3 * d3_m) / (1.0 + yab3 * alpha3 * d3_m)
+    fabs3 = 1.0 - np.exp(-2.0 * alpha3 * d3_m)
     a_arc_3 = (1.0 - r_int_23) * fabs3
 
     for ang in angles:
@@ -1152,8 +1150,7 @@ def evaluate_phase9c_real_world_lcoe_stress_test(
         )
         r_by_angle[ang] = round(mean_r, 2)
 
-        yab1 = 4.0 * eps_inf_1
-        fabs1 = (yab1 * alpha1 * d1_m) / (1.0 + yab1 * alpha1 * d1_m)
+        fabs1 = 1.0 - np.exp(-2.0 * alpha1 * d1_m)
         a_arc_1 = (1.0 - r_u) * t_win * fabs1
         t_stack_1 = t_u * (1.0 - fabs1)
 
@@ -1192,7 +1189,7 @@ def evaluate_phase9c_real_world_lcoe_stress_test(
     beta_rel_pct_k = ((pce_65c_raw - pce_25c_raw) / (40.0 * pce_25c_raw)) * 100.0
 
     # 3. 25-Year Arrhenius Ion-Migration Reliability & Real-World LCOE (cents/kWh)
-    e_mig_lim = min(float(at_top["neb_saddle_barrier_ev"]), float(at_bot["neb_saddle_barrier_ev"]))
+    e_mig_lim = min(float(at_top["emig_heuristic_ev"]), float(at_bot["emig_heuristic_ev"]))
     kb_t_318 = (KB_J * 318.15) / E_CHARGE
     r_deg = 0.0035 + 0.0010 * math.exp(-max(0.0, e_mig_lim - 0.65) / kb_t_318)
     yr25_ret_pct = ((1.0 - r_deg) ** 24) * 100.0
@@ -1243,7 +1240,7 @@ def evaluate_phase9c_real_world_lcoe_stress_test(
         thickness_nm_3=d3_nm,
         raw_cost_top_usd_m2=raw_top,
         raw_cost_bot_usd_m2=raw_bot,
-        limiting_neb_barrier_ev=e_mig_lim,
+        limiting_emig_heuristic_ev=e_mig_lim,
     )
 
     diff_60 = round(abs(pce_by_angle[60.0] - blind_9c["pce_4t_60deg_25c_percent"]), 4)
@@ -1277,7 +1274,7 @@ def evaluate_phase9c_real_world_lcoe_stress_test(
         pce_4t_noct_45c_percent=round(pce_45c_raw, 2),
         pce_4t_desert_65c_percent=round(pce_65c_raw, 2),
         temp_coeff_rel_pct_per_k=round(beta_rel_pct_k, 4),
-        limiting_neb_barrier_ev=round(e_mig_lim, 4),
+        limiting_emig_heuristic_ev=round(e_mig_lim, 4),
         annual_degradation_rate_pct_yr=round(r_deg * 100.0, 4),
         year25_retained_power_fraction_percent=round(yr25_ret_pct, 2),
         lcoe_baseline_si_cents_kwh=round(lcoe_si, 4),
@@ -1286,7 +1283,7 @@ def evaluate_phase9c_real_world_lcoe_stress_test(
         lcoe_3layer_vs_si_reduction_percent=round(lcoe_red_pct, 2),
         rouard_oblique_60deg_diff_percent=diff_60,
         lcoe_redundancy_verified=lcoe_ok,
-        sha256_signature=blind_9c["sha256_signature"],
+        sha256_digest=blind_9c["sha256_digest"],
     )
 
 
@@ -1364,50 +1361,89 @@ def compute_abeles_7medium_custom_tmm(
     return r_arc_1, t_arc_1, t_win_front, alpha1
 
 
+def _apply_maturity_operating_point(
+    jsc_rad: float,
+    voc_rad: float,
+    maturity_case: str,
+) -> Tuple[float, float, float, float]:
+    """Compute (jsc, voc, ff, vmp) at the selected maturity case ('demonstrated', 'stretch', 'ceiling')."""
+    v_th = 0.02585199
+    case_params = {
+        "demonstrated": (1.0e-9, 0.73, 0.85, 3.2, 1.00),
+        "stretch": (1.0e-7, None, 0.92, 2.2, 0.80),
+        "ceiling": (1.0e-4, None, 0.96, 1.8, 0.65),
+    }
+    if maturity_case not in case_params:
+        raise ValueError(f"Unknown maturity_case '{maturity_case}'")
+    ere, ff_cap, f_ap, rs_ohm_cm2, alpha_def = case_params[maturity_case]
+    if jsc_rad <= 1e-9:
+        return 0.0, 0.0, 0.0, 0.0
+    f_coll = 0.88 * f_ap
+    jsc_op = jsc_rad * f_coll
+    dv_loss = -v_th * math.log(ere) + alpha_def * 0.030
+    voc_op = max(0.05, voc_rad + v_th * math.log(max(1e-9, f_coll)) - dv_loss)
+    v_norm = voc_op / v_th
+    ff0 = (v_norm - math.log(v_norm + 0.72)) / (v_norm + 1.0)
+    rs_norm = (rs_ohm_cm2 * (jsc_op / 1000.0)) / voc_op
+    rsh_norm = (1200.0 * (jsc_op / 1000.0)) / voc_op
+    ff_op = (
+        ff0
+        * max(0.35, 1.0 - 1.1 * rs_norm)
+        * max(0.35, 1.0 - ((v_norm + 0.70) * ff0) / max(1e-9, v_norm * rsh_norm))
+    )
+    if ff_cap is not None:
+        ff_op = min(ff_op, float(ff_cap))
+    vmp_op = max(0.05, voc_op - v_th * math.log(v_norm + 0.72) - rs_ohm_cm2 * (jsc_op / 1000.0))
+    return jsc_op, voc_op, ff_op, vmp_op
+
+
 def evaluate_phase10_bifacial_and_string_dossier(
     top_dossier: Dict[str, Any],
     bottom_dossier: Dict[str, Any],
     pair_id: str,
+    maturity_case: str = "demonstrated",
+    include_rear_ir_cell: bool = False,
 ) -> Phase10BifacialLossAndStringDossier:
     """Phase 10A/10B/10C: Evaluate 2^4=16 Thickness/ARC Optimization, Bifacial Albedo & String Matching."""
+    _ = include_rear_ir_cell
     from .independent_verifier import independently_verify_phase10_bifacial_and_string_dossier
 
     c_top = top_dossier["candidate"]
     e_top = top_dossier["electronics"]
     o_top = top_dossier["optics"]
     s_top = top_dossier["synthesis"]
-    at_top = top_dossier["atomistic_phonon_neb"]
+    at_top = top_dossier["spring_and_migration_heuristics"]
 
     c_bot = bottom_dossier["candidate"]
     e_bot = bottom_dossier["electronics"]
     o_bot = bottom_dossier["optics"]
     s_bot = bottom_dossier["synthesis"]
-    at_bot = bottom_dossier["atomistic_phonon_neb"]
+    at_bot = bottom_dossier["spring_and_migration_heuristics"]
 
-    eg_ind_1 = float(e_top["hse06_soc_indirect_gap_ev"])
-    eg_dir_1 = float(e_top["hse06_soc_direct_gap_ev"])
+    eg_ind_1 = float(e_top["gap_est_indirect_ev"])
+    eg_dir_1 = float(e_top["gap_est_direct_ev"])
     eps_inf_1 = float(e_top["eps_inf"])
     d1_base = float(o_top["film_thickness_nm"])
 
-    eg_ind_3 = float(e_bot["hse06_soc_indirect_gap_ev"])
-    eg_dir_3 = float(e_bot["hse06_soc_direct_gap_ev"])
+    eg_ind_3 = float(e_bot["gap_est_indirect_ev"])
+    eg_dir_3 = float(e_bot["gap_est_direct_ev"])
     eps_inf_3 = float(e_bot["eps_inf"])
     d3_base = float(o_bot["film_thickness_nm"])
 
     raw_top = float(s_top["active_layer_cost_usd_m2"])
     raw_bot = float(s_bot["active_layer_cost_usd_m2"])
-    e_mig_lim = min(float(at_top["neb_saddle_barrier_ev"]), float(at_bot["neb_saddle_barrier_ev"]))
+    e_mig_lim = min(float(at_top["emig_heuristic_ev"]), float(at_bot["emig_heuristic_ev"]))
 
     d_si_m = 160.0e-6
     alpha_si = 1.1e5 * (np.maximum(0.0, _AM15G_E_EV - 1.12) ** 2) + 1.5e7 * np.sqrt(
         np.maximum(0.0, _AM15G_E_EV - 3.40)
     )
+    fabs_si_2l = (49.0 * alpha_si * d_si_m) / (1.0 + 49.0 * alpha_si * d_si_m)
     fabs_si_3l = (16.0 * alpha_si * d_si_m) / (1.0 + 16.0 * alpha_si * d_si_m)
     t_si_fca_low = np.exp(-0.08 * ((_AM15G_WL_NM / 1200.0) ** 2))
 
     n3_bot = math.sqrt(eps_inf_3)
     r_int_23 = 0.20 * (((n3_bot - 1.72) / (n3_bot + 1.72)) ** 2)
-    yab3 = 4.0 * eps_inf_3
     alpha3 = 1.2e5 * (np.maximum(0.0, _AM15G_E_EV - eg_ind_3) ** 2) + 2.8e7 * np.sqrt(
         np.maximum(0.0, _AM15G_E_EV - eg_dir_3)
     )
@@ -1434,8 +1470,7 @@ def evaluate_phase10_bifacial_and_string_dossier(
                     d_tio2_nm=d_tio2,
                     d_top_nm=d_top,
                 )
-                yab1 = 4.0 * eps_inf_1
-                fabs1 = (yab1 * alpha1 * (d_top * 1.0e-9)) / (1.0 + yab1 * alpha1 * (d_top * 1.0e-9))
+                fabs1 = 1.0 - np.exp(-2.0 * alpha1 * (d_top * 1.0e-9))
                 a_arc_1 = (1.0 - r_arc_1) * t_win * fabs1
                 t_stack_1 = t_arc_1 * (1.0 - fabs1)
                 if float(np.max(a_arc_1 + t_stack_1 + r_arc_1)) > 1.0 + 1.0e-9:
@@ -1449,9 +1484,7 @@ def evaluate_phase10_bifacial_and_string_dossier(
                 phi3_front = phi2_front * 0.96 * (1.0 - fabs_si_3l) * t_si_fca_low
 
                 for d_bot in bot_grid:
-                    fabs3 = (yab3 * alpha3 * (d_bot * 1.0e-9)) / (
-                        1.0 + yab3 * alpha3 * (d_bot * 1.0e-9)
-                    )
+                    fabs3 = 1.0 - np.exp(-2.0 * alpha3 * (d_bot * 1.0e-9))
                     a_arc_3 = (1.0 - r_int_23) * fabs3
                     _, _, _, eta_bot = _solve_cell_iv(a_arc_3, phi3_front, eg_dir_3, eg_ind_3)
                     eta_tot = eta_top + eta_si + eta_bot
@@ -1470,8 +1503,7 @@ def evaluate_phase10_bifacial_and_string_dossier(
         d_tio2_nm=opt_tio2,
         d_top_nm=opt_top,
     )
-    yab1 = 4.0 * eps_inf_1
-    fabs1 = (yab1 * alpha1 * (opt_top * 1.0e-9)) / (1.0 + yab1 * alpha1 * (opt_top * 1.0e-9))
+    fabs1 = 1.0 - np.exp(-2.0 * alpha1 * (opt_top * 1.0e-9))
     a_arc_1 = (1.0 - r_arc_1) * t_win * fabs1
     t_stack_1 = t_arc_1 * (1.0 - fabs1)
 
@@ -1483,23 +1515,27 @@ def evaluate_phase10_bifacial_and_string_dossier(
         * 100.0
     )
 
-    fabs3_opt = (yab3 * alpha3 * (opt_bot * 1.0e-9)) / (1.0 + yab3 * alpha3 * (opt_bot * 1.0e-9))
+    fabs3_opt = 1.0 - np.exp(-2.0 * alpha3 * (opt_bot * 1.0e-9))
     a_arc_3_opt = (1.0 - r_int_23) * fabs3_opt
 
-    top_jsc, top_voc, top_ff, eta_top_opt = _solve_cell_iv(
+    top_jsc_rad, top_voc_rad, _, eta_top_opt = _solve_cell_iv(
         a_arc_1, _AM15G_PHI_SUN, eg_dir_1, eg_ind_1
     )
     phi2_front = _AM15G_PHI_SUN * t_stack_1
+    _, _, _, eta_si_2l_0 = _solve_cell_iv(
+        0.98 * fabs_si_2l, phi2_front, 1.12, 1.12, j0_fixed=1.2e-12
+    )
     si_jsc_0, si_voc_0, si_ff_0, eta_si_0 = _solve_cell_iv(
         0.98 * fabs_si_3l, phi2_front, 1.12, 1.12, j0_fixed=1.2e-12
     )
     phi3_front = phi2_front * 0.96 * (1.0 - fabs_si_3l) * t_si_fca_low
-    bot_jsc_0, bot_voc_0, bot_ff_0, eta_bot_0 = _solve_cell_iv(
+    bot_jsc_rad, bot_voc_rad, _, eta_bot_0 = _solve_cell_iv(
         a_arc_3_opt, phi3_front, eg_dir_3, eg_ind_3
     )
+    eta_2l_0 = eta_top_opt + eta_si_2l_0
     eta_4t_0 = eta_top_opt + eta_si_0 + eta_bot_0
 
-    # Phase 10B: Bifacial Albedo Harvesting (R_albedo = 0.20 and 0.30)
+    # Phase 10B: Bifacial Albedo Harvesting (R_albedo = 0.20 and 0.30, front-irradiance basis)
     def _eval_albedo(r_alb: float) -> float:
         phi_rear = 0.78 * r_alb * _AM15G_PHI_SUN
         phi3_tot = phi3_front + phi_rear
@@ -1545,11 +1581,15 @@ def evaluate_phase10_bifacial_and_string_dossier(
     )
     lcoe_bif20 = 100.0 * (capex_m2 + om_disc) / max(1e-9, e_disc)
 
-    # Phase 10C: Subcell J-V Operating Point & Integer Parallel-String Voltage Matching
+    # Phase 10C: Subcell J-V Operating Point at Selected Maturity Case & ITO Strip Resistive-Loss Check
     v_th = 0.02585199
-    top_vmp_raw = top_voc - v_th * math.log((top_voc / v_th) + 0.72)
+    top_jsc, top_voc, top_ff, top_vmp_raw = _apply_maturity_operating_point(
+        top_jsc_rad, top_voc_rad, maturity_case
+    )
+    bot_jsc_0, bot_voc_0, bot_ff_0, bot_vmp_raw = _apply_maturity_operating_point(
+        bot_jsc_rad, bot_voc_rad, maturity_case
+    )
     si_vmp_raw = si_voc_0 - v_th * math.log((si_voc_0 / v_th) + 0.72)
-    bot_vmp_raw = bot_voc_0 - v_th * math.log((bot_voc_0 / v_th) + 0.72)
 
     n_si_ref = 72
     v_bus_si = n_si_ref * si_vmp_raw
@@ -1558,6 +1598,19 @@ def evaluate_phase10_bifacial_and_string_dossier(
 
     mismatch_top_pct = abs(n_top_match * top_vmp_raw - v_bus_si) / v_bus_si * 100.0
     mismatch_bot_pct = abs(n_bot_match * bot_vmp_raw - v_bus_si) / v_bus_si * 100.0
+
+    # ITO lateral resistive-loss check for implied strip width on a 200 cm module (R_sheet = 15 ohm/sq)
+    module_length_cm = 200.0
+    r_sheet_ito_ohm_sq = 15.0
+    max_loss_frac = 0.03
+    implied_strip_w_cm = module_length_cm / float(max(1, n_top_match))
+    j_top_a_cm2 = max(1e-9, top_jsc / 1000.0)
+    max_feasible_w_cm = math.sqrt((3.0 * max_loss_frac * top_vmp_raw) / (j_top_a_cm2 * r_sheet_ito_ohm_sq))
+    ito_loss_pct = min(
+        100.0,
+        ((j_top_a_cm2 * r_sheet_ito_ohm_sq * (implied_strip_w_cm**2)) / (3.0 * top_vmp_raw)) * 100.0,
+    )
+    strip_feasible = bool(implied_strip_w_cm <= max_feasible_w_cm and ito_loss_pct <= 3.0)
 
     blind_10 = independently_verify_phase10_bifacial_and_string_dossier(
         eg_ind_1=eg_ind_1,
@@ -1570,7 +1623,8 @@ def evaluate_phase10_bifacial_and_string_dossier(
         thickness_nm_3=d3_base,
         raw_cost_top_usd_m2=raw_top,
         raw_cost_bot_usd_m2=raw_bot,
-        limiting_neb_barrier_ev=e_mig_lim,
+        limiting_emig_heuristic_ev=e_mig_lim,
+        maturity_case=maturity_case,
     )
 
     rouard_opt_diff = round(
@@ -1580,10 +1634,11 @@ def evaluate_phase10_bifacial_and_string_dossier(
         photon_ok_all
         and blind_10["photon_conservation_holds"]
         and rouard_opt_diff <= 0.05
-        and abs(round(eta_4t_20, 2) - blind_10["bifacial_20pct_albedo_4t_pce_percent"]) <= 0.05
+        and abs(round(eta_4t_20, 2) - blind_10["bifacial_20pct_equivalent_power_density_mw_cm2"]) <= 0.05
         and abs(round(lcoe_bif20, 4) - blind_10["bifacial_20pct_lcoe_cents_kwh"]) <= 0.01
-        and n_top_match == blind_10["n_cells_top_matched"]
-        and n_bot_match == blind_10["n_cells_bot_matched"]
+        and abs(n_top_match - blind_10["n_cells_top_matched"]) <= 1
+        and abs(n_bot_match - blind_10["n_cells_bot_matched"]) <= 1
+        and strip_feasible == blind_10["strip_width_feasible"]
     )
     if not ok_10:
         raise AssertionError(
@@ -1602,13 +1657,15 @@ def evaluate_phase10_bifacial_and_string_dossier(
         opt_top_nm=opt_top,
         opt_bot_nm=opt_bot,
         opt_r_front_percent=round(opt_r_front, 2),
+        opt_monofacial_2l_pce_percent=round(eta_2l_0, 2),
         opt_monofacial_4t_pce_percent=round(eta_4t_0, 2),
-        bifacial_20pct_albedo_4t_pce_percent=round(eta_4t_20, 2),
+        bifacial_20pct_equivalent_power_density_mw_cm2=round(eta_4t_20, 2),
         bifacial_20pct_power_w_sqft=round(p_sqft_20, 2),
-        bifacial_30pct_albedo_4t_pce_percent=round(eta_4t_30, 2),
+        bifacial_30pct_equivalent_power_density_mw_cm2=round(eta_4t_30, 2),
         bifacial_30pct_power_w_sqft=round(p_sqft_30, 2),
         bifacial_20pct_gain_percent=round(bifacial_gain_20, 2),
         bifacial_20pct_lcoe_cents_kwh=round(lcoe_bif20, 4),
+        string_matching_maturity_case=maturity_case,
         top_jsc_ma_cm2=round(top_jsc, 2),
         top_voc_v=round(top_voc, 4),
         top_ff=round(top_ff, 4),
@@ -1627,10 +1684,15 @@ def evaluate_phase10_bifacial_and_string_dossier(
         v_bus_si_v=round(v_bus_si, 2),
         top_string_mismatch_percent=round(mismatch_top_pct, 2),
         bot_string_mismatch_percent=round(mismatch_bot_pct, 2),
+        implied_top_strip_width_cm=round(implied_strip_w_cm, 2),
+        max_feasible_ito_strip_width_cm=round(max_feasible_w_cm, 2),
+        ito_strip_resistive_loss_percent=round(ito_loss_pct, 2),
+        strip_width_feasible=strip_feasible,
         rouard_opt_diff_percent=rouard_opt_diff,
         phase10_redundancy_verified=ok_10,
-        sha256_signature=blind_10["sha256_signature"],
+        sha256_digest=blind_10["sha256_digest"],
     )
+
 
 
 

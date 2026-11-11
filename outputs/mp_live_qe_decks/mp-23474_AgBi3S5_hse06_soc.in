@@ -1,6 +1,6 @@
-! FailSmart-MatEngine v2.0 Auto-Generated Quantum ESPRESSO HSE06+SOC Input Deck
+! FailSmart-MatEngine Auto-Generated Quantum ESPRESSO HSE06+SOC Input Deck (not run)
 ! Candidate: mp-23474 (AgBi3S5) | Target: BOTTOM_IR_075EV
-! Verified Space Group: C2/m (#12) | nat = 18
+! Space Group: C2/m (#12) | nat = 18
 &CONTROL
   calculation = 'scf',
   prefix = 'agbi3s5',
@@ -20,7 +20,7 @@
   noncolin = .true.,
   lspinorb = .true.,
   input_dft = 'hse',
-  nqx1 = 2, nqx2 = 2, nqx3 = 2,
+  nqx1 = 2, nqx2 = 1, nqx3 = 2,
   x_gamma_extrapolation = .true.,
 /
 &ELECTRONS

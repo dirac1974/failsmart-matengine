@@ -1,5 +1,8 @@
 # FailSmart-MatEngine v1.0 → v2.0 Critical Audit & Remediation Record
 
+> [!WARNING]
+> **Read first (independent audit, 2026-11):** this earlier audit fixed internal consistency only. External validity is addressed in the 2026-11 audit. See [`INDEPENDENT_AUDIT_2026-11.md`](INDEPENDENT_AUDIT_2026-11.md) and [`REMEDIATION_TASKS.md`](REMEDIATION_TASKS.md).
+
 ## 1. Summary of Audit Findings Remediated in v2.0
 
 | ID | v1.0 Issue Identified | v2.0 Engineering & Scientific Fix Implemented | Verification Proof |
@@ -9,7 +12,7 @@
 | **F3** | **Incomplete Quantum ESPRESSO (`pw.x`) Decks:** `.in` files used `ibrav = 0` and placeholder mass `1.000` without `CELL_PARAMETERS` or `ATOMIC_POSITIONS`. | `orchestrator.py` parses each finalist's verified `pymatgen.core.Structure` and emits exact IUPAC atomic weights, $3\times 3$ `CELL_PARAMETERS (angstrom)` matrices, and `nat` `ATOMIC_POSITIONS (crystal)` fractional coordinates. | Automated parser test verifies non-singular lattice matrix (`|det| > 50 Å³`), IUPAC masses, and exact `nat` coordinate lines. |
 | **F4** | **Space-Group vs. Subgrid Mismatch & Heuristic BVS:** $Z=1$ orthorhombic grids carried `Pnma`/`C2/c` CIF headers and aspect-ratio BVS estimates. | Installed `pyxtal`, `pymatgen`, and `spglib`; generated genuine $Z \in \{1, 2, 4\}$ Wyckoff structures verified by `SpacegroupAnalyzer`, exported explicit-site CIFs verified round-trip by `CifParser`, and computed exact unscaled Brown-Altermatt BVS GII. | `20/20` crystals match `spglib`-verified symmetry (`P4/nmm`, `I4/mmm`, `Pnma`, `Cmcm`, `C2/c`, `R-3m`, etc.) and exact unscaled BVS GII. |
 | **F5** | **16-Compound Lookup Limitation & Stale Strings:** Proposing a 17th formula raised `KeyError`; unused `"SbCuS2Cl"` strings remained in `_CANDIDATE_SYNTHESIS_DATA`. | Removed all stale strings, added `SMACT` Pauling-screened open-world OOD candidate generation (`Sr2Cu2O2S`, `Ba2BiS3Cl`, `Ba2BiSe3I`, `Cu2SnSeI2`), and implemented smooth composition-derived surrogates across all stages. | `20` campaign candidates + arbitrary unseen 21st candidate evaluate end-to-end with zero `KeyError`s. |
-| **S1** | **Superionic $\text{Cu}^+$ / $\text{Ag}^+$ Migration Blind Spot:** `Cu3BiS2Cl2` (`37.5 at% Cu+` + dual `Cl-` channels) risked perovskite-like solar-bias drift and shunting. | Added mandatory **Stage 2b Ion-Migration Gate** ($E_{\text{mig}} \ge 0.65\text{ eV}$). `CAND-A09` (`Cu3BiS2Cl2`, $E_{\text{mig}} = 0.42\text{ eV}$) is now caught and rejected (`ION_MIGRATION_INSTABILITY`), leaving **5 Validated Finalists** (`Bi2CuO2SCl`, `Cu2SbS2Cl`, `BiZnOSCl`, `Sn2SbSe2I3`, `Cu2BiSe2I`). | Regression-tested in `test_stage2b_cu_ion_migration_gate`. |
+| **S1** | **Superionic $\text{Cu}^+$ / $\text{Ag}^+$ Migration Blind Spot:** `Cu3BiS2Cl2` (`37.5 at% Cu+` + dual `Cl-` channels) risked perovskite-like solar-bias drift and shunting. | Added mandatory **Stage 2b Ion-Migration Gate** ($E_{\text{mig}} \ge 0.65\text{ eV}$). `CAND-A09` (`Cu3BiS2Cl2`, $E_{\text{mig}} = 0.42\text{ eV}$) is now caught and rejected (`ION_MIGRATION_INSTABILITY`), leaving **5 Prescreen Finalists** (`Bi2CuO2SCl`, `Cu2SbS2Cl`, `BiZnOSCl`, `Sn2SbSe2I3`, `Cu2BiSe2I`). | Regression-tested in `test_stage2b_cu_ion_migration_gate`. |
 
 ---
 

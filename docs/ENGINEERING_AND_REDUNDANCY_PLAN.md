@@ -1,5 +1,8 @@
 # Scientific Engineering Team Plan, Research-Engineering Communication Protocol & Redundancy Verification Architecture
 
+> [!WARNING]
+> **Read first (independent audit, 2026-11):** the redundancy verifier re-implements the same formulas as the primary code, so agreement shows arithmetic consistency only. SHA-256 values are unkeyed digests, not signatures. See [`INDEPENDENT_AUDIT_2026-11.md`](INDEPENDENT_AUDIT_2026-11.md) and [`REMEDIATION_TASKS.md`](REMEDIATION_TASKS.md).
+
 ## 1. Root-Cause Audit of Prior Unacceptable Errors (Why Redundancy Is Mandatory)
 
 A zero-trust audit of the initial Phase 0 prototype (`failsmart_matengine/tools.py`) exposed four classes of errors that occurred because single-pass prototype code was written without an independent mathematical verifier:
@@ -31,7 +34,7 @@ Every agent is assigned the optimal model tier based on cognitive load, mathemat
 | `crystal_explorer` | Solid-State Chemist & Inverse-Design Explorer | **`pro`** | Deep coordination chemistry, Wyckoff symmetry rules, Pauling valence neutrality, and `SMACT` compositional design. |
 | `surrogate_physicist` | Lattice Dynamics & MLIP Surrogate Physicist | **`pro`** | Thermodynamic convex-hull phase equilibria, Born elastic tensor stability, and anharmonic phonon analysis. |
 | `synthesis_chemist` | Retrosynthesis, Kinetics & Speciation Chemist | **`pro`** | Multi-phase solid-state reaction network thermodynamics, halide vapor pressures, and Pourbaix aqueous speciation. |
-| `quantum_defect_physicist` | Quantum Electronic & Defect-Transport Physicist | **`pro`** | Relativistic spin-orbit coupling (`HSE06+SOC`), Fröhlich polaron physics, and Shockley-Read-Hall defect energetics. |
+| `quantum_defect_physicist` | Quantum Electronic & Defect-Transport Physicist | **`pro`** | Heuristic gap estimates (`HSE06+SOC` not run), Fröhlich polaron physics, and Shockley-Read-Hall defect estimates. |
 | `photonic_tandem_architect` | Nanophotonics & 4T Tandem Device Architect | **`pro`** | Detailed-balance blackbody thermodynamics, Transfer-Matrix optics, and $4n^2$ Yablonovitch light-trapping design. |
 | `adversarial_critic` | Adversarial Red-Team Critic (Research Veto) | **`pro`** | Deep physical falsification (anion phase segregation, TCO interfacial reactions, 0D/1D polaron trapping). |
 
@@ -43,7 +46,7 @@ Every agent is assigned the optimal model tier based on cognitive load, mathemat
 | `physics_engine_engineer` | Primary Computational Physics & Crystallography Engineer | **`pro`** | Implements primary crystallographic, Madelung/Born-Mayer, elastic/phonon, and relativistic electronic solvers. |
 | `optics_kinetics_engineer` | Primary Retrosynthesis, Pourbaix & Photonics Engineer | **`pro`** | Implements Gibbs reaction network solvers, Pourbaix solubility solvers, and wavelength-resolved AM1.5G 4T integration. |
 | `redundancy_verifier_alpha` | Independent Mathematical Verifier (**Redundancy #1**) | **`pro`** | Independently re-derives and re-computes all crystallographic, thermodynamic, and spectral integrals from scratch. |
-| `qa_test_audit_engineer` | Automated Test & Provenance Logger (**Redundancy #2**) | **`pro`** | Authors exhaustive `pytest`/`unittest` suites, runs invariant checks, and writes cryptographic audit logs. |
+| `qa_test_audit_engineer` | Automated Test & Provenance Logger (**Redundancy #2**) | **`pro`** | Authors `pytest`/`unittest` suites, runs invariant checks, and writes unkeyed SHA-256 digest audit logs. |
 | `repo_release_auditor` | Repository Consistency & Release Gatekeeper | **`flash`** | High-speed cross-file regex/JSON/SQLite/Markdown consistency scanning and pre-commit verification. |
 
 ---
@@ -69,7 +72,7 @@ sequenceDiagram
         VerA-->>Eng: RAISE REDUNDANCY_MISMATCH_BLOCK (Logged to Audit Trail)
         Eng->>VerA: Fix Mathematical/Code Bug & Re-Submit
     end
-    VerA->>QA: Issue Redundancy Certificate (SHA-256 Signed)
+    VerA->>QA: Issue Self-Consistency Certificate (SHA-256 Digest)
     QA->>QA: Run Full Automated Test Suite (test_scientific_integrity.py)
     QA->>Adv: Deliver Verified Numerical Dossier + Test Log
     Adv->>Adv: Execute Gate A / Gate B Physical Falsification Audit
@@ -98,4 +101,4 @@ All communications between the Research Team and the Engineering Team, along wit
    * **Redundancy Verifier Alpha (`redundancy_verifier_alpha`):** Independently re-computes the exact same physical model in photon-energy space ($E \in [0.62, 4.43]\text{ eV}$) using Simpson's rule quadrature and verifies $|\eta_{\text{primary}} - \eta_{\text{redundant}}| < 0.05\%$.
 
 3. **Gate R3 — Cross-Artifact Repository Audit (`repo_release_auditor`):**
-   * Before any commit, an automated script parses `data/failure_memory.db`, `outputs/pilot_campaign_summary.json`, `outputs/qe_hse06_soc_decks/*.in`, `README.md`, and `docs/*.md` to assert that every candidate formula, band gap, synthesis temperature, cost, and efficiency matches across all files with zero discrepancy.
+   * Before any commit, an automated script parses `data/failure_memory.db`, `outputs/pilot_campaign_summary.json`, `outputs/qe_hse06_soc_decks/*.in` (`HSE06+SOC` input decks only, not run), `README.md`, and `docs/*.md` to assert that every candidate formula, band gap, synthesis temperature, cost, and efficiency matches across all files with zero discrepancy.

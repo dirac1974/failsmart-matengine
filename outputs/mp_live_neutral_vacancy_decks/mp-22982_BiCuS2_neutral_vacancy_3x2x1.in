@@ -1,11 +1,11 @@
-! FailSmart-MatEngine v6.0 Stage 5 `doped` Defect Supercell QE Deck (3x2x1)
-! Candidate: mp-22982 (BiCuS2) | Defect: V_Cu (shallow acceptor, ns2-screened) removed at frac=(0.08333, 0.12221, 0.82861)
-! Supercell sites (with vacancy): 95 (host=96) | L_min = 11.747 A
-! FNV Electrostatic Correction: E_FNV(q=+-1) = 0.0991 eV, E_FNV(q=+-2) = 0.3963 eV
+! FailSmart-MatEngine Neutral Vacancy Supercell QE Deck (3x2x1)
+! Candidate: mp-22982 (BiCuS2) | Removed Species: Cu | Label: V_Cu (shallow acceptor, ns2-screened) at frac=(0.08333, 0.12221, 0.82861)
+! Supercell sites (with neutral vacancy): 95 (host=96) | d_perp_min = 11.747 A
+! Point-Charge Image Estimate: E_pc(|q|=1) = 0.0991 eV, E_pc(|q|=2) = 0.3963 eV
 ! Lab Synthesis Batch (10.0 mmol): Target Mass = 3.3666 g at T = 375.0 C
 &CONTROL
   calculation = 'relax',
-  prefix = 'bicus2_defect_v_cu (shallow acceptor, ns2-screened)',
+  prefix = 'bicus2_v_cu',
   outdir = './out_defect/',
   pseudo_dir = './pseudo_oncv_fr/',
   tprnfor = .true.,
@@ -125,4 +125,5 @@ ATOMIC_POSITIONS (crystal)
   S      0.58333333    0.93042528    0.59923068
   S      0.91666667    0.43042528    0.59923068
   S      0.91666667    0.93042528    0.59923068
-K_POINTS gamma
+K_POINTS automatic
+  1 1 1 0 0 0

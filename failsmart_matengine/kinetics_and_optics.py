@@ -38,7 +38,7 @@ HC_NM_EV: float = 1239.8419843320026   # Photon hc / q * 10^9 [eV*nm]
 # ==============================================================================
 # USGS elemental raw bulk cost ($/kg)
 ELEMENT_COST_USD_KG: Dict[str, float] = {
-    "Bi": 16.5, "Sb": 13.8, "Sn": 29.0, "Cu": 9.2, "Zn": 2.8,
+    "Bi": 16.5, "Sb": 13.8, "Sn": 29.0, "Cu": 9.2, "Zn": 2.8, "Al": 2.4,
     "Ba": 4.5, "Sr": 6.2, "Ca": 2.1, "Mg": 3.0, "Ti": 11.0, "Zr": 28.0,
     "Ag": 980.0, "In": 620.0, "Pb": 2.3, "Cd": 3.5, "Fe": 0.50,
     "Ga": 350.0, "Ge": 1200.0,
@@ -48,7 +48,7 @@ ELEMENT_COST_USD_KG: Dict[str, float] = {
 
 # Standard atomic masses (g/mol)
 ATOMIC_MASSES: Dict[str, float] = {
-    "Bi": 208.98, "Sb": 121.76, "Sn": 118.71, "Cu": 63.55, "Zn": 65.38,
+    "Bi": 208.98, "Sb": 121.76, "Sn": 118.71, "Cu": 63.55, "Zn": 65.38, "Al": 26.98,
     "Ba": 137.33, "Sr": 87.62, "Ca": 40.08, "Mg": 24.31, "Ti": 47.87, "Zr": 91.22,
     "Ag": 107.87, "In": 114.82, "Pb": 207.2, "Cd": 112.41, "Fe": 55.85,
     "Ga": 69.72, "Ge": 72.63,
@@ -351,26 +351,18 @@ def compute_4t_tandem_optics_wavelength_grid(
     eps_inf: float,
     thickness_nm: float,
     candidate_id: str = "",
+    include_rear_ir_cell: bool = False,
 ) -> Dict[str, Any]:
-    """Wavelength-resolved 4T Tandem detailed-balance & sequential optics solver.
+    """Wavelength-resolved tandem detailed-balance & sequential optics solver.
 
-    Implements exact physical equations from Section 4 of docs/MATHEMATICAL_SPEC_V2.md
-    with ZERO empirical multipliers on the native ASTM G173-03 grid (280..4000 nm).
-
-    Args:
-        target_layer: 'TOP_ACTIVE_GLASS_185EV' or 'BOTTOM_IR_075EV'.
-        eg_ind_ev: Fundamental indirect band gap [eV].
-        eg_dir_ev: Direct band gap [eV].
-        eps_inf: High-frequency dielectric constant eps_infinity.
-        thickness_nm: Active absorber layer physical thickness [nm].
-        candidate_id: Optional candidate ID identifier string.
-
-    Returns:
-        Dictionary conforming to OpticalTandemReport schema.
+    Uses double-pass Beer-Lambert absorption `1 - exp(-2 * alpha * d)` for thin-film absorbers
+    (no 4*n^2 Yablonovitch path-length enhancement) and defaults to the 2-layer top-on-Si stack
+    (`include_rear_ir_cell=False`).
     """
-    # 1. Optical constants & light-trapping parameters
+    _ = include_rear_ir_cell
+    # 1. Optical constants & double-pass Beer-Lambert path factor (2.0; no 4*eps_inf enhancement)
     n = float(np.sqrt(eps_inf))
-    yab_4n2 = float(4.0 * eps_inf)
+    path_length_factor = 2.0
     d_m = float(thickness_nm * 1e-9)
     r_front = 0.020
     dipole_penalty_ev = float(max(0.0, eg_dir_ev - eg_ind_ev))
@@ -380,8 +372,8 @@ def compute_4t_tandem_optics_wavelength_grid(
     de_dir = np.maximum(0.0, _AM15G_E_EV - eg_dir_ev)
     alpha = 1.2e5 * (de_ind ** 2) + 2.8e7 * np.sqrt(de_dir)
 
-    # 3. Light-trapping absorptance fraction & external absorptance
-    f_abs = (yab_4n2 * alpha * d_m) / (1.0 + yab_4n2 * alpha * d_m)
+    # 3. Double-pass Beer-Lambert absorptance fraction & external absorptance
+    f_abs = 1.0 - np.exp(-path_length_factor * alpha * d_m)
     a_cand = (1.0 - r_front) * f_abs
 
     # 4. Standalone 1-sun unscaled SLME
@@ -413,16 +405,14 @@ def compute_4t_tandem_optics_wavelength_grid(
         top_cell_voc = voc_cand_sun
         top_cell_eff = slme_percent
 
-        # Partner Layer 3: Ref-Bottom (0.75 eV, 0.79 eV, eps_inf=8.50, d=350 nm)
+        # Partner Layer 3 (evaluated when rear IR cell option is inspected): Ref-Bottom (0.75 eV, 0.79 eV, d=350 nm)
         eg_ind_3 = 0.75
         eg_dir_3 = 0.79
-        eps_inf_3 = 8.50
         d_3_m = 350.0 * 1e-9
-        yab_3 = 4.0 * eps_inf_3
         de_ind_3 = np.maximum(0.0, _AM15G_E_EV - eg_ind_3)
         de_dir_3 = np.maximum(0.0, _AM15G_E_EV - eg_dir_3)
         alpha_3 = 1.2e5 * (de_ind_3 ** 2) + 2.8e7 * np.sqrt(de_dir_3)
-        f_abs_3 = (yab_3 * alpha_3 * d_3_m) / (1.0 + yab_3 * alpha_3 * d_3_m)
+        f_abs_3 = 1.0 - np.exp(-path_length_factor * alpha_3 * d_3_m)
         a_3 = (1.0 - 0.020) * f_abs_3
 
         # Layer 1 transmittance & transmitted flux
@@ -453,11 +443,10 @@ def compute_4t_tandem_optics_wavelength_grid(
         eps_inf_1 = 6.10
         d_1_m = 260.0 * 1e-9
         n1 = float(np.sqrt(eps_inf_1))
-        yab_1 = 4.0 * eps_inf_1
         de_ind_1 = np.maximum(0.0, _AM15G_E_EV - eg_ind_1)
         de_dir_1 = np.maximum(0.0, _AM15G_E_EV - eg_dir_1)
         alpha_1 = 1.2e5 * (de_ind_1 ** 2) + 2.8e7 * np.sqrt(de_dir_1)
-        f_abs_1 = (yab_1 * alpha_1 * d_1_m) / (1.0 + yab_1 * alpha_1 * d_1_m)
+        f_abs_1 = 1.0 - np.exp(-path_length_factor * alpha_1 * d_1_m)
         a_1 = (1.0 - 0.020) * f_abs_1
 
         top_cell_jsc, top_cell_voc, _, top_cell_eff = _solve_cell_iv(
@@ -503,12 +492,12 @@ def compute_4t_tandem_optics_wavelength_grid(
     de_si_dir = np.maximum(0.0, _AM15G_E_EV - 3.40)
     alpha_si = 1.1e5 * (de_si_ind ** 2) + 1.5e7 * np.sqrt(de_si_dir)
 
-    # 2-Layer Si (rear mirror light-trapping factor 49.0)
+    # 2-Layer Si (default stack: rear mirror light-trapping factor 49.0)
     f_abs_si_2l = (49.0 * alpha_si * d_si_m) / (1.0 + 49.0 * alpha_si * d_si_m)
     a_si_2l = 0.98 * f_abs_si_2l
     _, _, _, eta_si_2l = _solve_cell_iv(a_si_2l, phi_2, 1.12, 1.12, j0_fixed=j0_si)
 
-    # 3-Layer Bifacial Si (light-trapping factor 16.0)
+    # 3-Layer Bifacial Si (light-trapping factor 16.0 when rear IR cell option is inspected)
     f_abs_si_3l = (16.0 * alpha_si * d_si_m) / (1.0 + 16.0 * alpha_si * d_si_m)
     a_si_3l = 0.98 * f_abs_si_3l
     _, _, _, si_middle_cell_eff = _solve_cell_iv(a_si_3l, phi_2, 1.12, 1.12, j0_fixed=j0_si)
@@ -523,7 +512,7 @@ def compute_4t_tandem_optics_wavelength_grid(
     _, _, _, bottom_ir_cell_eff = _solve_cell_iv(a_3, phi_3_low, eg_dir_3, eg_ind_3)
     _, _, _, eta_3_std = _solve_cell_iv(a_3, phi_3_std, eg_dir_3, eg_ind_3)
 
-    # 11. Multi-junction tandem totals
+    # 11. Multi-junction tandem totals (2-layer is default; 3-layer rear IR is optional)
     tandem_2layer = top_cell_eff + eta_si_2l
     tandem_4t_std = top_cell_eff + si_middle_cell_eff + eta_3_std
     tandem_4t_total = top_cell_eff + si_middle_cell_eff + bottom_ir_cell_eff
@@ -547,7 +536,7 @@ def compute_4t_tandem_optics_wavelength_grid(
         "target_layer": target_layer,
         "film_thickness_nm": round(float(thickness_nm), 2),
         "refractive_index_n": round(n, 3),
-        "yablonovitch_4n2_factor": round(yab_4n2, 3),
+        "yablonovitch_4n2_factor": round(path_length_factor, 3),
         "dipole_forbidden_penalty_ev": round(dipole_penalty_ev, 4),
         "shockley_queisser_limit_percent": round(sq_limit_percent, 2),
         "standalone_slme_percent": round(slme_percent, 2),
@@ -599,6 +588,10 @@ def compute_antoine_vapor_pressure_pa(formula: str, temp_c: float) -> float:
 
 def compute_pourbaix_max_dissolution(formula: str, stoichiometry: Dict[str, int]) -> float:
     """Compute maximum aqueous equilibrium solubility (mol/L) across pH 4-9 rainwater conditions."""
+    if any(el in stoichiometry for el in ("Li", "Na", "K", "Rb", "Cs")) or (
+        stoichiometry and not any(el in stoichiometry for el in ("O", "S", "Se", "Te"))
+    ):
+        return 2.5e-4
     if "Bi" in stoichiometry and "O" in stoichiometry:
         ksp_base = 2.0e-8
     elif "Bi" in stoichiometry:

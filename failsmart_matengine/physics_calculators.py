@@ -843,10 +843,10 @@ def compute_stability_metrics(cand_spec: Dict[str, Any]) -> Dict[str, Any]:
             "competing_hull_phases": competing,
             "bulk_modulus_gpa": data["K"],
             "shear_modulus_gpa": data["G"],
-            "min_phonon_freq_thz": data["wmin"],
+            "omega_min_heuristic_thz": data["wmin"],
             "debye_temperature_k": debye_k,
             "ion_migration_barrier_ev": data["emig"],
-            "mlip_force_std_ev_ang": data["std"],
+            "is_fixture_lookup": True,
         }
 
     # Composition-dependent smooth OOD surrogate without KeyError
@@ -887,10 +887,10 @@ def compute_stability_metrics(cand_spec: Dict[str, Any]) -> Dict[str, Any]:
         "competing_hull_phases": ["Binary-Chalcogenide", "Binary-Halide"],
         "bulk_modulus_gpa": k_gpa,
         "shear_modulus_gpa": g_gpa,
-        "min_phonon_freq_thz": wmin,
+        "omega_min_heuristic_thz": wmin,
         "debye_temperature_k": debye_k,
         "ion_migration_barrier_ev": emig,
-        "mlip_force_std_ev_ang": 0.065,
+        "is_fixture_lookup": False,
     }
 
 
@@ -909,7 +909,7 @@ def compute_exact_frohlich_alpha(
 _RAW_ELECTRONIC_DATA: Dict[str, Dict[str, Any]] = {
     "CAND-A01": {
         "pbe": 0.92,
-        "r2scan_soc": 1.48,
+        "mgga_soc": 1.48,
         "hse_nosoc": 1.74,
         "hse_soc_dir": 1.52,
         "hse_soc_ind": 1.18,
@@ -923,7 +923,7 @@ _RAW_ELECTRONIC_DATA: Dict[str, Dict[str, Any]] = {
     },
     "CAND-A02": {
         "pbe": 1.38,
-        "r2scan_soc": 1.66,
+        "mgga_soc": 1.66,
         "hse_nosoc": 2.24,
         "hse_soc_dir": 1.86,
         "hse_soc_ind": 1.82,
@@ -937,7 +937,7 @@ _RAW_ELECTRONIC_DATA: Dict[str, Dict[str, Any]] = {
     },
     "CAND-A03": {
         "pbe": 1.34,
-        "r2scan_soc": 1.62,
+        "mgga_soc": 1.62,
         "hse_nosoc": 2.02,
         "hse_soc_dir": 1.83,
         "hse_soc_ind": 1.79,
@@ -951,7 +951,7 @@ _RAW_ELECTRONIC_DATA: Dict[str, Dict[str, Any]] = {
     },
     "CAND-A04": {
         "pbe": 2.45,
-        "r2scan_soc": 2.82,
+        "mgga_soc": 2.82,
         "hse_nosoc": 3.55,
         "hse_soc_dir": 3.12,
         "hse_soc_ind": 2.94,
@@ -965,7 +965,7 @@ _RAW_ELECTRONIC_DATA: Dict[str, Dict[str, Any]] = {
     },
     "CAND-A05": {
         "pbe": 1.25,
-        "r2scan_soc": 1.54,
+        "mgga_soc": 1.54,
         "hse_nosoc": 2.15,
         "hse_soc_dir": 1.95,
         "hse_soc_ind": 1.90,
@@ -979,7 +979,7 @@ _RAW_ELECTRONIC_DATA: Dict[str, Dict[str, Any]] = {
     },
     "CAND-A06": {
         "pbe": 1.42,
-        "r2scan_soc": 1.70,
+        "mgga_soc": 1.70,
         "hse_nosoc": 2.29,
         "hse_soc_dir": 1.89,
         "hse_soc_ind": 1.85,
@@ -993,7 +993,7 @@ _RAW_ELECTRONIC_DATA: Dict[str, Dict[str, Any]] = {
     },
     "CAND-A07": {
         "pbe": 1.28,
-        "r2scan_soc": 1.56,
+        "mgga_soc": 1.56,
         "hse_nosoc": 2.12,
         "hse_soc_dir": 1.83,
         "hse_soc_ind": 1.76,
@@ -1007,7 +1007,7 @@ _RAW_ELECTRONIC_DATA: Dict[str, Dict[str, Any]] = {
     },
     "CAND-A08": {
         "pbe": 1.45,
-        "r2scan_soc": 1.72,
+        "mgga_soc": 1.72,
         "hse_nosoc": 2.30,
         "hse_soc_dir": 1.92,
         "hse_soc_ind": 1.88,
@@ -1021,7 +1021,7 @@ _RAW_ELECTRONIC_DATA: Dict[str, Dict[str, Any]] = {
     },
     "CAND-A09": {
         "pbe": 1.31,
-        "r2scan_soc": 1.59,
+        "mgga_soc": 1.59,
         "hse_nosoc": 2.16,
         "hse_soc_dir": 1.79,
         "hse_soc_ind": 1.76,
@@ -1035,7 +1035,7 @@ _RAW_ELECTRONIC_DATA: Dict[str, Dict[str, Any]] = {
     },
     "CAND-A10": {
         "pbe": 1.62,
-        "r2scan_soc": 1.88,
+        "mgga_soc": 1.88,
         "hse_nosoc": 2.48,
         "hse_soc_dir": 2.18,
         "hse_soc_ind": 2.12,
@@ -1049,7 +1049,7 @@ _RAW_ELECTRONIC_DATA: Dict[str, Dict[str, Any]] = {
     },
     "CAND-B01": {
         "pbe": 0.54,
-        "r2scan_soc": 0.70,
+        "mgga_soc": 0.70,
         "hse_nosoc": 1.22,
         "hse_soc_dir": 0.82,
         "hse_soc_ind": 0.79,
@@ -1063,7 +1063,7 @@ _RAW_ELECTRONIC_DATA: Dict[str, Dict[str, Any]] = {
     },
     "CAND-B02": {
         "pbe": 0.48,
-        "r2scan_soc": 0.64,
+        "mgga_soc": 0.64,
         "hse_nosoc": 1.08,
         "hse_soc_dir": 0.78,
         "hse_soc_ind": 0.75,
@@ -1077,7 +1077,7 @@ _RAW_ELECTRONIC_DATA: Dict[str, Dict[str, Any]] = {
     },
     "CAND-B03": {
         "pbe": 0.52,
-        "r2scan_soc": 0.68,
+        "mgga_soc": 0.68,
         "hse_nosoc": 1.24,
         "hse_soc_dir": 0.81,
         "hse_soc_ind": 0.77,
@@ -1091,7 +1091,7 @@ _RAW_ELECTRONIC_DATA: Dict[str, Dict[str, Any]] = {
     },
     "CAND-B04": {
         "pbe": 0.46,
-        "r2scan_soc": 0.61,
+        "mgga_soc": 0.61,
         "hse_nosoc": 1.18,
         "hse_soc_dir": 0.76,
         "hse_soc_ind": 0.74,
@@ -1105,7 +1105,7 @@ _RAW_ELECTRONIC_DATA: Dict[str, Dict[str, Any]] = {
     },
     "CAND-B05": {
         "pbe": 0.42,
-        "r2scan_soc": 0.58,
+        "mgga_soc": 0.58,
         "hse_nosoc": 1.05,
         "hse_soc_dir": 0.74,
         "hse_soc_ind": 0.71,
@@ -1119,7 +1119,7 @@ _RAW_ELECTRONIC_DATA: Dict[str, Dict[str, Any]] = {
     },
     "CAND-B06": {
         "pbe": 0.56,
-        "r2scan_soc": 0.72,
+        "mgga_soc": 0.72,
         "hse_nosoc": 1.26,
         "hse_soc_dir": 0.85,
         "hse_soc_ind": 0.81,
@@ -1133,7 +1133,7 @@ _RAW_ELECTRONIC_DATA: Dict[str, Dict[str, Any]] = {
     },
     "CAND-OOD-01": {
         "pbe": 1.35,
-        "r2scan_soc": 1.64,
+        "mgga_soc": 1.64,
         "hse_nosoc": 2.20,
         "hse_soc_dir": 1.84,
         "hse_soc_ind": 1.80,
@@ -1147,7 +1147,7 @@ _RAW_ELECTRONIC_DATA: Dict[str, Dict[str, Any]] = {
     },
     "CAND-OOD-02": {
         "pbe": 1.30,
-        "r2scan_soc": 1.58,
+        "mgga_soc": 1.58,
         "hse_nosoc": 2.14,
         "hse_soc_dir": 1.82,
         "hse_soc_ind": 1.78,
@@ -1161,7 +1161,7 @@ _RAW_ELECTRONIC_DATA: Dict[str, Dict[str, Any]] = {
     },
     "CAND-OOD-03": {
         "pbe": 0.50,
-        "r2scan_soc": 0.66,
+        "mgga_soc": 0.66,
         "hse_nosoc": 1.15,
         "hse_soc_dir": 0.80,
         "hse_soc_ind": 0.76,
@@ -1175,7 +1175,7 @@ _RAW_ELECTRONIC_DATA: Dict[str, Dict[str, Any]] = {
     },
     "CAND-OOD-04": {
         "pbe": 0.48,
-        "r2scan_soc": 0.63,
+        "mgga_soc": 0.63,
         "hse_nosoc": 1.12,
         "hse_soc_dir": 0.77,
         "hse_soc_ind": 0.74,
@@ -1191,18 +1191,18 @@ _RAW_ELECTRONIC_DATA: Dict[str, Dict[str, Any]] = {
 
 
 def compute_electronic_defect_metrics(cand_spec: Dict[str, Any]) -> Dict[str, Any]:
-    """Compute relativistic SOC band gaps, effective masses, dielectric constants, and Frohlich alpha."""
+    """Compute fixture/heuristic band gap estimates, effective masses, dielectric constants, and Frohlich alpha."""
     cid = cand_spec.get("id", "")
     stoich = cand_spec.get("stoich", {})
     layer = cand_spec.get("layer", "TOP_ACTIVE_GLASS_185EV")
 
     if cid in _RAW_ELECTRONIC_DATA:
         data = _RAW_ELECTRONIC_DATA[cid]
-        hse_nosoc = data["hse_nosoc"]
-        hse_soc_dir = data["hse_soc_dir"]
-        hse_soc_ind = data["hse_soc_ind"]
+        gap_nosoc = data["hse_nosoc"]
+        gap_dir = data["hse_soc_dir"]
+        gap_ind = data["hse_soc_ind"]
         pbe = data["pbe"]
-        r2scan = data["r2scan_soc"]
+        mgga_soc = data["mgga_soc"]
         me = data["me"]
         mh = data["mh"]
         einf = data["einf"]
@@ -1210,8 +1210,10 @@ def compute_electronic_defect_metrics(cand_spec: Dict[str, Any]) -> Dict[str, An
         w_lo_thz = data["w_lo_thz"]
         vac = data.get("vac", "V_site (shallow)")
         def_ev = data["def_ev"]
+        is_fixture = True
     else:
         # Fully composition-dependent smooth OOD surrogate
+        is_fixture = False
         total_atoms = max(1, sum(stoich.values()))
         bi_frac = (stoich.get("Bi", 0) + stoich.get("Pb", 0)) / total_atoms
         i_frac = (stoich.get("I", 0) + stoich.get("Te", 0)) / total_atoms
@@ -1229,27 +1231,47 @@ def compute_electronic_defect_metrics(cand_spec: Dict[str, Any]) -> Dict[str, An
             base_dir = 0.78 - 0.10 * i_frac + 0.08 * s_frac - 0.05 * se_frac
             base_ind = base_dir - 0.03
 
-        hse_soc_dir = round(base_dir, 2)
-        hse_soc_ind = round(base_ind, 2)
-        hse_nosoc = round(hse_soc_dir + soc_split, 2)
+        gap_dir = round(base_dir, 2)
+        gap_ind = round(base_ind, 2)
+        gap_nosoc = round(gap_dir + soc_split, 2)
 
-        r2scan = round(hse_soc_dir - 0.18, 2)
-        pbe = round(r2scan - 0.35, 2)
+        mgga_soc = round(gap_dir - 0.18, 2)
+        pbe = round(mgga_soc - 0.35, 2)
 
         me = round(0.20 + 0.10 * o_frac - 0.05 * (bi_frac + i_frac), 2)
         mh = round(me * 1.45, 2)
 
-        einf = round(max(5.0, 15.0 - 4.5 * hse_soc_ind), 1)
+        einf = round(max(5.0, 15.0 - 4.5 * gap_ind), 1)
         e0 = round(einf * (2.8 + 0.4 * bi_frac), 1)
 
         avg_mass = sum(IUPAC_ATOMIC_MASSES.get(el, 50.0) * cnt for el, cnt in stoich.items()) / total_atoms
         w_lo_thz = round(max(0.85, 1.65 / math.sqrt(avg_mass / 45.0)), 4)
 
-        vac = "V_Cu (shallow acceptor)" if "Cu" in stoich else ("V_Bi (shallow)" if "Bi" in stoich else "V_Ch (shallow)")
+        if "Cu" in stoich:
+            vac_el = "Cu"
+            vac = "V_Cu (shallow acceptor)"
+        elif "Bi" in stoich:
+            vac_el = "Bi"
+            vac = "V_Bi (shallow)"
+        else:
+            vac_el = next((e for e in ("S", "Se", "O", "Cl", "Br", "I") if e in stoich), next(iter(stoich)))
+            vac = f"V_{vac_el} (shallow)"
         def_ev = round(0.05 + 0.10 * o_frac, 2)
 
-    # Strict invariant: soc_splitting_ev == round(hse06_nosoc_gap_ev - hse06_soc_direct_gap_ev, 3)
-    soc_split = round(hse_nosoc - hse_soc_dir, 3)
+    # Resolve explicit element symbol for the defect species
+    if cid in _RAW_ELECTRONIC_DATA:
+        first_tok = vac.split()[0]
+        cand_el = first_tok.replace("V_", "").split("_")[0]
+        if cand_el in stoich:
+            vac_el = cand_el
+        else:
+            vac_el = next(
+                (e for e in ("Cu", "Cl", "Br", "I", "S", "Se", "O", "Sn", "Sb", "Bi", "Ag", "Zn") if e in stoich),
+                next(iter(stoich)),
+            )
+
+    # Strict invariant: soc_splitting_ev == round(gap_est_nosoc_ev - gap_est_direct_ev, 3)
+    soc_split = round(gap_nosoc - gap_dir, 3)
 
     # Section 2.4 Fröhlich polaron physics with dominant carrier mass m_dom = max(me, mh)
     m_dom = max(me, mh)
@@ -1263,11 +1285,11 @@ def compute_electronic_defect_metrics(cand_spec: Dict[str, Any]) -> Dict[str, An
     )
 
     return {
-        "pbesol_gap_ev": pbe,
-        "r2scan_soc_gap_ev": r2scan,
-        "hse06_nosoc_gap_ev": hse_nosoc,
-        "hse06_soc_direct_gap_ev": hse_soc_dir,
-        "hse06_soc_indirect_gap_ev": hse_soc_ind,
+        "pbe_gap_ev": pbe,
+        "gap_est_mgga_soc_ev": mgga_soc,
+        "gap_est_nosoc_ev": gap_nosoc,
+        "gap_est_direct_ev": gap_dir,
+        "gap_est_indirect_ev": gap_ind,
         "soc_splitting_ev": soc_split,
         "electron_eff_mass_m0": me,
         "hole_eff_mass_m0": mh,
@@ -1276,6 +1298,8 @@ def compute_electronic_defect_metrics(cand_spec: Dict[str, Any]) -> Dict[str, An
         "lo_phonon_freq_thz": w_lo_thz,
         "frohlich_alpha": frohlich_a,
         "polaron_trapping_mev": pol_mev,
+        "dominant_vacancy_element": vac_el,
         "dominant_vacancy_defect": vac,
         "deepest_defect_level_from_band_edge_ev": def_ev,
+        "is_fixture_lookup": is_fixture,
     }

@@ -5,6 +5,7 @@ Bridges the Pydantic v2 schemas (`schemas.py`) with the verified computational m
 candidates and arbitrary out-of-distribution (OOD) generative compositions with zero KeyErrors.
 """
 
+import math
 from typing import Any, Dict, List, Optional
 from .kinetics_and_optics import (
     compute_4t_tandem_optics_wavelength_grid,
@@ -26,6 +27,7 @@ from .schemas import (
     CandidateMaterial,
     ElectronicDefectReport,
     OpticalTandemReport,
+    ProvenanceTag,
     StabilityReport,
     SynthesisRouteReport,
 )
@@ -138,7 +140,7 @@ def stage2_evaluate_stability(cand: CandidateMaterial) -> StabilityReport:
     spec = _spec_from_candidate(cand)
     m = compute_stability_metrics(spec)
     born_ok = m["bulk_modulus_gpa"] > 15.0 and m["shear_modulus_gpa"] > 10.0
-    dyn_ok = m["min_phonon_freq_thz"] > -0.10
+    dyn_ok = m["omega_min_heuristic_thz"] > -0.10
     hull_ok = m["e_above_hull_0k_mev"] <= 50.0 or m["g_above_hull_synth_mev"] <= 0.0
     emig = float(m["ion_migration_barrier_ev"])
     ion_ok = emig >= 0.65
@@ -146,7 +148,7 @@ def stage2_evaluate_stability(cand: CandidateMaterial) -> StabilityReport:
 
     reason = None
     if not dyn_ok:
-        reason = f"IMAGINARY_PHONON: omega_min = {m['min_phonon_freq_thz']:.2f} THz (< 0 THz) -> Dynamic lattice collapse"
+        reason = f"IMAGINARY_PHONON: omega_min = {m['omega_min_heuristic_thz']:.2f} THz (< 0 THz) -> Dynamic lattice collapse"
     elif not hull_ok:
         reason = f"HULL_INSTABILITY: dE_hull = {m['e_above_hull_0k_mev']:.1f} meV/atom (> 50 meV/atom threshold)"
     elif not born_ok:
@@ -157,6 +159,7 @@ def stage2_evaluate_stability(cand: CandidateMaterial) -> StabilityReport:
             "Superionic Cu+/Ag+/halide drift & solar-bias hysteresis risk"
         )
 
+    base_tag = ProvenanceTag.ASSUMED if m.get("is_fixture_lookup") else ProvenanceTag.HEURISTIC
     return StabilityReport(
         candidate_id=cand.candidate_id,
         e_above_hull_0k_mev=m["e_above_hull_0k_mev"],
@@ -165,14 +168,22 @@ def stage2_evaluate_stability(cand: CandidateMaterial) -> StabilityReport:
         bulk_modulus_gpa=m["bulk_modulus_gpa"],
         shear_modulus_gpa=m["shear_modulus_gpa"],
         born_elastic_stable=born_ok,
-        min_phonon_freq_thz=m["min_phonon_freq_thz"],
+        omega_min_heuristic_thz=m["omega_min_heuristic_thz"],
         debye_temperature_k=m["debye_temperature_k"],
         dynamically_stable=dyn_ok,
         ion_migration_barrier_ev=emig,
         ion_migration_stable=ion_ok,
-        mlip_force_std_ev_ang=m["mlip_force_std_ev_ang"],
         passed_stage2=passed,
         failure_reason=reason,
+        provenance={
+            "e_above_hull_0k_mev": base_tag,
+            "g_above_hull_synth_mev": base_tag,
+            "bulk_modulus_gpa": base_tag,
+            "shear_modulus_gpa": base_tag,
+            "omega_min_heuristic_thz": base_tag,
+            "debye_temperature_k": ProvenanceTag.COMPUTED_HERE,
+            "ion_migration_barrier_ev": base_tag,
+        },
     )
 
 
@@ -237,11 +248,13 @@ def gate_a_adversarial_audit(
     cand: CandidateMaterial, stab: StabilityReport, synth: SynthesisRouteReport
 ) -> AdversarialAuditReport:
     """Agent 6 (adversarial_critic): Pre-DFT Red-Team Veto Gate."""
+    is_fixture = cand.candidate_id in _GATE_A_DATA
     d = _GATE_A_DATA.get(cand.candidate_id) or _infer_ood_gate_a(cand)
     polaron_flag = cand.structural_dimensionality in ("0D-Isolated", "1D-Chain")
     tco_ok = d["tco_rxn"] > -100.0
     seg_ok = d["hmix"] < 35.0
-    unc_flag = stab.mlip_force_std_ev_ang > 0.15
+    unc_flag = False
+    prov_tag = ProvenanceTag.ASSUMED if is_fixture else ProvenanceTag.HEURISTIC
 
     if polaron_flag:
         decision = "VETO_REJECT"
@@ -249,9 +262,6 @@ def gate_a_adversarial_audit(
     elif not seg_ok or not tco_ok:
         decision = "VETO_REJECT"
         fail_mode = "ANION_PHASE_SEGREGATION"
-    elif unc_flag:
-        decision = "ACTIVE_LEARNING_DFT"
-        fail_mode = None
     else:
         decision = "PROMOTE"
         fail_mode = None
@@ -268,19 +278,35 @@ def gate_a_adversarial_audit(
         decision=decision,
         critique_summary=d["notes"],
         primary_failure_mode=fail_mode,
+        provenance={
+            "anion_mixing_enthalpy_mev": prov_tag,
+            "tco_interface_rxn_energy_mev": prov_tag,
+        },
     )
 
 
 def stage4_5_quantum_and_defects(cand: CandidateMaterial) -> ElectronicDefectReport:
-    """Agent 4 (quantum_defect_physicist) + physics_engine_engineer: Evaluate HSE06+SOC, polaron & SRH defects."""
+    """Evaluate fixture/heuristic band gap estimates, Frohlich polaron coupling & SRH defect trap estimates."""
     spec = _spec_from_candidate(cand)
     m = compute_electronic_defect_metrics(spec)
-    eg = m["hse06_soc_indirect_gap_ev"]
+    eg = m["gap_est_indirect_ev"]
 
     if cand.target_layer == "TOP_ACTIVE_GLASS_185EV":
+        w_lo, w_hi = 1.75, 1.95
         gap_ok = 1.70 <= eg <= 2.00
     else:
+        w_lo, w_hi = 0.70, 0.85
         gap_ok = 0.68 <= eg <= 0.88
+
+    sigma_gap = 0.37
+    win_prob = round(
+        0.5
+        * (
+            math.erf((w_hi - eg) / (sigma_gap * math.sqrt(2.0)))
+            - math.erf((w_lo - eg) / (sigma_gap * math.sqrt(2.0)))
+        ),
+        4,
+    )
 
     mass_ok = max(m["electron_eff_mass_m0"], m["hole_eff_mass_m0"]) <= 0.80 and m["frohlich_alpha"] <= 5.0
     srh_ok = m["deepest_defect_level_from_band_edge_ev"] <= 0.15
@@ -290,8 +316,8 @@ def stage4_5_quantum_and_defects(cand: CandidateMaterial) -> ElectronicDefectRep
     reason = None
     if not gap_ok:
         reason = (
-            f"BANDGAP_OUT_OF_WINDOW: HSE06+SOC fundamental gap = {eg:.2f} eV "
-            f"(direct = {m['hse06_soc_direct_gap_ev']:.2f} eV) misses target spectral window"
+            f"BANDGAP_OUT_OF_WINDOW: estimated indirect gap = {eg:.2f} eV "
+            f"(direct = {m['gap_est_direct_ev']:.2f} eV) misses target spectral window"
         )
     elif not mass_ok:
         reason = f"HEAVY_CARRIER_MASS: max(m_e*, m_h*) = {max(m['electron_eff_mass_m0'], m['hole_eff_mass_m0']):.2f} m0"
@@ -301,13 +327,16 @@ def stage4_5_quantum_and_defects(cand: CandidateMaterial) -> ElectronicDefectRep
             f"from band edge (> 0.15 eV non-radiative recombination limit)"
         )
 
+    base_tag = ProvenanceTag.ASSUMED if m.get("is_fixture_lookup") else ProvenanceTag.HEURISTIC
     return ElectronicDefectReport(
         candidate_id=cand.candidate_id,
-        pbesol_gap_ev=m["pbesol_gap_ev"],
-        r2scan_soc_gap_ev=m["r2scan_soc_gap_ev"],
-        hse06_nosoc_gap_ev=m["hse06_nosoc_gap_ev"],
-        hse06_soc_direct_gap_ev=m["hse06_soc_direct_gap_ev"],
-        hse06_soc_indirect_gap_ev=m["hse06_soc_indirect_gap_ev"],
+        pbe_gap_ev=m["pbe_gap_ev"],
+        gap_est_mgga_soc_ev=m["gap_est_mgga_soc_ev"],
+        gap_est_nosoc_ev=m["gap_est_nosoc_ev"],
+        gap_est_direct_ev=m["gap_est_direct_ev"],
+        gap_est_indirect_ev=m["gap_est_indirect_ev"],
+        gap_error_bar_ev=sigma_gap,
+        window_probability=win_prob,
         soc_splitting_ev=m["soc_splitting_ev"],
         electron_eff_mass_m0=m["electron_eff_mass_m0"],
         hole_eff_mass_m0=m["hole_eff_mass_m0"],
@@ -316,11 +345,30 @@ def stage4_5_quantum_and_defects(cand: CandidateMaterial) -> ElectronicDefectRep
         lo_phonon_freq_thz=m["lo_phonon_freq_thz"],
         frohlich_alpha=m["frohlich_alpha"],
         polaron_trapping_mev=m["polaron_trapping_mev"],
+        dominant_vacancy_element=m["dominant_vacancy_element"],
         dominant_vacancy_defect=vac_name,
         deepest_defect_level_from_band_edge_ev=m["deepest_defect_level_from_band_edge_ev"],
         srh_recombination_safe=srh_ok,
         passed_stage4_and_5=passed,
         failure_reason=reason,
+        provenance={
+            "pbe_gap_ev": base_tag,
+            "gap_est_mgga_soc_ev": base_tag,
+            "gap_est_nosoc_ev": base_tag,
+            "gap_est_direct_ev": base_tag,
+            "gap_est_indirect_ev": base_tag,
+            "gap_error_bar_ev": ProvenanceTag.COMPUTED_HERE,
+            "window_probability": ProvenanceTag.COMPUTED_HERE,
+            "soc_splitting_ev": ProvenanceTag.COMPUTED_HERE,
+            "electron_eff_mass_m0": base_tag,
+            "hole_eff_mass_m0": base_tag,
+            "eps_inf": base_tag,
+            "eps_static": base_tag,
+            "lo_phonon_freq_thz": base_tag,
+            "frohlich_alpha": ProvenanceTag.COMPUTED_HERE,
+            "polaron_trapping_mev": ProvenanceTag.COMPUTED_HERE,
+            "deepest_defect_level_from_band_edge_ev": base_tag,
+        },
     )
 
 
@@ -347,13 +395,13 @@ _FILM_THICKNESS_NM: Dict[str, float] = {
 def stage5_optical_4t_tandem_simulation(
     cand: CandidateMaterial, elec: ElectronicDefectReport, synth: SynthesisRouteReport
 ) -> OpticalTandemReport:
-    """Agent 5 (photonic_tandem_architect) + optics_kinetics_engineer: Wavelength-grid AM1.5G 4T simulation."""
+    """Wavelength-grid AM1.5G 4T radiative-limit optical simulation."""
     default_d = 260.0 if cand.target_layer == "TOP_ACTIVE_GLASS_185EV" else 340.0
     thickness_nm = _FILM_THICKNESS_NM.get(cand.candidate_id, default_d)
     opt_res = compute_4t_tandem_optics_wavelength_grid(
         target_layer=cand.target_layer,
-        eg_ind_ev=elec.hse06_soc_indirect_gap_ev,
-        eg_dir_ev=elec.hse06_soc_direct_gap_ev,
+        eg_ind_ev=elec.gap_est_indirect_ev,
+        eg_dir_ev=elec.gap_est_direct_ev,
         eps_inf=elec.eps_inf,
         thickness_nm=thickness_nm,
     )

@@ -1,11 +1,11 @@
-! FailSmart-MatEngine v6.0 Stage 5 `doped` Defect Supercell QE Deck (3x1x1)
-! Candidate: mp-1227486 (BiSbS3) | Defect: V_Chalcogen (shallow donor, ns2 antibonding) removed at frac=(0.08333, 0.16977, 0.51572)
-! Supercell sites (with vacancy): 59 (host=60) | L_min = 11.206 A
-! FNV Electrostatic Correction: E_FNV(q=+-1) = 0.1275 eV, E_FNV(q=+-2) = 0.5100 eV
+! FailSmart-MatEngine Neutral Vacancy Supercell QE Deck (3x1x1)
+! Candidate: mp-1227486 (BiSbS3) | Removed Species: S | Label: V_S (shallow donor, ns2 antibonding) at frac=(0.08333, 0.62543, 0.54628)
+! Supercell sites (with neutral vacancy): 59 (host=60) | d_perp_min = 11.206 A
+! Point-Charge Image Estimate: E_pc(|q|=1) = 0.1275 eV, E_pc(|q|=2) = 0.5100 eV
 ! Lab Synthesis Batch (10.0 mmol): Target Mass = 4.2694 g at T = 375.0 C
 &CONTROL
   calculation = 'relax',
-  prefix = 'bisbs3_defect_v_chalcogen (shallow donor, ns2 antibonding)',
+  prefix = 'bisbs3_v_s',
   outdir = './out_defect/',
   pseudo_dir = './pseudo_oncv_fr/',
   tprnfor = .true.,
@@ -30,6 +30,7 @@ CELL_PARAMETERS (angstrom)
       0.00000000     11.20558400      0.00000000
       0.00000000      0.00000000     11.86769200
 ATOMIC_POSITIONS (crystal)
+  Bi     0.08333333    0.16977100    0.51571600
   Bi     0.41666667    0.16977100    0.51571600
   Bi     0.75000000    0.16977100    0.51571600
   Bi     0.08333333    0.33022900    0.01571600
@@ -53,7 +54,6 @@ ATOMIC_POSITIONS (crystal)
   Sb     0.08333333    0.96180700    0.85377800
   Sb     0.41666667    0.96180700    0.85377800
   Sb     0.75000000    0.96180700    0.85377800
-  S      0.08333333    0.62542800    0.54627700
   S      0.41666667    0.62542800    0.54627700
   S      0.75000000    0.62542800    0.54627700
   S      0.08333333    0.87457200    0.04627700
@@ -89,4 +89,5 @@ ATOMIC_POSITIONS (crystal)
   S      0.25000000    0.81318200    0.79766600
   S      0.58333333    0.81318200    0.79766600
   S      0.91666667    0.81318200    0.79766600
-K_POINTS gamma
+K_POINTS automatic
+  1 1 1 0 0 0
