@@ -260,5 +260,8 @@ The discovery framework expands to ingest **100 live candidates** directly from 
 1. **Step 1 — 3D Harmonic Dynamical Matrix $\mathbf{D}(\mathbf{q}=\mathbf{0})$ & 11-Image Saddle-Point NEB Migration (`atomistic_and_tmm.py` vs. `independent_verifier.py`):**
    - Evaluates the exact $3N \times 3N$ Harmonic Force-Constant Hessian ($0.50\text{ \AA} < r_{ij} \le 4.25\text{ \AA}$) with Acoustic Sum Rule projection (`np.linalg.eigh` vs. `scipy.linalg.eigvalsh`) and 3D 11-image NEB migration barriers across all 8 promoted live MP finalists (`imag = 0`, $\omega_{\text{opt,min}} \in [1.36, 9.19]\text{ THz}$, $E_{\text{mig}}^{\text{NEB}} \in [0.990, 1.348]\text{ eV}$, $D_{\text{ion}}(300\text{ K}) \ll 10^{-18}\text{ cm}^2/\text{s}$).
 2. **Step 2 — Wavelength-Resolved Coherent $2\times 2$ Abeles TMM vs. Recursive Rouard/Airy 4T Stack Optics:**
-   - Evaluates the 6-medium coherent thin-film interference stack across all 15 cross-layer 4T pairs (`0.0000%–0.0100%` dual-method discrepancy), achieving **40.00% Coherent 4T PCE** (`mp-861911__mp-1223998`) and **39.32% Coherent 4T PCE** at **\$0.0394/m²** (`mp-861911__mp-22982`).
+   - Evaluates the 6-medium single-ARC coherent thin-film interference stack across all 15 cross-layer 4T pairs (`0.0000%–0.0100%` dual-method discrepancy), achieving **40.00% Coherent 4T PCE** (`mp-861911__mp-1223998`) and **39.32% Coherent 4T PCE** at **\$0.0394/m²** (`mp-861911__mp-22982`).
+3. **Step 3 — 7-Medium Graded-ARC + $\text{TiO}_2$ Impedance-Matching Stack & 4-Metric Techno-Economic Figure-of-Merit Suite:**
+   - Suppresses front reflection from $11.90\%$ down to $2.42\%\text{–}3.33\%$, reaching **42.44% Graded-ARC Coherent 4T PCE** (`mp-861911__mp-1223998`, $\text{CER}_{\text{3L}} = 4.354$, $\text{SVI}_{\text{BOS}} = 1.763$) and **41.89% Graded-ARC Coherent 4T PCE** (`mp-861911__mp-22982`, $\text{CER}_{\text{3L}} = 4.308$, $\text{MCIW}_{\text{raw}} = \$0.0002/\Delta\text{W}_{\text{p}}$).
+
 

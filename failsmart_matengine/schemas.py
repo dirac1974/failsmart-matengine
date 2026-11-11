@@ -200,3 +200,53 @@ class CoherentTMM4TStackReport(BaseModel):
     rouard_airy_redundancy_diff_percent: float
     sha256_signature: str
 
+
+class GradedARCTechnoEconomicReport(BaseModel):
+    """7-Medium Graded-ARC + TiO2 Impedance-Matching Coherent Stack & 4-Metric Techno-Economic Dossier (v5.0)."""
+    pair_id: str
+    top_mp_id: str
+    top_formula: str
+    bottom_mp_id: str
+    bottom_formula: str
+    arc_mgf2_thickness_nm: float
+    front_ito_thickness_nm: float
+    tio2_matcher_thickness_nm: float
+    top_absorber_thickness_nm: float
+    rear_buffer_thickness_nm: float
+    bottom_absorber_thickness_nm: float
+    single_arc_front_reflectance_percent: float
+    graded_arc_front_reflectance_percent: float
+    reflectance_reduction_percent: float
+    graded_sub_bandgap_transmittance_percent: float
+    graded_top_pce_percent: float
+    graded_si_pce_percent: float
+    graded_bottom_std_si_pce_percent: float
+    graded_bottom_pce_percent: float
+    graded_2layer_pce_percent: float
+    graded_4t_std_si_pce_percent: float
+    graded_4t_low_fca_pce_percent: float
+    single_to_graded_4t_gain_percent: float
+    power_density_2l_w_m2: float
+    power_density_2l_w_sqft: float
+    power_density_3l_w_m2: float
+    power_density_3l_w_sqft: float
+    eff_gain_ratio_2l: float
+    eff_gain_ratio_3l: float
+    cer_2l_vs_2x_si: float
+    cer_3l_vs_3x_si: float
+    mciw_2l_raw_usd_per_dw: float
+    mciw_2l_full_usd_per_dw: float
+    mciw_3l_raw_usd_per_dw: float
+    mciw_3l_full_usd_per_dw: float
+    cpr_mod_2l: float
+    cpr_mod_3l: float
+    svi_bos_2l: float
+    svi_bos_3l: float
+    top_raw_cost_usd_m2: float
+    combined_raw_cost_usd_m2: float
+    photon_conservation_verified: bool
+    rouard_airy_redundancy_diff_percent: float
+    techno_economic_redundancy_verified: bool
+    sha256_signature: str
+
+

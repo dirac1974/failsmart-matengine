@@ -218,6 +218,24 @@ Replacing scalar Fresnel idealizations with a full 6-medium coherent thin-film i
 
 *Key Physical Insight from Coherent TMM:* High refractive indices ($n_1 \approx 2.8\text{–}3.1$) of heavy pnictogen chalcohalides/oxychalcogenides produce $11.01\%\text{–}11.97\%$ broadband front reflectance despite a single-layer $\text{MgF}_2/\text{ITO}$ anti-reflection coating, while sub-bandgap IR transmittance rises to $88.25\%\text{–}88.92\%$. Even with full coherent optical losses, `mp-861911 Sb2OS2 + c-Si + mp-1223998 Bi3InSe6` reaches **40.00% Coherent 4T PCE**, and the ultra-low-cost **\$0.0394/m²** `Sb2OS2 + c-Si + BiCuS2` stack achieves **39.32% Coherent 4T PCE**.
 
+### Step 3: 7-Medium Graded-ARC + $\text{TiO}_2$ Impedance-Matching Stack & 4-Metric Techno-Economic Figure-of-Merit Suite
+Inserting a $48\text{ nm}$ high-index $\text{TiO}_2$ optical impedance-matching layer ($n_3 \approx 2.38$) between Front $\text{ITO}$ ($80\text{ nm}$) and the Top Active Absorber (`Air / 94 nm MgF2 / 80 nm ITO / 48 nm TiO2 / Absorber / 82 nm Buffer / Couplant`) suppresses mean front reflection from **$11.90\%$ down to $2.42\%\text{–}3.33\%$** ($-8.57\%$ to $-8.75\%$ reduction), recovering **$+2.20\%$ to $+2.58\%$** in coherent 4T efficiency and reaching **42.44% Coherent 4T PCE** ($39.4\text{ W/ft}^2$)!
+
+We simultaneously evaluate all 4 Techno-Economic Figures of Merit against a single-junction $22.0\%$ c-Si baseline ($C_{\text{Si,mod}} = \$40/\text{m}^2$, $C_{\text{BOS,area}} = \$100/\text{m}^2$, $\$6.50/\text{m}^2$ TCO/coating process overhead per added subcell):
+1. **$\text{CER}_N$ (Your Normalized Multi-Junction Cost-Efficiency Ratio):** $\frac{\eta_{\text{stack}} / \eta_{\text{Si}}}{(C_{\text{Si,mod}} + \Delta C) / (N \cdot C_{\text{Si,mod}})}$ ($N=2$ or $3$).
+2. **$\text{MCIW}_{\text{raw}}$ / $\text{MCIW}_{\text{full}}$ (Marginal Cost per Incremental Watt, $\$/\Delta\text{W}_{\text{p}}$):** $\frac{\Delta C}{1000(\eta_{\text{stack}} - \eta_{\text{Si}})}$ vs. $\$0.1818/\text{W}_{\text{p}}$ baseline Si.
+3. **$\text{CPR}_{\text{mod}}$ (Factory-Gate Module Cost-Performance Ratio):** $\frac{\eta_{\text{stack}} / \eta_{\text{Si}}}{1 + \Delta C / C_{\text{Si,mod}}}$.
+4. **$\text{SVI}_{\text{BOS}}$ (Area-Constrained System Value Index):** $\frac{\eta_{\text{stack}} / \eta_{\text{Si}}}{(C_{\text{Si,mod}} + \Delta C + C_{\text{BOS,area}}) / (C_{\text{Si,mod}} + C_{\text{BOS,area}})}$.
+
+| Pair ID | Stack (`Top + c-Si + Bot`) | $R_{\text{front}}$ ($\text{1-ARC}\rightarrow\text{Graded}$) | Graded 2L PCE ($\text{W/ft}^2$) | **Graded 4T PCE ($\text{W/ft}^2$)** | $\text{CER}_{\text{2L}}$ / **$\text{CER}_{\text{3L}}$** | $\text{MCIW}_{\text{3L}}$ (Raw / Full $\$/\Delta\text{W}$) | $\text{CPR}_{\text{mod}}$ (2L / 3L) | **$\text{SVI}_{\text{BOS}}$ (2L / 3L)** |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| `mp-861911__mp-1223998` | `Sb2OS2 + c-Si + Bi3InSe6` | $11.90\% \rightarrow \mathbf{3.33\%}$ | 38.50% ($35.8\text{ W/ft}^2$) | **42.44%** ($39.4\text{ W/ft}^2$) | $3.010$ / **$4.354$** | $\$0.0008$ / **$\$0.0644$** | $1.505$ / $1.451$ | $1.672$ / **$1.763$** |
+| `mp-1227486__mp-1223998` | `BiSbS3 + c-Si + Bi3InSe6` | $11.97\% \rightarrow \mathbf{3.22\%}$ | 38.42% ($35.7\text{ W/ft}^2$) | **42.36%** ($39.4\text{ W/ft}^2$) | $3.003$ / **$4.346$** | $\$0.0008$ / **$\$0.0647$** | $1.502$ / $1.449$ | $1.669$ / **$1.760$** |
+| `mp-1078776__mp-1223998` | `BiInS3 + c-Si + Bi3InSe6` | $11.01\% \rightarrow \mathbf{2.42\%}$ | 38.16% ($35.5\text{ W/ft}^2$) | **42.16%** ($39.2\text{ W/ft}^2$) | $2.967$ / **$4.305$** | $\$0.0021$ / **$\$0.0666$** | $1.484$ / $1.435$ | $1.655$ / **$1.749$** |
+| `mp-861911__mp-1224922` | `Sb2OS2 + c-Si + CuGaSnSe4` | $11.90\% \rightarrow \mathbf{3.33\%}$ | 38.50% ($35.8\text{ W/ft}^2$) | **41.94%** ($39.0\text{ W/ft}^2$) | $3.010$ / **$4.305$** | $\$0.0007$ / **$\$0.0659$** | $1.505$ / $1.435$ | $1.672$ / **$1.743$** |
+| `mp-861911__mp-22982` | `Sb2OS2 + c-Si + BiCuS2` | $11.90\% \rightarrow \mathbf{3.33\%}$ | 38.50% ($35.8\text{ W/ft}^2$) | **41.89%** ($38.9\text{ W/ft}^2$) | $3.010$ / **$4.308$** | **$\$0.0002$** / **$\$0.0656$** | $1.505$ / $1.436$ | $1.672$ / **$1.742$** |
+| `mp-1227486__mp-22982` | `BiSbS3 + c-Si + BiCuS2` | $11.97\% \rightarrow \mathbf{3.22\%}$ | 38.42% ($35.7\text{ W/ft}^2$) | **41.81%** ($38.8\text{ W/ft}^2$) | $3.003$ / **$4.300$** | **$\$0.0002$** / **$\$0.0658$** | $1.502$ / $1.433$ | $1.669$ / **$1.738$** |
+
 ---
 
 ## Quick Start & Cross-Repository Verification
@@ -227,18 +245,19 @@ Replacing scalar Fresnel idealizations with a full 6-medium coherent thin-film i
 python3 -m failsmart_matengine.orchestrator
 ```
 
-### Run the v4.0 Live Materials Project Discovery + 3D Phonon/NEB & Coherent TMM Engine
+### Run the Live Materials Project Discovery + 3D Phonon/NEB, Graded-ARC TMM & Techno-Economic Engine
 ```bash
 python3 -m failsmart_matengine.mp_live_discovery
 ```
 
-### Run the Comprehensive Automated Scientific Test Suite (17/17 Tests)
+### Run the Comprehensive Automated Scientific Test Suite (18/18 Tests)
 ```bash
 pytest -v
 ```
 
-### Run the Repository Release Auditor (v4.0)
+### Run the Repository Release Auditor
 ```bash
 python3 -m failsmart_matengine.repo_auditor
 ```
+
 

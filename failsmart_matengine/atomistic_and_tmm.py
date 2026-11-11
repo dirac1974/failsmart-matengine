@@ -34,11 +34,20 @@ from .physics_calculators import (
     E_CHARGE,
     IUPAC_ATOMIC_MASSES,
 )
-from .schemas import AtomisticPhononNEBReport, CoherentTMM4TStackReport
+from .schemas import (
+    AtomisticPhononNEBReport,
+    CoherentTMM4TStackReport,
+    GradedARCTechnoEconomicReport,
+)
 
 # Exact CODATA 2018 Boltzmann constant (J/K) and THz conversion factor (Section 6.1)
 KB_J = 1.380649e-23
 THZ_CONV_FACTOR = 15.633302
+SQFT_TO_M2 = 0.09290304
+SI_REF_EFF_PCT = 22.00
+SI_REF_MOD_COST_USD_M2 = 40.00
+BOS_AREA_COST_USD_M2 = 100.00
+SUBCELL_PROCESS_TCO_COST_USD_M2 = 6.50
 
 
 def compute_3d_harmonic_dynamical_matrix_gamma(
@@ -456,3 +465,312 @@ def evaluate_coherent_abeles_tmm_4t_stack(
         rouard_airy_redundancy_diff_percent=rouard_diff,
         sha256_signature=blind_tmm["sha256_signature"],
     )
+
+
+def compute_abeles_7medium_graded_arc_tmm(
+    wl_nm: np.ndarray,
+    e_ev: np.ndarray,
+    eg_ind_1: float,
+    eg_dir_1: float,
+    eps_inf_1: float,
+    d_top_nm: float,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Method A (Section 8.1): Vectorized 2x2 Abeles Characteristic Matrix on 7-Medium Graded-ARC + TiO2 Stack.
+
+    Media:
+      0: Air (n0 = 1.000)
+      1: Outer MgF2 ARC (d1 = 94.0 nm)
+      2: Front ITO (d2 = 80.0 nm)
+      3: High-Index TiO2 Impedance Matcher (d3 = 48.0 nm, n3 = 2.380 + 0.0180/wl_um^2 + i*0.0004*wl_um^2)
+      4: Top Active Absorber (d4 = d_top_nm)
+      5: Rear SiO2/ITO Buffer (d5 = 82.0 nm)
+      6: Optical Couplant (n6 = 1.520)
+    """
+    wl_um = wl_nm / 1000.0
+
+    n0 = np.ones_like(wl_nm, dtype=np.complex128)
+    n1 = (1.377 + 0.0032 / (wl_um ** 2)).astype(np.complex128)
+
+    n_ito_real = np.maximum(1.45, 1.92 - 0.085 * (wl_um ** 2))
+    k_ito = 0.0018 + 0.0065 * (wl_um ** 3)
+    n2 = n_ito_real + 1j * k_ito
+
+    n_tio2_real = 2.380 + 0.0180 / (wl_um ** 2)
+    k_tio2 = 0.0004 * (wl_um ** 2)
+    n3 = n_tio2_real + 1j * k_tio2
+
+    alpha1 = 1.2e5 * (np.maximum(0.0, e_ev - eg_ind_1) ** 2) + 2.8e7 * np.sqrt(np.maximum(0.0, e_ev - eg_dir_1))
+    n_act_real = math.sqrt(eps_inf_1) + 0.035 / (wl_um ** 2)
+    k_act = (alpha1 * (wl_nm * 1.0e-9)) / (4.0 * math.pi)
+    n4 = n_act_real + 1j * k_act
+
+    n_buf_real = 1.720 + 0.0040 / (wl_um ** 2)
+    k_buf = 0.0012 * (wl_um ** 2)
+    n5 = n_buf_real + 1j * k_buf
+
+    n6 = np.full_like(wl_nm, 1.520, dtype=np.complex128)
+
+    n_list = [n0, n1, n2, n3, n4, n5, n6]
+    d_list_nm = [0.0, 94.0, 80.0, 48.0, float(d_top_nm), 82.0, 0.0]
+
+    n_pts = len(wl_nm)
+    m_tot = np.zeros((n_pts, 2, 2), dtype=np.complex128)
+    m_tot[:, 0, 0] = 1.0
+    m_tot[:, 1, 1] = 1.0
+
+    for m in range(6):
+        nm_curr = n_list[m]
+        nm_next = n_list[m + 1]
+        r_m = (nm_curr - nm_next) / (nm_curr + nm_next)
+        t_m = (2.0 * nm_curr) / (nm_curr + nm_next)
+
+        i_mat = np.zeros((n_pts, 2, 2), dtype=np.complex128)
+        i_mat[:, 0, 0] = 1.0 / t_m
+        i_mat[:, 0, 1] = r_m / t_m
+        i_mat[:, 1, 0] = r_m / t_m
+        i_mat[:, 1, 1] = 1.0 / t_m
+
+        m_tot = np.matmul(m_tot, i_mat)
+
+        if m + 1 <= 5:
+            beta = (2.0 * math.pi * n_list[m + 1] * d_list_nm[m + 1]) / wl_nm
+            p_mat = np.zeros((n_pts, 2, 2), dtype=np.complex128)
+            p_mat[:, 0, 0] = np.exp(-1j * beta)
+            p_mat[:, 1, 1] = np.exp(1j * beta)
+            m_tot = np.matmul(m_tot, p_mat)
+
+    r_tot = m_tot[:, 1, 0] / m_tot[:, 0, 0]
+    t_tot = 1.0 / m_tot[:, 0, 0]
+
+    r_arc_1 = np.abs(r_tot) ** 2
+    t_arc_1 = (np.real(n6) / np.real(n0)) * (np.abs(t_tot) ** 2)
+    t_win_front = np.exp(-4.0 * math.pi * (k_ito * 80.0 + k_tio2 * 48.0) / wl_nm)
+
+    return r_arc_1, t_arc_1, t_win_front, alpha1
+
+
+def compute_techno_economic_fom_suite(
+    eta_2l_pct: float,
+    eta_3l_pct: float,
+    raw_cost_top_usd_m2: float,
+    raw_cost_bot_usd_m2: float,
+) -> Dict[str, float]:
+    """Compute the 4-Metric Techno-Economic & Area-Value Suite (Section 8.2 of MATHEMATICAL_SPEC_V2.md)."""
+    raw_2l = float(raw_cost_top_usd_m2)
+    raw_3l = float(raw_cost_top_usd_m2 + raw_cost_bot_usd_m2)
+
+    delta_c_2l = raw_2l + SUBCELL_PROCESS_TCO_COST_USD_M2
+    delta_c_3l = raw_3l + 2.0 * SUBCELL_PROCESS_TCO_COST_USD_M2
+
+    p_2l_m2 = 10.0 * eta_2l_pct
+    p_2l_sqft = p_2l_m2 * SQFT_TO_M2
+    p_3l_m2 = 10.0 * eta_3l_pct
+    p_3l_sqft = p_3l_m2 * SQFT_TO_M2
+
+    g_2l = eta_2l_pct / SI_REF_EFF_PCT
+    g_3l = eta_3l_pct / SI_REF_EFF_PCT
+
+    # Metric 1: Normalized Multi-Junction Cost-Efficiency Ratio (CER_N)
+    cer_2l = (2.0 * SI_REF_MOD_COST_USD_M2 * g_2l) / (SI_REF_MOD_COST_USD_M2 + delta_c_2l)
+    cer_3l = (3.0 * SI_REF_MOD_COST_USD_M2 * g_3l) / (SI_REF_MOD_COST_USD_M2 + delta_c_3l)
+
+    # Metric 2: Marginal Cost per Incremental Watt (MCIW_raw & MCIW_full in $/dW_p)
+    dp_2l = max(1e-6, 10.0 * (eta_2l_pct - SI_REF_EFF_PCT))
+    dp_3l = max(1e-6, 10.0 * (eta_3l_pct - SI_REF_EFF_PCT))
+    mciw_2l_raw = raw_2l / dp_2l
+    mciw_2l_full = delta_c_2l / dp_2l
+    mciw_3l_raw = raw_3l / dp_3l
+    mciw_3l_full = delta_c_3l / dp_3l
+
+    # Metric 3: Factory-Gate Module Cost-Performance Ratio (CPR_mod)
+    cpr_2l = g_2l / (1.0 + delta_c_2l / SI_REF_MOD_COST_USD_M2)
+    cpr_3l = g_3l / (1.0 + delta_c_3l / SI_REF_MOD_COST_USD_M2)
+
+    # Metric 4: Area-Constrained System Value Index (SVI_BOS)
+    base_sys = SI_REF_MOD_COST_USD_M2 + BOS_AREA_COST_USD_M2
+    svi_2l = (base_sys * g_2l) / (base_sys + delta_c_2l)
+    svi_3l = (base_sys * g_3l) / (base_sys + delta_c_3l)
+
+    return {
+        "power_density_2l_w_m2": round(p_2l_m2, 2),
+        "power_density_2l_w_sqft": round(p_2l_sqft, 2),
+        "power_density_3l_w_m2": round(p_3l_m2, 2),
+        "power_density_3l_w_sqft": round(p_3l_sqft, 2),
+        "eff_gain_ratio_2l": round(g_2l, 4),
+        "eff_gain_ratio_3l": round(g_3l, 4),
+        "cer_2l_vs_2x_si": round(cer_2l, 4),
+        "cer_3l_vs_3x_si": round(cer_3l, 4),
+        "mciw_2l_raw_usd_per_dw": round(mciw_2l_raw, 5),
+        "mciw_2l_full_usd_per_dw": round(mciw_2l_full, 4),
+        "mciw_3l_raw_usd_per_dw": round(mciw_3l_raw, 5),
+        "mciw_3l_full_usd_per_dw": round(mciw_3l_full, 4),
+        "cpr_mod_2l": round(cpr_2l, 4),
+        "cpr_mod_3l": round(cpr_3l, 4),
+        "svi_bos_2l": round(svi_2l, 4),
+        "svi_bos_3l": round(svi_3l, 4),
+        "top_raw_cost_usd_m2": round(raw_2l, 4),
+        "combined_raw_cost_usd_m2": round(raw_3l, 4),
+    }
+
+
+def evaluate_graded_arc_and_techno_economics_4t_stack(
+    top_dossier: Dict[str, Any],
+    bottom_dossier: Dict[str, Any],
+    single_arc_report: CoherentTMM4TStackReport,
+) -> GradedARCTechnoEconomicReport:
+    """Evaluate 7-Medium Graded-ARC + TiO2 Impedance-Matching 4T Stack & 4-Metric Techno-Economics (v5.0)."""
+    from .independent_verifier import independently_verify_graded_arc_and_techno_economics
+
+    c_top = top_dossier["candidate"]
+    e_top = top_dossier["electronics"]
+    o_top = top_dossier["optics"]
+    s_top = top_dossier["synthesis"]
+
+    c_bot = bottom_dossier["candidate"]
+    e_bot = bottom_dossier["electronics"]
+    o_bot = bottom_dossier["optics"]
+    s_bot = bottom_dossier["synthesis"]
+
+    eg_ind_1 = float(e_top["hse06_soc_indirect_gap_ev"])
+    eg_dir_1 = float(e_top["hse06_soc_direct_gap_ev"])
+    eps_inf_1 = float(e_top["eps_inf"])
+    d1_nm = float(o_top["film_thickness_nm"])
+    d1_m = d1_nm * 1.0e-9
+
+    eg_ind_3 = float(e_bot["hse06_soc_indirect_gap_ev"])
+    eg_dir_3 = float(e_bot["hse06_soc_direct_gap_ev"])
+    eps_inf_3 = float(e_bot["eps_inf"])
+    d3_nm = float(o_bot["film_thickness_nm"])
+    d3_m = d3_nm * 1.0e-9
+
+    r_arc_1, t_arc_1, t_win_front, alpha1 = compute_abeles_7medium_graded_arc_tmm(
+        wl_nm=_AM15G_WL_NM,
+        e_ev=_AM15G_E_EV,
+        eg_ind_1=eg_ind_1,
+        eg_dir_1=eg_dir_1,
+        eps_inf_1=eps_inf_1,
+        d_top_nm=d1_nm,
+    )
+
+    yab1 = 4.0 * eps_inf_1
+    fabs1 = (yab1 * alpha1 * d1_m) / (1.0 + yab1 * alpha1 * d1_m)
+    a_arc_1 = (1.0 - r_arc_1) * t_win_front * fabs1
+    t_stack_arc_1 = t_arc_1 * (1.0 - fabs1)
+
+    _, _, _, eta_top_arc = _solve_cell_iv(a_arc_1, _AM15G_PHI_SUN, eg_dir_1, eg_ind_1)
+
+    mask_above = (_AM15G_E_EV >= eg_ind_1) & (_AM15G_E_EV <= 3.50)
+    flux_above = float(np.trapezoid(_AM15G_PHI_SUN[mask_above], _AM15G_WL_NM[mask_above]))
+    mean_refl_pct = float(
+        np.trapezoid(r_arc_1[mask_above] * _AM15G_PHI_SUN[mask_above], _AM15G_WL_NM[mask_above])
+        / max(1.0e-12, flux_above)
+        * 100.0
+    )
+
+    mask_sub = (_AM15G_E_EV >= 0.75) & (_AM15G_E_EV <= (eg_ind_1 - 0.02))
+    flux_sub = float(np.trapezoid(_AM15G_PHI_SUN[mask_sub], _AM15G_WL_NM[mask_sub]))
+    sub_trans_pct = float(
+        np.trapezoid(t_stack_arc_1[mask_sub] * _AM15G_PHI_SUN[mask_sub], _AM15G_WL_NM[mask_sub])
+        / max(1.0e-12, flux_sub)
+        * 100.0
+    )
+
+    phi2_arc = _AM15G_PHI_SUN * t_stack_arc_1
+
+    d_si_m = 160.0e-6
+    alpha_si = 1.1e5 * (np.maximum(0.0, _AM15G_E_EV - 1.12) ** 2) + 1.5e7 * np.sqrt(np.maximum(0.0, _AM15G_E_EV - 3.40))
+    fabs_si_2l = (49.0 * alpha_si * d_si_m) / (1.0 + 49.0 * alpha_si * d_si_m)
+    _, _, _, eta_si_2l_arc = _solve_cell_iv(0.98 * fabs_si_2l, phi2_arc, 1.12, 1.12, j0_fixed=1.2e-12)
+
+    fabs_si_3l = (16.0 * alpha_si * d_si_m) / (1.0 + 16.0 * alpha_si * d_si_m)
+    _, _, _, eta_si_3l_arc = _solve_cell_iv(0.98 * fabs_si_3l, phi2_arc, 1.12, 1.12, j0_fixed=1.2e-12)
+
+    t_si_fca_low = np.exp(-0.08 * ((_AM15G_WL_NM / 1200.0) ** 2))
+    t_si_fca_std = np.exp(-0.38 * ((_AM15G_WL_NM / 1200.0) ** 2))
+    phi3_low_arc = phi2_arc * 0.96 * (1.0 - fabs_si_3l) * t_si_fca_low
+    phi3_std_arc = phi2_arc * 0.96 * (1.0 - fabs_si_3l) * t_si_fca_std
+
+    n3_bot = math.sqrt(eps_inf_3)
+    r_int_23 = 0.20 * (((n3_bot - 1.72) / (n3_bot + 1.72)) ** 2)
+    yab3 = 4.0 * eps_inf_3
+    alpha3 = 1.2e5 * (np.maximum(0.0, _AM15G_E_EV - eg_ind_3) ** 2) + 2.8e7 * np.sqrt(np.maximum(0.0, _AM15G_E_EV - eg_dir_3))
+    fabs3 = (yab3 * alpha3 * d3_m) / (1.0 + yab3 * alpha3 * d3_m)
+    a_arc_3 = (1.0 - r_int_23) * fabs3
+
+    _, _, _, eta_bot_low_arc = _solve_cell_iv(a_arc_3, phi3_low_arc, eg_dir_3, eg_ind_3)
+    _, _, _, eta_bot_std_arc = _solve_cell_iv(a_arc_3, phi3_std_arc, eg_dir_3, eg_ind_3)
+
+    graded_2l = round(eta_top_arc + eta_si_2l_arc, 2)
+    graded_4t_std = round(eta_top_arc + eta_si_3l_arc + eta_bot_std_arc, 2)
+    graded_4t_low = round(eta_top_arc + eta_si_3l_arc + eta_bot_low_arc, 2)
+
+    raw_top = float(s_top["active_layer_cost_usd_m2"])
+    raw_bot = float(s_bot["active_layer_cost_usd_m2"])
+    te_fom = compute_techno_economic_fom_suite(
+        eta_2l_pct=graded_2l,
+        eta_3l_pct=graded_4t_low,
+        raw_cost_top_usd_m2=raw_top,
+        raw_cost_bot_usd_m2=raw_bot,
+    )
+
+    blind_arc = independently_verify_graded_arc_and_techno_economics(
+        eg_ind_1=eg_ind_1,
+        eg_dir_1=eg_dir_1,
+        eps_inf_1=eps_inf_1,
+        thickness_nm_1=d1_nm,
+        eg_ind_3=eg_ind_3,
+        eg_dir_3=eg_dir_3,
+        eps_inf_3=eps_inf_3,
+        thickness_nm_3=d3_nm,
+        raw_cost_top_usd_m2=raw_top,
+        raw_cost_bot_usd_m2=raw_bot,
+    )
+
+    rouard_diff = round(abs(graded_4t_low - blind_arc["graded_4t_low_fca_pce_percent"]), 4)
+    te_ok = bool(
+        abs(te_fom["cer_2l_vs_2x_si"] - blind_arc["cer_2l_vs_2x_si"]) <= 2e-3
+        and abs(te_fom["cer_3l_vs_3x_si"] - blind_arc["cer_3l_vs_3x_si"]) <= 2e-3
+        and abs(te_fom["mciw_3l_full_usd_per_dw"] - blind_arc["mciw_3l_full_usd_per_dw"]) <= 2e-3
+        and abs(te_fom["cpr_mod_3l"] - blind_arc["cpr_mod_3l"]) <= 2e-3
+        and abs(te_fom["svi_bos_3l"] - blind_arc["svi_bos_3l"]) <= 2e-3
+    )
+    if rouard_diff > 0.05 or not blind_arc["photon_conservation_holds"] or not te_ok:
+        raise AssertionError(
+            f"REDUNDANCY_MISMATCH_BLOCK: Graded-ARC or Techno-Economic mismatch on {single_arc_report.pair_id}: "
+            f"rouard_diff={rouard_diff:.4f}%, te_ok={te_ok}"
+        )
+
+    refl_red = round(single_arc_report.tmm_mean_front_reflectance_percent - round(mean_refl_pct, 2), 2)
+    gain_4t = round(graded_4t_low - single_arc_report.tmm_4t_low_fca_pce_percent, 2)
+
+    return GradedARCTechnoEconomicReport(
+        pair_id=single_arc_report.pair_id,
+        top_mp_id=c_top["candidate_id"],
+        top_formula=c_top["formula_reduced"],
+        bottom_mp_id=c_bot["candidate_id"],
+        bottom_formula=c_bot["formula_reduced"],
+        arc_mgf2_thickness_nm=94.0,
+        front_ito_thickness_nm=80.0,
+        tio2_matcher_thickness_nm=48.0,
+        top_absorber_thickness_nm=d1_nm,
+        rear_buffer_thickness_nm=82.0,
+        bottom_absorber_thickness_nm=d3_nm,
+        single_arc_front_reflectance_percent=single_arc_report.tmm_mean_front_reflectance_percent,
+        graded_arc_front_reflectance_percent=round(mean_refl_pct, 2),
+        reflectance_reduction_percent=refl_red,
+        graded_sub_bandgap_transmittance_percent=round(sub_trans_pct, 2),
+        graded_top_pce_percent=round(eta_top_arc, 2),
+        graded_si_pce_percent=round(eta_si_3l_arc, 2),
+        graded_bottom_std_si_pce_percent=round(eta_bot_std_arc, 2),
+        graded_bottom_pce_percent=round(eta_bot_low_arc, 2),
+        graded_2layer_pce_percent=graded_2l,
+        graded_4t_std_si_pce_percent=graded_4t_std,
+        graded_4t_low_fca_pce_percent=graded_4t_low,
+        single_to_graded_4t_gain_percent=gain_4t,
+        **te_fom,
+        photon_conservation_verified=blind_arc["photon_conservation_holds"],
+        rouard_airy_redundancy_diff_percent=rouard_diff,
+        techno_economic_redundancy_verified=te_ok,
+        sha256_signature=blind_arc["sha256_signature"],
+    )
+

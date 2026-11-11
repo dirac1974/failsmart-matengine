@@ -968,7 +968,261 @@ def independently_verify_coherent_tmm_4t_stack(
 
 
 # =============================================================================
-# 8. Top-Level Entrypoint: Candidate Dossier Zero-Trust Verifier
+# 10. Independent Graded-Index Double-Layer ARC + TiO2 Stack & 4-Metric Techno-Economic Suite (Section 8 - v5.0)
+# =============================================================================
+
+def independently_verify_graded_arc_and_techno_economics(
+    eg_ind_1: float,
+    eg_dir_1: float,
+    eps_inf_1: float,
+    thickness_nm_1: float,
+    eg_ind_3: float,
+    eg_dir_3: float,
+    eps_inf_3: float,
+    thickness_nm_3: float,
+    raw_cost_top_usd_m2: float,
+    raw_cost_bot_usd_m2: float,
+) -> Dict[str, Any]:
+    """Blinded independent verification of 7-medium graded-ARC + TiO2 stack & techno-economic metrics.
+
+    Per Section 8.1 and Section 8.2 of docs/MATHEMATICAL_SPEC_V2.md:
+    - Solves the 7-medium coherent thin-film stack (m = 0..6: Air / 94.0 nm MgF2 / 80.0 nm ITO /
+      48.0 nm TiO2 / d_top_nm Absorber / 82.0 nm Buffer / Couplant) using Method B (Recursive
+      Rouard / Airy backward amplitude addition from interface (5,6) down to (0,1)) on the
+      photon-energy grid ENERGY_GRID_EV (N_E = 8001 points) integrated via scipy.integrate.simpson.
+    - Computes all Section 8.2 4-Metric Techno-Economic Figure-of-Merit quantities.
+    """
+    wl_nm = LAMBDA_GRID_NM
+    wl_um = wl_nm / 1000.0
+
+    # Complex refractive indices of the 7 media (m = 0..6) on the energy grid
+    n0 = np.ones_like(wl_nm, dtype=np.complex128)
+    n1 = (1.377 + 0.0032 / (wl_um ** 2)).astype(np.complex128)
+
+    n_ito_real = np.maximum(1.45, 1.92 - 0.085 * (wl_um ** 2))
+    k_ito = 0.0018 + 0.0065 * (wl_um ** 3)
+    n2 = n_ito_real + 1j * k_ito
+
+    n_tio2_real = 2.380 + 0.0180 / (wl_um ** 2)
+    k_tio2 = 0.0004 * (wl_um ** 2)
+    n3 = n_tio2_real + 1j * k_tio2
+
+    alpha1 = 1.2e5 * (np.maximum(0.0, ENERGY_GRID_EV - eg_ind_1) ** 2) + 2.8e7 * np.sqrt(np.maximum(0.0, ENERGY_GRID_EV - eg_dir_1))
+    n_act_real = math.sqrt(eps_inf_1) + 0.035 / (wl_um ** 2)
+    k_act = (alpha1 * (wl_nm * 1.0e-9)) / (4.0 * math.pi)
+    n4 = n_act_real + 1j * k_act
+
+    n_buf_real = 1.720 + 0.0040 / (wl_um ** 2)
+    k_buf = 0.0012 * (wl_um ** 2)
+    n5 = n_buf_real + 1j * k_buf
+
+    n6 = np.full_like(wl_nm, 1.520, dtype=np.complex128)
+
+    n_list = [n0, n1, n2, n3, n4, n5, n6]
+    d_list_nm = [0.0, 94.0, 80.0, 48.0, float(thickness_nm_1), 82.0, 0.0]
+
+    # Method B: Recursive Rouard / Airy backward amplitude addition from interface (5,6) down to (0,1)
+    r_amp = (n5 - n6) / (n5 + n6)
+    t_amp = (2.0 * n5) / (n5 + n6)
+
+    for m in (4, 3, 2, 1, 0):
+        nm_curr = n_list[m]
+        nm_next = n_list[m + 1]
+        r_m = (nm_curr - nm_next) / (nm_curr + nm_next)
+        t_m = (2.0 * nm_curr) / (nm_curr + nm_next)
+        beta_next = (2.0 * math.pi * nm_next * d_list_nm[m + 1]) / wl_nm
+        phi_next = np.exp(1j * beta_next)
+        denom = 1.0 + r_m * r_amp * (phi_next ** 2)
+        r_amp = (r_m + r_amp * (phi_next ** 2)) / denom
+        t_amp = (t_m * t_amp * phi_next) / denom
+
+    r_arc_1 = np.abs(r_amp) ** 2
+    t_arc_1 = (np.real(n6) / np.real(n0)) * (np.abs(t_amp) ** 2)
+    t_win_front = np.exp(-4.0 * math.pi * (k_ito * 80.0 + k_tio2 * 48.0) / wl_nm)
+
+    # Top cell absorptance and stack transmittance
+    yab1 = 4.0 * eps_inf_1
+    d1_m = thickness_nm_1 * 1.0e-9
+    fabs1 = (yab1 * alpha1 * d1_m) / (1.0 + yab1 * alpha1 * d1_m)
+    a_arc_1 = (1.0 - r_arc_1) * t_win_front * fabs1
+    t_stack_arc_1 = t_arc_1 * (1.0 - fabs1)
+
+    # Verify photon conservation identically: A + T + R <= 1.0
+    conservation_holds = bool(np.all(a_arc_1 + t_stack_arc_1 + r_arc_1 <= 1.0 + 1e-12))
+
+    # Mean front reflectance over above-bandgap solar window [eg_ind_1, 3.50] eV
+    mask_above = (ENERGY_GRID_EV >= eg_ind_1) & (ENERGY_GRID_EV <= 3.50)
+    flux_above = float(scipy.integrate.simpson(SOLAR_PHOTON_FLUX_E[mask_above], x=ENERGY_GRID_EV[mask_above]))
+    mean_refl_pct = float(
+        scipy.integrate.simpson(r_arc_1[mask_above] * SOLAR_PHOTON_FLUX_E[mask_above], x=ENERGY_GRID_EV[mask_above])
+        / max(1.0e-12, flux_above)
+        * 100.0
+    )
+
+    # Sub-bandgap transmittance over [0.75, eg_ind_1 - 0.02] eV
+    mask_sub = (ENERGY_GRID_EV >= 0.75) & (ENERGY_GRID_EV <= (eg_ind_1 - 0.02))
+    flux_sub = float(scipy.integrate.simpson(SOLAR_PHOTON_FLUX_E[mask_sub], x=ENERGY_GRID_EV[mask_sub]))
+    sub_trans_pct = float(
+        scipy.integrate.simpson(t_stack_arc_1[mask_sub] * SOLAR_PHOTON_FLUX_E[mask_sub], x=ENERGY_GRID_EV[mask_sub])
+        / max(1.0e-12, flux_sub)
+        * 100.0
+    )
+
+    # Step A — Layer 1 PCE
+    cell1 = _solve_pv_cell_energy_quadrature(
+        absorptance_e=a_arc_1,
+        incident_photon_flux_e=SOLAR_PHOTON_FLUX_E,
+        eg_ind_ev=eg_ind_1,
+        eg_dir_ev=eg_dir_1,
+    )
+    eta_top = cell1["eff"]
+
+    # Step B — Layer 2: c-Si Wafer under transmitted flux phi2_arc
+    phi2_arc = SOLAR_PHOTON_FLUX_E * t_stack_arc_1
+    d_si_m = 160.0e-6
+    alpha_si = 1.1e5 * (np.maximum(0.0, ENERGY_GRID_EV - 1.12) ** 2) + 1.5e7 * np.sqrt(np.maximum(0.0, ENERGY_GRID_EV - 3.40))
+
+    fabs_si_2l = (49.0 * alpha_si * d_si_m) / (1.0 + 49.0 * alpha_si * d_si_m)
+    cell_si_2l = _solve_pv_cell_energy_quadrature(
+        absorptance_e=0.98 * fabs_si_2l,
+        incident_photon_flux_e=phi2_arc,
+        eg_ind_ev=1.12,
+        eg_dir_ev=1.12,
+        j0_rad_fixed=1.2e-12,
+    )
+
+    fabs_si_3l = (16.0 * alpha_si * d_si_m) / (1.0 + 16.0 * alpha_si * d_si_m)
+    cell_si_3l = _solve_pv_cell_energy_quadrature(
+        absorptance_e=0.98 * fabs_si_3l,
+        incident_photon_flux_e=phi2_arc,
+        eg_ind_ev=1.12,
+        eg_dir_ev=1.12,
+        j0_rad_fixed=1.2e-12,
+    )
+
+    t_si_fca_low = np.exp(-0.08 * ((wl_nm / 1200.0) ** 2))
+    t_si_fca_std = np.exp(-0.38 * ((wl_nm / 1200.0) ** 2))
+    phi3_low = phi2_arc * 0.96 * (1.0 - fabs_si_3l) * t_si_fca_low
+    phi3_std = phi2_arc * 0.96 * (1.0 - fabs_si_3l) * t_si_fca_std
+
+    # Step C — Layer 3: Bottom IR Scavenger
+    d3_m = thickness_nm_3 * 1.0e-9
+    n3_bot = math.sqrt(eps_inf_3)
+    r_int_23 = 0.20 * (((n3_bot - 1.72) / (n3_bot + 1.72)) ** 2)
+    yab3 = 4.0 * eps_inf_3
+    alpha3 = 1.2e5 * (np.maximum(0.0, ENERGY_GRID_EV - eg_ind_3) ** 2) + 2.8e7 * np.sqrt(np.maximum(0.0, ENERGY_GRID_EV - eg_dir_3))
+    fabs3 = (yab3 * alpha3 * d3_m) / (1.0 + yab3 * alpha3 * d3_m)
+    a_arc_3 = (1.0 - r_int_23) * fabs3
+
+    cell3_low = _solve_pv_cell_energy_quadrature(
+        absorptance_e=a_arc_3,
+        incident_photon_flux_e=phi3_low,
+        eg_ind_ev=eg_ind_3,
+        eg_dir_ev=eg_dir_3,
+    )
+    cell3_std = _solve_pv_cell_energy_quadrature(
+        absorptance_e=a_arc_3,
+        incident_photon_flux_e=phi3_std,
+        eg_ind_ev=eg_ind_3,
+        eg_dir_ev=eg_dir_3,
+    )
+
+    graded_2l = round(eta_top + cell_si_2l["eff"], 2)
+    graded_4t_std = round(eta_top + cell_si_3l["eff"] + cell3_std["eff"], 2)
+    graded_4t_low = round(eta_top + cell_si_3l["eff"] + cell3_low["eff"], 2)
+
+    # Section 8.2: 4-Metric Techno-Economic & Area-Constrained Figure-of-Merit Suite
+    eta_si_ref = 22.00
+    c_si_mod = 40.00
+    c_bos_area = 100.00
+    sqft_to_m2 = 0.09290304
+
+    eta_2l = graded_2l
+    eta_3l = graded_4t_low
+
+    c_raw_top = float(raw_cost_top_usd_m2)
+    c_raw_bot = float(raw_cost_bot_usd_m2)
+    c_raw_comb = c_raw_top + c_raw_bot
+
+    delta_c_2l = c_raw_top + 6.50
+    delta_c_3l = c_raw_comb + 13.00
+
+    p_m2_2l = 10.0 * eta_2l
+    p_sqft_2l = p_m2_2l * sqft_to_m2
+    p_m2_3l = 10.0 * eta_3l
+    p_sqft_3l = p_m2_3l * sqft_to_m2
+
+    g_eta_2l = eta_2l / eta_si_ref
+    g_eta_3l = eta_3l / eta_si_ref
+
+    cer_2l = (2.0 * c_si_mod * g_eta_2l) / (c_si_mod + delta_c_2l)
+    cer_3l = (3.0 * c_si_mod * g_eta_3l) / (c_si_mod + delta_c_3l)
+
+    delta_p_2l = max(1.0e-9, 10.0 * (eta_2l - eta_si_ref))
+    delta_p_3l = max(1.0e-9, 10.0 * (eta_3l - eta_si_ref))
+
+    mciw_2l_raw = c_raw_top / delta_p_2l
+    mciw_2l_full = delta_c_2l / delta_p_2l
+    mciw_3l_raw = c_raw_comb / delta_p_3l
+    mciw_3l_full = delta_c_3l / delta_p_3l
+
+    cpr_mod_2l = g_eta_2l / (1.0 + delta_c_2l / c_si_mod)
+    cpr_mod_3l = g_eta_3l / (1.0 + delta_c_3l / c_si_mod)
+
+    svi_bos_2l = ((c_si_mod + c_bos_area) * g_eta_2l) / (c_si_mod + c_bos_area + delta_c_2l)
+    svi_bos_3l = ((c_si_mod + c_bos_area) * g_eta_3l) / (c_si_mod + c_bos_area + delta_c_3l)
+
+    res: Dict[str, Any] = {
+        "graded_arc_front_reflectance_percent": round(mean_refl_pct, 2),
+        "graded_sub_bandgap_transmittance_percent": round(sub_trans_pct, 2),
+        "graded_top_pce_percent": round(eta_top, 2),
+        "graded_si_pce_percent": round(cell_si_3l["eff"], 2),
+        "graded_bottom_std_si_pce_percent": round(cell3_std["eff"], 2),
+        "graded_bottom_pce_percent": round(cell3_low["eff"], 2),
+        "graded_2layer_pce_percent": graded_2l,
+        "graded_4t_std_si_pce_percent": graded_4t_std,
+        "graded_4t_low_fca_pce_percent": graded_4t_low,
+        "power_density_2l_w_m2": round(p_m2_2l, 2),
+        "power_density_2l_w_sqft": round(p_sqft_2l, 2),
+        "power_density_3l_w_m2": round(p_m2_3l, 2),
+        "power_density_3l_w_sqft": round(p_sqft_3l, 2),
+        "eff_gain_ratio_2l": round(g_eta_2l, 4),
+        "eff_gain_ratio_3l": round(g_eta_3l, 4),
+        "cer_2l_vs_2x_si": round(cer_2l, 4),
+        "cer_3l_vs_3x_si": round(cer_3l, 4),
+        "mciw_2l_raw_usd_per_dw": round(mciw_2l_raw, 4),
+        "mciw_2l_full_usd_per_dw": round(mciw_2l_full, 4),
+        "mciw_3l_raw_usd_per_dw": round(mciw_3l_raw, 4),
+        "mciw_3l_full_usd_per_dw": round(mciw_3l_full, 4),
+        "cpr_mod_2l": round(cpr_mod_2l, 4),
+        "cpr_mod_3l": round(cpr_mod_3l, 4),
+        "svi_bos_2l": round(svi_bos_2l, 4),
+        "svi_bos_3l": round(svi_bos_3l, 4),
+        "top_raw_cost_usd_m2": round(c_raw_top, 4),
+        "combined_raw_cost_usd_m2": round(c_raw_comb, 4),
+        "photon_conservation_holds": conservation_holds,
+    }
+
+    sig_payload = {
+        "graded_arc_front_reflectance_percent": res["graded_arc_front_reflectance_percent"],
+        "graded_sub_bandgap_transmittance_percent": res["graded_sub_bandgap_transmittance_percent"],
+        "graded_top_pce_percent": res["graded_top_pce_percent"],
+        "graded_2layer_pce_percent": res["graded_2layer_pce_percent"],
+        "graded_4t_low_fca_pce_percent": res["graded_4t_low_fca_pce_percent"],
+        "cer_2l_vs_2x_si": res["cer_2l_vs_2x_si"],
+        "cer_3l_vs_3x_si": res["cer_3l_vs_3x_si"],
+        "svi_bos_2l": res["svi_bos_2l"],
+        "svi_bos_3l": res["svi_bos_3l"],
+    }
+    res["sha256_signature"] = hashlib.sha256(
+        json.dumps(sig_payload, sort_keys=True).encode("utf-8")
+    ).hexdigest()
+
+    return res
+
+
+# =============================================================================
+# 11. Top-Level Entrypoint: Candidate Dossier Zero-Trust Verifier
 # =============================================================================
 
 def verify_candidate_dossier(

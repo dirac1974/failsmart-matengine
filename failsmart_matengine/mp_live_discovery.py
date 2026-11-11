@@ -1180,6 +1180,7 @@ def run_live_mp_discovery_campaign(
     from .atomistic_and_tmm import (
         evaluate_3d_atomistic_phonon_and_neb,
         evaluate_coherent_abeles_tmm_4t_stack,
+        evaluate_graded_arc_and_techno_economics_4t_stack,
     )
 
     atomistic_reports: List[Dict[str, Any]] = []
@@ -1194,6 +1195,7 @@ def run_live_mp_discovery_campaign(
 
     cross_pairs: List[Dict[str, Any]] = []
     coherent_tmm_stacks: List[Dict[str, Any]] = []
+    graded_arc_te_stacks: List[Dict[str, Any]] = []
     for tf in top_finalists:
         for bf in bot_finalists:
             pair_model = compute_cross_layer_4t_stack_wavelength(tf, bf)
@@ -1204,16 +1206,23 @@ def run_live_mp_discovery_campaign(
             tmm_model = evaluate_coherent_abeles_tmm_4t_stack(tf, bf, pair_dump)
             coherent_tmm_stacks.append(tmm_model.model_dump())
 
+            # Step 3 (v5.0): 7-Medium Graded-ARC + TiO2 Impedance Matching & 4-Metric Techno-Economic Suite
+            graded_model = evaluate_graded_arc_and_techno_economics_4t_stack(tf, bf, tmm_model)
+            graded_arc_te_stacks.append(graded_model.model_dump())
+
     cross_pairs.sort(key=lambda x: (-x["tandem_4t_low_fca_total_eff_percent"], x["combined_active_cost_usd_m2"]))
     coherent_tmm_stacks.sort(key=lambda x: (-x["tmm_4t_low_fca_pce_percent"], x["combined_active_cost_usd_m2"]))
+    graded_arc_te_stacks.sort(key=lambda x: (-x["graded_4t_low_fca_pce_percent"], x["combined_raw_cost_usd_m2"]))
 
     summary = {
         "version": "4.0.0",
+        "v5_graded_arc_and_techno_economics_enabled": True,
         "data_provenance": {
             "materials_project_live_api": True,
             "negative_synthesis_datasets": neg_priors.get("dataset_provenance", {}),
             "atomistic_dynamical_matrix_and_neb": True,
             "coherent_abeles_tmm_vs_rouard_airy": True,
+            "graded_arc_tio2_and_techno_economic_fom": True,
         },
         "funnel_counts": funnel_counts,
         "failure_mode_breakdown": failure_mode_breakdown,
@@ -1221,6 +1230,7 @@ def run_live_mp_discovery_campaign(
         "atomistic_phonon_neb_reports": atomistic_reports,
         "cross_layer_4t_tandem_pairs": cross_pairs,
         "coherent_tmm_4t_stacks": coherent_tmm_stacks,
+        "graded_arc_techno_economic_stacks": graded_arc_te_stacks,
         "all_mp_records": all_dossiers,
     }
     (out_path / "live_mp_discovery_summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
@@ -1229,7 +1239,7 @@ def run_live_mp_discovery_campaign(
 
 if __name__ == "__main__":
     res = run_live_mp_discovery_campaign()
-    print("Live MP v4.0 Funnel Counts:", json.dumps(res["funnel_counts"], indent=2))
+    print("Live MP v4.0/v5.0 Funnel Counts:", json.dumps(res["funnel_counts"], indent=2))
     print("Failure Mode Breakdown:", json.dumps(res["failure_mode_breakdown"], indent=2))
     print("\n=== Step 1: 3D Dynamical Matrix D(q=0) & 11-Image NEB Ion-Migration Reports (8 Finalists) ===")
     for ar in res["atomistic_phonon_neb_reports"]:
@@ -1240,13 +1250,26 @@ if __name__ == "__main__":
             f"E_mig^NEB={ar['neb_saddle_barrier_ev']:.3f} eV, D_300K={ar['room_temp_diffusivity_cm2_s']:.2e} cm^2/s "
             f"[SHA256: {ar['sha256_signature'][:8]}]"
         )
-    print(f"\n=== Step 2: Coherent 2x2 Abeles TMM vs Rouard/Airy 4T Stacks ({len(res['coherent_tmm_4t_stacks'])} Verified) ===")
-    for ts in res["coherent_tmm_4t_stacks"][:8]:
+    print(f"\n=== Step 2: Single-ARC Coherent 2x2 Abeles TMM vs Rouard/Airy 4T Stacks ({len(res['coherent_tmm_4t_stacks'])} Verified) ===")
+    for ts in res["coherent_tmm_4t_stacks"][:6]:
         print(
             f"  * {ts['pair_id']} ({ts['top_formula']} + c-Si + {ts['bottom_formula']}): "
             f"R_front={ts['tmm_mean_front_reflectance_percent']:.2f}%, T_sub={ts['tmm_sub_bandgap_transmittance_percent']:.2f}%, "
             f"2L={ts['tmm_2layer_pce_percent']:.2f}%, 4T(std-Si)={ts['tmm_4t_std_si_pce_percent']:.2f}%, "
-            f"4T(low-FCA)={ts['tmm_4t_low_fca_pce_percent']:.2f}% (delta={ts['scalar_to_tmm_delta_pce_percent']:+.2f}%), "
-            f"RouardDiff={ts['rouard_airy_redundancy_diff_percent']:.4f}% [SHA256: {ts['sha256_signature'][:8]}]"
+            f"4T(low-FCA)={ts['tmm_4t_low_fca_pce_percent']:.2f}% (delta={ts['scalar_to_tmm_delta_pce_percent']:+.2f}%)"
         )
+    print(f"\n=== Step 3: 7-Medium Graded-ARC + TiO2 Impedance Matcher & 4-Metric Techno-Economic Suite ({len(res['graded_arc_techno_economic_stacks'])} Verified) ===")
+    for gs in res["graded_arc_techno_economic_stacks"][:8]:
+        print(
+            f"  * {gs['pair_id']} ({gs['top_formula']} + c-Si + {gs['bottom_formula']}): "
+            f"R_front={gs['single_arc_front_reflectance_percent']:.2f}%->{gs['graded_arc_front_reflectance_percent']:.2f}% "
+            f"(dR=-{gs['reflectance_reduction_percent']:.2f}%), T_sub={gs['graded_sub_bandgap_transmittance_percent']:.2f}%, "
+            f"2L={gs['graded_2layer_pce_percent']:.2f}% ({gs['power_density_2l_w_sqft']:.1f} W/ft^2), "
+            f"4T={gs['graded_4t_low_fca_pce_percent']:.2f}% ({gs['power_density_3l_w_sqft']:.1f} W/ft^2, +{gs['single_to_graded_4t_gain_percent']:.2f}%), "
+            f"CER_2L={gs['cer_2l_vs_2x_si']:.3f}, CER_3L={gs['cer_3l_vs_3x_si']:.3f}, "
+            f"MCIW_3L(raw/full)=${gs['mciw_3l_raw_usd_per_dw']:.4f}/${gs['mciw_3l_full_usd_per_dw']:.4f}/dW, "
+            f"CPR_mod(2L/3L)={gs['cpr_mod_2l']:.3f}/{gs['cpr_mod_3l']:.3f}, "
+            f"SVI_BOS(2L/3L)={gs['svi_bos_2l']:.3f}/{gs['svi_bos_3l']:.3f} [SHA256: {gs['sha256_signature'][:8]}]"
+        )
+
 

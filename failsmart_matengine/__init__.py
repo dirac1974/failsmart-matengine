@@ -8,6 +8,7 @@ from .independent_verifier import (
     independently_verify_coherent_tmm_4t_stack,
     independently_verify_cross_layer_4t_pair,
     independently_verify_energy_quadrature_slme,
+    independently_verify_graded_arc_and_techno_economics,
     simpson_13,
     verify_candidate_dossier,
 )

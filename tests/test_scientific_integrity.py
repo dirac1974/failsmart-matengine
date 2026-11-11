@@ -92,6 +92,7 @@ from failsmart_matengine.independent_verifier import (
     independently_verify_cross_layer_4t_pair,
     independently_verify_atomistic_phonon_and_neb,
     independently_verify_coherent_tmm_4t_stack,
+    independently_verify_graded_arc_and_techno_economics,
 )
 from pymatgen.core import Structure
 import subprocess
@@ -1008,8 +1009,59 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
                 f"{pid}: Independent Rouard/Airy verification diff {diff_total:.4f}% > 0.05%",
             )
 
+    def test_step3_graded_arc_tio2_and_techno_economic_fom_suite(self):
+        """Test 18: Verify 7-Medium Graded-ARC + TiO2 Impedance Matching & 4-Metric Techno-Economic Suite across all 15 stacks."""
+        live_sum_path = os.path.join(self.repo_root, "outputs", "live_mp_discovery_summary.json")
+        with open(live_sum_path, "r", encoding="utf-8") as f:
+            live_sum = json.load(f)
+
+        self.assertTrue(live_sum.get("v5_graded_arc_and_techno_economics_enabled"))
+        graded_stacks = live_sum.get("graded_arc_techno_economic_stacks", [])
+        self.assertEqual(len(graded_stacks), 15, f"Expected 15 graded_arc_techno_economic_stacks, got {len(graded_stacks)}")
+
+        finalists_by_id = {f["candidate"]["candidate_id"]: f for f in live_sum.get("finalists", [])}
+
+        for gs in graded_stacks:
+            pid = gs["pair_id"]
+            self.assertTrue(gs["photon_conservation_verified"], f"{pid}: Photon conservation failed")
+            self.assertTrue(gs["techno_economic_redundancy_verified"], f"{pid}: Techno-economic redundancy check failed")
+            self.assertLessEqual(gs["graded_arc_front_reflectance_percent"], 4.0, f"{pid}: Expected graded ARC R_front <= 4.0%")
+            self.assertGreaterEqual(gs["reflectance_reduction_percent"], 8.0, f"{pid}: Expected R_front reduction >= 8.0%")
+            self.assertGreater(gs["single_to_graded_4t_gain_percent"], 2.0, f"{pid}: Expected >= +2.0% 4T PCE gain from Graded-ARC")
+            self.assertGreater(gs["cer_2l_vs_2x_si"], 2.8, f"{pid}: Expected CER_2L > 2.8")
+            self.assertGreater(gs["cer_3l_vs_3x_si"], 4.1, f"{pid}: Expected CER_3L > 4.1")
+            self.assertLess(gs["mciw_3l_full_usd_per_dw"], 0.08, f"{pid}: Expected MCIW_3L_full < $0.08/dW")
+            self.assertGreater(gs["svi_bos_3l"], gs["svi_bos_2l"], f"{pid}: Expected 3L Area-BOS SVI > 2L Area-BOS SVI")
+
+            top_f = finalists_by_id[gs["top_mp_id"]]
+            bot_f = finalists_by_id[gs["bottom_mp_id"]]
+
+            iv_gs = independently_verify_graded_arc_and_techno_economics(
+                eg_ind_1=top_f["electronics"]["hse06_soc_indirect_gap_ev"],
+                eg_dir_1=top_f["electronics"]["hse06_soc_direct_gap_ev"],
+                eps_inf_1=top_f["electronics"]["eps_inf"],
+                thickness_nm_1=top_f["optics"]["film_thickness_nm"],
+                eg_ind_3=bot_f["electronics"]["hse06_soc_indirect_gap_ev"],
+                eg_dir_3=bot_f["electronics"]["hse06_soc_direct_gap_ev"],
+                eps_inf_3=bot_f["electronics"]["eps_inf"],
+                thickness_nm_3=bot_f["optics"]["film_thickness_nm"],
+                raw_cost_top_usd_m2=top_f["synthesis"]["active_layer_cost_usd_m2"],
+                raw_cost_bot_usd_m2=bot_f["synthesis"]["active_layer_cost_usd_m2"],
+            )
+            self.assertLessEqual(
+                abs(gs["graded_4t_low_fca_pce_percent"] - iv_gs["graded_4t_low_fca_pce_percent"]),
+                0.05,
+                f"{pid}: Graded-ARC 4T PCE diff > 0.05%",
+            )
+            self.assertLessEqual(
+                abs(gs["cer_3l_vs_3x_si"] - iv_gs["cer_3l_vs_3x_si"]),
+                2e-3,
+                f"{pid}: CER_3L mismatch between primary and independent verifier",
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
+
 
 

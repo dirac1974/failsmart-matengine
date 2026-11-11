@@ -242,3 +242,57 @@ $$r_{m,m+1} = \frac{\tilde{n}_m - \tilde{n}_{m+1}}{\tilde{n}_m + \tilde{n}_{m+1}
      * `tmm_sub_bandgap_transmittance_percent` (flux-weighted mean of $T_{\text{stack,TMM},1}(\lambda)\times 100$ over $E \in [0.75\text{ eV}, E_{g,\text{ind},1} - 0.02\text{ eV}]$)
      * `tmm_mean_front_reflectance_percent` (flux-weighted mean of $R_{\text{TMM},1}(\lambda)\times 100$ over $E \in [E_{g,\text{ind},1}, 3.50\text{ eV}]$).
 
+---
+
+## 8. Graded-Index Double-Layer ARC + High-Index $\text{TiO}_2$ Impedance-Matching Stack & 4-Metric Techno-Economic Figure-of-Merit Suite (v5.0)
+
+### 8.1 7-Medium Graded-Index Double-ARC + $\text{TiO}_2$ Impedance-Matched Coherent Stack
+To eliminate the $\sim 11\%\text{–}12\%$ broadband front reflection caused by the refractive-index step between $\text{ITO}$ ($n_2 \approx 1.88$) and the high-index pnictogen absorber ($n_4 = \sqrt{\varepsilon_{\infty,1}} \approx 2.8\text{–}3.1$), we insert a transparent rutile/anatase $\text{TiO}_2$ high-index optical impedance-matching layer ($m=3$) between Front $\text{ITO}$ ($m=2$) and the Top Active Absorber ($m=4$), forming a 7-medium graded-index coherent thin-film stack ($m \in \{0, 1, 2, 3, 4, 5, 6\}$):
+* **Medium 0 (Superstrate — Air):** $\tilde{n}_0(\lambda) = 1.000 + 0i$
+* **Medium 1 (Outer Quarter-Wave $\text{MgF}_2$ ARC, $d_1 = 94.0\text{ nm}$):** $\tilde{n}_1(\lambda) = 1.377 + \frac{0.0032}{\lambda_{\mu\text{m}}^2} + 0i$
+* **Medium 2 (Front Transparent Electrode — Sputtered $\text{ITO}$, $d_2 = 80.0\text{ nm}$):**
+  $$n_2(\lambda) = \max\left(1.45,\ 1.92 - 0.085\,\lambda_{\mu\text{m}}^2\right), \quad k_2(\lambda) = 0.0018 + 0.0065\,\lambda_{\mu\text{m}}^3$$
+* **Medium 3 (High-Index $\text{TiO}_2$ Optical Impedance-Matching Buffer, $d_3 = 48.0\text{ nm}$):**
+  $$n_3(\lambda) = 2.380 + \frac{0.0180}{\lambda_{\mu\text{m}}^2}, \quad k_3(\lambda) = 0.0004\,\lambda_{\mu\text{m}}^2, \quad \tilde{n}_3(\lambda) = n_3(\lambda) + i\,k_3(\lambda)$$
+* **Medium 4 (Top Active Glass Absorber, $d_4 = d_{\text{top}}$):**
+  $$n_4(\lambda) = \sqrt{\varepsilon_{\infty,1}} + \frac{0.035}{\lambda_{\mu\text{m}}^2}, \quad k_4(\lambda) = \frac{\alpha_1(E)\cdot (\lambda_{\text{nm}}\times 10^{-9})}{4\pi}, \quad \tilde{n}_4(\lambda) = n_4(\lambda) + i\,k_4(\lambda)$$
+* **Medium 5 (Rear $\text{SiO}_2/\text{ITO}$ Optical Buffer, $d_5 = 82.0\text{ nm}$):**
+  $$n_5(\lambda) = 1.720 + \frac{0.0040}{\lambda_{\mu\text{m}}^2}, \quad k_5(\lambda) = 0.0012\,\lambda_{\mu\text{m}}^2$$
+* **Medium 6 (Substrate / Optical Couplant into c-Si):** $\tilde{n}_6(\lambda) = 1.520 + 0i$.
+
+#### Dual-Redundancy Coherent Solvers on the 7-Medium Stack:
+* **Method A (`atomistic_and_tmm.py`):** Vectorized $2\times 2$ Abeles Characteristic Matrix Product $\mathbf{M}(\lambda) = \mathbf{I}_{01}\mathbf{P}_1\mathbf{I}_{12}\mathbf{P}_2\mathbf{I}_{23}\mathbf{P}_3\mathbf{I}_{34}\mathbf{P}_4\mathbf{I}_{45}\mathbf{P}_5\mathbf{I}_{56}$ on the native ASTM G173-03 wavelength grid (`np.trapezoid`).
+* **Method B (`independent_verifier.py`):** Recursive Rouard / Airy backward amplitude addition from interface $(5,6)$ down to $(0,1)$ on the $N_E = 8001$ photon-energy grid (`scipy.integrate.simpson`).
+* **Front Window Transmission & Absorptance:**
+  $$T_{\text{win,front}}(\lambda) = \exp\left(-\frac{4\pi \left(k_2(\lambda) d_2 + k_3(\lambda) d_3\right)}{\lambda_{\text{nm}}}\right)$$
+  $$A_{\text{ARC},1}(\lambda) = \left(1.0 - R_{\text{ARC},1}(\lambda)\right) \cdot T_{\text{win,front}}(\lambda) \cdot f_{\text{abs},1}(E), \quad T_{\text{stack,ARC},1}(\lambda) = T_{\text{ARC},1}(\lambda) \cdot \left(1.0 - f_{\text{abs},1}(E)\right)$$
+
+### 8.2 4-Metric Techno-Economic & Area-Constrained Figure-of-Merit Suite
+To evaluate the economic return of every 2-Layer (`Top + c-Si`, $N_{\text{layers}}=2$, $k_{\text{add}}=1$) and 3-Layer (`Top + c-Si + Bottom`, $N_{\text{layers}}=3$, $k_{\text{add}}=2$) Silicon-Sandwich stack relative to a commercial single-junction c-Si baseline, we standardize the following reference techno-economic parameters:
+* **Single-Junction c-Si Baseline:**
+  $$\eta_{\text{Si,ref}} = 22.00\%, \quad P_{\text{Si,ref}} = 220.0\text{ W/m}^2, \quad C_{\text{Si,mod}} = \$40.00/\text{m}^2, \quad C_{\text{BOS,area}} = \$100.00/\text{m}^2$$
+* **Subcell Process & TCO Coating Overhead:** $C_{\text{proc,sub}} = \$6.50/\text{m}^2$ per added thin-film subcell ($1\times \$6.50 = \$6.50/\text{m}^2$ for 2-Layer; $2\times \$6.50 = \$13.00/\text{m}^2$ for 3-Layer).
+* **Incremental & Total Module Costs ($\$/\text{m}^2$):**
+  * For 2-Layer (`Top + c-Si`, $N_{\text{layers}}=2$):
+    $$\Delta C_{\text{2L}} = c_{\text{raw,top}} + 6.50, \quad C_{\text{mod,2L}} = C_{\text{Si,mod}} + \Delta C_{\text{2L}}$$
+  * For 3-Layer (`Top + c-Si + Bottom`, $N_{\text{layers}}=3$):
+    $$\Delta C_{\text{3L}} = c_{\text{raw,top}} + c_{\text{raw,bot}} + 13.00, \quad C_{\text{mod,3L}} = C_{\text{Si,mod}} + \Delta C_{\text{3L}}$$
+* **Power Density ($\text{W/m}^2$ and $\text{W/ft}^2$, with $1\text{ ft}^2 = 0.09290304\text{ m}^2$):**
+  $$P_{\text{m2}}(\eta) = 10.0 \cdot \eta\ (\%)\ [\text{W/m}^2], \quad P_{\text{sqft}}(\eta) = P_{\text{m2}}(\eta) \times 0.09290304\ [\text{W/ft}^2]$$
+
+For both 2-Layer ($\eta = \eta_{\text{2L}}, N=2, \Delta C = \Delta C_{\text{2L}}, c_{\text{raw}} = c_{\text{raw,top}}$) and 3-Layer ($\eta = \eta_{\text{3L}}, N=3, \Delta C = \Delta C_{\text{3L}}, c_{\text{raw}} = c_{\text{raw,top}} + c_{\text{raw,bot}}$), both primary and independent engines must compute and cross-verify to within $10^{-4}$:
+1. **Relative Efficiency Gain Multiplier ($G_\eta$):**
+   $$G_\eta = \frac{\eta}{\eta_{\text{Si,ref}}} = \frac{\eta}{22.00}$$
+2. **Metric 1 — Normalized Multi-Junction Cost-Efficiency Ratio ($\text{CER}_N$):**
+   *(Compares the efficiency gain multiplier $G_\eta$ against the total stack module cost normalized by $N$ standalone c-Si module costs $N \cdot C_{\text{Si,mod}}$):*
+   $$\text{CER}_N = \frac{\eta / \eta_{\text{Si,ref}}}{\left(C_{\text{Si,mod}} + \Delta C\right) / \left(N \cdot C_{\text{Si,mod}}\right)} = \frac{N \cdot C_{\text{Si,mod}} \cdot (\eta / 22.00)}{C_{\text{Si,mod}} + \Delta C}$$
+3. **Metric 2 — Marginal Cost per Incremental Watt ($\text{MCIW}_{\text{raw}}$ and $\text{MCIW}_{\text{full}}$ in $\$/\Delta\text{W}_{\text{p}}$):**
+   $$\Delta P_{\text{m2}} = 10.0 \cdot (\eta - 22.00)\ [\text{W/m}^2]$$
+   $$\text{MCIW}_{\text{raw}} = \frac{c_{\text{raw}}}{\Delta P_{\text{m2}}}\ [\$/\Delta\text{W}_{\text{p}}], \quad \text{MCIW}_{\text{full}} = \frac{\Delta C}{\Delta P_{\text{m2}}}\ [\$/\Delta\text{W}_{\text{p}}]$$
+   *(Reference single-junction c-Si cost per Watt is $C_{\text{Si,mod}} / P_{\text{Si,ref}} = 40.00 / 220.0 = \$0.1818/\text{W}_{\text{p}}$; any $\text{MCIW}_{\text{full}} < \$0.1818/\Delta\text{W}_{\text{p}}$ lowers module $\$/\text{W}_{\text{p}}$).*
+4. **Metric 3 — Factory-Gate Module Cost-Performance Ratio ($\text{CPR}_{\text{mod}}$):**
+   $$\text{CPR}_{\text{mod}} = \frac{\eta / 22.00}{1.0 + \Delta C / C_{\text{Si,mod}}}$$
+5. **Metric 4 — Area-Constrained System Value Index ($\text{SVI}_{\text{BOS}}$, Sofia-NREL Area-BOS Credit):**
+   $$\text{SVI}_{\text{BOS}} = \frac{\eta / 22.00}{\left(C_{\text{Si,mod}} + \Delta C + C_{\text{BOS,area}}\right) / \left(C_{\text{Si,mod}} + C_{\text{BOS,area}}\right)} = \frac{140.0 \cdot (\eta / 22.00)}{140.0 + \Delta C}$$
+
+
