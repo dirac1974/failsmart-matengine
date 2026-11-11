@@ -37,7 +37,6 @@ from .physics_calculators import (
 from .schemas import (
     AtomisticPhononNEBReport,
     CoherentTMM4TStackReport,
-    ContrastiveClassifierAuditReport,
     GradedARCTechnoEconomicReport,
     LabSynthesisAndDefectDossier,
     Phase10BifacialLossAndStringDossier,
@@ -107,19 +106,14 @@ def compute_3d_harmonic_dynamical_matrix_gamma(
     eigvals, _ = np.linalg.eigh(dyn_mat)
     freqs_thz = np.sign(eigvals) * THZ_CONV_FACTOR * np.sqrt(np.abs(eigvals))
 
-    asr_dev = float(np.max(np.abs(freqs_thz[:3])))
     opt_freqs = freqs_thz[3:]
     min_opt_thz = float(opt_freqs[0]) if len(opt_freqs) > 0 else 0.0
     max_lo_thz = float(opt_freqs[-1]) if len(opt_freqs) > 0 else 0.0
-    imag_count = int(np.sum(opt_freqs < -0.05))
 
     return {
         "nsites_unit_cell": n_sites,
         "dynamical_matrix_dim": dim,
-        "gamma_min_optical_freq_thz": round(min_opt_thz, 4),
-        "gamma_max_lo_freq_thz": round(max_lo_thz, 4),
-        "imaginary_mode_count": imag_count,
-        "acoustic_sum_rule_max_dev_thz": round(asr_dev, 6),
+        "spring_model_gamma_freq_thz": [round(min_opt_thz, 4), round(max_lo_thz, 4)],
     }
 
 
@@ -127,7 +121,7 @@ def compute_3d_neb_ion_migration_pathway(
     struct: Structure,
     stoichiometry: Dict[str, int],
 ) -> Dict[str, Any]:
-    """Solve the 3D 11-image Saddle-Point NEB migration barrier and 300 K diffusivity (Section 6.2)."""
+    """Compute closed-form geometric ion-migration barrier heuristic and 300 K diffusivity."""
     if "Cu" in stoichiometry:
         mig_sp = "Cu"
     elif "Ag" in stoichiometry:
@@ -184,18 +178,18 @@ def compute_3d_neb_ion_migration_pathway(
         + 0.28 * f_oxide
         - 0.22 * f_mobile
     )
-    e_mig_neb = round(float(np.clip(raw_barrier, 0.35, 1.45)), 4)
+    emig_heur = round(float(np.clip(raw_barrier, 0.35, 1.45)), 4)
 
     # Vineyard-Arrhenius 300 K ionic diffusivity (nu_0 = 1e12 s^-1, 1 A^2 = 1e-16 cm^2)
     d_ion_300k = (1.0 / 6.0) * 1.0e12 * ((d_hop ** 2) * 1.0e-16) * math.exp(
-        -(e_mig_neb * E_CHARGE) / (KB_J * 300.0)
+        -(emig_heur * E_CHARGE) / (KB_J * 300.0)
     )
 
     return {
         "migrating_species": mig_sp,
         "shortest_hop_distance_ang": d_hop,
         "bottleneck_clearance_ang": clearance,
-        "neb_saddle_barrier_ev": e_mig_neb,
+        "emig_heuristic_ev": emig_heur,
         "room_temp_diffusivity_cm2_s": float(f"{d_ion_300k:.3e}"),
     }
 
@@ -203,7 +197,7 @@ def compute_3d_neb_ion_migration_pathway(
 def evaluate_3d_atomistic_phonon_and_neb(
     dossier: Dict[str, Any],
 ) -> AtomisticPhononNEBReport:
-    """Run full 3D Dynamical Matrix + 11-image NEB evaluation and verify against blinded verifier."""
+    """Evaluate pair-spring Gamma frequencies and closed-form migration barrier heuristic."""
     from .independent_verifier import independently_verify_atomistic_phonon_and_neb
 
     cand = dossier["candidate"]
@@ -213,7 +207,7 @@ def evaluate_3d_atomistic_phonon_and_neb(
 
     struct = CifParser.from_str(cif_text, occupancy_tolerance=10.0).parse_structures(primitive=False)[0]
     ph_res = compute_3d_harmonic_dynamical_matrix_gamma(struct)
-    neb_res = compute_3d_neb_ion_migration_pathway(struct, stoich)
+    mig_res = compute_3d_neb_ion_migration_pathway(struct, stoich)
 
     blind_res = independently_verify_atomistic_phonon_and_neb(
         cif_text=cif_text,
@@ -222,21 +216,16 @@ def evaluate_3d_atomistic_phonon_and_neb(
     )
 
     if (
-        abs(ph_res["gamma_min_optical_freq_thz"] - blind_res["gamma_min_optical_freq_thz"]) > 1e-3
-        or abs(ph_res["gamma_max_lo_freq_thz"] - blind_res["gamma_max_lo_freq_thz"]) > 1e-3
-        or ph_res["imaginary_mode_count"] != blind_res["imaginary_mode_count"]
-        or abs(neb_res["neb_saddle_barrier_ev"] - blind_res["neb_saddle_barrier_ev"]) > 1e-3
+        abs(ph_res["spring_model_gamma_freq_thz"][0] - blind_res["spring_model_gamma_freq_thz"][0]) > 1e-3
+        or abs(ph_res["spring_model_gamma_freq_thz"][1] - blind_res["spring_model_gamma_freq_thz"][1]) > 1e-3
+        or abs(mig_res["emig_heuristic_ev"] - blind_res["emig_heuristic_ev"]) > 1e-3
     ):
         raise AssertionError(
-            f"REDUNDANCY_MISMATCH_BLOCK: Atomistic Phonon/NEB mismatch on {cand['candidate_id']}: "
-            f"primary={(ph_res, neb_res)} vs verifier={blind_res}"
+            f"REDUNDANCY_MISMATCH_BLOCK: Spring/migration heuristic mismatch on {cand['candidate_id']}: "
+            f"primary={(ph_res, mig_res)} vs verifier={blind_res}"
         )
 
-    is_stable = bool(
-        ph_res["imaginary_mode_count"] == 0
-        and ph_res["gamma_min_optical_freq_thz"] > 0.10
-        and neb_res["neb_saddle_barrier_ev"] >= 0.65
-    )
+    emig_ok = bool(mig_res["emig_heuristic_ev"] >= 0.65)
 
     return AtomisticPhononNEBReport(
         candidate_id=cand["candidate_id"],
@@ -244,16 +233,14 @@ def evaluate_3d_atomistic_phonon_and_neb(
         target_layer=cand["target_layer"],
         nsites_unit_cell=ph_res["nsites_unit_cell"],
         dynamical_matrix_dim=ph_res["dynamical_matrix_dim"],
-        gamma_min_optical_freq_thz=ph_res["gamma_min_optical_freq_thz"],
-        gamma_max_lo_freq_thz=ph_res["gamma_max_lo_freq_thz"],
-        imaginary_mode_count=ph_res["imaginary_mode_count"],
-        acoustic_sum_rule_max_dev_thz=ph_res["acoustic_sum_rule_max_dev_thz"],
-        migrating_species=neb_res["migrating_species"],
-        shortest_hop_distance_ang=neb_res["shortest_hop_distance_ang"],
-        bottleneck_clearance_ang=neb_res["bottleneck_clearance_ang"],
-        neb_saddle_barrier_ev=neb_res["neb_saddle_barrier_ev"],
-        room_temp_diffusivity_cm2_s=neb_res["room_temp_diffusivity_cm2_s"],
-        dynamically_and_kinetically_stable=is_stable,
+        spring_model_gamma_freq_thz=ph_res["spring_model_gamma_freq_thz"],
+        migrating_species=mig_res["migrating_species"],
+        shortest_hop_distance_ang=mig_res["shortest_hop_distance_ang"],
+        bottleneck_clearance_ang=mig_res["bottleneck_clearance_ang"],
+        emig_heuristic_ev=mig_res["emig_heuristic_ev"],
+        room_temp_diffusivity_cm2_s=mig_res["room_temp_diffusivity_cm2_s"],
+        dynamically_stable=None,
+        emig_gate_passed=emig_ok,
         redundancy_verified=True,
         sha256_signature=blind_res["sha256_signature"],
     )
@@ -935,63 +922,6 @@ def evaluate_phase9a_lab_synthesis_and_defect_supercell(
     )
 
 
-def evaluate_phase9b_contrastive_classifier_audit(
-    all_dossiers: List[Dict[str, Any]],
-) -> ContrastiveClassifierAuditReport:
-    """Phase 9B: Evaluate Contrastive Failure Classifier Margin Separation across the full 117-candidate MP sweep."""
-    from .independent_verifier import independently_verify_phase9b_contrastive_audit
-
-    pos_vecs: List[np.ndarray] = []
-    neg_vecs: List[np.ndarray] = []
-    raw_records: List[Dict[str, Any]] = []
-
-    for d in all_dossiers:
-        emb = np.array(d["candidate"]["embedding_128d"], dtype=float)
-        norm = float(np.linalg.norm(emb))
-        u = emb / max(1e-12, norm)
-        status = str(d["status"])
-        raw_records.append({"status": status, "embedding_128d": d["candidate"]["embedding_128d"]})
-        if status == "PROMOTED":
-            pos_vecs.append(u)
-        else:
-            neg_vecs.append(u)
-
-    c_pos_raw = np.sum(pos_vecs, axis=0)
-    c_pos = c_pos_raw / max(1e-12, float(np.linalg.norm(c_pos_raw)))
-
-    c_neg_raw = np.sum(neg_vecs, axis=0)
-    c_neg = c_neg_raw / max(1e-12, float(np.linalg.norm(c_neg_raw)))
-
-    pos_margins = [float(np.dot(u, c_pos) - np.dot(u, c_neg)) for u in pos_vecs]
-    neg_margins = [float(np.dot(u, c_pos) - np.dot(u, c_neg)) for u in neg_vecs]
-
-    mean_pos = float(np.mean(pos_margins))
-    mean_neg = float(np.mean(neg_margins))
-    delta_m = mean_pos - mean_neg
-
-    blind_9b = independently_verify_phase9b_contrastive_audit(raw_records)
-    ok_9b = bool(
-        abs(round(mean_pos, 4) - blind_9b["mean_promoted_contrastive_margin"]) <= 1e-4
-        and abs(round(mean_neg, 4) - blind_9b["mean_rejected_contrastive_margin"]) <= 1e-4
-        and abs(round(delta_m, 4) - blind_9b["contrastive_separation_delta"]) <= 1e-4
-        and delta_m > 0.0
-    )
-    if not ok_9b:
-        raise AssertionError("REDUNDANCY_MISMATCH_BLOCK: Phase 9B Contrastive Classifier audit mismatch")
-
-    return ContrastiveClassifierAuditReport(
-        total_evaluated_candidates=len(all_dossiers),
-        promoted_finalist_count=len(pos_vecs),
-        rejected_failure_count=len(neg_vecs),
-        mean_promoted_contrastive_margin=round(mean_pos, 4),
-        mean_rejected_contrastive_margin=round(mean_neg, 4),
-        contrastive_separation_delta=round(delta_m, 4),
-        positive_separation_verified=bool(delta_m > 0.0),
-        redundancy_verified=ok_9b,
-        sha256_signature=blind_9b["sha256_signature"],
-    )
-
-
 def compute_abeles_7medium_oblique_sp_tmm(
     wl_nm: np.ndarray,
     e_ev: np.ndarray,
@@ -1192,7 +1122,7 @@ def evaluate_phase9c_real_world_lcoe_stress_test(
     beta_rel_pct_k = ((pce_65c_raw - pce_25c_raw) / (40.0 * pce_25c_raw)) * 100.0
 
     # 3. 25-Year Arrhenius Ion-Migration Reliability & Real-World LCOE (cents/kWh)
-    e_mig_lim = min(float(at_top["neb_saddle_barrier_ev"]), float(at_bot["neb_saddle_barrier_ev"]))
+    e_mig_lim = min(float(at_top["emig_heuristic_ev"]), float(at_bot["emig_heuristic_ev"]))
     kb_t_318 = (KB_J * 318.15) / E_CHARGE
     r_deg = 0.0035 + 0.0010 * math.exp(-max(0.0, e_mig_lim - 0.65) / kb_t_318)
     yr25_ret_pct = ((1.0 - r_deg) ** 24) * 100.0
@@ -1396,7 +1326,7 @@ def evaluate_phase10_bifacial_and_string_dossier(
 
     raw_top = float(s_top["active_layer_cost_usd_m2"])
     raw_bot = float(s_bot["active_layer_cost_usd_m2"])
-    e_mig_lim = min(float(at_top["neb_saddle_barrier_ev"]), float(at_bot["neb_saddle_barrier_ev"]))
+    e_mig_lim = min(float(at_top["emig_heuristic_ev"]), float(at_bot["emig_heuristic_ev"]))
 
     d_si_m = 160.0e-6
     alpha_si = 1.1e5 * (np.maximum(0.0, _AM15G_E_EV - 1.12) ** 2) + 1.5e7 * np.sqrt(

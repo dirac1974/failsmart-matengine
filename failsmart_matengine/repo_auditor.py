@@ -50,6 +50,7 @@ class RepoConsistencyAuditor:
         self.expected_live_mp_finalists: Dict[str, str] = {
             "mp-861911": "Sb2OS2",
             "mp-1227486": "BiSbS3",
+            "mp-1195160": "Al2Bi2Cu2S3Cl8",
             "mp-1078776": "BiInS3",
             "mp-1223998": "Bi3InSe6",
             "mp-1224129": "CuInSnSe4",
@@ -135,7 +136,7 @@ class RepoConsistencyAuditor:
 
             for num_col in [
                 "e_above_hull_mev",
-                "min_phonon_freq_thz",
+                "omega_min_heuristic_thz",
                 "rxn_temp_celsius",
                 "active_layer_cost_usd_m2",
                 "slme_percent",
@@ -232,15 +233,15 @@ class RepoConsistencyAuditor:
         counts = self.live_summary_data["funnel_counts"]
         assert counts["stage1_live_mp_ingested"] == 100, f"Expected 100 ingested, got {counts.get('stage1_live_mp_ingested')}"
         assert counts["stage2_dynamically_and_ion_stable"] == 91, f"Expected 91 Stage 2, got {counts.get('stage2_dynamically_and_ion_stable')}"
-        assert counts["stage3_manufacturable_lbnl_alab_screened"] == 52, f"Expected 52 Stage 3, got {counts.get('stage3_manufacturable_lbnl_alab_screened')}"
+        assert counts["stage3_manufacturable_lbnl_alab_screened"] == 47, f"Expected 47 Stage 3, got {counts.get('stage3_manufacturable_lbnl_alab_screened')}"
         assert counts["gate_a_promoted_to_dft"] == 40, f"Expected 40 Gate A, got {counts.get('gate_a_promoted_to_dft')}"
-        assert counts["stage4_5_validated_finalists"] == 8, f"Expected 8 finalists, got {counts.get('stage4_5_validated_finalists')}"
-        assert counts["top_active_glass_finalists"] == 3, f"Expected 3 Top Active Glass, got {counts.get('top_active_glass_finalists')}"
+        assert counts["stage4_5_validated_finalists"] == 9, f"Expected 9 finalists, got {counts.get('stage4_5_validated_finalists')}"
+        assert counts["top_active_glass_finalists"] == 4, f"Expected 4 Top Active Glass, got {counts.get('top_active_glass_finalists')}"
         assert counts["bottom_ir_scavenger_finalists"] == 5, f"Expected 5 Bottom IR Scavengers, got {counts.get('bottom_ir_scavenger_finalists')}"
         assert counts["redundancy_verifications_passed"] == 100, f"Expected 100 redundancy passed, got {counts.get('redundancy_verifications_passed')}"
 
         finalists = self.live_summary_data["finalists"]
-        assert len(finalists) == 8, f"Expected 8 finalists, got {len(finalists)}"
+        assert len(finalists) == 9, f"Expected 9 finalists, got {len(finalists)}"
 
         fin_dict = {f["candidate"]["candidate_id"]: f["candidate"]["formula_reduced"] for f in finalists}
         for exp_id, exp_formula in self.expected_live_mp_finalists.items():
@@ -248,7 +249,7 @@ class RepoConsistencyAuditor:
             assert fin_dict[exp_id] == exp_formula, f"Formula mismatch for {exp_id}: got {fin_dict[exp_id]} vs {exp_formula}"
 
         pairs = self.live_summary_data["cross_layer_4t_tandem_pairs"]
-        assert len(pairs) == 15, f"Expected 15 cross-layer 4T pairs, got {len(pairs)}"
+        assert len(pairs) == 20, f"Expected 20 cross-layer 4T pairs, got {len(pairs)}"
 
         # Check top pair and cost-optimal pair
         pair_dict = {p["pair_id"]: p for p in pairs}
@@ -282,43 +283,39 @@ class RepoConsistencyAuditor:
         # v4.0 Step 1 & Step 2 Checks
         assert self.live_summary_data.get("version") == "4.0.0", "Expected live_mp_discovery_summary.json version == 4.0.0"
         phonon_reports = self.live_summary_data.get("atomistic_phonon_neb_reports", [])
-        assert len(phonon_reports) == 8, f"Expected 8 atomistic_phonon_neb_reports, got {len(phonon_reports)}"
+        assert len(phonon_reports) == 9, f"Expected 9 atomistic_phonon_neb_reports, got {len(phonon_reports)}"
         for pr in phonon_reports:
-            assert pr["imaginary_mode_count"] == 0, f"{pr['candidate_id']} has imaginary modes"
-            assert pr["dynamically_and_kinetically_stable"] is True
+            assert pr["dynamically_stable"] is None
+            assert pr["emig_gate_passed"] is True
             assert pr["redundancy_verified"] is True
-            assert pr["neb_saddle_barrier_ev"] >= 0.90
+            assert pr["emig_heuristic_ev"] >= 0.90
 
         tmm_stacks = self.live_summary_data.get("coherent_tmm_4t_stacks", [])
-        assert len(tmm_stacks) == 15, f"Expected 15 coherent_tmm_4t_stacks, got {len(tmm_stacks)}"
+        assert len(tmm_stacks) == 20, f"Expected 20 coherent_tmm_4t_stacks, got {len(tmm_stacks)}"
         for ts in tmm_stacks:
             assert ts["photon_conservation_verified"] is True
             assert ts["rouard_airy_redundancy_diff_percent"] <= 0.05
 
         graded_stacks = self.live_summary_data.get("graded_arc_techno_economic_stacks", [])
-        assert len(graded_stacks) == 15, f"Expected 15 graded_arc_techno_economic_stacks, got {len(graded_stacks)}"
+        assert len(graded_stacks) == 20, f"Expected 20 graded_arc_techno_economic_stacks, got {len(graded_stacks)}"
         for gs in graded_stacks:
             assert gs["photon_conservation_verified"] is True
             assert gs["techno_economic_redundancy_verified"] is True
             assert gs["rouard_airy_redundancy_diff_percent"] <= 0.05
             assert gs["graded_arc_front_reflectance_percent"] <= 4.0
 
-        # v6.0 Phase 9A, 9B, and 9C Checks
-        assert self.live_summary_data.get("v6_phase9_lab_contrastive_lcoe_enabled") is True
+        # v6.0 Phase 9A and 9C Checks
+        assert self.live_summary_data.get("v6_phase9_lab_and_lcoe_enabled") is True
+        assert "contrastive_classifier_audit" not in self.live_summary_data
         lab_dossiers = self.live_summary_data.get("lab_synthesis_and_defect_dossiers", [])
-        assert len(lab_dossiers) == 8, f"Expected 8 lab_synthesis_and_defect_dossiers, got {len(lab_dossiers)}"
+        assert len(lab_dossiers) == 9, f"Expected 9 lab_synthesis_and_defect_dossiers, got {len(lab_dossiers)}"
         for ld in lab_dossiers:
             assert ld["redundancy_verified"] is True
             assert ld["elemental_mass_conservation_diff_g"] <= 1e-6
             assert ld["supercell_min_image_dist_ang"] >= 10.0
 
-        ca = self.live_summary_data.get("contrastive_classifier_audit", {})
-        assert ca.get("total_evaluated_candidates") == 117
-        assert ca.get("positive_separation_verified") is True
-        assert ca.get("redundancy_verified") is True
-
         lcoe_stacks = self.live_summary_data.get("real_world_lcoe_stress_test_stacks", [])
-        assert len(lcoe_stacks) == 15, f"Expected 15 real_world_lcoe_stress_test_stacks, got {len(lcoe_stacks)}"
+        assert len(lcoe_stacks) == 20, f"Expected 20 real_world_lcoe_stress_test_stacks, got {len(lcoe_stacks)}"
         for rw in lcoe_stacks:
             assert rw["lcoe_redundancy_verified"] is True
             assert rw["lcoe_3layer_vs_si_reduction_percent"] > 32.0
@@ -326,7 +323,7 @@ class RepoConsistencyAuditor:
         # v7.0 Phase 10A, 10B, and 10C Checks
         assert self.live_summary_data.get("v7_phase10_bifacial_and_string_enabled") is True
         p10_stacks = self.live_summary_data.get("phase10_bifacial_and_string_dossiers", [])
-        assert len(p10_stacks) == 15, f"Expected 15 phase10_bifacial_and_string_dossiers, got {len(p10_stacks)}"
+        assert len(p10_stacks) == 20, f"Expected 20 phase10_bifacial_and_string_dossiers, got {len(p10_stacks)}"
         for p10 in p10_stacks:
             assert p10["phase10_redundancy_verified"] is True
             assert p10["rouard_opt_diff_percent"] <= 0.05
@@ -337,10 +334,14 @@ class RepoConsistencyAuditor:
         # v8.0 Phase 11A, 11B, and 11C Realistic Synthesis & Commercialization Checks
         assert self.live_summary_data.get("v8_phase11_realistic_commercialization_enabled") is True
         p11a_list = self.live_summary_data.get("phase11a_synthesis_contact_dossiers", [])
-        assert len(p11a_list) == 8, f"Expected 8 phase11a_synthesis_contact_dossiers, got {len(p11a_list)}"
+        assert len(p11a_list) == 9, f"Expected 9 phase11a_synthesis_contact_dossiers, got {len(p11a_list)}"
+        evaluated_11a = 0
         for p11a in p11a_list:
             assert p11a["redundancy_verified"] is True
-            assert 0.0 <= p11a["synthesis_practicality_score_100"] <= 100.0
+            if p11a["synthesis_practicality_score_100"] is not None:
+                evaluated_11a += 1
+                assert 0.0 <= p11a["synthesis_practicality_score_100"] <= 100.0
+        assert evaluated_11a == 8, f"Expected 8 evaluated Phase 11A dossiers, got {evaluated_11a}"
 
         p11b_list = self.live_summary_data.get("phase11b_realistic_commercialization_dossiers", [])
         assert len(p11b_list) == 15, f"Expected 15 phase11b_realistic_commercialization_dossiers, got {len(p11b_list)}"
@@ -350,7 +351,7 @@ class RepoConsistencyAuditor:
             assert p11b["path2_utility_lcoe_cents_kwh"] < p11b["path1_utility_lcoe_cents_kwh"]
             assert p11b["path4_gross_margin_percent"] > 40.0
 
-        self.log("   [OK] live_mp_discovery_summary.json verified: 100 -> 91 -> 52 -> 40 -> 8 finalists, v4-v8 D-matrix/NEB, Lab/Defect, Synthesis/Contact, 117-MP Contrastive, TMM, Graded-ARC, LCOE, Bifacial/String & Realistic 4-Path Commercialization.")
+        self.log("   [OK] live_mp_discovery_summary.json verified: 100 -> 91 -> 47 -> 40 -> 9 finalists, spring/migration heuristics, Lab/Defect, Synthesis/Contact, TMM, Graded-ARC, LCOE, Bifacial/String & Realistic 4-Path Commercialization.")
 
     def audit_negative_synthesis_priors(self) -> None:
         """Audit LBNL 80k solid-state recipes and A-Lab precursor genome negative priors."""
@@ -375,15 +376,15 @@ class RepoConsistencyAuditor:
         self.log(f"   [OK] negative_synthesis_priors.json verified: 80,806 LBNL recipes (18,869 impure), 1,035 A-Lab reactions (892 stalled), {len(chemsys_priors)} chemsys.")
 
     def audit_mp_live_qe_decks(self) -> None:
-        """Audit Quantum ESPRESSO decks and CIF files for the 8 live MP finalists."""
+        """Audit Quantum ESPRESSO decks and CIF files for the 9 live MP finalists."""
         self.log(f"-> Auditing live MP Quantum ESPRESSO decks in {self.mp_live_qe_dir} ...")
         assert self.mp_live_qe_dir.exists(), f"Missing {self.mp_live_qe_dir}"
 
         deck_files = sorted(os.listdir(self.mp_live_qe_dir))
-        assert len(deck_files) == 16, f"Expected 16 files in {self.mp_live_qe_dir}, found {len(deck_files)}: {deck_files}"
+        assert len(deck_files) == 18, f"Expected 18 files in {self.mp_live_qe_dir}, found {len(deck_files)}: {deck_files}"
 
         finalists_by_id = {f["candidate"]["candidate_id"]: f for f in self.live_summary_data["finalists"]}
-        assert len(finalists_by_id) == 8, f"Expected 8 finalists in live summary, got {len(finalists_by_id)}"
+        assert len(finalists_by_id) == 9, f"Expected 9 finalists in live summary, got {len(finalists_by_id)}"
 
         for cid, fin in finalists_by_id.items():
             cand = fin["candidate"]
@@ -464,7 +465,7 @@ class RepoConsistencyAuditor:
                 f"Expected {expected_ntyp} species in {in_file}, found {len(species_found)}"
             )
 
-        self.log("   [OK] All 8 live MP finalists possess valid, synchronized CIF & Quantum ESPRESSO decks with IUPAC atomic masses.")
+        self.log("   [OK] All 9 live MP finalists possess valid, synchronized CIF & Quantum ESPRESSO decks with IUPAC atomic masses.")
 
     # =========================================================================
     # Documentation Consistency Checks
@@ -522,14 +523,14 @@ class RepoConsistencyAuditor:
         # 4. v3.0, v4.0 & v5.0 Live MP Funnel & Finalists verification
         assert "100" in text, "Missing 100 live MP candidates in README.md"
         assert "91" in text, "Missing 91 Stage 2 count in README.md"
-        assert "52" in text, "Missing 52 Stage 3 count in README.md"
+        assert "47" in text, "Missing 47 Stage 3 count in README.md"
         assert "40" in text, "Missing 40 Gate A count in README.md"
         assert "80,806" in text or "80806" in text, "Missing LBNL 80,806 dataset count in README.md"
         assert "18,869" in text or "18869" in text, "Missing LBNL 18,869 impure count in README.md"
         assert "1,035" in text or "1035" in text, "Missing A-Lab 1,035 count in README.md"
         assert "892" in text, "Missing A-Lab 892 negative stalls count in README.md"
 
-        # Verify all 8 live MP finalist IDs appear
+        # Verify all 9 live MP finalist IDs appear
         for mp_id in self.expected_live_mp_finalists.keys():
             assert mp_id in text, f"Missing live MP finalist ID {mp_id} in README.md"
 

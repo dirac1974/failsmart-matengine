@@ -38,7 +38,7 @@ HC_NM_EV: float = 1239.8419843320026   # Photon hc / q * 10^9 [eV*nm]
 # ==============================================================================
 # USGS elemental raw bulk cost ($/kg)
 ELEMENT_COST_USD_KG: Dict[str, float] = {
-    "Bi": 16.5, "Sb": 13.8, "Sn": 29.0, "Cu": 9.2, "Zn": 2.8,
+    "Bi": 16.5, "Sb": 13.8, "Sn": 29.0, "Cu": 9.2, "Zn": 2.8, "Al": 2.4,
     "Ba": 4.5, "Sr": 6.2, "Ca": 2.1, "Mg": 3.0, "Ti": 11.0, "Zr": 28.0,
     "Ag": 980.0, "In": 620.0, "Pb": 2.3, "Cd": 3.5, "Fe": 0.50,
     "Ga": 350.0, "Ge": 1200.0,
@@ -48,7 +48,7 @@ ELEMENT_COST_USD_KG: Dict[str, float] = {
 
 # Standard atomic masses (g/mol)
 ATOMIC_MASSES: Dict[str, float] = {
-    "Bi": 208.98, "Sb": 121.76, "Sn": 118.71, "Cu": 63.55, "Zn": 65.38,
+    "Bi": 208.98, "Sb": 121.76, "Sn": 118.71, "Cu": 63.55, "Zn": 65.38, "Al": 26.98,
     "Ba": 137.33, "Sr": 87.62, "Ca": 40.08, "Mg": 24.31, "Ti": 47.87, "Zr": 91.22,
     "Ag": 107.87, "In": 114.82, "Pb": 207.2, "Cd": 112.41, "Fe": 55.85,
     "Ga": 69.72, "Ge": 72.63,
@@ -599,6 +599,10 @@ def compute_antoine_vapor_pressure_pa(formula: str, temp_c: float) -> float:
 
 def compute_pourbaix_max_dissolution(formula: str, stoichiometry: Dict[str, int]) -> float:
     """Compute maximum aqueous equilibrium solubility (mol/L) across pH 4-9 rainwater conditions."""
+    if any(el in stoichiometry for el in ("Li", "Na", "K", "Rb", "Cs")) or (
+        stoichiometry and not any(el in stoichiometry for el in ("O", "S", "Se", "Te"))
+    ):
+        return 2.5e-4
     if "Bi" in stoichiometry and "O" in stoichiometry:
         ksp_base = 2.0e-8
     elif "Bi" in stoichiometry:

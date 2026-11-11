@@ -57,7 +57,7 @@ T0 -> T1 -> T6 -> T3 -> T2 -> T4 -> T5 -> T8 -> [HUMAN GATE] T7 -> T9 -> T10 -> 
 | T3 | Fix deck generators | todo | |
 | T4 | Calibrate the gap estimate; literature gate | todo | |
 | T5 | External-truth tests | todo | |
-| T6 | Remove gates that cannot fail | todo | |
+| T6 | Remove gates that cannot fail | done | Removed non-failing gates (`dynamically_stable=None`, `g_above_hull_synth_mev=None`, `mlip_force_std_ev_ang=None`, `tco_rxn/hmix=None`, deleted contrastive audit, enabled LBNL prior gate `IMPURITY_SINK_PRIOR`); funnel `100->91->52->40->8` updated to `100->91->47->40->9`; `test_24` verifies all 13 remaining gates fail; `24 passed`, auditor `PASS` |
 | T7 | One real vertical slice | todo | HUMAN GATE |
 | T8 | Correct device assumptions; invert the cost model | todo | |
 | T9 | Quarantine the v2 pilot | todo | |

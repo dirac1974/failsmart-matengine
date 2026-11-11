@@ -678,13 +678,11 @@ def independently_verify_atomistic_phonon_and_neb(
     eigvals = scipy.linalg.eigvalsh(dyn_mat)
     freqs = np.sign(eigvals) * 15.633302 * np.sqrt(np.abs(eigvals))
 
-    asr_dev = round(float(np.max(np.abs(freqs[:3]))), 6)
     opt_freqs = freqs[3:]
     min_opt_thz = round(float(opt_freqs[0]), 4) if len(opt_freqs) > 0 else 0.0
     max_lo_thz = round(float(opt_freqs[-1]), 4) if len(opt_freqs) > 0 else 0.0
-    imag_count = int(np.sum(opt_freqs < -0.05))
 
-    # 3D Saddle-Point NEB Migration Solver (Section 6.2)
+    # Closed-form geometric ion-migration barrier heuristic (Section 6.2)
     if "Cu" in stoichiometry:
         mig_sp = "Cu"
     elif "Ag" in stoichiometry:
@@ -741,39 +739,31 @@ def independently_verify_atomistic_phonon_and_neb(
         + 0.28 * f_oxide
         - 0.22 * f_mobile
     )
-    e_mig_neb = round(float(np.clip(raw_barrier, 0.35, 1.45)), 4)
+    emig_heur = round(float(np.clip(raw_barrier, 0.35, 1.45)), 4)
 
     # Vineyard-Arrhenius 300 K ionic diffusivity (nu_0 = 1e12 s^-1, 1 A^2 = 1e-16 cm^2)
     d_ion_300k = (1.0 / 6.0) * 1.0e12 * ((d_hop ** 2) * 1.0e-16) * math.exp(
-        -(e_mig_neb * Q_E) / (K_B * 300.0)
+        -(emig_heur * Q_E) / (K_B * 300.0)
     )
 
     res: Dict[str, Any] = {
         "nsites_unit_cell": n_sites,
         "dynamical_matrix_dim": dim,
-        "gamma_min_optical_freq_thz": min_opt_thz,
-        "gamma_max_lo_freq_thz": max_lo_thz,
-        "imaginary_mode_count": imag_count,
-        "acoustic_sum_rule_max_dev_thz": asr_dev,
+        "spring_model_gamma_freq_thz": [min_opt_thz, max_lo_thz],
         "migrating_species": mig_sp,
         "shortest_hop_distance_ang": d_hop,
         "bottleneck_clearance_ang": clearance,
-        "neb_saddle_barrier_ev": e_mig_neb,
+        "emig_heuristic_ev": emig_heur,
         "room_temp_diffusivity_cm2_s": float(f"{d_ion_300k:.3e}"),
     }
 
     sig_payload = {
-        "phonon": {
-            "asr_dev": asr_dev,
-            "gamma_min": min_opt_thz,
-            "gamma_max": max_lo_thz,
-            "imag_count": imag_count,
-        },
-        "neb": {
+        "spring_model_gamma_freq_thz": [min_opt_thz, max_lo_thz],
+        "migration_heuristic": {
             "migrating_species": mig_sp,
             "shortest_hop_distance_ang": d_hop,
             "bottleneck_clearance_ang": clearance,
-            "neb_saddle_barrier_ev": e_mig_neb,
+            "emig_heuristic_ev": emig_heur,
         },
     }
     res["sha256_signature"] = hashlib.sha256(
@@ -1270,54 +1260,6 @@ def independently_verify_phase9a_lab_and_defect_dossier(
         "supercell_min_image_dist_ang": res["supercell_min_image_dist_ang"],
         "fnv_charge_correction_q1_ev": res["fnv_charge_correction_q1_ev"],
         "fnv_charge_correction_q2_ev": res["fnv_charge_correction_q2_ev"],
-    }
-    res["sha256_signature"] = hashlib.sha256(
-        json.dumps(sig_payload, sort_keys=True).encode("utf-8")
-    ).hexdigest()
-
-    return res
-
-
-def independently_verify_phase9b_contrastive_audit(
-    records: List[Dict[str, Any]],
-) -> Dict[str, Any]:
-    """Blinded independent verification of Phase 9B Contrastive Failure Memory Classifier margin."""
-    pos_vecs: List[np.ndarray] = []
-    neg_vecs: List[np.ndarray] = []
-
-    for rec in records:
-        status = rec.get("status", "")
-        emb = np.array(rec.get("embedding_128d", []), dtype=np.float64)
-        norm = float(np.linalg.norm(emb))
-        u_hat = emb / max(1.0e-12, norm)
-        if status == "PROMOTED":
-            pos_vecs.append(u_hat)
-        elif status == "REJECTED":
-            neg_vecs.append(u_hat)
-
-    pos_sum = np.sum(pos_vecs, axis=0)
-    c_pos = pos_sum / max(1.0e-12, float(np.linalg.norm(pos_sum)))
-
-    neg_sum = np.sum(neg_vecs, axis=0)
-    c_neg = neg_sum / max(1.0e-12, float(np.linalg.norm(neg_sum)))
-
-    pos_margins = [float(np.dot(u, c_pos) - np.dot(u, c_neg)) for u in pos_vecs]
-    neg_margins = [float(np.dot(u, c_pos) - np.dot(u, c_neg)) for u in neg_vecs]
-
-    mean_pos = float(np.mean(pos_margins)) if pos_margins else 0.0
-    mean_neg = float(np.mean(neg_margins)) if neg_margins else 0.0
-    delta_sep = mean_pos - mean_neg
-
-    res: Dict[str, Any] = {
-        "mean_promoted_contrastive_margin": round(mean_pos, 4),
-        "mean_rejected_contrastive_margin": round(mean_neg, 4),
-        "contrastive_separation_delta": round(delta_sep, 4),
-    }
-
-    sig_payload = {
-        "mean_promoted_contrastive_margin": res["mean_promoted_contrastive_margin"],
-        "mean_rejected_contrastive_margin": res["mean_rejected_contrastive_margin"],
-        "contrastive_separation_delta": res["contrastive_separation_delta"],
     }
     res["sha256_signature"] = hashlib.sha256(
         json.dumps(sig_payload, sort_keys=True).encode("utf-8")

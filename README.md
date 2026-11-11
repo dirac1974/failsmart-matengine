@@ -132,11 +132,11 @@ Running `python3 -m failsmart_matengine.orchestrator` executes the v2.0 discover
 
 | Candidate ID | Formula | Target Layer | Space Group | $N_{\text{sites}}$ | $T_{\text{synth}}$ ($^\circ\text{C}$) | Active Layer Cost ($\$/\text{m}^2$) | $\Delta E_{\text{hull}}$ (meV) | $\omega_{\min}$ (THz) | $E_{\text{mig}}$ (eV) | $E_g^{\text{est}}$ (Ind / Dir; heuristic, not HSE06+SOC) | Single-Layer SLME (%) | SQ Limit (%) | 2-Layer Si $\eta$ (%) | 4T Std Si FCA $\eta$ (%) | **3-Layer 4T Tandem $\eta$ (%)** | Self-consistency SHA-256 digest (unkeyed) |
 | :--- | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| `CAND-A02` | `Bi2CuO2SCl` | Top Active Glass | `I4/mmm` (#139) | 28 | 365.0 | \$0.0195 | 14.5 | 1.18 | 0.88 | 1.82 / 1.86 eV | 24.43% | 26.78% | 38.29% | 40.43% | **41.66%** | `1df52efdd58d0e055ac198a8332ce11a8b0d61dc8c760738c93cf33ff0afc763` |
-| `CAND-A03` | `Cu2SbS2Cl` | Top Active Glass | `Pnma` (#62) | 24 | 320.0 | \$0.0129 | 21.0 | 1.05 | 0.74 | 1.79 / 1.83 eV | 25.08% | 27.32% | 38.41% | 40.54% | **41.77%** | `badee394a07f1aef7074748fa8673dae56c245f2a7b46aeef2ec09c66bb83df6` |
-| `CAND-A06` | `BiZnOSCl` | Top Active Glass | `P4/nmm` (#129) | 10 | 380.0 | \$0.0148 | 18.2 | 1.29 | 0.98 | 1.85 / 1.89 eV | 23.81% | 26.11% | 38.18% | 40.31% | **41.55%** | `161eb8f206f732cdd034ca55584620c623da5d2130b28da5414d99d8aeb311b1` |
-| `CAND-B02` | `Sn2SbSe2I3` | Bottom IR Scavenger | `Cmcm` (#63) | 32 | 295.0 | \$0.0865 | 12.6 | 0.88 | 0.75 | 0.75 / 0.78 eV | 23.48% | 25.00% | 38.26% | 40.51% | **41.83%** | `0e7d2cff9087e81f64923a3627923828046e0899fcf3f854cd24fb9d43913f52` |
-| `CAND-B04` | `Cu2BiSe2I` | Bottom IR Scavenger | `Pnma` (#62) | 24 | 345.0 | \$0.0509 | 11.2 | 1.09 | 0.71 | 0.74 / 0.76 eV | 23.59% | 24.79% | 38.26% | 40.64% | **42.08%** | `f8c3fe9aabede259ea5158ff04fdf38b65ade2b6656f194a79cade99337623c2` |
+| `CAND-A02` | `Bi2CuO2SCl` | Top Active Glass | `I4/mmm` (#139) | 28 | 365.0 | \$0.0195 | 14.5 | 1.18 | 0.88 | 1.82 / 1.86 eV | 24.43% | 26.78% | 38.29% | 40.43% | **41.66%** | `6382979614e0fd6d2cda0114648237dbb4bfaddd65b1687baabf043e8266bbc7` |
+| `CAND-A03` | `Cu2SbS2Cl` | Top Active Glass | `Pnma` (#62) | 24 | 320.0 | \$0.0129 | 21.0 | 1.05 | 0.74 | 1.79 / 1.83 eV | 25.08% | 27.32% | 38.41% | 40.54% | **41.77%** | `fb15fe199fb7ac822e9ed2ee0c7991617449a7e82bf1e0d55a2dc8050b3ed52b` |
+| `CAND-A06` | `BiZnOSCl` | Top Active Glass | `P4/nmm` (#129) | 10 | 380.0 | \$0.0148 | 18.2 | 1.29 | 0.98 | 1.85 / 1.89 eV | 23.81% | 26.11% | 38.18% | 40.31% | **41.55%** | `a276ac1f94198e64b32af6b2389572d4473d2ad2fc5166136b238982ce9f4e7e` |
+| `CAND-B02` | `Sn2SbSe2I3` | Bottom IR Scavenger | `Cmcm` (#63) | 32 | 295.0 | \$0.0865 | 12.6 | 0.88 | 0.75 | 0.75 / 0.78 eV | 23.48% | 25.00% | 38.26% | 40.51% | **41.83%** | `7ebc09271391eafd86207b69463ef89f33c70eb268855524860ef84602bd7cd3` |
+| `CAND-B04` | `Cu2BiSe2I` | Bottom IR Scavenger | `Pnma` (#62) | 24 | 345.0 | \$0.0509 | 11.2 | 1.09 | 0.71 | 0.74 / 0.76 eV | 23.59% | 24.79% | 38.26% | 40.64% | **42.08%** | `a09f4523c9a449f39b7c3dbe08e9e1bca841f705fadf344c8c5838651b0a25d9` |
 
 ---
 
@@ -146,9 +146,9 @@ Running `python3 -m failsmart_matengine.mp_live_discovery` executes the v3.0 dis
 
 * **Stage 1 (Live Materials Project Query & RoHS Filtering):** `100` live MP candidates ingested with verified non-toxic elements and Pauling charge neutrality.
 * **Stage 2 (Thermodynamic Hull, Elasticity & Stage 2b Ion-Migration):** `91` dynamically & ion-stable candidates surviving ($6$ elastic instabilities and $3$ superionic migration instabilities vetoed with $E_{\text{mig}} < 0.65\text{ eV}$).
-* **Stage 3 (LBNL 80k Impurity & A-Lab Precursor Genome Retrosynthesis):** `52` manufacturable candidates passing reaction network driving-force and negative-synthesis prior screening ($26$ rejected for `OXIDE_IMPURITY_SINK` from refractory oxide reactions, $13$ rejected for `TIER2_COST_EXCEEDED` $> \$0.50/\text{m}^2$).
-* **Gate A (Adversarial Red-Team Pre-DFT Veto):** `40` promoted to Stage 4/5 DFT ($8$ vetoed for `LOW_DIM_POLARON_RISK` 1D-chains, $4$ vetoed for `ANION_PHASE_SEGREGATION`).
-* **Stages 4 & 5 (heuristic gap estimate from the MP PBE gap & radiative-limit 4T Tandem Optics; no `HSE06+SOC` calculation was run):** **8 Promoted Finalists** ($32$ rejected for `BANDGAP_OUT_OF_WINDOW` outside $[1.75, 1.95]\text{ eV}$ top or $[0.70, 0.85]\text{ eV}$ bottom windows).
+* **Stage 3 (LBNL 80k Impurity & A-Lab Precursor Genome Retrosynthesis):** `47` manufacturable candidates passing reaction network driving-force and negative-synthesis prior screening ($26$ rejected for `OXIDE_IMPURITY_SINK` from refractory oxide reactions, $5$ rejected for `IMPURITY_SINK_PRIOR` where empirical LBNL `impurity_rate > 0.50` across $n \ge 5$ recipes, $13$ rejected for `TIER2_COST_EXCEEDED` $> \$0.50/\text{m}^2$).
+* **Gate A (Adversarial Red-Team Pre-DFT Veto):** `40` promoted to Stage 4/5 ($7$ vetoed for `LOW_DIM_POLARON_RISK` 1D-chains; anion mixing enthalpy and TCO reaction energy are `None` / not evaluated at Gate A).
+* **Stages 4 & 5 (heuristic gap estimate from the MP PBE gap & radiative-limit 4T Tandem Optics; no `HSE06+SOC` calculation was run):** **9 Promoted Finalists** ($31$ rejected for `BANDGAP_OUT_OF_WINDOW` outside $[1.75, 1.95]\text{ eV}$ top or $[0.70, 0.85]\text{ eV}$ bottom windows).
 * **Self-consistency re-computation:** `100/100` re-computations matched. This confirms arithmetic agreement between two implementations of the same formulas; it does not validate the inputs or the physics.
 
 ### Open-Access Negative Synthesis Priors Integration
@@ -156,14 +156,15 @@ The v3.0 engine integrates two massive open-access empirical negative-synthesis 
 1. **LBNL Solid-State Impurity Dataset:** `80,806` parsed solid-state recipes across `4,292` chemical systems with `18,869` phase-impure/failed reactions (Lee, Cruse, Baibakova, Ceder, Jain, *Sci. Data* 12:1969, 2025).
 2. **LBNL A-Lab "Precursor Genome" Dataset:** `1,035` autonomous laboratory pairwise reactions with `892` negative/stalled reactions (369 unreacted, 384 transformed, 113 partially reacted) (Walters, Szymanski, Fei, Ceder et al., *Precursor Genome*, 2026).
 
-### Promoted Live Materials Project Finalists (8 Finalists: 3 Track A + 5 Track B)
+### Promoted Live Materials Project Finalists (9 Finalists: 4 Track A + 5 Track B)
 
-All 8 finalists have generated Quantum ESPRESSO `HSE06+SOC` input decks and CIF files in `outputs/mp_live_qe_decks/`. The decks have never been executed and have known defects (task T3). Per the committed cache, only `mp-22982` and `mp-23474` are experimentally known phases; the other six are theoretical Materials Project entries. The gap column is a heuristic estimate with unquantified error (task T4):
+All 9 finalists have generated Quantum ESPRESSO `HSE06+SOC` input decks and CIF files in `outputs/mp_live_qe_decks/`. The decks have never been executed and have known defects (task T3). Per the committed cache, only `mp-22982` and `mp-23474` are experimentally known phases; the other seven are theoretical Materials Project entries. The gap column is a heuristic estimate with unquantified error (task T4):
 
 | Candidate ID | Formula | Target Layer | Space Group | $N_{\text{sites}}$ | $T_{\text{synth}}$ ($^\circ\text{C}$) | Active Layer Cost ($\/\text{m}^2$) | $\Delta E_{\text{hull}}$ (meV) | $\omega_{\min}$ (THz) | $E_{\text{mig}}$ (eV) | $E_g^{\text{est}}$ (Ind / Dir; heuristic, not HSE06+SOC) | Single-Layer SLME (%) | SQ Limit (%) | 2-Layer Si $\eta$ (%) | 4T Std Si FCA $\eta$ (%) | **3-Layer 4T Tandem $\eta$ (%)** | Self-consistency SHA-256 digest (unkeyed) |
 | :--- | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
 | `mp-861911` | `Sb2OS2` | Top Active Glass | `C2/m` (#12) | 10 | 375.0 | \$0.0157 | 7.07 | 1.40 | 1.18 | 1.76 / 1.80 eV | 25.66% | 27.93% | 38.43% | 40.55% | **41.78%** | `a09dbb1c343327cd5cbb5fe25b0409ec548a0f06b6168ca7feb5d47fc3ae68d1` |
 | `mp-1227486` | `BiSbS3` | Top Active Glass | `Pnma` (#62) | 20 | 375.0 | \$0.0182 | 2.30 | 1.20 | 1.18 | 1.79 / 1.83 eV | 25.10% | 27.32% | 38.36% | 40.48% | **41.70%** | `d8f6b425fa2066a5062437ab9edb68a127d62b3ca1821a2645bbf4f07a9076cb` |
+| `mp-1195160` | `Al2Bi2Cu2S3Cl8` | Top Active Glass | `P6_3/m` (#176) | 34 | 335.0 | \$0.0128 | 6.02 | 1.33 | 0.87 | 1.82 / 1.83 eV | 25.63% | 26.78% | 38.91% | 41.03% | **42.26%** | `b04a50d78a9aa16b7b274b19263ad7a7f6a8fb640603874e8d70b8cb607e05f5` |
 | `mp-1078776` | `BiInS3` | Top Active Glass | `P2_1/m` (#11) | 10 | 375.0 | \$0.2681 | 15.08 | 1.11 | 1.18 | 1.90 / 1.94 eV | 22.87% | 25.00% | 37.89% | 40.00% | **41.23%** | `efd0e571e1da58bcc47487420264fbc3faad1689ffc3bd7e6a5edd8f817ec9f3` |
 | `mp-1223998` | `Bi3InSe6` | Bottom IR Scavenger | `R3m` (#160) | 10 | 375.0 | \$0.1507 | 17.99 | 1.33 | 1.18 | 0.75 / 0.76 eV | 24.11% | 25.00% | 38.26% | 40.72% | **42.19%** | `0dae9392716774ac808f7d90ab583018289674f56443c20fd9ccbb69f01202d5` |
 | `mp-1224922` | `CuGaSnSe4` | Bottom IR Scavenger | `I-4` (#82) | 7 | 375.0 | \$0.1251 | 3.61 | 1.28 | 0.98 | 0.85 / 0.86 eV | 26.50% | 27.20% | 38.26% | 40.53% | **41.66%** | `94e846fe365a26c374eab9715c63f9678401f11dbe6c757cc4f6608bd2464e5c` |
@@ -171,9 +172,9 @@ All 8 finalists have generated Quantum ESPRESSO `HSE06+SOC` input decks and CIF 
 | `mp-23474` | `AgBi3S5` | Bottom IR Scavenger | `C2/m` (#12) | 18 | 375.0 | \$0.2558 | 0.00 | 1.18 | 0.98 | 0.85 / 0.89 eV | 26.35% | 27.20% | 38.26% | 40.50% | **41.61%** | `28fffc7cc0a9332db420e8769ac9fb9a11b27285bc604d3ee1bd2f9732ceaa72` |
 | `mp-1224129` | `CuInSnSe4` | Bottom IR Scavenger | `I-4` (#82) | 7 | 375.0 | \$0.2664 | 5.17 | 1.21 | 0.98 | 0.78 / 0.82 eV | 23.71% | 25.60% | 38.26% | 40.29% | **41.39%** | `e9f128da15956ed2693b7ddd9cf262a07696ca573313e2164f6491cf979d5d01` |
 
-### Top Cross-Layer 4-Terminal Tandem Stacks (15 Pairs Screened)
+### Top Cross-Layer 4-Terminal Tandem Stacks (20 Pairs Screened)
 
-The 3 Top Active Glass and 5 Bottom IR Scavenger finalists yield `15` mechanically decoupled 4-terminal tandem stacks with middle crystalline silicon ($E_g = 1.12\text{ eV}$):
+The 4 Top Active Glass and 5 Bottom IR Scavenger finalists yield `20` mechanically decoupled 4-terminal tandem stacks with middle crystalline silicon ($E_g = 1.12\text{ eV}$):
 
 | Pair ID | Top MP Cell | Bottom MP Cell | Top $E_g$ (Ind/Dir) | Bottom $E_g$ (Ind/Dir) | Top PCE (%) | Middle c-Si PCE (%) | Bottom IR PCE (%) | Combined Cost ($\/\text{m}^2$) | **4T Tandem Total PCE (%)** |
 | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -252,11 +253,10 @@ We simultaneously evaluate all 4 Techno-Economic Figures of Merit against a sing
 | `mp-1227486__mp-22982` | `BiSbS3 + c-Si + BiCuS2` | $11.97\% \rightarrow \mathbf{3.22\%}$ | 38.42% ($35.7\text{ W/ft}^2$) | **41.81%** ($38.8\text{ W/ft}^2$) | $3.003$ / **$4.300$** | **$\$0.0002$** / **$\$0.0658$** | $1.502$ / $1.433$ | $1.669$ / **$1.738$** |
 
 > [!CAUTION]
-> Phases 9 to 11 below stack device, cost and market models on the heuristic material properties above. The LCOE and efficiency figures are conditional on a top cell near 16% efficiency at an external radiative efficiency of `1e-4`; the best reported Sb2S3 cell is about 8%. The generated defect decks remove the wrong atom in most cases, the "FNV" term is a point-charge estimate, and the contrastive margin is non-negative for any labelling. See the audit, sections 3 and 4.
+> Phases 9 to 11 below stack device, cost and market models on the heuristic material properties above. The LCOE and efficiency figures are conditional on a top cell near 16% efficiency at an external radiative efficiency of `1e-4`; the best reported Sb2S3 cell is about 8%. The generated defect decks remove the wrong atom in most cases and the "FNV" term is a point-charge estimate. See the audit, sections 3 and 4.
 
-### 6. Phase 9 (`v6.0`): 10 mmol Lab Synthesis & `doped` Supercells (9A), 117-MP Contrastive Margin Audit (9B), and Oblique/Thermal/25-Year LCOE Stress-Test (9C)
-- **Phase 9A (10.0 mmol Stoichiometric Lab Batch & Stage 5 `doped` Defect Supercell Decks):** Generates exact elemental mass-balanced precursor recipes (`elemental_mass_conservation_diff_g == 0.0 g`), $5\%$ sulfur/selenium volatile overpressure ampoule charges, and runnable Stage 5 `doped` / Quantum ESPRESSO defect supercell decks (`outputs/mp_live_doped_supercell_decks/`, $L_{\min} \ge 10.0\text{ \AA}$, Freysoldt-Neugebauer-Van de Walle electrostatic corrections $E_{\text{FNV}}(q=\pm 1) \in [0.090, 0.190]\text{ eV}$).
-- **Phase 9B (Extended 117-Candidate Live MP Contrastive Failure Classifier Audit):** Sweeps all `117` RoHS-clean semiconductors in `data/mp_live_candidates_cache.json`, confirming positive separation $\Delta M = +0.1605$ between promoted finalists ($\bar{M}_{\mathcal{P}} = +0.0850$) and rejected failures ($\bar{M}_{\mathcal{N}} = -0.0755$).
+### 6. Phase 9 (`v6.0`): 10 mmol Lab Synthesis & Supercells (9A) and Oblique/Thermal/25-Year LCOE Stress-Test (9C)
+- **Phase 9A (10.0 mmol Stoichiometric Lab Batch & Stage 5 Defect Supercell Decks):** Generates exact elemental mass-balanced precursor recipes (`elemental_mass_conservation_diff_g == 0.0 g`), $5\%$ sulfur/selenium volatile overpressure ampoule charges, and Stage 5 Quantum ESPRESSO defect supercell decks (`outputs/mp_live_doped_supercell_decks/`, $L_{\min} \ge 10.0\text{ \AA}$, electrostatic point-charge estimates $E_{\text{FNV}}(q=\pm 1) \in [0.090, 0.190]\text{ eV}$).
 - **Phase 9C (Oblique $0^\circ\text{–}60^\circ$ S/P Coherent TMM, Operating Temp $25^\circ\text{C}\text{–}65^\circ\text{C}$ & 25-Year Arrhenius LCOE):** Evaluates unpolarized $\frac{1}{2}(|r_s|^2+|r_p|^2)$ oblique optics ($\text{IAM}_{60^\circ} = 0.954$), NOCT ($45^\circ\text{C}$) and desert peak ($65^\circ\text{C}$) thermal derating ($\beta_{\text{4T}} = -0.361\%/\text{K}$ vs. $-0.409\%/\text{K}$ c-Si), and 25-year discounted LCOE (**3.172 ¢/kWh**, a **-35.74% reduction** vs. 4.936 ¢/kWh standalone c-Si).
 
 ### 7. Phase 10 (`v7.0`): $2^4=16$ Thickness/ARC Global Coherent Optimization (10A), Bifacial Ground-Albedo Harvesting (10B), and SPICE Subcell $J\text{–}V$ String Voltage Matching (10C)

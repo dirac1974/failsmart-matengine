@@ -300,31 +300,22 @@ For both 2-Layer ($\eta = \eta_{\text{2L}}, N=2, \Delta C = \Delta C_{\text{2L}}
 
 ---
 
-## 9. Phase 9 Engineering Extensions: Lab-Ready Synthesis & Defect Supercell Dossiers (9A), Contrastive Failure Classifier (9B), and Real-World Angular / Thermal / 25-Year Arrhenius LCOE Stress-Test (9C) (v6.0)
+## 9. Phase 9 Engineering Extensions: Lab-Ready Synthesis & Defect Supercell Dossiers (9A) and Real-World Angular / Thermal / 25-Year Arrhenius LCOE Stress-Test (9C) (v6.0)
 
-### 9.1 Phase 9A — Stoichiometric Lab Synthesis Recipes ($\le 500^\circ\text{C}$) & 3D `doped` Defect Supercell Decks
+### 9.1 Phase 9A — Stoichiometric Lab Synthesis Recipes ($\le 500^\circ\text{C}$) & 3D Defect Supercell Decks
 1. **Exact $10.0\text{ mmol}$ Batch Precursor Mass Balance:**
    * Given a reduced formula unit $\prod_i E_i^{\nu_i}$ with formula-unit molar mass $M_{\text{FU}} = \sum_i \nu_i M_i\text{ [g/mol]}$, the exact target product mass for a $n_{\text{batch}} = 0.010\text{ mol}$ ($10.0\text{ mmol}$) batch is:
      $$m_{\text{target,g}} = 0.010 \cdot M_{\text{FU}}$$
    * Each element $E_i$ is supplied by a designated commercial reagent $R_i$ with molar mass $M(R_i)$ and metal/anion atom count $a_i$ per reagent formula unit, requiring reagent moles $n(R_i) = 0.010 \cdot \frac{\nu_i}{a_i}$ and reagent mass $m(R_i) = n(R_i) \cdot M(R_i)\text{ [g]}$ (with a $+5.0\%$ volatile overpressure margin recorded separately for $\text{S}, \text{Se}, \text{Cl}, \text{Br}, \text{I}$ chalcogen/halide sources).
    * **Dual-Redundancy Elemental Mass-Conservation Invariant:**
      Both the primary engine (`atomistic_and_tmm.py`) and the blinded verifier (`independent_verifier.py`) verify that the sum of elemental masses supplied by the stoichiometric reagents equals $m_{\text{target,g}}$ to within $10^{-6}\text{ g}$.
-2. **Stage 5 `doped` Intrinsic Vacancy & Antisite Defect Supercell Generation:**
+2. **Stage 5 Intrinsic Vacancy Supercell Generation:**
    * Given conventional/primitive unit-cell lattice lengths $(a, b, c)$, the supercell expansion integers $(N_a, N_b, N_c)$ are chosen as:
      $$N_a = \max\!\left(1, \left\lceil \frac{10.0}{a} \right\rceil\right), \quad N_b = \max\!\left(1, \left\lceil \frac{10.0}{b} \right\rceil\right), \quad N_c = \max\!\left(1, \left\lceil \frac{10.0}{c} \right\rceil\right)$$
      yielding supercell site count $N_{\text{super}} = N_a N_b N_c N_{\text{unit}}$ and minimum periodic image separation $L_{\min} = \min(N_a a, N_b b, N_c c) \ge 10.0\text{ \AA}$.
-   * Isotropic Freysoldt-Neugebauer-Van de Walle (FNV) point-charge electrostatic finite-size correction energy (Madelung constant $\alpha_{\text{M}} = 2.8373$ for cubic-equivalent volume $L_{\text{eff}} = \Omega_{\text{super}}^{1/3}$):
-     $$E_{\text{FNV}}(q) = \frac{q^2 \alpha_{\text{M}} \cdot 14.399645}{\varepsilon_0 \cdot L_{\text{eff}}}\text{ [eV]}$$
+   * Isotropic point-charge electrostatic finite-size correction estimate (Madelung constant $\alpha_{\text{M}} = 2.8373$ for cubic-equivalent volume $L_{\text{eff}} = \Omega_{\text{super}}^{1/3}$):
+     $$E_{\text{img}}(q) = \frac{q^2 \alpha_{\text{M}} \cdot 14.399645}{\varepsilon_0 \cdot L_{\text{eff}}}\text{ [eV]}$$
      evaluated at $q = \pm 1, \pm 2$.
-
-### 9.2 Phase 9B — Extended 117-Candidate Live MP Discovery Funnel & Contrastive Failure Classifier Audit
-1. **Full 117-Candidate Live MP Cache Sweep:**
-   * Evaluates all $N_{\text{MP}} = 117$ charge-neutral, RoHS-clean semiconductors in `data/mp_live_candidates_cache.json` across the 5-stage funnel (`117 -> Stage 2 -> Stage 3 -> Gate A -> Stage 4/5 Finalists`).
-2. **Contrastive Failure Memory Classifier Separation Margin ($\Delta S_{\text{contrastive}}$):**
-   * For every candidate with 128-dimensional L2-normalized embedding $\hat{\mathbf{u}}_i$, define the positive centroid $\bar{\mathbf{c}}_{+} = \frac{\sum_{j \in \mathcal{P}} \hat{\mathbf{u}}_j}{\|\sum_{j \in \mathcal{P}} \hat{\mathbf{u}}_j\|_2}$ (over promoted finalists $\mathcal{P}$) and negative failure centroid $\bar{\mathbf{c}}_{-} = \frac{\sum_{k \in \mathcal{N}} \hat{\mathbf{u}}_k}{\|\sum_{k \in \mathcal{N}} \hat{\mathbf{u}}_k\|_2}$ (over rejected failures $\mathcal{N}$).
-   * The Contrastive Failure Margin for candidate $i$ is:
-     $$M_{\text{contrastive}}(i) = \hat{\mathbf{u}}_i \cdot \bar{\mathbf{c}}_{+} - \hat{\mathbf{u}}_i \cdot \bar{\mathbf{c}}_{-}$$
-   * Both primary and blinded engines verify that the mean margin of promoted finalists exceeds the mean margin of rejected candidates ($\bar{M}_{\mathcal{P}} - \bar{M}_{\mathcal{N}} > 0$).
 
 ### 9.3 Phase 9C — Oblique-Incidence ($0^\circ\text{–}60^\circ$) S/P-Polarized Coherent TMM, Operating Temperature ($25^\circ\text{C}\text{–}65^\circ\text{C}$), and 25-Year Arrhenius LCOE Stress-Test
 1. **Oblique-Incidence ($\theta_0 \in \{0^\circ, 30^\circ, 45^\circ, 60^\circ\}$) S/P-Polarized 7-Medium Coherent Optics:**

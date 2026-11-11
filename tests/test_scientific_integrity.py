@@ -94,7 +94,6 @@ from failsmart_matengine.independent_verifier import (
     independently_verify_coherent_tmm_4t_stack,
     independently_verify_graded_arc_and_techno_economics,
     independently_verify_phase9a_lab_and_defect_dossier,
-    independently_verify_phase9b_contrastive_audit,
     independently_verify_phase9c_oblique_thermal_lcoe,
     independently_verify_phase10_bifacial_and_string_dossier,
     independently_verify_phase11a_synthesis_and_contacts,
@@ -780,21 +779,24 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
 
         fc = live_sum.get("funnel_counts", {})
         self.assertEqual(fc.get("stage1_live_mp_ingested"), 100)
-        self.assertEqual(fc.get("stage4_5_validated_finalists"), 8)
-        self.assertEqual(fc.get("top_active_glass_finalists"), 3)
+        self.assertEqual(fc.get("stage2_dynamically_and_ion_stable"), 91)
+        self.assertEqual(fc.get("stage3_manufacturable_lbnl_alab_screened"), 47)
+        self.assertEqual(fc.get("gate_a_promoted_to_dft"), 40)
+        self.assertEqual(fc.get("stage4_5_validated_finalists"), 9)
+        self.assertEqual(fc.get("top_active_glass_finalists"), 4)
         self.assertEqual(fc.get("bottom_ir_scavenger_finalists"), 5)
 
     def test_cross_layer_discovered_mp_4t_tandem_stacks(self):
-        """Test 14: Verify all 15 cross-layer (mp-Top, c-Si, mp-Bottom) 4T stacks match independent_verifier within <= 0.05%."""
+        """Test 14: Verify all 20 cross-layer (mp-Top, c-Si, mp-Bottom) 4T stacks match independent_verifier within <= 0.05%."""
         live_sum_path = os.path.join(self.repo_root, "outputs", "live_mp_discovery_summary.json")
         with open(live_sum_path, "r", encoding="utf-8") as f:
             live_sum = json.load(f)
 
         pairs = live_sum.get("cross_layer_4t_tandem_pairs", [])
-        self.assertEqual(len(pairs), 15, f"Expected 15 cross-layer 4T pairs, got {len(pairs)}")
+        self.assertEqual(len(pairs), 20, f"Expected 20 cross-layer 4T pairs, got {len(pairs)}")
 
         finalists_by_id = {fin["candidate"]["candidate_id"]: fin for fin in live_sum.get("finalists", [])}
-        self.assertEqual(len(finalists_by_id), 8, f"Expected 8 promoted finalists, got {len(finalists_by_id)}")
+        self.assertEqual(len(finalists_by_id), 9, f"Expected 9 promoted finalists, got {len(finalists_by_id)}")
 
         for p in pairs:
             pid = p["pair_id"]
@@ -834,12 +836,12 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
             )
 
     def test_live_mp_finalist_qe_hse06_soc_decks(self):
-        """Test 15: Verify all 8 promoted live MP finalists have runnable .in/.cif files with non-placeholder IUPAC masses and det(cell) > 50."""
+        """Test 15: Verify all 9 promoted live MP finalists have runnable .in/.cif files with non-placeholder IUPAC masses and det(cell) > 50."""
         live_decks_dir = os.path.join(self.repo_root, "outputs", "mp_live_qe_decks")
         self.assertTrue(os.path.exists(live_decks_dir), f"Directory {live_decks_dir} does not exist")
 
         deck_files = sorted(glob.glob(os.path.join(live_decks_dir, "*_hse06_soc.in")))
-        self.assertEqual(len(deck_files), 8, f"Expected 8 live MP finalist QE input decks, got {len(deck_files)}")
+        self.assertEqual(len(deck_files), 9, f"Expected 9 live MP finalist QE input decks, got {len(deck_files)}")
 
         for dpath in deck_files:
             cif_path = dpath.replace("_hse06_soc.in", ".cif")
@@ -907,7 +909,7 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
                 )
 
     def test_step1_3d_dynamical_matrix_and_neb_ion_migration(self):
-        """Test 16: Verify Step 1 3D Harmonic Dynamical Matrix D(q=0) & 11-Image NEB Ion-Migration across all 8 finalists.
+        """Test 16: Verify pair-spring Gamma frequencies & closed-form migration heuristic across all 9 finalists.
 
         Also verifies zero 'unknown' unindexed XRD tokens in competing_impurity_sinks or competing_hull_phases.
         """
@@ -929,27 +931,25 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
                     f"Candidate {cid} contains unindexed 'unknown' token in competing phase/sink: {phase}",
                 )
 
-        # 2. Verify all 8 finalists' 3D Dynamical Matrix & 11-Image NEB reports and independent scipy.linalg.eigvalsh verification
+        # 2. Verify all 9 finalists' pair-spring Gamma frequency & closed-form migration heuristic reports
         phonon_reports = live_sum.get("atomistic_phonon_neb_reports", [])
-        self.assertEqual(len(phonon_reports), 8, f"Expected 8 atomistic_phonon_neb_reports, got {len(phonon_reports)}")
-
-        cache_path = os.path.join(self.repo_root, "data", "mp_live_candidates_cache.json")
-        with open(cache_path, "r", encoding="utf-8") as f:
-            cache_by_id = {c["mp_id"]: c for c in json.load(f)}
+        self.assertEqual(len(phonon_reports), 9, f"Expected 9 atomistic_phonon_neb_reports, got {len(phonon_reports)}")
 
         finalists_by_id = {f["candidate"]["candidate_id"]: f for f in live_sum.get("finalists", [])}
 
         for rep in phonon_reports:
             cid = rep["candidate_id"]
-            self.assertEqual(rep["imaginary_mode_count"], 0, f"{cid}: Expected 0 imaginary modes, got {rep['imaginary_mode_count']}")
-            self.assertTrue(rep["dynamically_and_kinetically_stable"], f"{cid}: Expected dynamically_and_kinetically_stable == True")
+            self.assertNotIn("imaginary_mode_count", rep)
+            self.assertNotIn("acoustic_sum_rule_max_dev_thz", rep)
+            self.assertIsNone(rep["dynamically_stable"], f"{cid}: Expected dynamically_stable is None")
+            self.assertTrue(rep["emig_gate_passed"], f"{cid}: Expected emig_gate_passed == True")
             self.assertTrue(rep["redundancy_verified"], f"{cid}: Expected redundancy_verified == True")
-            self.assertGreater(rep["gamma_min_optical_freq_thz"], 1.0, f"{cid}: Expected min optical phonon > 1.0 THz")
-            self.assertLess(rep["acoustic_sum_rule_max_dev_thz"], 1e-4, f"{cid}: Acoustic sum rule dev >= 1e-4 THz")
-            self.assertGreaterEqual(rep["neb_saddle_barrier_ev"], 0.90, f"{cid}: Expected NEB barrier >= 0.90 eV")
+            self.assertEqual(len(rep["spring_model_gamma_freq_thz"]), 2)
+            self.assertGreater(rep["spring_model_gamma_freq_thz"][0], 1.0, f"{cid}: Expected min spring freq > 1.0 THz")
+            self.assertGreaterEqual(rep["emig_heuristic_ev"], 0.90, f"{cid}: Expected emig_heuristic_ev >= 0.90 eV")
             self.assertLess(rep["room_temp_diffusivity_cm2_s"], 1e-18, f"{cid}: Expected D_ion(300K) < 1e-18 cm^2/s")
 
-            # Cross-verify against blinded scipy.linalg.eigvalsh + independent NEB solver
+            # Cross-verify against scipy.linalg.eigvalsh + closed-form migration heuristic
             fin = finalists_by_id[cid]
             iv_rep = independently_verify_atomistic_phonon_and_neb(
                 cif_text=fin["candidate"]["cif_content"],
@@ -957,32 +957,32 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
                 oxidation_states=fin["candidate"]["oxidation_states"],
             )
             self.assertAlmostEqual(
-                rep["gamma_min_optical_freq_thz"],
-                iv_rep["gamma_min_optical_freq_thz"],
+                rep["spring_model_gamma_freq_thz"][0],
+                iv_rep["spring_model_gamma_freq_thz"][0],
                 places=4,
-                msg=f"{cid}: w_opt,min mismatch between np.linalg.eigh and scipy.linalg.eigvalsh",
+                msg=f"{cid}: min spring freq mismatch between np.linalg.eigh and scipy.linalg.eigvalsh",
             )
             self.assertAlmostEqual(
-                rep["gamma_max_lo_freq_thz"],
-                iv_rep["gamma_max_lo_freq_thz"],
+                rep["spring_model_gamma_freq_thz"][1],
+                iv_rep["spring_model_gamma_freq_thz"][1],
                 places=4,
-                msg=f"{cid}: w_LO,max mismatch between np.linalg.eigh and scipy.linalg.eigvalsh",
+                msg=f"{cid}: max spring freq mismatch between np.linalg.eigh and scipy.linalg.eigvalsh",
             )
             self.assertAlmostEqual(
-                rep["neb_saddle_barrier_ev"],
-                iv_rep["neb_saddle_barrier_ev"],
+                rep["emig_heuristic_ev"],
+                iv_rep["emig_heuristic_ev"],
                 places=4,
-                msg=f"{cid}: NEB barrier mismatch between primary and independent verifier",
+                msg=f"{cid}: emig_heuristic_ev mismatch between primary and verifier",
             )
 
     def test_step2_coherent_abeles_tmm_vs_rouard_airy_4t_stacks(self):
-        """Test 17: Verify Step 2 Coherent 2x2 Abeles TMM vs Recursive Rouard/Airy 4T Stack Optics across all 15 stacks."""
+        """Test 17: Verify Step 2 Coherent 2x2 Abeles TMM vs Recursive Rouard/Airy 4T Stack Optics across all 20 stacks."""
         live_sum_path = os.path.join(self.repo_root, "outputs", "live_mp_discovery_summary.json")
         with open(live_sum_path, "r", encoding="utf-8") as f:
             live_sum = json.load(f)
 
         tmm_stacks = live_sum.get("coherent_tmm_4t_stacks", [])
-        self.assertEqual(len(tmm_stacks), 15, f"Expected 15 coherent_tmm_4t_stacks, got {len(tmm_stacks)}")
+        self.assertEqual(len(tmm_stacks), 20, f"Expected 20 coherent_tmm_4t_stacks, got {len(tmm_stacks)}")
 
         finalists_by_id = {f["candidate"]["candidate_id"]: f for f in live_sum.get("finalists", [])}
 
@@ -1019,14 +1019,14 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
             )
 
     def test_step3_graded_arc_tio2_and_techno_economic_fom_suite(self):
-        """Test 18: Verify 7-Medium Graded-ARC + TiO2 Impedance Matching & 4-Metric Techno-Economic Suite across all 15 stacks."""
+        """Test 18: Verify 7-Medium Graded-ARC + TiO2 Impedance Matching & 4-Metric Techno-Economic Suite across all 20 stacks."""
         live_sum_path = os.path.join(self.repo_root, "outputs", "live_mp_discovery_summary.json")
         with open(live_sum_path, "r", encoding="utf-8") as f:
             live_sum = json.load(f)
 
         self.assertTrue(live_sum.get("v5_graded_arc_and_techno_economics_enabled"))
         graded_stacks = live_sum.get("graded_arc_techno_economic_stacks", [])
-        self.assertEqual(len(graded_stacks), 15, f"Expected 15 graded_arc_techno_economic_stacks, got {len(graded_stacks)}")
+        self.assertEqual(len(graded_stacks), 20, f"Expected 20 graded_arc_techno_economic_stacks, got {len(graded_stacks)}")
 
         finalists_by_id = {f["candidate"]["candidate_id"]: f for f in live_sum.get("finalists", [])}
 
@@ -1069,16 +1069,17 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
             )
 
     def test_step4_phase9a_9b_9c_lab_contrastive_and_real_world_lcoe(self):
-        """Test 19: Verify Phase 9A (Lab Synthesis & doped Defect Supercells), Phase 9B (117-MP Contrastive Margin), and Phase 9C (Oblique TMM, Thermal & 25-Yr LCOE)."""
+        """Test 19: Verify Phase 9A (Lab Synthesis & Defect Supercells) and Phase 9C (Oblique TMM, Thermal & 25-Yr LCOE), with Phase 9B contrastive margin removed."""
         live_sum_path = os.path.join(self.repo_root, "outputs", "live_mp_discovery_summary.json")
         with open(live_sum_path, "r", encoding="utf-8") as f:
             live_sum = json.load(f)
 
-        self.assertTrue(live_sum.get("v6_phase9_lab_contrastive_lcoe_enabled"))
+        self.assertTrue(live_sum.get("v6_phase9_lab_and_lcoe_enabled"))
+        self.assertNotIn("contrastive_classifier_audit", live_sum)
 
-        # 1. Phase 9A: Verify 8 Lab Synthesis & doped Defect Supercell Dossiers + Deck Files
+        # 1. Phase 9A: Verify 9 Lab Synthesis & Defect Supercell Dossiers + Deck Files
         lab_dossiers = live_sum.get("lab_synthesis_and_defect_dossiers", [])
-        self.assertEqual(len(lab_dossiers), 8, f"Expected 8 lab_synthesis_and_defect_dossiers, got {len(lab_dossiers)}")
+        self.assertEqual(len(lab_dossiers), 9, f"Expected 9 lab_synthesis_and_defect_dossiers, got {len(lab_dossiers)}")
         defect_dir = os.path.join(self.repo_root, "outputs", "mp_live_doped_supercell_decks")
         self.assertTrue(os.path.isdir(defect_dir))
 
@@ -1090,7 +1091,7 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
             self.assertGreaterEqual(ld["supercell_min_image_dist_ang"], 10.0)
             self.assertLessEqual(ld["synthesis_temperature_c"], 500.0)
             deck_path = os.path.join(defect_dir, ld["doped_defect_deck_filename"])
-            self.assertTrue(os.path.isfile(deck_path), f"Missing doped supercell deck: {deck_path}")
+            self.assertTrue(os.path.isfile(deck_path), f"Missing defect supercell deck: {deck_path}")
 
             fin = finalists_by_id[cid]
             iv_9a = independently_verify_phase9a_lab_and_defect_dossier(
@@ -1103,18 +1104,9 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
             self.assertEqual(ld["supercell_total_sites"], iv_9a["supercell_total_sites"])
             self.assertAlmostEqual(ld["fnv_charge_correction_q1_ev"], iv_9a["fnv_charge_correction_q1_ev"], places=3)
 
-        # 2. Phase 9B: Verify 117-Candidate Extended MP Sweep & Contrastive Failure Classifier Margin
-        ca = live_sum.get("contrastive_classifier_audit", {})
-        self.assertEqual(ca.get("total_evaluated_candidates"), 117)
-        self.assertEqual(ca.get("promoted_finalist_count"), 8)
-        self.assertEqual(ca.get("rejected_failure_count"), 109)
-        self.assertTrue(ca.get("positive_separation_verified"))
-        self.assertTrue(ca.get("redundancy_verified"))
-        self.assertGreater(ca.get("contrastive_separation_delta", 0.0), 0.10)
-
-        # 3. Phase 9C: Verify Oblique (0-60 deg) S/P TMM, Operating Temp (25-65 C) & 25-Year Arrhenius LCOE across 15 Stacks
+        # 2. Phase 9C: Verify Oblique (0-60 deg) S/P TMM, Operating Temp (25-65 C) & 25-Year Arrhenius LCOE across 20 Stacks
         lcoe_stacks = live_sum.get("real_world_lcoe_stress_test_stacks", [])
-        self.assertEqual(len(lcoe_stacks), 15, f"Expected 15 real_world_lcoe_stress_test_stacks, got {len(lcoe_stacks)}")
+        self.assertEqual(len(lcoe_stacks), 20, f"Expected 20 real_world_lcoe_stress_test_stacks, got {len(lcoe_stacks)}")
         for rw in lcoe_stacks:
             pid = rw["pair_id"]
             self.assertTrue(rw["lcoe_redundancy_verified"], f"{pid}: Phase 9C redundancy failed")
@@ -1127,8 +1119,8 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
             top_f = finalists_by_id[rw["top_mp_id"]]
             bot_f = finalists_by_id[rw["bottom_mp_id"]]
             e_mig_lim = min(
-                top_f["atomistic_phonon_neb"]["neb_saddle_barrier_ev"],
-                bot_f["atomistic_phonon_neb"]["neb_saddle_barrier_ev"],
+                top_f["atomistic_phonon_neb"]["emig_heuristic_ev"],
+                bot_f["atomistic_phonon_neb"]["emig_heuristic_ev"],
             )
             iv_9c = independently_verify_phase9c_oblique_thermal_lcoe(
                 eg_ind_1=top_f["electronics"]["hse06_soc_indirect_gap_ev"],
@@ -1162,7 +1154,7 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
 
         self.assertTrue(live_sum.get("v7_phase10_bifacial_and_string_enabled"))
         p10_stacks = live_sum.get("phase10_bifacial_and_string_dossiers", [])
-        self.assertEqual(len(p10_stacks), 15, f"Expected 15 phase10_bifacial_and_string_dossiers, got {len(p10_stacks)}")
+        self.assertEqual(len(p10_stacks), 20, f"Expected 20 phase10_bifacial_and_string_dossiers, got {len(p10_stacks)}")
 
         finalists_by_id = {f["candidate"]["candidate_id"]: f for f in live_sum.get("finalists", [])}
         graded_by_id = {g["pair_id"]: g for g in live_sum.get("graded_arc_techno_economic_stacks", [])}
@@ -1193,8 +1185,8 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
             top_f = finalists_by_id[p10["top_mp_id"]]
             bot_f = finalists_by_id[p10["bottom_mp_id"]]
             e_mig_lim = min(
-                top_f["atomistic_phonon_neb"]["neb_saddle_barrier_ev"],
-                bot_f["atomistic_phonon_neb"]["neb_saddle_barrier_ev"],
+                top_f["atomistic_phonon_neb"]["emig_heuristic_ev"],
+                bot_f["atomistic_phonon_neb"]["emig_heuristic_ev"],
             )
             iv_10 = independently_verify_phase10_bifacial_and_string_dossier(
                 eg_ind_1=top_f["electronics"]["hse06_soc_indirect_gap_ev"],
@@ -1273,7 +1265,7 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
                     )
 
     def test_step6_phase11_realistic_synthesis_and_commercialization_audit(self):
-        """Test 22: Verify Phase 11A (Live MP Hull Windows, TCO Reactivity & SPS across 8 Finalists) and Phase 11B/11C (Non-Radiative SRH & 4-Path Commercialization across 15 Stacks)."""
+        """Test 22: Verify Phase 11A (Live MP Hull Windows, TCO Reactivity & SPS across 9 Finalists; 8 cached + 1 not evaluated) and Phase 11B/11C across 15 evaluated stacks."""
         live_sum_path = os.path.join(self.repo_root, "outputs", "live_mp_discovery_summary.json")
         with open(live_sum_path, "r", encoding="utf-8") as f:
             live_sum = json.load(f)
@@ -1281,13 +1273,21 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
         self.assertTrue(live_sum.get("v8_phase11_realistic_commercialization_enabled"))
 
         p11a_list = live_sum.get("phase11a_synthesis_contact_dossiers", [])
-        self.assertEqual(len(p11a_list), 8, f"Expected 8 phase11a_synthesis_contact_dossiers, got {len(p11a_list)}")
+        self.assertEqual(len(p11a_list), 9, f"Expected 9 phase11a_synthesis_contact_dossiers, got {len(p11a_list)}")
         finalists_by_id = {f["candidate"]["candidate_id"]: f for f in live_sum.get("finalists", [])}
 
         p11a_by_id = {}
+        evaluated_11a_count = 0
         for p11a in p11a_list:
             cid = p11a["candidate_id"]
             p11a_by_id[cid] = p11a
+            if cid == "mp-1195160":
+                self.assertIsNone(p11a["synthesis_practicality_score_100"])
+                self.assertIsNone(p11a["contact_voltage_penalty_v"])
+                self.assertEqual(p11a["recommended_etl_barrier"], "not evaluated")
+                continue
+
+            evaluated_11a_count += 1
             self.assertTrue(p11a["redundancy_verified"], f"{cid}: Phase 11A redundancy check failed")
             self.assertGreaterEqual(p11a["synthesis_practicality_score_100"], 0.0)
             self.assertLessEqual(p11a["synthesis_practicality_score_100"], 100.0)
@@ -1311,6 +1311,8 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
                 places=2,
             )
             self.assertEqual(p11a["recommended_etl_barrier"], iv_11a["recommended_etl_barrier"])
+
+        self.assertEqual(evaluated_11a_count, 8)
 
         # Top synthesis practicality candidates must be BiSbS3 (mp-1227486) and Sb2OS2 (mp-861911) > 94.0
         self.assertGreater(p11a_by_id["mp-1227486"]["synthesis_practicality_score_100"], 94.0)
@@ -1413,6 +1415,171 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
             Path(inspect.signature(run_live_mp_discovery_campaign).parameters["output_dir"].default),
             expected_root / "outputs",
         )
+
+    def test_24_every_remaining_gate_can_fail(self) -> None:
+        """T6 acceptance check: feed every remaining gate in mp_live_discovery and atomistic migration an input that must fail, and assert it fails."""
+        import tempfile
+        from pymatgen.core import Lattice
+        from pymatgen.io.cif import CifWriter
+        from failsmart_matengine.atomistic_and_tmm import evaluate_3d_atomistic_phonon_and_neb
+        from failsmart_matengine.mp_live_discovery import (
+            build_live_mp_candidate_dossier,
+            load_negative_synthesis_priors,
+        )
+
+        cache_path = os.path.join(self.repo_root, "data", "mp_live_candidates_cache.json")
+        with open(cache_path, "r", encoding="utf-8") as f:
+            cache_by_id = {c["mp_id"]: c for c in json.load(f)}
+
+        priors = load_negative_synthesis_priors()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            ledger = ContrastiveFailureLedger(os.path.join(tmpdir, "gate_test.db"))
+            base = copy.deepcopy(cache_by_id["mp-861911"])  # Sb2OS2 promoted baseline
+
+            d_pass = build_live_mp_candidate_dossier(base, priors, ledger)
+            self.assertEqual(d_pass["status"], "PROMOTED")
+            self.assertIsNone(d_pass["stability"]["dynamically_stable"])
+            self.assertIsNone(d_pass["stability"]["g_above_hull_synth_mev"])
+            self.assertIsNone(d_pass["stability"]["mlip_force_std_ev_ang"])
+            self.assertIsNone(d_pass["gate_a"]["anion_mixing_enthalpy_mev"])
+            self.assertIsNone(d_pass["gate_a"]["tco_interface_rxn_energy_mev"])
+            self.assertIsNone(d_pass["gate_a"]["tco_compatible"])
+
+            # 1. Stage 2 hull gate (ehull_mev > 50.0)
+            r_hull = copy.deepcopy(base)
+            r_hull["energy_above_hull_mev"] = 75.0
+            d_hull = build_live_mp_candidate_dossier(r_hull, priors, ledger)
+            self.assertEqual(d_hull["status"], "REJECTED")
+            self.assertEqual(d_hull["primary_failure_mode"], "HULL_INSTABILITY")
+
+            # 2. Stage 2 Born elasticity gate (k_gpa <= 15 or g_gpa <= 12)
+            r_born = copy.deepcopy(base)
+            r_born["dft_elasticity"] = {"k_vrh_gpa": 12.0, "g_vrh_gpa": 8.0}
+            d_born = build_live_mp_candidate_dossier(r_born, priors, ledger)
+            self.assertEqual(d_born["status"], "REJECTED")
+            self.assertEqual(d_born["primary_failure_mode"], "ELASTIC_INSTABILITY")
+
+            # 3. Stage 2 ion-migration barrier gate (emig_ev < 0.65)
+            st_ion = Structure(
+                Lattice.cubic(5.2),
+                ["Cu", "Cu", "Cu", "Bi", "S", "S", "Cl", "Cl"],
+                [
+                    [0.0, 0.0, 0.0],
+                    [0.5, 0.0, 0.0],
+                    [0.0, 0.5, 0.0],
+                    [0.5, 0.5, 0.5],
+                    [0.25, 0.25, 0.25],
+                    [0.75, 0.75, 0.25],
+                    [0.25, 0.75, 0.75],
+                    [0.75, 0.25, 0.75],
+                ],
+            )
+            r_ion = copy.deepcopy(base)
+            r_ion["mp_id"] = "mp-test-ion"
+            r_ion["stoichiometry"] = {"Cu": 3, "Bi": 1, "S": 2, "Cl": 2}
+            r_ion["oxidation_states"] = {"Cu": 1, "Bi": 3, "S": -2, "Cl": -1}
+            r_ion["structure_dict"] = st_ion.as_dict()
+            d_ion = build_live_mp_candidate_dossier(r_ion, priors, ledger)
+            self.assertEqual(d_ion["status"], "REJECTED")
+            self.assertEqual(d_ion["primary_failure_mode"], "ION_MIGRATION_INSTABILITY")
+
+            # 4. Stage 3 synthesis temperature gate (temp_c > 500 C)
+            d_temp = build_live_mp_candidate_dossier(cache_by_id["mp-1105202"], priors, ledger)
+            self.assertEqual(d_temp["status"], "REJECTED")
+            self.assertEqual(d_temp["primary_failure_mode"], "OXIDE_IMPURITY_SINK")
+
+            # 5. Stage 3 empirical LBNL impurity-prior gate (n >= 5 and impurity_rate > 0.50)
+            priors_fail = copy.deepcopy(priors)
+            priors_fail["chemsys_impurity_priors"]["O-S-Sb"] = {
+                "pure_count": 2,
+                "impure_count": 8,
+                "impurity_rate": 0.80,
+            }
+            d_prior = build_live_mp_candidate_dossier(base, priors_fail, ledger)
+            self.assertEqual(d_prior["status"], "REJECTED")
+            self.assertEqual(d_prior["primary_failure_mode"], "IMPURITY_SINK_PRIOR")
+
+            # 6. Stage 3 Pourbaix aqueous dissolution gate (pbx_mol > 1e-6 M)
+            st_pbx = Structure(
+                Lattice.cubic(5.6),
+                ["Cs", "Bi", "S", "S"],
+                [[0.0, 0.0, 0.0], [0.5, 0.5, 0.5], [0.25, 0.25, 0.25], [0.75, 0.75, 0.75]],
+            )
+            r_pbx = copy.deepcopy(base)
+            r_pbx["mp_id"] = "mp-test-pbx"
+            r_pbx["stoichiometry"] = {"Cs": 1, "Bi": 1, "S": 2}
+            r_pbx["oxidation_states"] = {"Cs": 1, "Bi": 3, "S": -2}
+            r_pbx["dft_elasticity"] = {"k_vrh_gpa": 40.0, "g_vrh_gpa": 22.0}
+            r_pbx["structure_dict"] = st_pbx.as_dict()
+            d_pbx = build_live_mp_candidate_dossier(r_pbx, priors, ledger)
+            self.assertEqual(d_pbx["status"], "REJECTED")
+            self.assertEqual(d_pbx["primary_failure_mode"], "AQUEOUS_LEACHING")
+
+            # 7. Stage 3 active-layer cost gate (cost_m2 > $0.50/m^2)
+            d_cost = build_live_mp_candidate_dossier(cache_by_id["mp-1079889"], priors, ledger)
+            self.assertEqual(d_cost["status"], "REJECTED")
+            self.assertEqual(d_cost["primary_failure_mode"], "TIER2_COST_EXCEEDED")
+
+            # 8. Gate A covalent 0D/1D polaron connectivity gate
+            d_pol = build_live_mp_candidate_dossier(cache_by_id["mp-21365"], priors, ledger)
+            self.assertEqual(d_pol["status"], "REJECTED")
+            self.assertEqual(d_pol["primary_failure_mode"], "LOW_DIM_POLARON_RISK")
+
+            # 9. Stage 4 bandgap window gate
+            r_gap = copy.deepcopy(base)
+            r_gap["dft_pbe_band_gap_ev"] = 2.40
+            d_gap = build_live_mp_candidate_dossier(r_gap, priors, ledger)
+            self.assertEqual(d_gap["status"], "REJECTED")
+            self.assertEqual(d_gap["primary_failure_mode"], "BANDGAP_OUT_OF_WINDOW")
+
+            # 10. Stage 4 effective-mass / Frohlich-polaron gate
+            r_mass = copy.deepcopy(base)
+            r_mass["dft_pbe_band_gap_ev"] = 0.85
+            r_mass["dfpt_dielectric"] = {"eps_inf": 2.6, "eps_static": 80.0}
+            d_mass = build_live_mp_candidate_dossier(r_mass, priors, ledger)
+            self.assertEqual(d_mass["status"], "REJECTED")
+            self.assertEqual(d_mass["primary_failure_mode"], "HEAVY_CARRIER_MASS")
+
+            # 11. Stage 4 deep-defect SRH gate
+            st_srh = Structure(Lattice.cubic(3.6), ["Zn", "O"], [[0.0, 0.0, 0.0], [0.5, 0.5, 0.5]])
+            r_srh = copy.deepcopy(base)
+            r_srh["mp_id"] = "mp-test-srh"
+            r_srh["stoichiometry"] = {"Zn": 1, "O": 1}
+            r_srh["oxidation_states"] = {"Zn": 2, "O": -2}
+            r_srh["dft_pbe_band_gap_ev"] = 1.15
+            r_srh["structure_dict"] = st_srh.as_dict()
+            d_srh = build_live_mp_candidate_dossier(r_srh, priors, ledger)
+            self.assertEqual(d_srh["status"], "REJECTED")
+            self.assertEqual(d_srh["primary_failure_mode"], "DEEP_SRH_DEFECT")
+
+            # 12. Stage 5 optical SLME / sub-gap transmittance gate
+            r_opt = copy.deepcopy(base)
+            r_opt["dft_pbe_band_gap_ev"] = 1.63
+            r_opt["dfpt_dielectric"] = {"eps_inf": 65.0, "eps_static": 80.0}
+            d_opt = build_live_mp_candidate_dossier(r_opt, priors, ledger)
+            self.assertEqual(d_opt["status"], "REJECTED")
+            self.assertEqual(d_opt["primary_failure_mode"], "LOW_OPTICAL_EFFICIENCY")
+
+            # 13. Closed-form migration heuristic gate in evaluate_3d_atomistic_phonon_and_neb
+            st_emig = Structure(
+                Lattice.cubic(10.0),
+                ["Cu", "Cu", "S"],
+                [[0.0, 0.0, 0.0], [0.185, 0.0, 0.0], [0.5, 0.5, 0.5]],
+            )
+            rep_emig = evaluate_3d_atomistic_phonon_and_neb(
+                {
+                    "candidate": {
+                        "candidate_id": "mp-test-emig",
+                        "formula_reduced": "Cu2S",
+                        "target_layer": "BOTTOM_IR_075EV",
+                        "cif_content": str(CifWriter(st_emig)),
+                        "stoichiometry": {"Cu": 2, "S": 1},
+                        "oxidation_states": {"Cu": 1, "S": -2},
+                    }
+                }
+            )
+            self.assertFalse(rep_emig.emig_gate_passed)
+            self.assertIsNone(rep_emig.dynamically_stable)
 
 
 if __name__ == "__main__":

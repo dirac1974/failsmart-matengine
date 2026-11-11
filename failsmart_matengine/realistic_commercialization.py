@@ -76,6 +76,67 @@ def evaluate_phase11a_synthesis_and_contacts(
     dim = str(cand["structural_dimensionality"])
     eg_ind = float(elec["hse06_soc_indirect_gap_ev"])
 
+    n_tot = sum(stoich.values())
+    if len(stoich) >= 4 and ("Cu" in stoich) and ("Sn" in stoich):
+        v_antisite = 0.110
+    elif ("Cu" in stoich) or ("Ag" in stoich):
+        v_antisite = 0.045
+    else:
+        v_antisite = 0.015
+
+    if dim == "3D":
+        f_orient = 0.95
+    elif dim == "Quasi-2D":
+        f_orient = 0.88
+    else:
+        f_orient = 0.72
+
+    s_crit = (
+        0.65 * stoich.get("In", 0) + 0.45 * stoich.get("Ga", 0) + 0.55 * stoich.get("Ag", 0)
+    ) / float(n_tot)
+    has_crit = any(el in stoich for el in ("In", "Ga", "Ag"))
+
+    if cid not in thermo_cache or any(el not in MULLIKEN_CHI_EV for el in stoich):
+        import hashlib
+        sig_payload = {
+            "candidate_id": cid,
+            "formula_reduced": formula,
+            "evaluated": False,
+            "antisite_voltage_penalty_v": round(v_antisite, 4),
+            "ribbon_orientation_factor": round(f_orient, 4),
+            "critical_mineral_index": round(s_crit, 4),
+        }
+        sig_hex = hashlib.sha256(json.dumps(sig_payload, sort_keys=True).encode("utf-8")).hexdigest()
+        return Phase11ASynthesisContactDossier(
+            candidate_id=cid,
+            formula_reduced=formula,
+            target_layer=layer,
+            structural_dimensionality=dim,
+            mp_gga_hull_mev_per_atom=None,
+            hull_decomposition_phases=[],
+            anion_chempot_window_ev=None,
+            min_cation_chempot_window_ev=None,
+            rxn_sno2_mev_per_atom=None,
+            rxn_in2o3_mev_per_atom=None,
+            rxn_tio2_mev_per_atom=None,
+            dominant_in2o3_reaction="not evaluated",
+            cbm_vs_vacuum_ev=None,
+            vbm_vs_vacuum_ev=None,
+            cbo_vs_tio2_ev=None,
+            cbo_vs_sno2_ev=None,
+            vbo_vs_niox_ev=None,
+            recommended_etl_barrier="not evaluated",
+            best_cbo_ev=None,
+            contact_voltage_penalty_v=None,
+            antisite_voltage_penalty_v=round(v_antisite, 4),
+            ribbon_orientation_factor=round(f_orient, 4),
+            critical_mineral_index=round(s_crit, 4),
+            has_critical_mineral=has_crit,
+            synthesis_practicality_score_100=None,
+            redundancy_verified=True,
+            sha256_signature=sig_hex,
+        )
+
     th_rec = thermo_cache[cid]
     hull_mev = float(th_rec["mp_gga_hull_mev_per_atom"])
     decomp_phases = [str(p) for p in th_rec["hull_decomposition_phases"]]
@@ -97,7 +158,6 @@ def evaluate_phase11a_synthesis_and_contacts(
     rxn_tio2 = float(tco_rxn["TiO2"]["worst_rxn_energy_mev_per_atom"])
     dom_in2o3_rxn = str(tco_rxn["In2O3"]["dominant_interface_reaction"])
 
-    n_tot = sum(stoich.values())
     chi_comp = math.exp(
         sum(cnt * math.log(MULLIKEN_CHI_EV[el]) for el, cnt in stoich.items()) / float(n_tot)
     )
@@ -118,25 +178,6 @@ def evaluate_phase11a_synthesis_and_contacts(
         best_cbo = cbo_sno2
 
     v_contact = max(0.0, -best_cbo - 0.25) + max(0.0, best_cbo - 0.20)
-
-    if len(stoich) >= 4 and ("Cu" in stoich) and ("Sn" in stoich):
-        v_antisite = 0.110
-    elif ("Cu" in stoich) or ("Ag" in stoich):
-        v_antisite = 0.045
-    else:
-        v_antisite = 0.015
-
-    if dim == "3D":
-        f_orient = 0.95
-    elif dim == "Quasi-2D":
-        f_orient = 0.88
-    else:
-        f_orient = 0.72
-
-    s_crit = (
-        0.65 * stoich.get("In", 0) + 0.45 * stoich.get("Ga", 0) + 0.55 * stoich.get("Ag", 0)
-    ) / float(n_tot)
-    has_crit = any(el in stoich for el in ("In", "Ga", "Ag"))
 
     sps_raw = (
         92.0

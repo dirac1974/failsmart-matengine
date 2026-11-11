@@ -2,16 +2,16 @@
 # generated using pymatgen
 data_BiZnOSCl
 _symmetry_space_group_name_H-M   'P 1'
-_cell_length_a   4.44259193
-_cell_length_b   4.44259193
-_cell_length_c   11.34350095
+_cell_length_a   13.18584523
+_cell_length_b   13.18584523
+_cell_length_c   7.34327119
 _cell_angle_alpha   90.00000000
 _cell_angle_beta   90.00000000
 _cell_angle_gamma   90.00000000
 _symmetry_Int_Tables_number   1
 _chemical_formula_structural   ZnBiSClO
 _chemical_formula_sum   'Zn2 Bi2 S2 Cl2 O2'
-_cell_volume   223.88240289
+_cell_volume   1276.74896598
 _cell_formula_units_Z   2
 loop_
  _symmetry_equiv_pos_site_id
@@ -25,13 +25,13 @@ loop_
  _atom_site_fract_y
  _atom_site_fract_z
  _atom_site_occupancy
-  Bi  Bi0  1  0.75000000  0.25000000  0.50000000  1
-  Bi  Bi1  1  0.25000000  0.75000000  0.50000000  1
-  Cl  Cl2  1  0.75000000  0.25000000  -0.00000000  1
-  Cl  Cl3  1  0.25000000  0.75000000  -0.00000000  1
-  O  O4  1  0.25000000  0.25000000  0.48264773  1
-  O  O5  1  0.75000000  0.75000000  0.51735227  1
-  S  S6  1  0.25000000  0.25000000  0.78435559  1
-  S  S7  1  0.75000000  0.75000000  0.21564441  1
-  Zn  Zn8  1  0.25000000  0.25000000  0.13207609  1
-  Zn  Zn9  1  0.75000000  0.75000000  0.86792391  1
+  Bi  Bi0  1  0.75000000  0.25000000  0.00000000  1
+  Bi  Bi1  1  0.25000000  0.75000000  -0.00000000  1
+  Cl  Cl2  1  0.25000000  0.25000000  0.11603323  1
+  Cl  Cl3  1  0.75000000  0.75000000  0.88396677  1
+  O  O4  1  0.25000000  0.25000000  0.41971260  1
+  O  O5  1  0.75000000  0.75000000  0.58028740  1
+  S  S6  1  0.75000000  0.25000000  0.50000000  1
+  S  S7  1  0.25000000  0.75000000  0.50000000  1
+  Zn  Zn8  1  0.25000000  0.25000000  0.80210651  1
+  Zn  Zn9  1  0.75000000  0.75000000  0.19789349  1

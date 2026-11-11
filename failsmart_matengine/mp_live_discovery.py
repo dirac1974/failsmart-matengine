@@ -669,9 +669,8 @@ def build_live_mp_candidate_dossier(
     )
     cand_dump = cand.model_dump()
 
-    # Stage 2: Live MP Convex Hull + Elasticity + Phonon + Debye + 3D Structure Ion-Migration Gate
+    # Stage 2: Live MP Convex Hull + Elasticity + Debye + 3D Structure Ion-Migration Gate
     ehull_mev = float(rec["energy_above_hull_mev"])
-    ghull_mev = round(ehull_mev - 10.5, 2)
     elas = rec.get("dft_elasticity")
     if elas and elas.get("k_vrh_gpa", 0) > 1.0:
         k_gpa = float(elas["k_vrh_gpa"])
@@ -690,10 +689,9 @@ def build_live_mp_candidate_dossier(
     emig_ev = _evaluate_structure_ion_migration_barrier(parsed_struct, stoich)
 
     born_ok = (k_gpa > 15.0) and (g_gpa > 12.0)
-    dyn_ok = wmin_thz > -0.10
-    hull_ok = (ehull_mev <= 50.0) or (ghull_mev <= 0.0)
+    hull_ok = ehull_mev <= 50.0
     ion_ok = emig_ev >= 0.65
-    passed_s2 = bool(born_ok and dyn_ok and hull_ok and ion_ok)
+    passed_s2 = bool(born_ok and hull_ok and ion_ok)
 
     s2_reason = None
     if not hull_ok:
@@ -750,17 +748,17 @@ def build_live_mp_candidate_dossier(
     stab = StabilityReport(
         candidate_id=mp_id,
         e_above_hull_0k_mev=ehull_mev,
-        g_above_hull_synth_mev=ghull_mev,
+        g_above_hull_synth_mev=None,
         competing_hull_phases=comp_phases[:4],
         bulk_modulus_gpa=k_gpa,
         shear_modulus_gpa=g_gpa,
         born_elastic_stable=born_ok,
-        min_phonon_freq_thz=wmin_thz,
+        omega_min_heuristic_thz=wmin_thz,
         debye_temperature_k=debye_k,
-        dynamically_stable=dyn_ok,
+        dynamically_stable=None,
         ion_migration_barrier_ev=emig_ev,
         ion_migration_stable=ion_ok,
-        mlip_force_std_ev_ang=round(0.038 + 0.0006 * ehull_mev, 3),
+        mlip_force_std_ev_ang=None,
         passed_stage2=passed_s2,
         failure_reason=s2_reason,
     )
@@ -786,12 +784,19 @@ def build_live_mp_candidate_dossier(
     if has_refractory:
         base_temp_c = float(cs_prior.get("median_temp_c") or (920.0 if any(e in els for e in ("Zr", "Ti")) else 680.0))
         temp_c = max(580.0, base_temp_c)
-        sink_risk = max(0.76, float(cs_prior.get("impurity_rate") or 0.82))
     else:
         # Solution / solvothermal / halide-flux low-T synthesis window for lone-pair pnictogen/chalcohalides
         has_halide = any(e in els for e in ("Cl", "Br", "I"))
         temp_c = 335.0 if has_halide else 375.0
-        sink_risk = round(float(np.clip(float(cs_prior.get("impurity_rate") or 0.16) * 0.65, 0.11, 0.42)), 3)
+
+    # Empirical LBNL prior rule: record raw impurity_rate when n_recipes > 0 (None otherwise),
+    # and reject when n_recipes >= 5 and impurity_rate > 0.50.
+    n_prior_recipes = int(cs_prior.get("pure_count", 0)) + int(cs_prior.get("impure_count", 0))
+    sink_risk: Optional[float] = (
+        round(float(cs_prior["impurity_rate"]), 4)
+        if (n_prior_recipes > 0 and cs_prior.get("impurity_rate") is not None)
+        else None
+    )
 
     raw_cs_sinks = [s for s in (cs_prior.get("top_impurities") or []) if _is_valid_sink_formula(s)]
     sinks = list(dict.fromkeys(raw_cs_sinks + comp_phases))[:4]
@@ -804,16 +809,22 @@ def build_live_mp_candidate_dossier(
     pbx_mol = compute_pourbaix_max_dissolution(formula, stoich)
     synth_score, _, _ = ledger.score_contrastive_risk(emb)
 
-    temp_ok = (temp_c <= 500.0) and (sink_risk < 0.50)
+    temp_ok = temp_c <= 500.0
+    prior_ok = True if (sink_risk is None or n_prior_recipes < 5) else (sink_risk <= 0.50)
     pbx_ok = pbx_mol <= 1.0e-6
     cost_ok = cost_m2 <= 0.50
-    passed_s3 = bool(temp_ok and pbx_ok and cost_ok)
+    passed_s3 = bool(temp_ok and prior_ok and pbx_ok and cost_ok)
 
     s3_reason = None
     if not temp_ok:
         s3_reason = (
             f"OXIDE_IMPURITY_SINK: Requires {temp_c:.0f} C (> 500 C soda-lime glass ceiling) "
             f"to overcome refractory {sinks[0]} impurity sink (LBNL-80k/A-Lab prior)"
+        )
+    elif not prior_ok:
+        s3_reason = (
+            f"IMPURITY_SINK_PRIOR: Empirical LBNL prior for {chemsys_key} has impurity_rate = "
+            f"{sink_risk:.3f} (> 0.50 threshold across n={n_prior_recipes} recipes)"
         )
     elif not pbx_ok:
         s3_reason = f"AQUEOUS_LEACHING: Pourbaix dissolution {pbx_mol:.2e} mol/L (> 1e-6 M) in pH 4-9 rainwater"
@@ -828,7 +839,7 @@ def build_live_mp_candidate_dossier(
         min_synthesis_temp_c=round(temp_c, 1),
         rxn_driving_force_mev_atom=round(-145.0 + 0.8 * ehull_mev, 2),
         competing_impurity_sinks=sinks[:4],
-        impurity_sink_risk_score=round(sink_risk, 3),
+        impurity_sink_risk_score=sink_risk,
         halide_volatility_pressure_pa=round(vap_pa, 3),
         pourbaix_max_dissolution_mol_l=float(f"{pbx_mol:.3e}"),
         pourbaix_stable_ph4_to_9=pbx_ok,
@@ -852,13 +863,11 @@ def build_live_mp_candidate_dossier(
         dossier["redundancy_verification"] = verify_candidate_dossier(dossier, raise_on_error=True)
         return dossier
 
-    # Gate A: Adversarial Red-Team Pre-DFT Veto (Topological 0D/1D Polaron + Anion Unmixing)
-    heavy_hal = stoich.get("Br", 0) + stoich.get("I", 0) + stoich.get("Cl", 0)
-    chalc = stoich.get("S", 0) + stoich.get("Se", 0)
-    ox = stoich.get("O", 0)
-    hmix = 38.4 if (heavy_hal > 0 and chalc > 0 and ox == 0 and (heavy_hal / max(1, chalc)) >= 2.0) else 12.6
-    seg_risk = "HIGH" if hmix >= 35.0 else "LOW"
-    tco_rxn = -26.0
+    # Gate A: Adversarial Red-Team Pre-DFT Veto (Topological 0D/1D Polaron Connectivity)
+    # Anion mixing enthalpy and TCO interfacial reaction energy are not computed at Gate A -> None ("NOT_EVALUATED").
+    hmix = None
+    seg_risk = "NOT_EVALUATED"
+    tco_rxn = None
     polaron_flag = dim in ("0D-Isolated", "1D-Chain")
 
     if polaron_flag:
@@ -868,14 +877,13 @@ def build_live_mp_candidate_dossier(
             f"VETO: {dim} topological connectivity detected directly from 3D MP crystal structure "
             f"({mp_id} {formula}, {sg_sym}) causes carrier localization across van der Waals gaps."
         )
-    elif hmix >= 35.0:
-        decision = "VETO_REJECT"
-        fail_mode = "ANION_PHASE_SEGREGATION"
-        critique = f"VETO: High halide/chalcogen ratio in {formula} yields anion unmixing enthalpy {hmix:.1f} meV/atom (>= 35 meV/atom)."
     else:
         decision = "PROMOTE"
         fail_mode = None
-        critique = f"PROMOTE: {dim} framework ({sg_sym}) passes topological connectivity, anion-ordering, and TCO stability."
+        critique = (
+            f"PROMOTE: {dim} framework ({sg_sym}) passes topological connectivity check "
+            "(anion mixing and TCO reaction not evaluated at Gate A)."
+        )
 
     gate_a = AdversarialAuditReport(
         candidate_id=mp_id,
@@ -883,7 +891,7 @@ def build_live_mp_candidate_dossier(
         anion_mixing_enthalpy_mev=hmix,
         photo_segregation_risk=seg_risk,
         tco_interface_rxn_energy_mev=tco_rxn,
-        tco_compatible=True,
+        tco_compatible=None,
         polaron_dimensionality_flag=polaron_flag,
         epistemic_uncertainty_flag=False,
         decision=decision,
@@ -1162,7 +1170,7 @@ def run_live_mp_discovery_campaign(
             status=dossier["status"],
             primary_failure_mode=dossier.get("primary_failure_mode"),
             e_above_hull_mev=st["e_above_hull_0k_mev"],
-            min_phonon_freq_thz=st["min_phonon_freq_thz"],
+            omega_min_heuristic_thz=st["omega_min_heuristic_thz"],
             rxn_temp_celsius=sy["min_synthesis_temp_c"] if sy else 0.0,
             competing_impurity_phases=sy["competing_impurity_sinks"] if sy else st["competing_hull_phases"],
             pourbaix_max_dissolution_mol_l=sy["pourbaix_max_dissolution_mol_l"] if sy else 0.0,
@@ -1180,13 +1188,12 @@ def run_live_mp_discovery_campaign(
             full_dossier=dossier,
         )
 
-    # Step 1 (v4.0) & Phase 9A (v6.0): 3D Dynamical Matrix D(q=0), 11-Image NEB Migration & Lab/Defect Supercell Dossiers
+    # Step 1 (v4.0) & Phase 9A (v6.0): Pair-Spring Gamma Heuristic, Migration Heuristic & Lab/Defect Supercell Dossiers
     from .atomistic_and_tmm import (
         evaluate_3d_atomistic_phonon_and_neb,
         evaluate_coherent_abeles_tmm_4t_stack,
         evaluate_graded_arc_and_techno_economics_4t_stack,
         evaluate_phase9a_lab_synthesis_and_defect_supercell,
-        evaluate_phase9b_contrastive_classifier_audit,
         evaluate_phase9c_real_world_lcoe_stress_test,
         evaluate_phase10_bifacial_and_string_dossier,
     )
@@ -1221,19 +1228,13 @@ def run_live_mp_discovery_campaign(
         fin["phase11a_synthesis_contact_dossier"] = p11a_rep.model_dump()
         phase11a_dossiers.append(fin["phase11a_synthesis_contact_dossier"])
 
-    phase11a_dossiers.sort(key=lambda x: (-x["synthesis_practicality_score_100"], x["mp_gga_hull_mev_per_atom"]))
-
-    # Phase 9B (v6.0): Extended Full-Cache (117 Candidates) Sweep & Contrastive Failure Classifier Audit
-    full_cache_records = fetch_live_mp_semiconductors(refresh=False, max_candidates=500)
-    extended_117_dossiers: List[Dict[str, Any]] = list(all_dossiers)
-    seen_ids = {d["candidate"]["candidate_id"] for d in all_dossiers}
-    for extra_rec in full_cache_records:
-        if extra_rec["mp_id"] not in seen_ids:
-            ext_dos = build_live_mp_candidate_dossier(extra_rec, neg_priors, ledger)
-            extended_117_dossiers.append(ext_dos)
-            seen_ids.add(extra_rec["mp_id"])
-
-    contrastive_audit = evaluate_phase9b_contrastive_classifier_audit(extended_117_dossiers).model_dump()
+    phase11a_dossiers.sort(
+        key=lambda x: (
+            x["synthesis_practicality_score_100"] is None,
+            -(x["synthesis_practicality_score_100"] if x["synthesis_practicality_score_100"] is not None else -1.0),
+            x["mp_gga_hull_mev_per_atom"] if x["mp_gga_hull_mev_per_atom"] is not None else 1e9,
+        )
+    )
 
     # Cross-pair all discovered Track A Top Active Glass finalists with all discovered Track B Bottom IR finalists
     top_finalists = [f for f in finalists if f["candidate"]["target_layer"] == "TOP_ACTIVE_GLASS_185EV"]
@@ -1268,14 +1269,17 @@ def run_live_mp_discovery_campaign(
             phase10_bifacial_string_stacks.append(p10_model.model_dump())
 
             # Phase 11B/11C (v8.0): Realistic Non-Radiative SRH Device Physics & 4-Path Commercialization Techno-Economics
-            p11b_model = evaluate_phase11b_realistic_commercialization(
-                top_dossier=tf,
-                bottom_dossier=bf,
-                top_11a=phase11a_models[tf["candidate"]["candidate_id"]],
-                bot_11a=phase11a_models[bf["candidate"]["candidate_id"]],
-                p10_report=p10_model,
-            )
-            phase11b_realistic_comm_stacks.append(p11b_model.model_dump())
+            top_11a = phase11a_models[tf["candidate"]["candidate_id"]]
+            bot_11a = phase11a_models[bf["candidate"]["candidate_id"]]
+            if top_11a.contact_voltage_penalty_v is not None and bot_11a.contact_voltage_penalty_v is not None:
+                p11b_model = evaluate_phase11b_realistic_commercialization(
+                    top_dossier=tf,
+                    bottom_dossier=bf,
+                    top_11a=top_11a,
+                    bot_11a=bot_11a,
+                    p10_report=p10_model,
+                )
+                phase11b_realistic_comm_stacks.append(p11b_model.model_dump())
 
     cross_pairs.sort(key=lambda x: (-x["tandem_4t_low_fca_total_eff_percent"], x["combined_active_cost_usd_m2"]))
     coherent_tmm_stacks.sort(key=lambda x: (-x["tmm_4t_low_fca_pce_percent"], x["combined_active_cost_usd_m2"]))
@@ -1291,7 +1295,7 @@ def run_live_mp_discovery_campaign(
     summary = {
         "version": "4.0.0",
         "v5_graded_arc_and_techno_economics_enabled": True,
-        "v6_phase9_lab_contrastive_lcoe_enabled": True,
+        "v6_phase9_lab_and_lcoe_enabled": True,
         "v7_phase10_bifacial_and_string_enabled": True,
         "v8_phase11_realistic_commercialization_enabled": True,
         "data_provenance": {
@@ -1301,7 +1305,6 @@ def run_live_mp_discovery_campaign(
             "coherent_abeles_tmm_vs_rouard_airy": True,
             "graded_arc_tio2_and_techno_economic_fom": True,
             "phase9a_lab_synthesis_and_doped_supercells": True,
-            "phase9b_extended_117_mp_and_contrastive_audit": True,
             "phase9c_oblique_thermal_arrhenius_lcoe": True,
             "phase10_thickness_opt_bifacial_and_string_matching": True,
             "phase11_live_dft_thermo_interface_and_4path_commercialization": True,
@@ -1312,7 +1315,6 @@ def run_live_mp_discovery_campaign(
         "atomistic_phonon_neb_reports": atomistic_reports,
         "lab_synthesis_and_defect_dossiers": lab_defect_dossiers,
         "phase11a_synthesis_contact_dossiers": phase11a_dossiers,
-        "contrastive_classifier_audit": contrastive_audit,
         "cross_layer_4t_tandem_pairs": cross_pairs,
         "coherent_tmm_4t_stacks": coherent_tmm_stacks,
         "graded_arc_techno_economic_stacks": graded_arc_te_stacks,
@@ -1328,16 +1330,22 @@ def run_live_mp_discovery_campaign(
 if __name__ == "__main__":
     res = run_live_mp_discovery_campaign()
     print("Live MP v4.0-v8.0 Funnel Counts:", json.dumps(res["funnel_counts"], indent=2))
-    print("\n=== Phase 11A: Synthesis Practicality & Contact Alignment Ranking (8 Finalists) ===")
+    print(f"\n=== Phase 11A: Synthesis Practicality & Contact Alignment Ranking ({len(res['phase11a_synthesis_contact_dossiers'])} Finalists) ===")
     for p11a in res["phase11a_synthesis_contact_dossiers"]:
-        print(
-            f"  * {p11a['candidate_id']} ({p11a['formula_reduced']}, {p11a['target_layer']}): "
-            f"SPS={p11a['synthesis_practicality_score_100']:.2f}/100, "
-            f"Hull={p11a['mp_gga_hull_mev_per_atom']:.2f} meV, dMu_an={p11a['anion_chempot_window_ev']:.3f} eV, "
-            f"Rxn(In2O3/SnO2)={p11a['rxn_in2o3_mev_per_atom']:.1f}/{p11a['rxn_sno2_mev_per_atom']:.1f} meV/at, "
-            f"ETL={p11a['recommended_etl_barrier']}({p11a['best_cbo_ev']:+.2f} eV)"
-        )
-    print(f"\n=== Phase 11B/11C: Realistic Non-Radiative vs. Radiative & 4-Path Commercialization ({len(res['phase11b_realistic_commercialization_dossiers'])} Verified) ===")
+        if p11a["synthesis_practicality_score_100"] is None:
+            print(
+                f"  * {p11a['candidate_id']} ({p11a['formula_reduced']}, {p11a['target_layer']}): "
+                "SPS=not evaluated (no cached thermo/interface entry)"
+            )
+        else:
+            print(
+                f"  * {p11a['candidate_id']} ({p11a['formula_reduced']}, {p11a['target_layer']}): "
+                f"SPS={p11a['synthesis_practicality_score_100']:.2f}/100, "
+                f"Hull={p11a['mp_gga_hull_mev_per_atom']:.2f} meV, dMu_an={p11a['anion_chempot_window_ev']:.3f} eV, "
+                f"Rxn(In2O3/SnO2)={p11a['rxn_in2o3_mev_per_atom']:.1f}/{p11a['rxn_sno2_mev_per_atom']:.1f} meV/at, "
+                f"ETL={p11a['recommended_etl_barrier']}({p11a['best_cbo_ev']:+.2f} eV)"
+            )
+    print(f"\n=== Phase 11B/11C: Realistic Non-Radiative vs. Radiative & 4-Path Commercialization ({len(res['phase11b_realistic_commercialization_dossiers'])} Evaluated) ===")
     for p11b in res["phase11b_realistic_commercialization_dossiers"][:6]:
         print(
             f"  * {p11b['pair_id']} ({p11b['top_formula']} + c-Si + {p11b['bottom_formula']}): "

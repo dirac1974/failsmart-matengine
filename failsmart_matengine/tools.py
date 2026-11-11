@@ -138,7 +138,7 @@ def stage2_evaluate_stability(cand: CandidateMaterial) -> StabilityReport:
     spec = _spec_from_candidate(cand)
     m = compute_stability_metrics(spec)
     born_ok = m["bulk_modulus_gpa"] > 15.0 and m["shear_modulus_gpa"] > 10.0
-    dyn_ok = m["min_phonon_freq_thz"] > -0.10
+    dyn_ok = m["omega_min_heuristic_thz"] > -0.10
     hull_ok = m["e_above_hull_0k_mev"] <= 50.0 or m["g_above_hull_synth_mev"] <= 0.0
     emig = float(m["ion_migration_barrier_ev"])
     ion_ok = emig >= 0.65
@@ -146,7 +146,7 @@ def stage2_evaluate_stability(cand: CandidateMaterial) -> StabilityReport:
 
     reason = None
     if not dyn_ok:
-        reason = f"IMAGINARY_PHONON: omega_min = {m['min_phonon_freq_thz']:.2f} THz (< 0 THz) -> Dynamic lattice collapse"
+        reason = f"IMAGINARY_PHONON: omega_min = {m['omega_min_heuristic_thz']:.2f} THz (< 0 THz) -> Dynamic lattice collapse"
     elif not hull_ok:
         reason = f"HULL_INSTABILITY: dE_hull = {m['e_above_hull_0k_mev']:.1f} meV/atom (> 50 meV/atom threshold)"
     elif not born_ok:
@@ -165,7 +165,7 @@ def stage2_evaluate_stability(cand: CandidateMaterial) -> StabilityReport:
         bulk_modulus_gpa=m["bulk_modulus_gpa"],
         shear_modulus_gpa=m["shear_modulus_gpa"],
         born_elastic_stable=born_ok,
-        min_phonon_freq_thz=m["min_phonon_freq_thz"],
+        omega_min_heuristic_thz=m["omega_min_heuristic_thz"],
         debye_temperature_k=m["debye_temperature_k"],
         dynamically_stable=dyn_ok,
         ion_migration_barrier_ev=emig,
@@ -241,7 +241,7 @@ def gate_a_adversarial_audit(
     polaron_flag = cand.structural_dimensionality in ("0D-Isolated", "1D-Chain")
     tco_ok = d["tco_rxn"] > -100.0
     seg_ok = d["hmix"] < 35.0
-    unc_flag = stab.mlip_force_std_ev_ang > 0.15
+    unc_flag = (stab.mlip_force_std_ev_ang is not None) and (stab.mlip_force_std_ev_ang > 0.15)
 
     if polaron_flag:
         decision = "VETO_REJECT"

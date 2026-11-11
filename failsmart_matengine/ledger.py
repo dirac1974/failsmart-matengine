@@ -46,7 +46,7 @@ class ContrastiveFailureLedger:
                     status TEXT NOT NULL,
                     primary_failure_mode TEXT,
                     e_above_hull_mev REAL,
-                    min_phonon_freq_thz REAL,
+                    omega_min_heuristic_thz REAL,
                     rxn_temp_celsius REAL,
                     competing_impurity_phases TEXT,
                     pourbaix_max_dissolution_mol_l REAL,
@@ -66,6 +66,9 @@ class ContrastiveFailureLedger:
                 );
                 """
             )
+            cols = {row[1] for row in conn.execute("PRAGMA table_info(material_evaluations)").fetchall()}
+            if "min_phonon_freq_thz" in cols and "omega_min_heuristic_thz" not in cols:
+                conn.execute("ALTER TABLE material_evaluations RENAME COLUMN min_phonon_freq_thz TO omega_min_heuristic_thz")
             conn.commit()
 
     @staticmethod
@@ -193,7 +196,7 @@ class ContrastiveFailureLedger:
                 "status": "REJECTED",
                 "primary_failure_mode": "OXIDE_IMPURITY_SINK",
                 "e_above_hull_mev": 0.0,
-                "min_phonon_freq_thz": 1.45,
+                "omega_min_heuristic_thz": 1.45,
                 "rxn_temp_celsius": 950.0,
                 "competing_impurity_phases": ["ZrO2", "BaS", "BaSO4"],
                 "pourbaix_max_dissolution_mol_l": 1e-8,
@@ -224,7 +227,7 @@ class ContrastiveFailureLedger:
                 "status": "REJECTED",
                 "primary_failure_mode": "SMALL_POLARON_TRAP",
                 "e_above_hull_mev": 8.0,
-                "min_phonon_freq_thz": 0.65,
+                "omega_min_heuristic_thz": 0.65,
                 "rxn_temp_celsius": 180.0,
                 "competing_impurity_phases": ["BiI3"],
                 "pourbaix_max_dissolution_mol_l": 4.2e-4,
@@ -255,7 +258,7 @@ class ContrastiveFailureLedger:
                 "status": "REJECTED",
                 "primary_failure_mode": "AQUEOUS_LEACHING",
                 "e_above_hull_mev": 19.0,
-                "min_phonon_freq_thz": 0.82,
+                "omega_min_heuristic_thz": 0.82,
                 "rxn_temp_celsius": 340.0,
                 "competing_impurity_phases": ["PbI2", "Bi2S3"],
                 "pourbaix_max_dissolution_mol_l": 2.8e-3,
@@ -295,7 +298,7 @@ class ContrastiveFailureLedger:
                 status=item["status"],
                 primary_failure_mode=item["primary_failure_mode"],
                 e_above_hull_mev=item["e_above_hull_mev"],
-                min_phonon_freq_thz=item["min_phonon_freq_thz"],
+                omega_min_heuristic_thz=item["omega_min_heuristic_thz"],
                 rxn_temp_celsius=item["rxn_temp_celsius"],
                 competing_impurity_phases=item["competing_impurity_phases"],
                 pourbaix_max_dissolution_mol_l=item["pourbaix_max_dissolution_mol_l"],
@@ -327,7 +330,7 @@ class ContrastiveFailureLedger:
         status: str,
         primary_failure_mode: Optional[str],
         e_above_hull_mev: float,
-        min_phonon_freq_thz: float,
+        omega_min_heuristic_thz: Optional[float],
         rxn_temp_celsius: float,
         competing_impurity_phases: List[str],
         pourbaix_max_dissolution_mol_l: float,
@@ -351,7 +354,7 @@ class ContrastiveFailureLedger:
                     candidate_id, formula_reduced, target_layer, crystal_family,
                     space_group_number, structural_dimensionality, cif_structure,
                     mace_embedding, stage_reached, status, primary_failure_mode,
-                    e_above_hull_mev, min_phonon_freq_thz, rxn_temp_celsius,
+                    e_above_hull_mev, omega_min_heuristic_thz, rxn_temp_celsius,
                     competing_impurity_phases, pourbaix_max_dissolution_mol_l,
                     active_layer_cost_usd_m2, hse06_soc_gap_ev, direct_gap_ev,
                     soc_splitting_ev, max_carrier_eff_mass, frohlich_alpha,
@@ -372,7 +375,7 @@ class ContrastiveFailureLedger:
                     status,
                     primary_failure_mode,
                     e_above_hull_mev,
-                    min_phonon_freq_thz,
+                    omega_min_heuristic_thz,
                     rxn_temp_celsius,
                     json.dumps(competing_impurity_phases),
                     pourbaix_max_dissolution_mol_l,

@@ -36,17 +36,17 @@ class CandidateMaterial(BaseModel):
 class StabilityReport(BaseModel):
     candidate_id: str
     e_above_hull_0k_mev: float
-    g_above_hull_synth_mev: float
+    g_above_hull_synth_mev: Optional[float] = None
     competing_hull_phases: List[str]
     bulk_modulus_gpa: float
     shear_modulus_gpa: float
     born_elastic_stable: bool
-    min_phonon_freq_thz: float
+    omega_min_heuristic_thz: Optional[float] = None
     debye_temperature_k: float
-    dynamically_stable: bool
+    dynamically_stable: Optional[bool] = None
     ion_migration_barrier_ev: float
     ion_migration_stable: bool
-    mlip_force_std_ev_ang: float
+    mlip_force_std_ev_ang: Optional[float] = None
     passed_stage2: bool
     failure_reason: Optional[str] = None
 
@@ -58,7 +58,7 @@ class SynthesisRouteReport(BaseModel):
     min_synthesis_temp_c: float
     rxn_driving_force_mev_atom: float
     competing_impurity_sinks: List[str]
-    impurity_sink_risk_score: float
+    impurity_sink_risk_score: Optional[float] = None
     halide_volatility_pressure_pa: float
     pourbaix_max_dissolution_mol_l: float
     pourbaix_stable_ph4_to_9: bool
@@ -71,10 +71,10 @@ class SynthesisRouteReport(BaseModel):
 class AdversarialAuditReport(BaseModel):
     candidate_id: str
     gate_stage: str = Field(..., description="GATE_A_PRE_DFT or GATE_B_FINAL")
-    anion_mixing_enthalpy_mev: float
-    photo_segregation_risk: str
-    tco_interface_rxn_energy_mev: float
-    tco_compatible: bool
+    anion_mixing_enthalpy_mev: Optional[float] = None
+    photo_segregation_risk: str = "NOT_EVALUATED"
+    tco_interface_rxn_energy_mev: Optional[float] = None
+    tco_compatible: Optional[bool] = None
     polaron_dimensionality_flag: bool
     epistemic_uncertainty_flag: bool
     decision: str = Field(
@@ -153,22 +153,20 @@ class CrossLayerTandemPair(BaseModel):
 
 
 class AtomisticPhononNEBReport(BaseModel):
-    """3D Harmonic Dynamical Matrix D(q=0) & 11-Image Saddle-Point NEB Migration Dossier (v4.0)."""
+    """Pair-spring Gamma frequency heuristic and closed-form ion-migration barrier estimate."""
     candidate_id: str
     formula_reduced: str
     target_layer: str
     nsites_unit_cell: int
     dynamical_matrix_dim: int
-    gamma_min_optical_freq_thz: float
-    gamma_max_lo_freq_thz: float
-    imaginary_mode_count: int
-    acoustic_sum_rule_max_dev_thz: float
+    spring_model_gamma_freq_thz: List[float]
     migrating_species: str
     shortest_hop_distance_ang: float
     bottleneck_clearance_ang: float
-    neb_saddle_barrier_ev: float
+    emig_heuristic_ev: float
     room_temp_diffusivity_cm2_s: float
-    dynamically_and_kinetically_stable: bool
+    dynamically_stable: Optional[bool] = None
+    emig_gate_passed: bool
     redundancy_verified: bool
     sha256_signature: str
 
@@ -274,19 +272,6 @@ class LabSynthesisAndDefectDossier(BaseModel):
     sha256_signature: str
 
 
-class ContrastiveClassifierAuditReport(BaseModel):
-    """Phase 9B: Extended 117-Candidate MP Sweep & Contrastive Failure Classifier Margin Audit (v6.0)."""
-    total_evaluated_candidates: int
-    promoted_finalist_count: int
-    rejected_failure_count: int
-    mean_promoted_contrastive_margin: float
-    mean_rejected_contrastive_margin: float
-    contrastive_separation_delta: float
-    positive_separation_verified: bool
-    redundancy_verified: bool
-    sha256_signature: str
-
-
 class RealWorldLCOEStressTestReport(BaseModel):
     """Phase 9C: Oblique-Incidence (0-60 deg) S/P TMM, Operating Temp (25-65 C) & 25-Year Arrhenius LCOE Dossier (v6.0)."""
     pair_id: str
@@ -367,27 +352,27 @@ class Phase11ASynthesisContactDossier(BaseModel):
     formula_reduced: str
     target_layer: str
     structural_dimensionality: str
-    mp_gga_hull_mev_per_atom: float
+    mp_gga_hull_mev_per_atom: Optional[float] = None
     hull_decomposition_phases: List[str]
-    anion_chempot_window_ev: float
-    min_cation_chempot_window_ev: float
-    rxn_sno2_mev_per_atom: float
-    rxn_in2o3_mev_per_atom: float
-    rxn_tio2_mev_per_atom: float
+    anion_chempot_window_ev: Optional[float] = None
+    min_cation_chempot_window_ev: Optional[float] = None
+    rxn_sno2_mev_per_atom: Optional[float] = None
+    rxn_in2o3_mev_per_atom: Optional[float] = None
+    rxn_tio2_mev_per_atom: Optional[float] = None
     dominant_in2o3_reaction: str
-    cbm_vs_vacuum_ev: float
-    vbm_vs_vacuum_ev: float
-    cbo_vs_tio2_ev: float
-    cbo_vs_sno2_ev: float
-    vbo_vs_niox_ev: float
+    cbm_vs_vacuum_ev: Optional[float] = None
+    vbm_vs_vacuum_ev: Optional[float] = None
+    cbo_vs_tio2_ev: Optional[float] = None
+    cbo_vs_sno2_ev: Optional[float] = None
+    vbo_vs_niox_ev: Optional[float] = None
     recommended_etl_barrier: str
-    best_cbo_ev: float
-    contact_voltage_penalty_v: float
+    best_cbo_ev: Optional[float] = None
+    contact_voltage_penalty_v: Optional[float] = None
     antisite_voltage_penalty_v: float
     ribbon_orientation_factor: float
     critical_mineral_index: float
     has_critical_mineral: bool
-    synthesis_practicality_score_100: float
+    synthesis_practicality_score_100: Optional[float] = None
     redundancy_verified: bool
     sha256_signature: str
 
