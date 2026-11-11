@@ -336,20 +336,20 @@
         "target_layer": "TOP_ACTIVE_GLASS_185EV",
         "film_thickness_nm": 260.0,
         "refractive_index_n": 2.793,
-        "yablonovitch_4n2_factor": 31.2,
+        "yablonovitch_4n2_factor": 2.0,
         "dipole_forbidden_penalty_ev": 0.04,
         "shockley_queisser_limit_percent": 26.78,
-        "standalone_slme_percent": 24.43,
+        "standalone_slme_percent": 24.4,
         "sub_bandgap_transmittance_percent": 86.25,
         "tco_parasitic_loss_percent": 9.18,
-        "top_cell_jsc_ma_cm2": 17.46,
-        "top_cell_voc_v": 1.529,
-        "top_cell_eff_percent": 24.43,
-        "si_middle_cell_eff_percent": 12.92,
-        "bottom_ir_cell_eff_percent": 4.31,
-        "tandem_2layer_si_eff_percent": 38.29,
-        "tandem_4t_std_si_fca_eff_percent": 40.43,
-        "tandem_4t_total_eff_percent": 41.66,
+        "top_cell_jsc_ma_cm2": 17.39,
+        "top_cell_voc_v": 1.533,
+        "top_cell_eff_percent": 24.4,
+        "si_middle_cell_eff_percent": 12.97,
+        "bottom_ir_cell_eff_percent": 4.3,
+        "tandem_2layer_si_eff_percent": 38.32,
+        "tandem_4t_std_si_fca_eff_percent": 40.45,
+        "tandem_4t_total_eff_percent": 41.67,
         "passed_optical_gate": true,
         "failure_reason": null
       },
@@ -438,25 +438,25 @@
             "passed": true
           },
           "slme_quadrature": {
-            "stated_trapezoidal_slme_percent": 24.43,
-            "simpson_energy_slme_percent": 24.42,
-            "abs_difference_percent": 0.01,
+            "stated_trapezoidal_slme_percent": 24.4,
+            "simpson_energy_slme_percent": 24.4,
+            "abs_difference_percent": 0.0,
             "passed": true
           },
           "thermodynamic_sq_ceiling": {
-            "stated_slme_percent": 24.43,
+            "stated_slme_percent": 24.4,
             "shockley_queisser_limit_percent": 26.76,
             "passed": true
           },
           "sequential_4t_quadrature": {
-            "stated_tandem_4t_total_eff_percent": 41.66,
+            "stated_tandem_4t_total_eff_percent": 41.67,
             "simpson_tandem_4t_total_eff_percent": 41.66,
-            "abs_difference_percent": 0.0,
+            "abs_difference_percent": 0.01,
             "passed": true
           }
         },
         "mismatches": [],
-        "sha256_digest": "7327ea003865f07f05731062031db534816808ce0ee3ef6c9fe25352a3ebe11d"
+        "sha256_digest": "a20a11b8a87356615ed2dbf1cf9d78b0a506da656b2f522035708a91eb2981e9"
       }
     },
     {
@@ -785,20 +785,20 @@
         "target_layer": "TOP_ACTIVE_GLASS_185EV",
         "film_thickness_nm": 270.0,
         "refractive_index_n": 2.846,
-        "yablonovitch_4n2_factor": 32.4,
+        "yablonovitch_4n2_factor": 2.0,
         "dipole_forbidden_penalty_ev": 0.04,
         "shockley_queisser_limit_percent": 27.32,
-        "standalone_slme_percent": 25.08,
+        "standalone_slme_percent": 25.06,
         "sub_bandgap_transmittance_percent": 86.09,
         "tco_parasitic_loss_percent": 9.26,
-        "top_cell_jsc_ma_cm2": 18.29,
-        "top_cell_voc_v": 1.501,
-        "top_cell_eff_percent": 25.08,
-        "si_middle_cell_eff_percent": 12.39,
-        "bottom_ir_cell_eff_percent": 4.3,
-        "tandem_2layer_si_eff_percent": 38.41,
-        "tandem_4t_std_si_fca_eff_percent": 40.54,
-        "tandem_4t_total_eff_percent": 41.77,
+        "top_cell_jsc_ma_cm2": 18.22,
+        "top_cell_voc_v": 1.505,
+        "top_cell_eff_percent": 25.06,
+        "si_middle_cell_eff_percent": 12.44,
+        "bottom_ir_cell_eff_percent": 4.29,
+        "tandem_2layer_si_eff_percent": 38.43,
+        "tandem_4t_std_si_fca_eff_percent": 40.56,
+        "tandem_4t_total_eff_percent": 41.78,
         "passed_optical_gate": true,
         "failure_reason": null
       },
@@ -883,25 +883,25 @@
             "passed": true
           },
           "slme_quadrature": {
-            "stated_trapezoidal_slme_percent": 25.08,
-            "simpson_energy_slme_percent": 25.08,
-            "abs_difference_percent": 0.0,
+            "stated_trapezoidal_slme_percent": 25.06,
+            "simpson_energy_slme_percent": 25.05,
+            "abs_difference_percent": 0.01,
             "passed": true
           },
           "thermodynamic_sq_ceiling": {
-            "stated_slme_percent": 25.08,
+            "stated_slme_percent": 25.06,
             "shockley_queisser_limit_percent": 27.32,
             "passed": true
           },
           "sequential_4t_quadrature": {
-            "stated_tandem_4t_total_eff_percent": 41.77,
-            "simpson_tandem_4t_total_eff_percent": 41.77,
+            "stated_tandem_4t_total_eff_percent": 41.78,
+            "simpson_tandem_4t_total_eff_percent": 41.78,
             "abs_difference_percent": 0.0,
             "passed": true
           }
         },
         "mismatches": [],
-        "sha256_digest": "a6cc389afeaa8cccac8901bd6ea208fe026d6671db2a7c58eefff54afb6b7033"
+        "sha256_digest": "11d0cc71c0ff065d442fec434bb5920620a02c649ddb865e37a32b7695c36abc"
       }
     },
     {
@@ -1231,20 +1231,20 @@
         "target_layer": "TOP_ACTIVE_GLASS_185EV",
         "film_thickness_nm": 250.0,
         "refractive_index_n": 2.739,
-        "yablonovitch_4n2_factor": 30.0,
+        "yablonovitch_4n2_factor": 2.0,
         "dipole_forbidden_penalty_ev": 0.04,
         "shockley_queisser_limit_percent": 26.11,
-        "standalone_slme_percent": 23.81,
+        "standalone_slme_percent": 23.79,
         "sub_bandgap_transmittance_percent": 86.41,
         "tco_parasitic_loss_percent": 9.1,
-        "top_cell_jsc_ma_cm2": 16.69,
-        "top_cell_voc_v": 1.557,
-        "top_cell_eff_percent": 23.81,
-        "si_middle_cell_eff_percent": 13.42,
-        "bottom_ir_cell_eff_percent": 4.31,
-        "tandem_2layer_si_eff_percent": 38.18,
-        "tandem_4t_std_si_fca_eff_percent": 40.31,
-        "tandem_4t_total_eff_percent": 41.55,
+        "top_cell_jsc_ma_cm2": 16.62,
+        "top_cell_voc_v": 1.562,
+        "top_cell_eff_percent": 23.79,
+        "si_middle_cell_eff_percent": 13.46,
+        "bottom_ir_cell_eff_percent": 4.3,
+        "tandem_2layer_si_eff_percent": 38.2,
+        "tandem_4t_std_si_fca_eff_percent": 40.33,
+        "tandem_4t_total_eff_percent": 41.56,
         "passed_optical_gate": true,
         "failure_reason": null
       },
@@ -1333,25 +1333,25 @@
             "passed": true
           },
           "slme_quadrature": {
-            "stated_trapezoidal_slme_percent": 23.81,
-            "simpson_energy_slme_percent": 23.82,
-            "abs_difference_percent": 0.01,
+            "stated_trapezoidal_slme_percent": 23.79,
+            "simpson_energy_slme_percent": 23.79,
+            "abs_difference_percent": 0.0,
             "passed": true
           },
           "thermodynamic_sq_ceiling": {
-            "stated_slme_percent": 23.81,
+            "stated_slme_percent": 23.79,
             "shockley_queisser_limit_percent": 26.08,
             "passed": true
           },
           "sequential_4t_quadrature": {
-            "stated_tandem_4t_total_eff_percent": 41.55,
+            "stated_tandem_4t_total_eff_percent": 41.56,
             "simpson_tandem_4t_total_eff_percent": 41.55,
-            "abs_difference_percent": 0.0,
+            "abs_difference_percent": 0.01,
             "passed": true
           }
         },
         "mismatches": [],
-        "sha256_digest": "f7228c7119f0512da697a81e39f7709621af9f891dfa6b9559405770662c75c3"
+        "sha256_digest": "8185c04696a2a053f41545b6e8cc3c4ba50cbe9ea9d90840eca3f5b20c5c3775"
       }
     },
     {
@@ -1682,20 +1682,20 @@
         "target_layer": "BOTTOM_IR_075EV",
         "film_thickness_nm": 350.0,
         "refractive_index_n": 3.521,
-        "yablonovitch_4n2_factor": 49.6,
+        "yablonovitch_4n2_factor": 2.0,
         "dipole_forbidden_penalty_ev": 0.03,
         "shockley_queisser_limit_percent": 25.0,
-        "standalone_slme_percent": 23.48,
+        "standalone_slme_percent": 23.58,
         "sub_bandgap_transmittance_percent": 81.43,
         "tco_parasitic_loss_percent": 12.98,
-        "top_cell_jsc_ma_cm2": 16.91,
-        "top_cell_voc_v": 1.548,
-        "top_cell_eff_percent": 23.96,
-        "si_middle_cell_eff_percent": 13.34,
-        "bottom_ir_cell_eff_percent": 4.52,
-        "tandem_2layer_si_eff_percent": 38.26,
-        "tandem_4t_std_si_fca_eff_percent": 40.51,
-        "tandem_4t_total_eff_percent": 41.83,
+        "top_cell_jsc_ma_cm2": 16.89,
+        "top_cell_voc_v": 1.552,
+        "top_cell_eff_percent": 24.0,
+        "si_middle_cell_eff_percent": 13.36,
+        "bottom_ir_cell_eff_percent": 4.5,
+        "tandem_2layer_si_eff_percent": 38.31,
+        "tandem_4t_std_si_fca_eff_percent": 40.56,
+        "tandem_4t_total_eff_percent": 41.86,
         "passed_optical_gate": true,
         "failure_reason": null
       },
@@ -1780,25 +1780,25 @@
             "passed": true
           },
           "slme_quadrature": {
-            "stated_trapezoidal_slme_percent": 23.48,
-            "simpson_energy_slme_percent": 23.48,
+            "stated_trapezoidal_slme_percent": 23.58,
+            "simpson_energy_slme_percent": 23.58,
             "abs_difference_percent": 0.0,
             "passed": true
           },
           "thermodynamic_sq_ceiling": {
-            "stated_slme_percent": 23.48,
+            "stated_slme_percent": 23.58,
             "shockley_queisser_limit_percent": 25.0,
             "passed": true
           },
           "sequential_4t_quadrature": {
-            "stated_tandem_4t_total_eff_percent": 41.83,
-            "simpson_tandem_4t_total_eff_percent": 41.83,
+            "stated_tandem_4t_total_eff_percent": 41.86,
+            "simpson_tandem_4t_total_eff_percent": 41.86,
             "abs_difference_percent": 0.0,
             "passed": true
           }
         },
         "mismatches": [],
-        "sha256_digest": "24e5980fa55fb8a5e1a675ac6d5ac7d224cb55cc0a996f2a6a84977078f21350"
+        "sha256_digest": "8d2a220da8b781d0d9c9b7685baf2befb20b2dd749671de821a322ae923b049e"
       }
     },
     {
@@ -2127,20 +2127,20 @@
         "target_layer": "BOTTOM_IR_075EV",
         "film_thickness_nm": 320.0,
         "refractive_index_n": 3.619,
-        "yablonovitch_4n2_factor": 52.4,
+        "yablonovitch_4n2_factor": 2.0,
         "dipole_forbidden_penalty_ev": 0.02,
         "shockley_queisser_limit_percent": 24.79,
-        "standalone_slme_percent": 23.59,
+        "standalone_slme_percent": 23.7,
         "sub_bandgap_transmittance_percent": 80.93,
         "tco_parasitic_loss_percent": 13.34,
-        "top_cell_jsc_ma_cm2": 16.91,
-        "top_cell_voc_v": 1.548,
-        "top_cell_eff_percent": 23.96,
-        "si_middle_cell_eff_percent": 13.34,
-        "bottom_ir_cell_eff_percent": 4.77,
-        "tandem_2layer_si_eff_percent": 38.26,
-        "tandem_4t_std_si_fca_eff_percent": 40.64,
-        "tandem_4t_total_eff_percent": 42.08,
+        "top_cell_jsc_ma_cm2": 16.89,
+        "top_cell_voc_v": 1.552,
+        "top_cell_eff_percent": 24.0,
+        "si_middle_cell_eff_percent": 13.36,
+        "bottom_ir_cell_eff_percent": 4.74,
+        "tandem_2layer_si_eff_percent": 38.31,
+        "tandem_4t_std_si_fca_eff_percent": 40.69,
+        "tandem_4t_total_eff_percent": 42.1,
         "passed_optical_gate": true,
         "failure_reason": null
       },
@@ -2225,25 +2225,25 @@
             "passed": true
           },
           "slme_quadrature": {
-            "stated_trapezoidal_slme_percent": 23.59,
-            "simpson_energy_slme_percent": 23.59,
+            "stated_trapezoidal_slme_percent": 23.7,
+            "simpson_energy_slme_percent": 23.7,
             "abs_difference_percent": 0.0,
             "passed": true
           },
           "thermodynamic_sq_ceiling": {
-            "stated_slme_percent": 23.59,
+            "stated_slme_percent": 23.7,
             "shockley_queisser_limit_percent": 24.79,
             "passed": true
           },
           "sequential_4t_quadrature": {
-            "stated_tandem_4t_total_eff_percent": 42.08,
-            "simpson_tandem_4t_total_eff_percent": 42.08,
+            "stated_tandem_4t_total_eff_percent": 42.1,
+            "simpson_tandem_4t_total_eff_percent": 42.1,
             "abs_difference_percent": 0.0,
             "passed": true
           }
         },
         "mismatches": [],
-        "sha256_digest": "83b3549e4805d11c3be55a82df02534f37e1ff926bf18a3bb3935492530ce9e9"
+        "sha256_digest": "e5a66a7b95475eb68e1518917f2c358ff2b84052a6d0ef8974ad46ed2e48a4c3"
       }
     }
   ],
@@ -2574,22 +2574,22 @@
         "target_layer": "TOP_ACTIVE_GLASS_185EV",
         "film_thickness_nm": 280.0,
         "refractive_index_n": 3.066,
-        "yablonovitch_4n2_factor": 37.6,
+        "yablonovitch_4n2_factor": 2.0,
         "dipole_forbidden_penalty_ev": 0.34,
         "shockley_queisser_limit_percent": 33.43,
-        "standalone_slme_percent": 17.88,
+        "standalone_slme_percent": 19.49,
         "sub_bandgap_transmittance_percent": 82.88,
         "tco_parasitic_loss_percent": 12.27,
-        "top_cell_jsc_ma_cm2": 28.11,
-        "top_cell_voc_v": 0.746,
-        "top_cell_eff_percent": 17.88,
-        "si_middle_cell_eff_percent": 6.4,
+        "top_cell_jsc_ma_cm2": 27.53,
+        "top_cell_voc_v": 0.82,
+        "top_cell_eff_percent": 19.49,
+        "si_middle_cell_eff_percent": 6.73,
         "bottom_ir_cell_eff_percent": 4.23,
-        "tandem_2layer_si_eff_percent": 25.14,
-        "tandem_4t_std_si_fca_eff_percent": 27.3,
-        "tandem_4t_total_eff_percent": 28.51,
+        "tandem_2layer_si_eff_percent": 27.09,
+        "tandem_4t_std_si_fca_eff_percent": 29.24,
+        "tandem_4t_total_eff_percent": 30.45,
         "passed_optical_gate": false,
-        "failure_reason": "LOW_OPTICAL_EFFICIENCY: Top SLME=17.88% (<20.0%) or sub-gap transmittance=82.88% (<85.0%)"
+        "failure_reason": "LOW_OPTICAL_EFFICIENCY: Top SLME=19.49% (<20.0%) or sub-gap transmittance=82.88% (<85.0%)"
       },
       "redundancy_verification": {
         "candidate_id": "CAND-A01",
@@ -2672,25 +2672,25 @@
             "passed": true
           },
           "slme_quadrature": {
-            "stated_trapezoidal_slme_percent": 17.88,
-            "simpson_energy_slme_percent": 17.89,
-            "abs_difference_percent": 0.01,
+            "stated_trapezoidal_slme_percent": 19.49,
+            "simpson_energy_slme_percent": 19.49,
+            "abs_difference_percent": 0.0,
             "passed": true
           },
           "thermodynamic_sq_ceiling": {
-            "stated_slme_percent": 17.88,
+            "stated_slme_percent": 19.49,
             "shockley_queisser_limit_percent": 33.43,
             "passed": true
           },
           "sequential_4t_quadrature": {
-            "stated_tandem_4t_total_eff_percent": 28.51,
-            "simpson_tandem_4t_total_eff_percent": 28.52,
-            "abs_difference_percent": 0.01,
+            "stated_tandem_4t_total_eff_percent": 30.45,
+            "simpson_tandem_4t_total_eff_percent": 30.45,
+            "abs_difference_percent": 0.0,
             "passed": true
           }
         },
         "mismatches": [],
-        "sha256_digest": "debc03b9be382904e528a9692e4910f90ecaea2f9453e6bdd825a0c6b97bb2e6"
+        "sha256_digest": "e9a8b8734d7cb9112bd75aed29fe560873ae21af168f4e0c00360e314364d984"
       }
     },
     {
@@ -3020,20 +3020,20 @@
         "target_layer": "TOP_ACTIVE_GLASS_185EV",
         "film_thickness_nm": 260.0,
         "refractive_index_n": 2.793,
-        "yablonovitch_4n2_factor": 31.2,
+        "yablonovitch_4n2_factor": 2.0,
         "dipole_forbidden_penalty_ev": 0.04,
         "shockley_queisser_limit_percent": 26.78,
-        "standalone_slme_percent": 24.43,
+        "standalone_slme_percent": 24.4,
         "sub_bandgap_transmittance_percent": 86.25,
         "tco_parasitic_loss_percent": 9.18,
-        "top_cell_jsc_ma_cm2": 17.46,
-        "top_cell_voc_v": 1.529,
-        "top_cell_eff_percent": 24.43,
-        "si_middle_cell_eff_percent": 12.92,
-        "bottom_ir_cell_eff_percent": 4.31,
-        "tandem_2layer_si_eff_percent": 38.29,
-        "tandem_4t_std_si_fca_eff_percent": 40.43,
-        "tandem_4t_total_eff_percent": 41.66,
+        "top_cell_jsc_ma_cm2": 17.39,
+        "top_cell_voc_v": 1.533,
+        "top_cell_eff_percent": 24.4,
+        "si_middle_cell_eff_percent": 12.97,
+        "bottom_ir_cell_eff_percent": 4.3,
+        "tandem_2layer_si_eff_percent": 38.32,
+        "tandem_4t_std_si_fca_eff_percent": 40.45,
+        "tandem_4t_total_eff_percent": 41.67,
         "passed_optical_gate": true,
         "failure_reason": null
       },
@@ -3122,25 +3122,25 @@
             "passed": true
           },
           "slme_quadrature": {
-            "stated_trapezoidal_slme_percent": 24.43,
-            "simpson_energy_slme_percent": 24.42,
-            "abs_difference_percent": 0.01,
+            "stated_trapezoidal_slme_percent": 24.4,
+            "simpson_energy_slme_percent": 24.4,
+            "abs_difference_percent": 0.0,
             "passed": true
           },
           "thermodynamic_sq_ceiling": {
-            "stated_slme_percent": 24.43,
+            "stated_slme_percent": 24.4,
             "shockley_queisser_limit_percent": 26.76,
             "passed": true
           },
           "sequential_4t_quadrature": {
-            "stated_tandem_4t_total_eff_percent": 41.66,
+            "stated_tandem_4t_total_eff_percent": 41.67,
             "simpson_tandem_4t_total_eff_percent": 41.66,
-            "abs_difference_percent": 0.0,
+            "abs_difference_percent": 0.01,
             "passed": true
           }
         },
         "mismatches": [],
-        "sha256_digest": "7327ea003865f07f05731062031db534816808ce0ee3ef6c9fe25352a3ebe11d"
+        "sha256_digest": "a20a11b8a87356615ed2dbf1cf9d78b0a506da656b2f522035708a91eb2981e9"
       }
     },
     {
@@ -3469,20 +3469,20 @@
         "target_layer": "TOP_ACTIVE_GLASS_185EV",
         "film_thickness_nm": 270.0,
         "refractive_index_n": 2.846,
-        "yablonovitch_4n2_factor": 32.4,
+        "yablonovitch_4n2_factor": 2.0,
         "dipole_forbidden_penalty_ev": 0.04,
         "shockley_queisser_limit_percent": 27.32,
-        "standalone_slme_percent": 25.08,
+        "standalone_slme_percent": 25.06,
         "sub_bandgap_transmittance_percent": 86.09,
         "tco_parasitic_loss_percent": 9.26,
-        "top_cell_jsc_ma_cm2": 18.29,
-        "top_cell_voc_v": 1.501,
-        "top_cell_eff_percent": 25.08,
-        "si_middle_cell_eff_percent": 12.39,
-        "bottom_ir_cell_eff_percent": 4.3,
-        "tandem_2layer_si_eff_percent": 38.41,
-        "tandem_4t_std_si_fca_eff_percent": 40.54,
-        "tandem_4t_total_eff_percent": 41.77,
+        "top_cell_jsc_ma_cm2": 18.22,
+        "top_cell_voc_v": 1.505,
+        "top_cell_eff_percent": 25.06,
+        "si_middle_cell_eff_percent": 12.44,
+        "bottom_ir_cell_eff_percent": 4.29,
+        "tandem_2layer_si_eff_percent": 38.43,
+        "tandem_4t_std_si_fca_eff_percent": 40.56,
+        "tandem_4t_total_eff_percent": 41.78,
         "passed_optical_gate": true,
         "failure_reason": null
       },
@@ -3567,25 +3567,25 @@
             "passed": true
           },
           "slme_quadrature": {
-            "stated_trapezoidal_slme_percent": 25.08,
-            "simpson_energy_slme_percent": 25.08,
-            "abs_difference_percent": 0.0,
+            "stated_trapezoidal_slme_percent": 25.06,
+            "simpson_energy_slme_percent": 25.05,
+            "abs_difference_percent": 0.01,
             "passed": true
           },
           "thermodynamic_sq_ceiling": {
-            "stated_slme_percent": 25.08,
+            "stated_slme_percent": 25.06,
             "shockley_queisser_limit_percent": 27.32,
             "passed": true
           },
           "sequential_4t_quadrature": {
-            "stated_tandem_4t_total_eff_percent": 41.77,
-            "simpson_tandem_4t_total_eff_percent": 41.77,
+            "stated_tandem_4t_total_eff_percent": 41.78,
+            "simpson_tandem_4t_total_eff_percent": 41.78,
             "abs_difference_percent": 0.0,
             "passed": true
           }
         },
         "mismatches": [],
-        "sha256_digest": "a6cc389afeaa8cccac8901bd6ea208fe026d6671db2a7c58eefff54afb6b7033"
+        "sha256_digest": "11d0cc71c0ff065d442fec434bb5920620a02c649ddb865e37a32b7695c36abc"
       }
     },
     {
@@ -3913,22 +3913,22 @@
         "target_layer": "TOP_ACTIVE_GLASS_185EV",
         "film_thickness_nm": 290.0,
         "refractive_index_n": 2.366,
-        "yablonovitch_4n2_factor": 22.4,
+        "yablonovitch_4n2_factor": 2.0,
         "dipole_forbidden_penalty_ev": 0.18,
         "shockley_queisser_limit_percent": 4.96,
-        "standalone_slme_percent": 2.55,
+        "standalone_slme_percent": 2.54,
         "sub_bandgap_transmittance_percent": 88.18,
         "tco_parasitic_loss_percent": 7.78,
         "top_cell_jsc_ma_cm2": 1.23,
         "top_cell_voc_v": 2.206,
-        "top_cell_eff_percent": 2.55,
+        "top_cell_eff_percent": 2.54,
         "si_middle_cell_eff_percent": 23.46,
-        "bottom_ir_cell_eff_percent": 4.36,
-        "tandem_2layer_si_eff_percent": 27.0,
+        "bottom_ir_cell_eff_percent": 4.34,
+        "tandem_2layer_si_eff_percent": 26.99,
         "tandem_4t_std_si_fca_eff_percent": 29.12,
-        "tandem_4t_total_eff_percent": 30.37,
+        "tandem_4t_total_eff_percent": 30.35,
         "passed_optical_gate": false,
-        "failure_reason": "LOW_OPTICAL_EFFICIENCY: Top SLME=2.55% (<20.0%) or sub-gap transmittance=88.18% (<85.0%)"
+        "failure_reason": "LOW_OPTICAL_EFFICIENCY: Top SLME=2.54% (<20.0%) or sub-gap transmittance=88.18% (<85.0%)"
       },
       "redundancy_verification": {
         "candidate_id": "CAND-A04",
@@ -4011,25 +4011,25 @@
             "passed": true
           },
           "slme_quadrature": {
-            "stated_trapezoidal_slme_percent": 2.55,
-            "simpson_energy_slme_percent": 2.55,
+            "stated_trapezoidal_slme_percent": 2.54,
+            "simpson_energy_slme_percent": 2.54,
             "abs_difference_percent": 0.0,
             "passed": true
           },
           "thermodynamic_sq_ceiling": {
-            "stated_slme_percent": 2.55,
+            "stated_slme_percent": 2.54,
             "shockley_queisser_limit_percent": 4.98,
             "passed": true
           },
           "sequential_4t_quadrature": {
-            "stated_tandem_4t_total_eff_percent": 30.37,
-            "simpson_tandem_4t_total_eff_percent": 30.37,
+            "stated_tandem_4t_total_eff_percent": 30.35,
+            "simpson_tandem_4t_total_eff_percent": 30.35,
             "abs_difference_percent": 0.0,
             "passed": true
           }
         },
         "mismatches": [],
-        "sha256_digest": "8a3aad908295b4d8e72c444e4e1a059263eee1dddb78a9881a785960b987d99f"
+        "sha256_digest": "d0d03fb8d0fb644c442633bb8d4fa33932a2e8ca202c05a2940c244441041ae1"
       }
     },
     {
@@ -4640,20 +4640,20 @@
         "target_layer": "TOP_ACTIVE_GLASS_185EV",
         "film_thickness_nm": 250.0,
         "refractive_index_n": 2.739,
-        "yablonovitch_4n2_factor": 30.0,
+        "yablonovitch_4n2_factor": 2.0,
         "dipole_forbidden_penalty_ev": 0.04,
         "shockley_queisser_limit_percent": 26.11,
-        "standalone_slme_percent": 23.81,
+        "standalone_slme_percent": 23.79,
         "sub_bandgap_transmittance_percent": 86.41,
         "tco_parasitic_loss_percent": 9.1,
-        "top_cell_jsc_ma_cm2": 16.69,
-        "top_cell_voc_v": 1.557,
-        "top_cell_eff_percent": 23.81,
-        "si_middle_cell_eff_percent": 13.42,
-        "bottom_ir_cell_eff_percent": 4.31,
-        "tandem_2layer_si_eff_percent": 38.18,
-        "tandem_4t_std_si_fca_eff_percent": 40.31,
-        "tandem_4t_total_eff_percent": 41.55,
+        "top_cell_jsc_ma_cm2": 16.62,
+        "top_cell_voc_v": 1.562,
+        "top_cell_eff_percent": 23.79,
+        "si_middle_cell_eff_percent": 13.46,
+        "bottom_ir_cell_eff_percent": 4.3,
+        "tandem_2layer_si_eff_percent": 38.2,
+        "tandem_4t_std_si_fca_eff_percent": 40.33,
+        "tandem_4t_total_eff_percent": 41.56,
         "passed_optical_gate": true,
         "failure_reason": null
       },
@@ -4742,25 +4742,25 @@
             "passed": true
           },
           "slme_quadrature": {
-            "stated_trapezoidal_slme_percent": 23.81,
-            "simpson_energy_slme_percent": 23.82,
-            "abs_difference_percent": 0.01,
+            "stated_trapezoidal_slme_percent": 23.79,
+            "simpson_energy_slme_percent": 23.79,
+            "abs_difference_percent": 0.0,
             "passed": true
           },
           "thermodynamic_sq_ceiling": {
-            "stated_slme_percent": 23.81,
+            "stated_slme_percent": 23.79,
             "shockley_queisser_limit_percent": 26.08,
             "passed": true
           },
           "sequential_4t_quadrature": {
-            "stated_tandem_4t_total_eff_percent": 41.55,
+            "stated_tandem_4t_total_eff_percent": 41.56,
             "simpson_tandem_4t_total_eff_percent": 41.55,
-            "abs_difference_percent": 0.0,
+            "abs_difference_percent": 0.01,
             "passed": true
           }
         },
         "mismatches": [],
-        "sha256_digest": "f7228c7119f0512da697a81e39f7709621af9f891dfa6b9559405770662c75c3"
+        "sha256_digest": "8185c04696a2a053f41545b6e8cc3c4ba50cbe9ea9d90840eca3f5b20c5c3775"
       }
     },
     {
@@ -6610,20 +6610,20 @@
         "target_layer": "BOTTOM_IR_075EV",
         "film_thickness_nm": 350.0,
         "refractive_index_n": 3.521,
-        "yablonovitch_4n2_factor": 49.6,
+        "yablonovitch_4n2_factor": 2.0,
         "dipole_forbidden_penalty_ev": 0.03,
         "shockley_queisser_limit_percent": 25.0,
-        "standalone_slme_percent": 23.48,
+        "standalone_slme_percent": 23.58,
         "sub_bandgap_transmittance_percent": 81.43,
         "tco_parasitic_loss_percent": 12.98,
-        "top_cell_jsc_ma_cm2": 16.91,
-        "top_cell_voc_v": 1.548,
-        "top_cell_eff_percent": 23.96,
-        "si_middle_cell_eff_percent": 13.34,
-        "bottom_ir_cell_eff_percent": 4.52,
-        "tandem_2layer_si_eff_percent": 38.26,
-        "tandem_4t_std_si_fca_eff_percent": 40.51,
-        "tandem_4t_total_eff_percent": 41.83,
+        "top_cell_jsc_ma_cm2": 16.89,
+        "top_cell_voc_v": 1.552,
+        "top_cell_eff_percent": 24.0,
+        "si_middle_cell_eff_percent": 13.36,
+        "bottom_ir_cell_eff_percent": 4.5,
+        "tandem_2layer_si_eff_percent": 38.31,
+        "tandem_4t_std_si_fca_eff_percent": 40.56,
+        "tandem_4t_total_eff_percent": 41.86,
         "passed_optical_gate": true,
         "failure_reason": null
       },
@@ -6708,25 +6708,25 @@
             "passed": true
           },
           "slme_quadrature": {
-            "stated_trapezoidal_slme_percent": 23.48,
-            "simpson_energy_slme_percent": 23.48,
+            "stated_trapezoidal_slme_percent": 23.58,
+            "simpson_energy_slme_percent": 23.58,
             "abs_difference_percent": 0.0,
             "passed": true
           },
           "thermodynamic_sq_ceiling": {
-            "stated_slme_percent": 23.48,
+            "stated_slme_percent": 23.58,
             "shockley_queisser_limit_percent": 25.0,
             "passed": true
           },
           "sequential_4t_quadrature": {
-            "stated_tandem_4t_total_eff_percent": 41.83,
-            "simpson_tandem_4t_total_eff_percent": 41.83,
+            "stated_tandem_4t_total_eff_percent": 41.86,
+            "simpson_tandem_4t_total_eff_percent": 41.86,
             "abs_difference_percent": 0.0,
             "passed": true
           }
         },
         "mismatches": [],
-        "sha256_digest": "24e5980fa55fb8a5e1a675ac6d5ac7d224cb55cc0a996f2a6a84977078f21350"
+        "sha256_digest": "8d2a220da8b781d0d9c9b7685baf2befb20b2dd749671de821a322ae923b049e"
       }
     },
     {
@@ -7056,20 +7056,20 @@
         "target_layer": "BOTTOM_IR_075EV",
         "film_thickness_nm": 340.0,
         "refractive_index_n": 3.435,
-        "yablonovitch_4n2_factor": 47.2,
+        "yablonovitch_4n2_factor": 2.0,
         "dipole_forbidden_penalty_ev": 0.04,
         "shockley_queisser_limit_percent": 25.4,
-        "standalone_slme_percent": 23.52,
+        "standalone_slme_percent": 23.64,
         "sub_bandgap_transmittance_percent": 82.1,
         "tco_parasitic_loss_percent": 12.42,
-        "top_cell_jsc_ma_cm2": 16.91,
-        "top_cell_voc_v": 1.548,
-        "top_cell_eff_percent": 23.96,
-        "si_middle_cell_eff_percent": 13.34,
-        "bottom_ir_cell_eff_percent": 4.17,
-        "tandem_2layer_si_eff_percent": 38.26,
-        "tandem_4t_std_si_fca_eff_percent": 40.33,
-        "tandem_4t_total_eff_percent": 41.47,
+        "top_cell_jsc_ma_cm2": 16.89,
+        "top_cell_voc_v": 1.552,
+        "top_cell_eff_percent": 24.0,
+        "si_middle_cell_eff_percent": 13.36,
+        "bottom_ir_cell_eff_percent": 4.15,
+        "tandem_2layer_si_eff_percent": 38.31,
+        "tandem_4t_std_si_fca_eff_percent": 40.38,
+        "tandem_4t_total_eff_percent": 41.51,
         "passed_optical_gate": true,
         "failure_reason": null
       },
@@ -7154,25 +7154,25 @@
             "passed": true
           },
           "slme_quadrature": {
-            "stated_trapezoidal_slme_percent": 23.52,
-            "simpson_energy_slme_percent": 23.52,
-            "abs_difference_percent": 0.0,
+            "stated_trapezoidal_slme_percent": 23.64,
+            "simpson_energy_slme_percent": 23.65,
+            "abs_difference_percent": 0.01,
             "passed": true
           },
           "thermodynamic_sq_ceiling": {
-            "stated_slme_percent": 23.52,
+            "stated_slme_percent": 23.64,
             "shockley_queisser_limit_percent": 25.41,
             "passed": true
           },
           "sequential_4t_quadrature": {
-            "stated_tandem_4t_total_eff_percent": 41.47,
-            "simpson_tandem_4t_total_eff_percent": 41.47,
+            "stated_tandem_4t_total_eff_percent": 41.51,
+            "simpson_tandem_4t_total_eff_percent": 41.51,
             "abs_difference_percent": 0.0,
             "passed": true
           }
         },
         "mismatches": [],
-        "sha256_digest": "a4f0e619511d65246105057298e32b4186417d5abf7101f7f802b98deda7481f"
+        "sha256_digest": "d1efc534af7fdd18b32f086895a9e50245beb6182b1d0f682688aab9e8f65d33"
       }
     },
     {
@@ -7501,20 +7501,20 @@
         "target_layer": "BOTTOM_IR_075EV",
         "film_thickness_nm": 320.0,
         "refractive_index_n": 3.619,
-        "yablonovitch_4n2_factor": 52.4,
+        "yablonovitch_4n2_factor": 2.0,
         "dipole_forbidden_penalty_ev": 0.02,
         "shockley_queisser_limit_percent": 24.79,
-        "standalone_slme_percent": 23.59,
+        "standalone_slme_percent": 23.7,
         "sub_bandgap_transmittance_percent": 80.93,
         "tco_parasitic_loss_percent": 13.34,
-        "top_cell_jsc_ma_cm2": 16.91,
-        "top_cell_voc_v": 1.548,
-        "top_cell_eff_percent": 23.96,
-        "si_middle_cell_eff_percent": 13.34,
-        "bottom_ir_cell_eff_percent": 4.77,
-        "tandem_2layer_si_eff_percent": 38.26,
-        "tandem_4t_std_si_fca_eff_percent": 40.64,
-        "tandem_4t_total_eff_percent": 42.08,
+        "top_cell_jsc_ma_cm2": 16.89,
+        "top_cell_voc_v": 1.552,
+        "top_cell_eff_percent": 24.0,
+        "si_middle_cell_eff_percent": 13.36,
+        "bottom_ir_cell_eff_percent": 4.74,
+        "tandem_2layer_si_eff_percent": 38.31,
+        "tandem_4t_std_si_fca_eff_percent": 40.69,
+        "tandem_4t_total_eff_percent": 42.1,
         "passed_optical_gate": true,
         "failure_reason": null
       },
@@ -7599,25 +7599,25 @@
             "passed": true
           },
           "slme_quadrature": {
-            "stated_trapezoidal_slme_percent": 23.59,
-            "simpson_energy_slme_percent": 23.59,
+            "stated_trapezoidal_slme_percent": 23.7,
+            "simpson_energy_slme_percent": 23.7,
             "abs_difference_percent": 0.0,
             "passed": true
           },
           "thermodynamic_sq_ceiling": {
-            "stated_slme_percent": 23.59,
+            "stated_slme_percent": 23.7,
             "shockley_queisser_limit_percent": 24.79,
             "passed": true
           },
           "sequential_4t_quadrature": {
-            "stated_tandem_4t_total_eff_percent": 42.08,
-            "simpson_tandem_4t_total_eff_percent": 42.08,
+            "stated_tandem_4t_total_eff_percent": 42.1,
+            "simpson_tandem_4t_total_eff_percent": 42.1,
             "abs_difference_percent": 0.0,
             "passed": true
           }
         },
         "mismatches": [],
-        "sha256_digest": "83b3549e4805d11c3be55a82df02534f37e1ff926bf18a3bb3935492530ce9e9"
+        "sha256_digest": "e5a66a7b95475eb68e1518917f2c358ff2b84052a6d0ef8974ad46ed2e48a4c3"
       }
     },
     {
@@ -9541,9 +9541,9 @@
       "max_carrier_eff_mass": 0.25,
       "frohlich_alpha": 1.426,
       "deepest_defect_ev": 0.04,
-      "slme_percent": 23.59,
+      "slme_percent": 23.7,
       "sub_bandgap_transmittance_percent": 80.93,
-      "tandem_4t_efficiency_percent": 42.08,
+      "tandem_4t_efficiency_percent": 42.1,
       "adversarial_notes": "PASSED PRESCREEN GATES (SHA256: 83b3549e4805): Covalent [Cu2BiSe2]+ framework locks single iodide site against photo-migration.",
       "created_at": "2026-11-11 17:41:30"
     },
@@ -9572,9 +9572,9 @@
       "max_carrier_eff_mass": 0.27,
       "frohlich_alpha": 1.5739,
       "deepest_defect_ev": 0.04,
-      "slme_percent": 23.48,
+      "slme_percent": 23.58,
       "sub_bandgap_transmittance_percent": 81.43,
-      "tandem_4t_efficiency_percent": 41.83,
+      "tandem_4t_efficiency_percent": 41.86,
       "adversarial_notes": "PASSED PRESCREEN GATES (SHA256: 24e5980fa55f): 3D Sn2+/Sb3+ lone-pair network stabilizes mixed Se/I sites and resists Sn2+ -> Sn4+ oxidation via iodide coordination.",
       "created_at": "2026-11-11 17:41:30"
     },
@@ -9603,9 +9603,9 @@
       "max_carrier_eff_mass": 0.44,
       "frohlich_alpha": 2.7853,
       "deepest_defect_ev": 0.09,
-      "slme_percent": 25.08,
+      "slme_percent": 25.06,
       "sub_bandgap_transmittance_percent": 86.09,
-      "tandem_4t_efficiency_percent": 41.77,
+      "tandem_4t_efficiency_percent": 41.78,
       "adversarial_notes": "PASSED PRESCREEN GATES (SHA256: a6cc389afeaa): 3D Cu2SbS2Cl corner-sharing chalcohalide network shows low mixing enthalpy and clean SnO2/ITO interface.",
       "created_at": "2026-11-11 17:41:30"
     },
@@ -9634,9 +9634,9 @@
       "max_carrier_eff_mass": 0.38,
       "frohlich_alpha": 2.5613,
       "deepest_defect_ev": 0.08,
-      "slme_percent": 24.43,
+      "slme_percent": 24.4,
       "sub_bandgap_transmittance_percent": 86.25,
-      "tandem_4t_efficiency_percent": 41.66,
+      "tandem_4t_efficiency_percent": 41.67,
       "adversarial_notes": "PASSED PRESCREEN GATES (SHA256: 7327ea003865): Distinct Wyckoff sites for O2-, S2-, and Cl- (size/charge mismatch) lock against photo-segregation.",
       "created_at": "2026-11-11 17:41:30"
     },
@@ -9666,9 +9666,9 @@
       "max_carrier_eff_mass": 0.42,
       "frohlich_alpha": 2.7544,
       "deepest_defect_ev": 0.07,
-      "slme_percent": 23.81,
+      "slme_percent": 23.79,
       "sub_bandgap_transmittance_percent": 86.41,
-      "tandem_4t_efficiency_percent": 41.55,
+      "tandem_4t_efficiency_percent": 41.56,
       "adversarial_notes": "PASSED PRESCREEN GATES (SHA256: f7228c7119f0): Strong Zn-S/O and Bi-O/Cl site selectivity prevents halide phase segregation.",
       "created_at": "2026-11-11 17:41:30"
     },
@@ -9697,9 +9697,9 @@
       "max_carrier_eff_mass": 0.31,
       "frohlich_alpha": 1.7554,
       "deepest_defect_ev": 0.36,
-      "slme_percent": 23.52,
+      "slme_percent": 23.64,
       "sub_bandgap_transmittance_percent": 82.1,
-      "tandem_4t_efficiency_percent": 41.47,
+      "tandem_4t_efficiency_percent": 41.51,
       "adversarial_notes": "DEEP_SRH_DEFECT: I_Se antisite (mid-gap SRH trap) forms deep trap 0.36 eV from band edge (> 0.15 eV non-radiative recombination limit)",
       "created_at": "2026-11-11 17:41:30"
     },
@@ -9728,9 +9728,9 @@
       "max_carrier_eff_mass": 0.92,
       "frohlich_alpha": 4.9827,
       "deepest_defect_ev": 0.42,
-      "slme_percent": 2.55,
+      "slme_percent": 2.54,
       "sub_bandgap_transmittance_percent": 88.18,
-      "tandem_4t_efficiency_percent": 30.37,
+      "tandem_4t_efficiency_percent": 30.35,
       "adversarial_notes": "BANDGAP_OUT_OF_WINDOW: estimated indirect gap = 2.94 eV (direct = 3.12 eV) misses target spectral window",
       "created_at": "2026-11-11 17:41:30"
     },
@@ -9759,9 +9759,9 @@
       "max_carrier_eff_mass": 0.41,
       "frohlich_alpha": 2.1997,
       "deepest_defect_ev": 0.06,
-      "slme_percent": 17.88,
+      "slme_percent": 19.49,
       "sub_bandgap_transmittance_percent": 82.88,
-      "tandem_4t_efficiency_percent": 28.51,
+      "tandem_4t_efficiency_percent": 30.45,
       "adversarial_notes": "BANDGAP_OUT_OF_WINDOW: estimated indirect gap = 1.18 eV (direct = 1.52 eV) misses target spectral window",
       "created_at": "2026-11-11 17:41:30"
     },

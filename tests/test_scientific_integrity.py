@@ -358,7 +358,7 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
             f"CAND-A09 regression failure: SLME {opt_a09['standalone_slme_percent']}% > SQ {opt_a09['shockley_queisser_limit_percent']}%",
         )
         self.assertEqual(opt_a09["shockley_queisser_limit_percent"], 27.93)
-        self.assertEqual(opt_a09["standalone_slme_percent"], 25.98)
+        self.assertEqual(opt_a09["standalone_slme_percent"], 25.94)
 
         # Test spoofed SLME > SQ raises AssertionError in verify_candidate_dossier
         promoted_records = [r for r in records if r.get("status") == "PROMOTED"]
@@ -1180,16 +1180,18 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
                 f"{pid}: Optimized monofacial PCE must be >= baseline Graded-ARC 4T PCE",
             )
             self.assertGreater(
-                p10["bifacial_20pct_albedo_4t_pce_percent"],
+                p10["bifacial_20pct_equivalent_power_density_mw_cm2"],
                 p10["opt_monofacial_4t_pce_percent"],
-                f"{pid}: 20% albedo bifacial PCE must exceed monofacial PCE",
+                f"{pid}: 20% albedo bifacial-equivalent power density must exceed monofacial PCE",
             )
             self.assertGreater(
-                p10["bifacial_30pct_albedo_4t_pce_percent"],
-                p10["bifacial_20pct_albedo_4t_pce_percent"],
-                f"{pid}: 30% albedo bifacial PCE must exceed 20% albedo PCE",
+                p10["bifacial_30pct_equivalent_power_density_mw_cm2"],
+                p10["bifacial_20pct_equivalent_power_density_mw_cm2"],
+                f"{pid}: 30% albedo bifacial-equivalent power density must exceed 20% albedo",
             )
             self.assertEqual(p10["n_cells_si_ref"], 72)
+            self.assertEqual(p10["string_matching_maturity_case"], "demonstrated")
+            self.assertIsInstance(p10["strip_width_feasible"], bool)
             self.assertLess(p10["top_string_mismatch_percent"], 2.0, f"{pid}: Top string mismatch >= 2.0%")
             self.assertLess(p10["bot_string_mismatch_percent"], 2.0, f"{pid}: Bottom string mismatch >= 2.0%")
 
@@ -1213,9 +1215,12 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
                 limiting_emig_heuristic_ev=e_mig_lim,
             )
             self.assertLessEqual(
-                abs(p10["bifacial_20pct_albedo_4t_pce_percent"] - iv_10["bifacial_20pct_albedo_4t_pce_percent"]),
+                abs(
+                    p10["bifacial_20pct_equivalent_power_density_mw_cm2"]
+                    - iv_10["bifacial_20pct_equivalent_power_density_mw_cm2"]
+                ),
                 0.05,
-                f"{pid}: Bifacial 20% PCE diff > 0.05%",
+                f"{pid}: Bifacial 20% equivalent power density diff > 0.05 mW/cm^2",
             )
             self.assertLessEqual(
                 abs(p10["bifacial_20pct_lcoe_cents_kwh"] - iv_10["bifacial_20pct_lcoe_cents_kwh"]),
@@ -1335,22 +1340,27 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
         for p11b in p11b_list:
             pid = p11b["pair_id"]
             self.assertTrue(p11b["phase11_redundancy_verified"], f"{pid}: Phase 11B redundancy check failed")
-            self.assertLessEqual(p11b["rouard_base_2l_diff_percent"], 0.05)
+            self.assertLessEqual(p11b["rouard_ceiling_2l_diff_percent"], 0.05)
+            self.assertEqual(p11b["default_stack_layers"], 2)
+            self.assertFalse(p11b["include_rear_ir_cell"])
             self.assertLess(
-                p11b["base_3l_mono_pce_percent"],
-                p11b["radiative_3l_mono_pce_percent"],
-                f"{pid}: Realistic SRH PCE must be strictly below radiative ceiling",
+                p11b["demonstrated_2l_mono_pce_percent"],
+                p11b["path0_si_mono_pce_percent"],
+                f"{pid}: Demonstrated 2L stack must perform below standalone c-Si ({p11b['path0_si_mono_pce_percent']}%)",
             )
+            self.assertLess(
+                p11b["ceiling_2l_mono_pce_percent"],
+                p11b["radiative_2l_mono_pce_percent"],
+                f"{pid}: Ceiling SRH 2L PCE must be strictly below radiative ceiling",
+            )
+            self.assertIsNone(p11b["ceiling_3l_mono_pce_percent"])
+            self.assertIsNone(p11b["demonstrated_3l_mono_pce_percent"])
+            self.assertIsNone(p11b["path1_3l_bif20_equivalent_power_density_mw_cm2"])
+            self.assertIsNone(p11b["path1_utility_lcoe_cents_kwh"])
             self.assertGreater(
-                p11b["path2_2l_bif20_pce_percent"],
-                p11b["path1_3l_bif20_pce_percent"],
-                f"{pid}: Path 2 unobstructed bifacial 2L must exceed Path 1 rear-cannibalized 3L at Base-Case ERE=1e-4",
+                p11b["utility_breakeven_top_pce_percent"],
+                p11b["demonstrated_top_pce_percent"],
             )
-            self.assertLess(
-                p11b["path2_utility_lcoe_cents_kwh"],
-                p11b["path1_utility_lcoe_cents_kwh"],
-            )
-            self.assertGreater(p11b["path4_gross_margin_percent"], 50.0)
 
             top_f = finalists_by_id[p11b["top_mp_id"]]
             bot_f = finalists_by_id[p11b["bottom_mp_id"]]
@@ -1381,9 +1391,12 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
                 stoich_3=bot_f["candidate"]["stoichiometry"],
             )
             self.assertLessEqual(
-                abs(p11b["path2_2l_bif20_pce_percent"] - iv_11b["path2_2l_bif20_pce_percent"]),
+                abs(
+                    p11b["path2_2l_bif20_equivalent_power_density_mw_cm2"]
+                    - iv_11b["path2_2l_bif20_equivalent_power_density_mw_cm2"]
+                ),
                 0.05,
-                f"{pid}: Path 2 Bifacial PCE diff > 0.05%",
+                f"{pid}: Path 2 Bifacial equivalent power density diff > 0.05 mW/cm^2",
             )
             self.assertLessEqual(
                 abs(p11b["path2_utility_lcoe_cents_kwh"] - iv_11b["path2_utility_lcoe_cents_kwh"]),
@@ -1878,6 +1891,74 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
             self.assertAlmostEqual(el["gap_error_bar_ev"], 0.37, places=2)
             self.assertGreater(el["window_probability"], 0.0)
             self.assertLessEqual(el["window_probability"], 0.25)
+
+    def test_28_t8_requirements_tea_and_device_model_remediation(self):
+        """T8: Verify requirements_tea.py break-even numbers, double-pass absorptance, maturity cases, and zero promotional strings."""
+        import re
+        from pathlib import Path
+        from failsmart_matengine.requirements_tea import (
+            compute_allowable_added_cost_per_eff_point,
+            compute_lcoe_breakeven_top_pce,
+            compute_optics_only_breakeven_top_pce,
+            generate_requirements_tea_report,
+        )
+
+        # 1. Verify requirements_tea.py reproduces the audit's Section 4.1 break-even figures
+        self.assertAlmostEqual(
+            compute_optics_only_breakeven_top_pce(0.88)["breakeven_top_cell_pce_percent"],
+            24.5 - 13.1 * 0.88,
+            places=3,
+        )
+        self.assertAlmostEqual(
+            compute_optics_only_breakeven_top_pce(0.85)["breakeven_top_cell_pce_percent"],
+            24.5 - 13.1 * 0.85,
+            places=3,
+        )
+
+        eta_be_util = compute_lcoe_breakeven_top_pce(0.88, case="utility")["breakeven_top_cell_pce_percent"]
+        eta_be_roof = compute_lcoe_breakeven_top_pce(0.88, case="rooftop")["breakeven_top_cell_pce_percent"]
+        self.assertAlmostEqual(eta_be_util, 15.72, delta=0.1)
+        self.assertAlmostEqual(eta_be_roof, 14.02, delta=0.1)
+
+        cost_pt_util = compute_allowable_added_cost_per_eff_point(case="utility")[
+            "allowable_added_cost_usd_m2_per_eff_point"
+        ]
+        cost_pt_roof = compute_allowable_added_cost_per_eff_point(case="rooftop")[
+            "allowable_added_cost_usd_m2_per_eff_point"
+        ]
+        self.assertAlmostEqual(cost_pt_util, 6.53, delta=0.05)
+        self.assertAlmostEqual(cost_pt_roof, 11.78, delta=0.05)
+
+        rep = generate_requirements_tea_report()
+        self.assertGreaterEqual(len(rep["degradation_sensitivity"]), 5)
+
+        # 2. Verify no file outside audit/task docs contains forbidden T8 promotional/forecast strings
+        root = Path(self.repo_root)
+        exempt_files = {
+            root / "docs" / "INDEPENDENT_AUDIT_2026-11.md",
+            root / "docs" / "REMEDIATION_TASKS.md",
+        }
+        forbidden_regex = re.compile(
+            r"58\.7%|Months\s*1[\u2013\-]18|Months\s*18[\u2013\-]36|Month\s*3|Month\s*6|"
+            r"beats\s+c-Si|GW\s+Tandem\s+Winner|World-Record|bifacial\s+PCE|"
+            r"bifacial_20pct_albedo_4t_pce_percent|bifacial_30pct_albedo_4t_pce_percent|"
+            r"path1_3l_bif20_pce_percent|path2_2l_bif20_pce_percent|path3_2t_bif20_pce_percent",
+            re.IGNORECASE,
+        )
+        scan_targets = [root / "README.md", root / "docs", root / "failsmart_matengine", root / "outputs"]
+        found = []
+        for target in scan_targets:
+            files = [target] if target.is_file() else sorted(p for p in target.rglob("*") if p.is_file())
+            for fpath in files:
+                if fpath in exempt_files or "__pycache__" in fpath.parts or fpath.suffix == ".pyc":
+                    continue
+                txt = fpath.read_text(encoding="utf-8", errors="ignore")
+                for line_no, line in enumerate(txt.splitlines(), start=1):
+                    line_no_urls = re.sub(r"https?://\S+", "", line)
+                    m = forbidden_regex.search(line_no_urls)
+                    if m:
+                        found.append(f"{fpath.relative_to(root)}:{line_no} ({m.group(0)}): {line.strip()[:100]}")
+        self.assertEqual(found, [], "T8 forbidden strings found:\n" + "\n".join(found))
 
 
 if __name__ == "__main__":

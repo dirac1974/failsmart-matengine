@@ -1013,11 +1013,14 @@ def build_live_mp_candidate_dossier(
 
 
 def compute_cross_layer_4t_stack_wavelength(
-    top_dossier: Dict[str, Any], bottom_dossier: Dict[str, Any]
+    top_dossier: Dict[str, Any],
+    bottom_dossier: Dict[str, Any],
+    include_rear_ir_cell: bool = False,
 ) -> CrossLayerTandemPair:
     """Pair a discovered Track A Top Active Glass finalist with a discovered Track B Bottom IR Scavenger
     finalist around the 1.12 eV bifacial c-Si anchor and check against photon-energy Simpson quadrature.
     """
+    _ = include_rear_ir_cell
     c_top = top_dossier["candidate"]
     e_top = top_dossier["electronics"]
     o_top = top_dossier["optics"]
@@ -1040,11 +1043,10 @@ def compute_cross_layer_4t_stack_wavelength(
     d3_nm = float(o_bot["film_thickness_nm"])
     d3_m = d3_nm * 1e-9
 
-    # Layer 1 (Top Active Glass)
+    # Layer 1 (Top Active Glass — double-pass Beer-Lambert)
     n1 = math.sqrt(eps_inf_1)
-    yab1 = 4.0 * eps_inf_1
     alpha1 = 1.2e5 * (np.maximum(0.0, _AM15G_E_EV - eg_ind_1) ** 2) + 2.8e7 * np.sqrt(np.maximum(0.0, _AM15G_E_EV - eg_dir_1))
-    fabs1 = (yab1 * alpha1 * d1_m) / (1.0 + yab1 * alpha1 * d1_m)
+    fabs1 = 1.0 - np.exp(-2.0 * alpha1 * d1_m)
     a1 = 0.98 * fabs1
     _, _, _, eta_top = _solve_cell_iv(a1, _AM15G_PHI_SUN, eg_dir_1, eg_ind_1)
 
@@ -1071,10 +1073,9 @@ def compute_cross_layer_4t_stack_wavelength(
     phi3_low = phi2 * 0.96 * (1.0 - fabs_si_3l) * t_si_fca_low
     phi3_std = phi2 * 0.96 * (1.0 - fabs_si_3l) * t_si_fca_std
 
-    # Layer 3 (Bottom IR Scavenger)
-    yab3 = 4.0 * eps_inf_3
+    # Layer 3 (Bottom IR Scavenger — double-pass Beer-Lambert)
     alpha3 = 1.2e5 * (np.maximum(0.0, _AM15G_E_EV - eg_ind_3) ** 2) + 2.8e7 * np.sqrt(np.maximum(0.0, _AM15G_E_EV - eg_dir_3))
-    fabs3 = (yab3 * alpha3 * d3_m) / (1.0 + yab3 * alpha3 * d3_m)
+    fabs3 = 1.0 - np.exp(-2.0 * alpha3 * d3_m)
     a3 = 0.98 * fabs3
     _, _, _, eta_bot_low = _solve_cell_iv(a3, phi3_low, eg_dir_3, eg_ind_3)
     _, _, _, eta_bot_std = _solve_cell_iv(a3, phi3_std, eg_dir_3, eg_ind_3)
@@ -1130,17 +1131,25 @@ def write_failsmart_dashboard_html(summary: Dict[str, Any], html_path: Path) -> 
     counts = summary["funnel_counts"]
     p11b_rows = [
         {
-            "stack": f"{r['top_formula']} + c-Si + {r['bottom_formula']}",
+            "stack": f"{r['top_formula']} + c-Si (+ {r['bottom_formula']} opt.)",
             "ids": r["pair_id"],
-            "rad": f"{r['radiative_3l_mono_pce_percent']:.2f}% / {r['radiative_3l_bif20_pce_percent']:.2f}%",
-            "mono_tiers": (
-                f"{r['conservative_2l_mono_pce_percent']:.2f}% | "
-                f"{r['base_2l_mono_pce_percent']:.2f}% | "
-                f"{r['mature_2l_mono_pce_percent']:.2f}%"
+            "rad": (
+                f"{r['radiative_2l_mono_pce_percent']:.2f}% (2L)"
+                if r["radiative_3l_mono_pce_percent"] is None
+                else f"{r['radiative_2l_mono_pce_percent']:.2f}% (2L) / {r['radiative_3l_mono_pce_percent']:.2f}% (3L)"
             ),
-            "p2": f"{r['path2_2l_bif20_pce_percent']:.2f}% (${r['path2_module_cost_usd_m2']:.2f}/m2)",
-            "p2_lcoe": f"{r['path2_utility_lcoe_cents_kwh']:.3f} / {r['path2_rooftop_lcoe_cents_kwh']:.3f} c/kWh",
-            "p1": f"{r['path1_3l_bif20_pce_percent']:.2f}% (${r['path1_module_cost_usd_m2']:.2f}/m2, {r['path1_utility_lcoe_cents_kwh']:.3f} c)",
+            "mono_tiers": (
+                f"{r['demonstrated_2l_mono_pce_percent']:.2f}% | "
+                f"{r['stretch_2l_mono_pce_percent']:.2f}% | "
+                f"{r['ceiling_2l_mono_pce_percent']:.2f}%"
+            ),
+            "p2": f"{r['path2_2l_bif20_equivalent_power_density_mw_cm2']:.2f} mW/cm2 (${r['path2_module_cost_usd_m2']:.2f}/m2)",
+            "p2_lcoe": f"{r['demonstrated_path2_utility_lcoe_cents_kwh']:.3f} (dem) / {r['path2_utility_lcoe_cents_kwh']:.3f} (ceil) c/kWh",
+            "p1": (
+                f"Break-even: {r['utility_breakeven_top_pce_percent']:.2f}% (util) / {r['rooftop_breakeven_top_pce_percent']:.2f}% (roof) / {r['optics_only_breakeven_top_pce_percent']:.2f}% (opt)"
+                if r["path1_3l_bif20_equivalent_power_density_mw_cm2"] is None
+                else f"{r['path1_3l_bif20_equivalent_power_density_mw_cm2']:.2f} mW/cm2 (${r['path1_module_cost_usd_m2']:.2f}/m2, {r['path1_utility_lcoe_cents_kwh']:.3f} c)"
+            ),
             "sha": r["sha256_digest"][:8],
         }
         for r in summary["phase11b_realistic_commercialization_dossiers"][:10]
@@ -1483,10 +1492,14 @@ def run_live_mp_discovery_campaign(
     graded_arc_te_stacks.sort(key=lambda x: (-x["graded_4t_low_fca_pce_percent"], x["combined_raw_cost_usd_m2"]))
     real_world_lcoe_stacks.sort(key=lambda x: (x["lcoe_3layer_4t_cents_kwh"], -x["pce_4t_0deg_25c_percent"]))
     phase10_bifacial_string_stacks.sort(
-        key=lambda x: (-x["bifacial_20pct_albedo_4t_pce_percent"], x["bifacial_20pct_lcoe_cents_kwh"])
+        key=lambda x: (-x["bifacial_20pct_equivalent_power_density_mw_cm2"], x["bifacial_20pct_lcoe_cents_kwh"])
     )
     phase11b_realistic_comm_stacks.sort(
-        key=lambda x: (x["path2_utility_lcoe_cents_kwh"], -x["path2_2l_bif20_pce_percent"], x["path1_utility_lcoe_cents_kwh"])
+        key=lambda x: (
+            x["path2_utility_lcoe_cents_kwh"],
+            -x["path2_2l_bif20_equivalent_power_density_mw_cm2"],
+            x["path1_utility_lcoe_cents_kwh"],
+        )
     )
 
     summary = {
@@ -1543,17 +1556,17 @@ if __name__ == "__main__":
                 f"Rxn(In2O3/SnO2)={p11a['rxn_in2o3_mev_per_atom']:.1f}/{p11a['rxn_sno2_mev_per_atom']:.1f} meV/at, "
                 f"ETL={p11a['recommended_etl_barrier']}({p11a['best_cbo_ev']:+.2f} eV)"
             )
-    print(f"\n=== Phase 11B/11C: Realistic Non-Radiative vs. Radiative & 4-Path Commercialization ({len(res['phase11b_realistic_commercialization_dossiers'])} Evaluated) ===")
+    print(f"\n=== Phase 11B/11C: Non-Radiative Maturity Cases & Requirements TEA ({len(res['phase11b_realistic_commercialization_dossiers'])} Evaluated) ===")
     for p11b in res["phase11b_realistic_commercialization_dossiers"][:6]:
         print(
-            f"  * {p11b['pair_id']} ({p11b['top_formula']} + c-Si + {p11b['bottom_formula']}): "
-            f"Rad(Mono/Bif20)={p11b['radiative_3l_mono_pce_percent']:.2f}%/{p11b['radiative_3l_bif20_pce_percent']:.2f}% -> "
-            f"Real_Mono(Cons/Base/Mat 2L|3L)={p11b['conservative_2l_mono_pce_percent']:.2f}%|{p11b['conservative_3l_mono_pce_percent']:.2f}% / "
-            f"{p11b['base_2l_mono_pce_percent']:.2f}%|{p11b['base_3l_mono_pce_percent']:.2f}% / "
-            f"{p11b['mature_2l_mono_pce_percent']:.2f}%|{p11b['mature_3l_mono_pce_percent']:.2f}% | "
-            f"Path2(2L_Bif20)={p11b['path2_2l_bif20_pce_percent']:.2f}% (${p11b['path2_module_cost_usd_m2']:.1f}/m2, {p11b['path2_utility_lcoe_cents_kwh']:.3f} c/kWh) vs "
-            f"Path1(3L_Bif20)={p11b['path1_3l_bif20_pce_percent']:.2f}% (${p11b['path1_module_cost_usd_m2']:.1f}/m2, {p11b['path1_utility_lcoe_cents_kwh']:.3f} c/kWh) | "
-            f"Path4(BIPV)={p11b['path4_bipv_window_pce_percent']:.2f}% (GM={p11b['path4_gross_margin_percent']:.1f}%)"
+            f"  * {p11b['pair_id']} ({p11b['top_formula']} + c-Si): "
+            f"Rad_2L={p11b['radiative_2l_mono_pce_percent']:.2f}% -> "
+            f"Real_2L_Mono(Dem/Str/Ceil)={p11b['demonstrated_2l_mono_pce_percent']:.2f}% / "
+            f"{p11b['stretch_2l_mono_pce_percent']:.2f}% / "
+            f"{p11b['ceiling_2l_mono_pce_percent']:.2f}% (vs c-Si={p11b['path0_si_mono_pce_percent']:.2f}%) | "
+            f"Path2(2L_Bif20)={p11b['path2_2l_bif20_equivalent_power_density_mw_cm2']:.2f} mW/cm2 (${p11b['path2_module_cost_usd_m2']:.1f}/m2, "
+            f"Dem={p11b['demonstrated_path2_utility_lcoe_cents_kwh']:.3f} / Ceil={p11b['path2_utility_lcoe_cents_kwh']:.3f} c/kWh) | "
+            f"BreakEven(Util/Roof/Optics)={p11b['utility_breakeven_top_pce_percent']:.2f}%/{p11b['rooftop_breakeven_top_pce_percent']:.2f}%/{p11b['optics_only_breakeven_top_pce_percent']:.2f}%"
         )
 
 

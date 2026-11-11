@@ -236,13 +236,13 @@ To guarantee **zero misstated or unverified results**, the 7-agent Research Divi
 
 ## 7. Materials Project Live API Discovery & Negative Synthesis Priors Roadmap (v3.0)
 
-### 7.1 Scope & Funnel Architecture (100 -> 91 -> 47 -> 40 -> 9 Prescreen Finalists)
+### 7.1 Scope & Funnel Architecture (100 -> 91 -> 47 -> 40 -> 15 Prescreen Finalists)
 The discovery framework expands to ingest **100 candidates** from the cached Materials Project dataset targeting the RoHS-compliant mixed-anion chalcohalide/oxychalcogenide space:
 1. **Stage 1 (100 Ingested):** RoHS whitelist filtering ($\text{Pb, Cd, Hg, Tl, As, Te, P}$ forbidden) + Pauling oxidation neutrality.
 2. **Stage 2 (91 Hull, Born & Migration Screened):** MP GGA hull ($\le 50\text{ meV/atom}$), Born elastic stability ($6$ failures vetoed), and Stage 2b cuprous/halide ion-migration heuristic ($3$ superionic failures vetoed with $E_{\text{mig}} < 0.65\text{ eV}$).
 3. **Stage 3 (47 Manufacturable):** Retrosynthesis under $500^\circ\text{C}$ with negative-synthesis priors ($26$ rejected for `OXIDE_IMPURITY_SINK`, $5$ rejected for `IMPURITY_SINK_PRIOR`, $13$ rejected for `TIER2_COST_EXCEEDED` $> \$0.50/\text{m}^2$).
 4. **Gate A (40 Promoted):** Covalent connectivity check ($7$ vetoed for `LOW_DIM_POLARON_RISK` 1D-chains).
-5. **Stages 4 & 5 (9 Prescreen Finalists):** Empirical gap estimate from MP PBE (`gap_est_*`; `HSE06+SOC` not run) + 3-layer 4T tandem optics ($31$ rejected for `BANDGAP_OUT_OF_WINDOW`).
+5. **Stages 4 & 5 (15 Prescreen Finalists):** Empirical gap estimate from MP PBE (`gap_est_*`; `HSE06+SOC` not run) with 1-error-bar ($\pm 0.37\text{ eV}$ LOOCV MAE) probabilistic window gate + double-pass Beer-Lambert 4T tandem optics ($25$ rejected for `BANDGAP_OUT_OF_WINDOW`).
 6. **Self-Consistency Verification:** `100/100` checks passed.
 
 ### 7.2 Open-Access Empirical Negative Synthesis Datasets
@@ -250,26 +250,28 @@ The discovery framework expands to ingest **100 candidates** from the cached Mat
 - **LBNL A-Lab Precursor Genome:** `1,035` robotic pairwise XRD reactions with `892` negative/stalled reactions (369 unreacted, 384 transformed, 113 partially reacted) (Walters, Szymanski, Fei, Ceder et al., 2026).
 
 ### 7.3 Promoted Live MP Prescreen Finalists & Top Cross-Layer 4T Stacks
-- **Top Active Glass Finalists (4):** `mp-861911` (`Sb2OS2`), `mp-1227486` (`BiSbS3`), `mp-1195160` (`Al2Bi2Cu2S3Cl8`), `mp-1078776` (`BiInS3`).
-- **Bottom IR Scavenger Finalists (5):** `mp-1223998` (`Bi3InSe6`), `mp-1224922` (`CuGaSnSe4`), `mp-22982` (`BiCuS2`), `mp-23474` (`AgBi3S5`), `mp-1224129` (`CuInSnSe4`).
-- **All 20 Cross-Layer 4T Tandem Stacks Screened:**
-  - **Highest Efficiency:** `mp-861911 Sb2OS2 + c-Si + mp-1223998 Bi3InSe6` achieving **42.32%** scalar 4T PCE (**40.00%** Coherent TMM 4T PCE) at $\$0.1664/\text{m}^2$.
-  - **Cost-Optimal Stack:** `mp-861911 Sb2OS2 + c-Si + mp-22982 BiCuS2` achieving **41.75%** scalar 4T PCE (**39.32%** Coherent TMM 4T PCE) at **\$0.0394/m^2**.
+- **Top Active Glass Finalists (7):** `mp-861911` (`Sb2OS2`), `mp-1227486` (`BiSbS3`), `mp-1195160` (`Al2Bi2Cu2S3Cl8`), `mp-1078776` (`BiInS3`), `mp-715212` (`Bi3In5S12`), `mp-1206068` (`Bi2InS4Br`), `mp-1228963` (`AgAlSnSe4`).
+- **Bottom IR Scavenger Finalists (8):** `mp-1223998` (`Bi3InSe6`), `mp-1224922` (`CuGaSnSe4`), `mp-22982` (`BiCuS2`), `mp-23474` (`AgBi3S5`), `mp-1224129` (`CuInSnSe4`), `mp-1224102` (`CuInSnS4`), `mp-20331` (`CuSbSe2`), `mp-1229027` (`AlCuSnSe4`).
+- **All 56 Cross-Layer 4T Tandem Stacks Screened:**
+  - **Highest Efficiency (Double-Pass):** `mp-1195160 Al2Bi2Cu2S3Cl8 + c-Si + mp-1223998 Bi3InSe6` achieving **42.69%** scalar 4T PCE at $\$0.1635/\text{m}^2$, and `mp-861911 Sb2OS2 + c-Si + mp-1223998 Bi3InSe6` achieving **42.22%** scalar 4T PCE (**39.88%** Coherent TMM 4T PCE) at $\$0.1664/\text{m}^2$.
+  - **Cost-Optimal Stack (Double-Pass):** `mp-861911 Sb2OS2 + c-Si + mp-22982 BiCuS2` achieving **41.71%** scalar 4T PCE (**39.29%** Coherent TMM 4T PCE) at **\$0.0394/m^2**.
 
 ---
 
 ## 8. v4.0 Pair-Spring Dynamical Matrix, Closed-Form Migration Heuristic & Coherent Multilayer TMM Upgrade (DFT Phonons and NEB not run)
 
 1. **Step 1 — Pair-Spring Dynamical Matrix $\mathbf{D}(\mathbf{q}=\mathbf{0})$ & Closed-Form Migration Heuristic (`atomistic_and_tmm.py` vs. `independent_verifier.py`; DFT Phonons and NEB not run):**
-   - Evaluates the $3N \times 3N$ pair-spring Hessian ($0.50\text{ \AA} < r_{ij} \le 4.25\text{ \AA}$, `np.linalg.eigh` vs. `scipy.linalg.eigvalsh`) and closed-form migration heuristic across all 9 live MP prescreen finalists (`dynamically_stable = None`, `spring_model_gamma_freq_thz`, `emig_heuristic_ev` $\in [0.990, 1.348]\text{ eV}$, $D_{\text{ion}}(300\text{ K}) \ll 10^{-18}\text{ cm}^2/\text{s}$).
+   - Evaluates the $3N \times 3N$ pair-spring Hessian ($0.50\text{ \AA} < r_{ij} \le 4.25\text{ \AA}$, `np.linalg.eigh` vs. `scipy.linalg.eigvalsh`) and closed-form migration heuristic across all 15 live MP prescreen finalists (`dynamically_stable = None`, `spring_model_gamma_freq_thz`, `emig_heuristic_ev` $\in [0.990, 1.348]\text{ eV}$, $D_{\text{ion}}(300\text{ K}) \ll 10^{-18}\text{ cm}^2/\text{s}$).
 2. **Step 2 — Wavelength-Resolved Coherent $2\times 2$ Abeles TMM vs. Recursive Rouard/Airy 4T Stack Optics:**
-   - Evaluates the 6-medium single-ARC coherent thin-film interference stack across all 15 cross-layer 4T pairs (`0.0000%–0.0100%` dual-method discrepancy), achieving **40.00% Coherent 4T PCE** (`mp-861911__mp-1223998`) and **39.32% Coherent 4T PCE** at **\$0.0394/m²** (`mp-861911__mp-22982`).
+   - Evaluates the 6-medium single-ARC coherent thin-film interference stack with double-pass Beer-Lambert thin-film absorption across all 15 cross-layer 4T pairs (`0.0000%–0.0100%` dual-method discrepancy), achieving **39.88% Coherent 4T PCE** (`mp-861911__mp-1223998`) and **39.29% Coherent 4T PCE** at **\$0.0394/m²** (`mp-861911__mp-22982`).
 3. **Step 3 — 7-Medium Graded-ARC + $\text{TiO}_2$ Impedance-Matching Stack & 4-Metric Techno-Economic Figure-of-Merit Suite:**
-   - Suppresses front reflection from $11.90\%$ down to $2.42\%\text{–}3.33\%$, reaching **42.44% Graded-ARC Coherent 4T PCE** (`mp-861911__mp-1223998`, $\text{CER}_{\text{3L}} = 4.354$, $\text{SVI}_{\text{BOS}} = 1.763$) and **41.89% Graded-ARC Coherent 4T PCE** (`mp-861911__mp-22982`, $\text{CER}_{\text{3L}} = 4.308$, $\text{MCIW}_{\text{raw}} = \$0.0002/\Delta\text{W}_{\text{p}}$).
+   - Suppresses front reflection from $11.90\%$ down to $2.42\%\text{–}3.33\%$, reaching **42.31% Graded-ARC Coherent 4T PCE** (`mp-861911__mp-1223998`, $\text{CER}_{\text{3L}} = 4.340$, $\text{SVI}_{\text{BOS}} = 1.758$) and **41.84% Graded-ARC Coherent 4T PCE** (`mp-861911__mp-22982`, $\text{CER}_{\text{3L}} = 4.303$, $\text{MCIW}_{\text{raw}} = \$0.0002/\Delta\text{W}_{\text{p}}$).
 4. **Phase 9 (`v6.0`) — Lab Synthesis & Supercells (9A) and Real-World Oblique/Thermal/25-Year LCOE (9C):**
-   - Generates 10.0 mmol lab batch precursor sheets and 9 Stage 5 defect supercells (including `mp-1195160` `Al2Bi2Cu2S3Cl8`), and evaluates $0^\circ\text{–}60^\circ$ S/P oblique TMM, NOCT 45 °C / Desert 65 °C thermal derating, and 25-year Arrhenius LCOE (**3.172 ¢/kWh**, -35.74% vs. c-Si).
-5. **Phase 10 (`v7.0`) — $2^4=16$ Thickness/ARC Global Optimization (10A), Bifacial Ground-Albedo Harvesting (10B), and SPICE Subcell $J\text{–}V$ String Matching (10C):**
-   - Evaluates 16-point factorial thickness optimization, 20% and 30% diffuse ground-albedo rear IR harvesting (**46.17%** and **48.06%** radiative equivalent PCE on `mp-861911__mp-1223998`, **25-Yr Bifacial Radiative LCOE = 3.002 ¢/kWh**), and integer series-string voltage matching (`37 : 72 : 120` and `36 : 72 : 120` at $V_{\text{bus}} \approx 50.1\text{ V}$).
-6. **Phase 11 (`v8.0`) — Realistic Synthesis Practicality (`SPS`), Live MP TCO Reactivity, Non-Radiative SRH Physics & Staged 3-Horizon Commercialization Plan:**
+   - Generates 10.0 mmol lab batch precursor sheets and 15 Stage 5 defect supercells (including `mp-1195160` `Al2Bi2Cu2S3Cl8`), and evaluates $0^\circ\text{–}60^\circ$ S/P oblique TMM, NOCT 45 °C / Desert 65 °C thermal derating, and 25-year Arrhenius LCOE (**3.180 ¢/kWh**, -35.58% vs. c-Si under the radiative ceiling).
+5. **Phase 10 (`v7.0`) — $2^4=16$ Thickness/ARC Global Optimization (10A), Bifacial-Equivalent Power Density (10B), and SPICE Subcell $J\text{–}V$ String Matching (10C):**
+   - Evaluates 16-point factorial thickness optimization, 20% and 30% diffuse ground-albedo rear IR harvesting (**46.01 mW/cm²** and **47.88 mW/cm²** radiative bifacial-equivalent power density on `mp-861911__mp-1223998`, **25-Yr Bifacial Radiative LCOE = 3.008 ¢/kWh**), and `"demonstrated"` maturity case integer series-string voltage matching (`58 : 72 : None` and `56 : 72 : None` at $V_{\text{bus}} \approx 38.2\text{ V}$ with ITO strip sheet-resistance loss $\approx 0.12\%\text{–}0.13\% \le 2.0\%$).
+6. **Phase 11 (`v8.0`) — Realistic Synthesis Practicality (`SPS`), Live MP TCO Reactivity, Non-Radiative SRH Maturity Cases & Inverted Techno-Economic Requirements (`requirements_tea.py`):**
    - Evaluates live MP convex-hull stability windows and `InterfacialReactivity` (`TiO2` and `SnO2` inert at `0.00 meV/atom` vs. `-13.16` to `-68.25 meV/atom` exothermic sulfidation on bare `In2O3`/ITO), ranking **`BiSbS3` (`SPS = 94.76`)** and **`Sb2OS2` (`SPS = 94.44`)** as Tier-1 scale-up co-leads.
-   - Adopts the consensus 3-Horizon Commercialization Roadmap ([`docs/REALISTIC_COMMERCIALIZATION_AND_DEBATE_REPORT.md`](REALISTIC_COMMERCIALIZATION_AND_DEBATE_REPORT.md)): **Horizon 1 (Path 4 BIPV Glazing: 11.40%–11.62% at 35% VLT, 58.7% gross margin)** $\rightarrow$ **Horizon 2 (Path 2 2-Layer Active Solar Glass Drop-In on Unobstructed Bifacial c-Si: 30.58%–30.61% realistic bifacial PCE at \$65.88/m², 4.234 ¢/kWh utility & 6.470 ¢/kWh rooftop LCOE)** $\rightarrow$ **Horizon 3 (Gen-3 Specialty 3-Layer Tandems once `ERE >= 5e-3` and low-FCA c-Si are achieved)**, gated by Phase-1 hardware Kill-Gates `K1–K4`.
+   - Evaluates three `ASSUMED` non-radiative device maturity tiers ([`docs/REALISTIC_COMMERCIALIZATION_AND_DEBATE_REPORT.md`](REALISTIC_COMMERCIALIZATION_AND_DEBATE_REPORT.md)): **`"demonstrated"` ($\text{ERE} = 10^{-9}$, $\text{FF} \le 0.73$: `19.90%–19.91%` 2-layer monofacial PCE, below `22.94%` standalone c-Si)**, **`"stretch"` ($\text{ERE} = 10^{-7}$: `23.66%–23.67%` 2-layer monofacial PCE)**, and **`"ceiling"` ($\text{ERE} = 10^{-4}$: `26.69%–26.80%` 2-layer monofacial PCE)** with the 2-layer stack as the default (`include_rear_ir_cell = False`).
+   - Inverts the cost model via `python -m failsmart_matengine.requirements_tea` to report required break-even top-cell efficiency (**`24.5 - 13.1 * T`%** optics-only, **`15.72%`** utility LCOE break-even at $T = 0.88$ and $+\$23.88/\text{m}^2$, **`14.02%`** rooftop LCOE break-even), allowable added module cost per efficiency point (**`\$6.53/m²` per `%` point** utility, **`\$11.78/m²` per `%` point** rooftop), and sensitivity to degradation rate (`0.45%/yr` to `1.50%/yr`), gated by hardware Kill-Gates `K1–K4`.
+

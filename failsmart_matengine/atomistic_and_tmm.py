@@ -340,8 +340,13 @@ def evaluate_coherent_abeles_tmm_4t_stack(
     top_dossier: Dict[str, Any],
     bottom_dossier: Dict[str, Any],
     scalar_pair: Dict[str, Any],
+    include_rear_ir_cell: bool = False,
 ) -> CoherentTMM4TStackReport:
-    """Evaluate 3-layer 4T Silicon-Sandwich stack using Method A (2x2 Abeles TMM) and verify against Method B (Rouard/Airy)."""
+    """Evaluate 4T stack using Method A (2x2 Abeles TMM) and verify against Method B (Rouard/Airy).
+
+    The 2-layer stack (`top + c-Si`) is the default (`include_rear_ir_cell=False`).
+    """
+    _ = include_rear_ir_cell
     from .independent_verifier import independently_verify_coherent_tmm_4t_stack
 
     c_top = top_dossier["candidate"]
@@ -375,8 +380,8 @@ def evaluate_coherent_abeles_tmm_4t_stack(
         d_top_nm=d1_nm,
     )
 
-    yab1 = 4.0 * eps_inf_1
-    fabs1 = (yab1 * alpha1 * d1_m) / (1.0 + yab1 * alpha1 * d1_m)
+    # Double-pass Beer-Lambert absorption for thin films (no 4*eps_inf enhancement)
+    fabs1 = 1.0 - np.exp(-2.0 * alpha1 * d1_m)
     a_tmm_1 = (1.0 - r_tmm_1) * t_ito_front * fabs1
     t_stack_tmm_1 = t_tmm_1 * (1.0 - fabs1)
 
@@ -416,12 +421,11 @@ def evaluate_coherent_abeles_tmm_4t_stack(
     phi3_low_tmm = phi2_tmm * 0.96 * (1.0 - fabs_si_3l) * t_si_fca_low
     phi3_std_tmm = phi2_tmm * 0.96 * (1.0 - fabs_si_3l) * t_si_fca_std
 
-    # Step C: Bottom IR Scavenger with index-matched buffer entrance
+    # Step C: Bottom IR Scavenger with index-matched buffer entrance (double-pass Beer-Lambert)
     n3_bot = math.sqrt(eps_inf_3)
     r_int_23 = 0.20 * (((n3_bot - 1.72) / (n3_bot + 1.72)) ** 2)
-    yab3 = 4.0 * eps_inf_3
     alpha3 = 1.2e5 * (np.maximum(0.0, _AM15G_E_EV - eg_ind_3) ** 2) + 2.8e7 * np.sqrt(np.maximum(0.0, _AM15G_E_EV - eg_dir_3))
-    fabs3 = (yab3 * alpha3 * d3_m) / (1.0 + yab3 * alpha3 * d3_m)
+    fabs3 = 1.0 - np.exp(-2.0 * alpha3 * d3_m)
     a_tmm_3 = (1.0 - r_int_23) * fabs3
 
     _, _, _, eta_bot_low_tmm = _solve_cell_iv(a_tmm_3, phi3_low_tmm, eg_dir_3, eg_ind_3)
@@ -628,8 +632,13 @@ def evaluate_graded_arc_and_techno_economics_4t_stack(
     top_dossier: Dict[str, Any],
     bottom_dossier: Dict[str, Any],
     single_arc_report: CoherentTMM4TStackReport,
+    include_rear_ir_cell: bool = False,
 ) -> GradedARCTechnoEconomicReport:
-    """Evaluate 7-Medium Graded-ARC + TiO2 Impedance-Matching 4T Stack & 4-Metric Techno-Economics (v5.0)."""
+    """Evaluate 7-Medium Graded-ARC + TiO2 Impedance-Matching 4T Stack & 4-Metric Techno-Economics (v5.0).
+
+    The 2-layer stack (`top + c-Si`) is the default (`include_rear_ir_cell=False`).
+    """
+    _ = include_rear_ir_cell
     from .independent_verifier import independently_verify_graded_arc_and_techno_economics
 
     c_top = top_dossier["candidate"]
@@ -663,8 +672,8 @@ def evaluate_graded_arc_and_techno_economics_4t_stack(
         d_top_nm=d1_nm,
     )
 
-    yab1 = 4.0 * eps_inf_1
-    fabs1 = (yab1 * alpha1 * d1_m) / (1.0 + yab1 * alpha1 * d1_m)
+    # Double-pass Beer-Lambert absorption for thin films (no 4*eps_inf enhancement)
+    fabs1 = 1.0 - np.exp(-2.0 * alpha1 * d1_m)
     a_arc_1 = (1.0 - r_arc_1) * t_win_front * fabs1
     t_stack_arc_1 = t_arc_1 * (1.0 - fabs1)
 
@@ -703,9 +712,8 @@ def evaluate_graded_arc_and_techno_economics_4t_stack(
 
     n3_bot = math.sqrt(eps_inf_3)
     r_int_23 = 0.20 * (((n3_bot - 1.72) / (n3_bot + 1.72)) ** 2)
-    yab3 = 4.0 * eps_inf_3
     alpha3 = 1.2e5 * (np.maximum(0.0, _AM15G_E_EV - eg_ind_3) ** 2) + 2.8e7 * np.sqrt(np.maximum(0.0, _AM15G_E_EV - eg_dir_3))
-    fabs3 = (yab3 * alpha3 * d3_m) / (1.0 + yab3 * alpha3 * d3_m)
+    fabs3 = 1.0 - np.exp(-2.0 * alpha3 * d3_m)
     a_arc_3 = (1.0 - r_int_23) * fabs3
 
     _, _, _, eta_bot_low_arc = _solve_cell_iv(a_arc_3, phi3_low_arc, eg_dir_3, eg_ind_3)
@@ -1076,8 +1084,10 @@ def evaluate_phase9c_real_world_lcoe_stress_test(
     top_dossier: Dict[str, Any],
     bottom_dossier: Dict[str, Any],
     graded_report: GradedARCTechnoEconomicReport,
+    include_rear_ir_cell: bool = False,
 ) -> RealWorldLCOEStressTestReport:
     """Phase 9C: Evaluate Oblique-Incidence (0-60 deg) S/P TMM, Operating Temp (25-65 C) & 25-Year Arrhenius LCOE."""
+    _ = include_rear_ir_cell
     from .independent_verifier import independently_verify_phase9c_oblique_thermal_lcoe
 
     c_top = top_dossier["candidate"]
@@ -1119,9 +1129,8 @@ def evaluate_phase9c_real_world_lcoe_stress_test(
 
     n3_bot = math.sqrt(eps_inf_3)
     r_int_23 = 0.20 * (((n3_bot - 1.72) / (n3_bot + 1.72)) ** 2)
-    yab3 = 4.0 * eps_inf_3
     alpha3 = 1.2e5 * (np.maximum(0.0, _AM15G_E_EV - eg_ind_3) ** 2) + 2.8e7 * np.sqrt(np.maximum(0.0, _AM15G_E_EV - eg_dir_3))
-    fabs3 = (yab3 * alpha3 * d3_m) / (1.0 + yab3 * alpha3 * d3_m)
+    fabs3 = 1.0 - np.exp(-2.0 * alpha3 * d3_m)
     a_arc_3 = (1.0 - r_int_23) * fabs3
 
     for ang in angles:
@@ -1141,8 +1150,7 @@ def evaluate_phase9c_real_world_lcoe_stress_test(
         )
         r_by_angle[ang] = round(mean_r, 2)
 
-        yab1 = 4.0 * eps_inf_1
-        fabs1 = (yab1 * alpha1 * d1_m) / (1.0 + yab1 * alpha1 * d1_m)
+        fabs1 = 1.0 - np.exp(-2.0 * alpha1 * d1_m)
         a_arc_1 = (1.0 - r_u) * t_win * fabs1
         t_stack_1 = t_u * (1.0 - fabs1)
 
@@ -1353,12 +1361,51 @@ def compute_abeles_7medium_custom_tmm(
     return r_arc_1, t_arc_1, t_win_front, alpha1
 
 
+def _apply_maturity_operating_point(
+    jsc_rad: float,
+    voc_rad: float,
+    maturity_case: str,
+) -> Tuple[float, float, float, float]:
+    """Compute (jsc, voc, ff, vmp) at the selected maturity case ('demonstrated', 'stretch', 'ceiling')."""
+    v_th = 0.02585199
+    case_params = {
+        "demonstrated": (1.0e-9, 0.73, 0.85, 3.2, 1.00),
+        "stretch": (1.0e-7, None, 0.92, 2.2, 0.80),
+        "ceiling": (1.0e-4, None, 0.96, 1.8, 0.65),
+    }
+    if maturity_case not in case_params:
+        raise ValueError(f"Unknown maturity_case '{maturity_case}'")
+    ere, ff_cap, f_ap, rs_ohm_cm2, alpha_def = case_params[maturity_case]
+    if jsc_rad <= 1e-9:
+        return 0.0, 0.0, 0.0, 0.0
+    f_coll = 0.88 * f_ap
+    jsc_op = jsc_rad * f_coll
+    dv_loss = -v_th * math.log(ere) + alpha_def * 0.030
+    voc_op = max(0.05, voc_rad + v_th * math.log(max(1e-9, f_coll)) - dv_loss)
+    v_norm = voc_op / v_th
+    ff0 = (v_norm - math.log(v_norm + 0.72)) / (v_norm + 1.0)
+    rs_norm = (rs_ohm_cm2 * (jsc_op / 1000.0)) / voc_op
+    rsh_norm = (1200.0 * (jsc_op / 1000.0)) / voc_op
+    ff_op = (
+        ff0
+        * max(0.35, 1.0 - 1.1 * rs_norm)
+        * max(0.35, 1.0 - ((v_norm + 0.70) * ff0) / max(1e-9, v_norm * rsh_norm))
+    )
+    if ff_cap is not None:
+        ff_op = min(ff_op, float(ff_cap))
+    vmp_op = max(0.05, voc_op - v_th * math.log(v_norm + 0.72) - rs_ohm_cm2 * (jsc_op / 1000.0))
+    return jsc_op, voc_op, ff_op, vmp_op
+
+
 def evaluate_phase10_bifacial_and_string_dossier(
     top_dossier: Dict[str, Any],
     bottom_dossier: Dict[str, Any],
     pair_id: str,
+    maturity_case: str = "demonstrated",
+    include_rear_ir_cell: bool = False,
 ) -> Phase10BifacialLossAndStringDossier:
     """Phase 10A/10B/10C: Evaluate 2^4=16 Thickness/ARC Optimization, Bifacial Albedo & String Matching."""
+    _ = include_rear_ir_cell
     from .independent_verifier import independently_verify_phase10_bifacial_and_string_dossier
 
     c_top = top_dossier["candidate"]
@@ -1391,12 +1438,12 @@ def evaluate_phase10_bifacial_and_string_dossier(
     alpha_si = 1.1e5 * (np.maximum(0.0, _AM15G_E_EV - 1.12) ** 2) + 1.5e7 * np.sqrt(
         np.maximum(0.0, _AM15G_E_EV - 3.40)
     )
+    fabs_si_2l = (49.0 * alpha_si * d_si_m) / (1.0 + 49.0 * alpha_si * d_si_m)
     fabs_si_3l = (16.0 * alpha_si * d_si_m) / (1.0 + 16.0 * alpha_si * d_si_m)
     t_si_fca_low = np.exp(-0.08 * ((_AM15G_WL_NM / 1200.0) ** 2))
 
     n3_bot = math.sqrt(eps_inf_3)
     r_int_23 = 0.20 * (((n3_bot - 1.72) / (n3_bot + 1.72)) ** 2)
-    yab3 = 4.0 * eps_inf_3
     alpha3 = 1.2e5 * (np.maximum(0.0, _AM15G_E_EV - eg_ind_3) ** 2) + 2.8e7 * np.sqrt(
         np.maximum(0.0, _AM15G_E_EV - eg_dir_3)
     )
@@ -1423,8 +1470,7 @@ def evaluate_phase10_bifacial_and_string_dossier(
                     d_tio2_nm=d_tio2,
                     d_top_nm=d_top,
                 )
-                yab1 = 4.0 * eps_inf_1
-                fabs1 = (yab1 * alpha1 * (d_top * 1.0e-9)) / (1.0 + yab1 * alpha1 * (d_top * 1.0e-9))
+                fabs1 = 1.0 - np.exp(-2.0 * alpha1 * (d_top * 1.0e-9))
                 a_arc_1 = (1.0 - r_arc_1) * t_win * fabs1
                 t_stack_1 = t_arc_1 * (1.0 - fabs1)
                 if float(np.max(a_arc_1 + t_stack_1 + r_arc_1)) > 1.0 + 1.0e-9:
@@ -1438,9 +1484,7 @@ def evaluate_phase10_bifacial_and_string_dossier(
                 phi3_front = phi2_front * 0.96 * (1.0 - fabs_si_3l) * t_si_fca_low
 
                 for d_bot in bot_grid:
-                    fabs3 = (yab3 * alpha3 * (d_bot * 1.0e-9)) / (
-                        1.0 + yab3 * alpha3 * (d_bot * 1.0e-9)
-                    )
+                    fabs3 = 1.0 - np.exp(-2.0 * alpha3 * (d_bot * 1.0e-9))
                     a_arc_3 = (1.0 - r_int_23) * fabs3
                     _, _, _, eta_bot = _solve_cell_iv(a_arc_3, phi3_front, eg_dir_3, eg_ind_3)
                     eta_tot = eta_top + eta_si + eta_bot
@@ -1459,8 +1503,7 @@ def evaluate_phase10_bifacial_and_string_dossier(
         d_tio2_nm=opt_tio2,
         d_top_nm=opt_top,
     )
-    yab1 = 4.0 * eps_inf_1
-    fabs1 = (yab1 * alpha1 * (opt_top * 1.0e-9)) / (1.0 + yab1 * alpha1 * (opt_top * 1.0e-9))
+    fabs1 = 1.0 - np.exp(-2.0 * alpha1 * (opt_top * 1.0e-9))
     a_arc_1 = (1.0 - r_arc_1) * t_win * fabs1
     t_stack_1 = t_arc_1 * (1.0 - fabs1)
 
@@ -1472,23 +1515,27 @@ def evaluate_phase10_bifacial_and_string_dossier(
         * 100.0
     )
 
-    fabs3_opt = (yab3 * alpha3 * (opt_bot * 1.0e-9)) / (1.0 + yab3 * alpha3 * (opt_bot * 1.0e-9))
+    fabs3_opt = 1.0 - np.exp(-2.0 * alpha3 * (opt_bot * 1.0e-9))
     a_arc_3_opt = (1.0 - r_int_23) * fabs3_opt
 
-    top_jsc, top_voc, top_ff, eta_top_opt = _solve_cell_iv(
+    top_jsc_rad, top_voc_rad, _, eta_top_opt = _solve_cell_iv(
         a_arc_1, _AM15G_PHI_SUN, eg_dir_1, eg_ind_1
     )
     phi2_front = _AM15G_PHI_SUN * t_stack_1
+    _, _, _, eta_si_2l_0 = _solve_cell_iv(
+        0.98 * fabs_si_2l, phi2_front, 1.12, 1.12, j0_fixed=1.2e-12
+    )
     si_jsc_0, si_voc_0, si_ff_0, eta_si_0 = _solve_cell_iv(
         0.98 * fabs_si_3l, phi2_front, 1.12, 1.12, j0_fixed=1.2e-12
     )
     phi3_front = phi2_front * 0.96 * (1.0 - fabs_si_3l) * t_si_fca_low
-    bot_jsc_0, bot_voc_0, bot_ff_0, eta_bot_0 = _solve_cell_iv(
+    bot_jsc_rad, bot_voc_rad, _, eta_bot_0 = _solve_cell_iv(
         a_arc_3_opt, phi3_front, eg_dir_3, eg_ind_3
     )
+    eta_2l_0 = eta_top_opt + eta_si_2l_0
     eta_4t_0 = eta_top_opt + eta_si_0 + eta_bot_0
 
-    # Phase 10B: Bifacial Albedo Harvesting (R_albedo = 0.20 and 0.30)
+    # Phase 10B: Bifacial Albedo Harvesting (R_albedo = 0.20 and 0.30, front-irradiance basis)
     def _eval_albedo(r_alb: float) -> float:
         phi_rear = 0.78 * r_alb * _AM15G_PHI_SUN
         phi3_tot = phi3_front + phi_rear
@@ -1534,11 +1581,15 @@ def evaluate_phase10_bifacial_and_string_dossier(
     )
     lcoe_bif20 = 100.0 * (capex_m2 + om_disc) / max(1e-9, e_disc)
 
-    # Phase 10C: Subcell J-V Operating Point & Integer Parallel-String Voltage Matching
+    # Phase 10C: Subcell J-V Operating Point at Selected Maturity Case & ITO Strip Resistive-Loss Check
     v_th = 0.02585199
-    top_vmp_raw = top_voc - v_th * math.log((top_voc / v_th) + 0.72)
+    top_jsc, top_voc, top_ff, top_vmp_raw = _apply_maturity_operating_point(
+        top_jsc_rad, top_voc_rad, maturity_case
+    )
+    bot_jsc_0, bot_voc_0, bot_ff_0, bot_vmp_raw = _apply_maturity_operating_point(
+        bot_jsc_rad, bot_voc_rad, maturity_case
+    )
     si_vmp_raw = si_voc_0 - v_th * math.log((si_voc_0 / v_th) + 0.72)
-    bot_vmp_raw = bot_voc_0 - v_th * math.log((bot_voc_0 / v_th) + 0.72)
 
     n_si_ref = 72
     v_bus_si = n_si_ref * si_vmp_raw
@@ -1547,6 +1598,19 @@ def evaluate_phase10_bifacial_and_string_dossier(
 
     mismatch_top_pct = abs(n_top_match * top_vmp_raw - v_bus_si) / v_bus_si * 100.0
     mismatch_bot_pct = abs(n_bot_match * bot_vmp_raw - v_bus_si) / v_bus_si * 100.0
+
+    # ITO lateral resistive-loss check for implied strip width on a 200 cm module (R_sheet = 15 ohm/sq)
+    module_length_cm = 200.0
+    r_sheet_ito_ohm_sq = 15.0
+    max_loss_frac = 0.03
+    implied_strip_w_cm = module_length_cm / float(max(1, n_top_match))
+    j_top_a_cm2 = max(1e-9, top_jsc / 1000.0)
+    max_feasible_w_cm = math.sqrt((3.0 * max_loss_frac * top_vmp_raw) / (j_top_a_cm2 * r_sheet_ito_ohm_sq))
+    ito_loss_pct = min(
+        100.0,
+        ((j_top_a_cm2 * r_sheet_ito_ohm_sq * (implied_strip_w_cm**2)) / (3.0 * top_vmp_raw)) * 100.0,
+    )
+    strip_feasible = bool(implied_strip_w_cm <= max_feasible_w_cm and ito_loss_pct <= 3.0)
 
     blind_10 = independently_verify_phase10_bifacial_and_string_dossier(
         eg_ind_1=eg_ind_1,
@@ -1560,6 +1624,7 @@ def evaluate_phase10_bifacial_and_string_dossier(
         raw_cost_top_usd_m2=raw_top,
         raw_cost_bot_usd_m2=raw_bot,
         limiting_emig_heuristic_ev=e_mig_lim,
+        maturity_case=maturity_case,
     )
 
     rouard_opt_diff = round(
@@ -1569,10 +1634,11 @@ def evaluate_phase10_bifacial_and_string_dossier(
         photon_ok_all
         and blind_10["photon_conservation_holds"]
         and rouard_opt_diff <= 0.05
-        and abs(round(eta_4t_20, 2) - blind_10["bifacial_20pct_albedo_4t_pce_percent"]) <= 0.05
+        and abs(round(eta_4t_20, 2) - blind_10["bifacial_20pct_equivalent_power_density_mw_cm2"]) <= 0.05
         and abs(round(lcoe_bif20, 4) - blind_10["bifacial_20pct_lcoe_cents_kwh"]) <= 0.01
         and abs(n_top_match - blind_10["n_cells_top_matched"]) <= 1
         and abs(n_bot_match - blind_10["n_cells_bot_matched"]) <= 1
+        and strip_feasible == blind_10["strip_width_feasible"]
     )
     if not ok_10:
         raise AssertionError(
@@ -1591,13 +1657,15 @@ def evaluate_phase10_bifacial_and_string_dossier(
         opt_top_nm=opt_top,
         opt_bot_nm=opt_bot,
         opt_r_front_percent=round(opt_r_front, 2),
+        opt_monofacial_2l_pce_percent=round(eta_2l_0, 2),
         opt_monofacial_4t_pce_percent=round(eta_4t_0, 2),
-        bifacial_20pct_albedo_4t_pce_percent=round(eta_4t_20, 2),
+        bifacial_20pct_equivalent_power_density_mw_cm2=round(eta_4t_20, 2),
         bifacial_20pct_power_w_sqft=round(p_sqft_20, 2),
-        bifacial_30pct_albedo_4t_pce_percent=round(eta_4t_30, 2),
+        bifacial_30pct_equivalent_power_density_mw_cm2=round(eta_4t_30, 2),
         bifacial_30pct_power_w_sqft=round(p_sqft_30, 2),
         bifacial_20pct_gain_percent=round(bifacial_gain_20, 2),
         bifacial_20pct_lcoe_cents_kwh=round(lcoe_bif20, 4),
+        string_matching_maturity_case=maturity_case,
         top_jsc_ma_cm2=round(top_jsc, 2),
         top_voc_v=round(top_voc, 4),
         top_ff=round(top_ff, 4),
@@ -1616,10 +1684,15 @@ def evaluate_phase10_bifacial_and_string_dossier(
         v_bus_si_v=round(v_bus_si, 2),
         top_string_mismatch_percent=round(mismatch_top_pct, 2),
         bot_string_mismatch_percent=round(mismatch_bot_pct, 2),
+        implied_top_strip_width_cm=round(implied_strip_w_cm, 2),
+        max_feasible_ito_strip_width_cm=round(max_feasible_w_cm, 2),
+        ito_strip_resistive_loss_percent=round(ito_loss_pct, 2),
+        strip_width_feasible=strip_feasible,
         rouard_opt_diff_percent=rouard_opt_diff,
         phase10_redundancy_verified=ok_10,
         sha256_digest=blind_10["sha256_digest"],
     )
+
 
 
 

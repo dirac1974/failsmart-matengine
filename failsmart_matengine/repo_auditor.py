@@ -280,8 +280,8 @@ class RepoConsistencyAuditor:
 
         assert "mp-861911__mp-22982" in pair_dict
         cheap_pair = pair_dict["mp-861911__mp-22982"]
-        assert abs(cheap_pair["tandem_4t_low_fca_total_eff_percent"] - 41.75) < 1e-2, (
-            f"Expected 41.75% for cheap pair, got {cheap_pair['tandem_4t_low_fca_total_eff_percent']}"
+        assert abs(cheap_pair["tandem_4t_low_fca_total_eff_percent"] - 41.81) < 1e-2, (
+            f"Expected 41.81% for cheap pair, got {cheap_pair['tandem_4t_low_fca_total_eff_percent']}"
         )
         assert abs(cheap_pair["combined_active_cost_usd_m2"] - 0.0394) < 1e-4, (
             f"Expected $0.0394/m2 for cheap pair, got {cheap_pair['combined_active_cost_usd_m2']}"
@@ -349,9 +349,10 @@ class RepoConsistencyAuditor:
         for p10 in p10_stacks:
             assert p10["phase10_redundancy_verified"] is True
             assert p10["rouard_opt_diff_percent"] <= 0.05
-            assert p10["bifacial_20pct_albedo_4t_pce_percent"] > p10["opt_monofacial_4t_pce_percent"]
-            assert p10["bifacial_30pct_albedo_4t_pce_percent"] > p10["bifacial_20pct_albedo_4t_pce_percent"]
+            assert p10["bifacial_20pct_equivalent_power_density_mw_cm2"] > p10["opt_monofacial_4t_pce_percent"]
+            assert p10["bifacial_30pct_equivalent_power_density_mw_cm2"] > p10["bifacial_20pct_equivalent_power_density_mw_cm2"]
             assert p10["n_cells_si_ref"] == 72
+            assert isinstance(p10["strip_width_feasible"], bool)
 
         # v8.0 Phase 11A, 11B, and 11C Realistic Synthesis & Commercialization Checks
         assert self.live_summary_data.get("v8_phase11_realistic_commercialization_enabled") is True
@@ -369,11 +370,19 @@ class RepoConsistencyAuditor:
         assert len(p11b_list) == 15, f"Expected 15 phase11b_realistic_commercialization_dossiers, got {len(p11b_list)}"
         for p11b in p11b_list:
             assert p11b["phase11_redundancy_verified"] is True
-            assert p11b["rouard_base_2l_diff_percent"] <= 0.05
-            assert p11b["path2_utility_lcoe_cents_kwh"] < p11b["path1_utility_lcoe_cents_kwh"]
-            assert p11b["path4_gross_margin_percent"] > 40.0
+            assert p11b["rouard_ceiling_2l_diff_percent"] <= 0.05
+            assert p11b["default_stack_layers"] == 2
+            assert p11b["include_rear_ir_cell"] is False
+            assert (
+                p11b["demonstrated_2l_mono_pce_percent"]
+                < p11b["stretch_2l_mono_pce_percent"]
+                < p11b["ceiling_2l_mono_pce_percent"]
+                < p11b["radiative_2l_mono_pce_percent"]
+            )
+            assert p11b["utility_breakeven_top_pce_percent"] > p11b["demonstrated_top_pce_percent"]
+            assert p11b["rooftop_breakeven_top_pce_percent"] > p11b["demonstrated_top_pce_percent"]
 
-        self.log("   [OK] live_mp_discovery_summary.json verified: 100 -> 91 -> 47 -> 40 -> 15 finalists, spring/migration heuristics, Lab/Defect, Synthesis/Contact, TMM, Graded-ARC, LCOE, Bifacial/String & Realistic 4-Path Commercialization.")
+        self.log("   [OK] live_mp_discovery_summary.json verified: 100 -> 91 -> 47 -> 40 -> 15 finalists, spring/migration heuristics, Lab/Defect, Synthesis/Contact, TMM, Graded-ARC, LCOE, Bifacial/String & Requirements-Based Commercialization.")
 
     def audit_negative_synthesis_priors(self) -> None:
         """Audit LBNL 80k solid-state recipes and A-Lab precursor genome negative priors."""
@@ -543,14 +552,15 @@ class RepoConsistencyAuditor:
         for mp_id in self.expected_live_mp_finalists.keys():
             assert mp_id in text, f"Missing live MP finalist ID {mp_id} in README.md"
 
-        # Check top tandem pairs (scalar + single-ARC TMM + Graded-ARC TMM + Techno-Economics)
+        # Check top tandem pairs (scalar + single-ARC TMM + Graded-ARC TMM + Techno-Economics + Requirements TEA)
         assert "42.32%" in text, "Missing 42.32% top scalar 4T PCE in README.md"
-        assert "41.75%" in text, "Missing 41.75% cost-optimal scalar 4T PCE in README.md"
-        assert "40.00%" in text, "Missing 40.00% top single-ARC TMM 4T PCE in README.md"
-        assert "42.44%" in text, "Missing 42.44% top Graded-ARC TMM 4T PCE in README.md"
-        assert "41.89%" in text, "Missing 41.89% cost-optimal Graded-ARC TMM 4T PCE in README.md"
-        assert "4.354" in text, "Missing CER_3L = 4.354 in README.md"
+        assert "42.22%" in text, "Missing 42.22% Stage 5 double-pass 4T PCE in README.md"
+        assert "41.71%" in text, "Missing 41.71% Stage 5 double-pass 4T PCE in README.md"
+        assert "40.71%" in text, "Missing 40.71% top single-ARC TMM 4T PCE in README.md"
+        assert "43.08%" in text, "Missing 43.08% top Graded-ARC TMM 4T PCE in README.md"
+        assert "4.420" in text, "Missing CER_3L = 4.420 in README.md"
         assert "0.0394" in text, "Missing $0.0394/m2 cost in README.md"
+        assert "15.72%" in text, "Missing 15.72% utility break-even top-cell PCE in README.md"
 
         # Check pytest verification reference
         assert "test" in text.lower() and "passed" in text.lower(), (
@@ -591,12 +601,10 @@ class RepoConsistencyAuditor:
         assert "18,869" in text or "18869" in text
         assert "1,035" in text or "1035" in text
         assert "892" in text
-        assert "42.32%" in text
-        assert "41.75%" in text
-        assert "40.00%" in text
-        assert "42.44%" in text
-        assert "41.89%" in text
+        assert "42.22%" in text
+        assert "41.71%" in text
         assert "0.0394" in text
+        assert "15.72%" in text
 
         self.log("   [OK] docs/MEMORY_AND_FAILURE_LEDGER.md is synchronized with v2.0, v3.0, v4.0, and v5.0 Graded-ARC & Techno-Economics.")
 
@@ -618,12 +626,10 @@ class RepoConsistencyAuditor:
         assert "18,869" in text or "18869" in text
         assert "1,035" in text or "1035" in text
         assert "892" in text
-        assert "42.32%" in text
-        assert "41.75%" in text
-        assert "40.00%" in text
-        assert "42.44%" in text
-        assert "41.89%" in text
+        assert "42.22%" in text
+        assert "41.71%" in text
         assert "0.0394" in text
+        assert "15.72%" in text
 
         self.log("   [OK] docs/VERIFICATION_AND_TEST_REPORT.md contains verified 18-test suite and all 9 core live MP finalists.")
 
@@ -645,9 +651,9 @@ class RepoConsistencyAuditor:
         assert "80,806" in text or "80806" in text
         assert "1,035" in text or "1035" in text
         assert "892" in text
-        assert "40.00%" in text
-        assert "42.44%" in text
-        assert "41.89%" in text
+        assert "42.22%" in text
+        assert "41.71%" in text
+        assert "15.72%" in text
         for mp_id in self.core_live_mp_finalists.keys():
             assert mp_id in text, f"Live MP finalist {mp_id} missing in {self.plan_doc_path}"
 

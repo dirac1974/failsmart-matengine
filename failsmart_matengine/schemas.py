@@ -570,13 +570,15 @@ class Phase10BifacialLossAndStringDossier(_ProvenanceTaggedModel):
         "opt_top_nm": ProvenanceTag.COMPUTED_HERE,
         "opt_bot_nm": ProvenanceTag.COMPUTED_HERE,
         "opt_r_front_percent": ProvenanceTag.COMPUTED_HERE,
+        "opt_monofacial_2l_pce_percent": ProvenanceTag.COMPUTED_HERE,
         "opt_monofacial_4t_pce_percent": ProvenanceTag.COMPUTED_HERE,
-        "bifacial_20pct_albedo_4t_pce_percent": ProvenanceTag.COMPUTED_HERE,
+        "bifacial_20pct_equivalent_power_density_mw_cm2": ProvenanceTag.COMPUTED_HERE,
         "bifacial_20pct_power_w_sqft": ProvenanceTag.COMPUTED_HERE,
-        "bifacial_30pct_albedo_4t_pce_percent": ProvenanceTag.COMPUTED_HERE,
+        "bifacial_30pct_equivalent_power_density_mw_cm2": ProvenanceTag.COMPUTED_HERE,
         "bifacial_30pct_power_w_sqft": ProvenanceTag.COMPUTED_HERE,
         "bifacial_20pct_gain_percent": ProvenanceTag.COMPUTED_HERE,
         "bifacial_20pct_lcoe_cents_kwh": ProvenanceTag.COMPUTED_HERE,
+        "string_matching_maturity_case": ProvenanceTag.ASSUMED,
         "top_jsc_ma_cm2": ProvenanceTag.COMPUTED_HERE,
         "top_voc_v": ProvenanceTag.COMPUTED_HERE,
         "top_ff": ProvenanceTag.COMPUTED_HERE,
@@ -595,6 +597,10 @@ class Phase10BifacialLossAndStringDossier(_ProvenanceTaggedModel):
         "v_bus_si_v": ProvenanceTag.COMPUTED_HERE,
         "top_string_mismatch_percent": ProvenanceTag.COMPUTED_HERE,
         "bot_string_mismatch_percent": ProvenanceTag.COMPUTED_HERE,
+        "implied_top_strip_width_cm": ProvenanceTag.COMPUTED_HERE,
+        "max_feasible_ito_strip_width_cm": ProvenanceTag.COMPUTED_HERE,
+        "ito_strip_resistive_loss_percent": ProvenanceTag.COMPUTED_HERE,
+        "strip_width_feasible": ProvenanceTag.COMPUTED_HERE,
         "rouard_opt_diff_percent": ProvenanceTag.COMPUTED_HERE,
     }
 
@@ -608,13 +614,15 @@ class Phase10BifacialLossAndStringDossier(_ProvenanceTaggedModel):
     opt_top_nm: float
     opt_bot_nm: float
     opt_r_front_percent: float
+    opt_monofacial_2l_pce_percent: float
     opt_monofacial_4t_pce_percent: float
-    bifacial_20pct_albedo_4t_pce_percent: float
+    bifacial_20pct_equivalent_power_density_mw_cm2: float
     bifacial_20pct_power_w_sqft: float
-    bifacial_30pct_albedo_4t_pce_percent: float
+    bifacial_30pct_equivalent_power_density_mw_cm2: float
     bifacial_30pct_power_w_sqft: float
     bifacial_20pct_gain_percent: float
     bifacial_20pct_lcoe_cents_kwh: float
+    string_matching_maturity_case: str = "demonstrated"
     top_jsc_ma_cm2: float
     top_voc_v: float
     top_ff: float
@@ -633,6 +641,10 @@ class Phase10BifacialLossAndStringDossier(_ProvenanceTaggedModel):
     v_bus_si_v: float
     top_string_mismatch_percent: float
     bot_string_mismatch_percent: float
+    implied_top_strip_width_cm: float
+    max_feasible_ito_strip_width_cm: float
+    ito_strip_resistive_loss_percent: float
+    strip_width_feasible: bool
     rouard_opt_diff_percent: float
     phase10_redundancy_verified: bool
     sha256_digest: str
@@ -691,44 +703,57 @@ class Phase11ASynthesisContactDossier(_ProvenanceTaggedModel):
 
 
 class Phase11BRealisticCommercializationDossier(_ProvenanceTaggedModel):
-    """Phase 11B/11C: Non-radiative device sensitivity & 4-path commercialization techno-economic dossier."""
+    """Phase 11B/11C: Non-radiative device sensitivity & requirements-oriented techno-economic dossier."""
 
     _DEFAULT_PROVENANCE: ClassVar[Dict[str, ProvenanceTag]] = {
+        "default_stack_layers": ProvenanceTag.ASSUMED,
+        "include_rear_ir_cell": ProvenanceTag.ASSUMED,
+        "maturity_case_assumptions": ProvenanceTag.ASSUMED,
+        "radiative_2l_mono_pce_percent": ProvenanceTag.COMPUTED_HERE,
         "radiative_3l_mono_pce_percent": ProvenanceTag.COMPUTED_HERE,
-        "radiative_3l_bif20_pce_percent": ProvenanceTag.COMPUTED_HERE,
+        "radiative_3l_bif20_equivalent_power_density_mw_cm2": ProvenanceTag.COMPUTED_HERE,
         "path0_si_mono_pce_percent": ProvenanceTag.ASSUMED,
-        "path0_si_bif20_pce_percent": ProvenanceTag.ASSUMED,
+        "path0_si_bif20_equivalent_power_density_mw_cm2": ProvenanceTag.ASSUMED,
         "path0_utility_lcoe_cents_kwh": ProvenanceTag.COMPUTED_HERE,
         "path0_rooftop_lcoe_cents_kwh": ProvenanceTag.COMPUTED_HERE,
-        "conservative_2l_mono_pce_percent": ProvenanceTag.COMPUTED_HERE,
-        "conservative_3l_mono_pce_percent": ProvenanceTag.COMPUTED_HERE,
-        "base_top_pce_percent": ProvenanceTag.COMPUTED_HERE,
-        "base_top_voc_v": ProvenanceTag.COMPUTED_HERE,
-        "base_bot_mono_pce_percent": ProvenanceTag.COMPUTED_HERE,
-        "base_bot_mono_voc_v": ProvenanceTag.COMPUTED_HERE,
-        "base_2l_mono_pce_percent": ProvenanceTag.COMPUTED_HERE,
-        "base_3l_mono_pce_percent": ProvenanceTag.COMPUTED_HERE,
-        "mature_2l_mono_pce_percent": ProvenanceTag.COMPUTED_HERE,
-        "mature_3l_mono_pce_percent": ProvenanceTag.COMPUTED_HERE,
+        "demonstrated_top_pce_percent": ProvenanceTag.COMPUTED_HERE,
+        "demonstrated_top_voc_v": ProvenanceTag.COMPUTED_HERE,
+        "demonstrated_top_ff": ProvenanceTag.COMPUTED_HERE,
+        "demonstrated_2l_mono_pce_percent": ProvenanceTag.COMPUTED_HERE,
+        "demonstrated_3l_mono_pce_percent": ProvenanceTag.COMPUTED_HERE,
+        "stretch_top_pce_percent": ProvenanceTag.COMPUTED_HERE,
+        "stretch_top_voc_v": ProvenanceTag.COMPUTED_HERE,
+        "stretch_2l_mono_pce_percent": ProvenanceTag.COMPUTED_HERE,
+        "stretch_3l_mono_pce_percent": ProvenanceTag.COMPUTED_HERE,
+        "ceiling_top_pce_percent": ProvenanceTag.COMPUTED_HERE,
+        "ceiling_top_voc_v": ProvenanceTag.COMPUTED_HERE,
+        "ceiling_bot_mono_pce_percent": ProvenanceTag.COMPUTED_HERE,
+        "ceiling_bot_mono_voc_v": ProvenanceTag.COMPUTED_HERE,
+        "ceiling_2l_mono_pce_percent": ProvenanceTag.COMPUTED_HERE,
+        "ceiling_3l_mono_pce_percent": ProvenanceTag.COMPUTED_HERE,
         "gap_sens_2l_mono_low_percent": ProvenanceTag.COMPUTED_HERE,
         "gap_sens_2l_mono_high_percent": ProvenanceTag.COMPUTED_HERE,
         "gap_sens_3l_mono_low_percent": ProvenanceTag.COMPUTED_HERE,
         "gap_sens_3l_mono_high_percent": ProvenanceTag.COMPUTED_HERE,
-        "path1_3l_bif20_pce_percent": ProvenanceTag.COMPUTED_HERE,
+        "path1_3l_bif20_equivalent_power_density_mw_cm2": ProvenanceTag.COMPUTED_HERE,
         "path1_module_cost_usd_m2": ProvenanceTag.ASSUMED,
         "path1_utility_lcoe_cents_kwh": ProvenanceTag.COMPUTED_HERE,
         "path1_rooftop_lcoe_cents_kwh": ProvenanceTag.COMPUTED_HERE,
-        "path2_2l_bif20_pce_percent": ProvenanceTag.COMPUTED_HERE,
+        "path2_2l_bif20_equivalent_power_density_mw_cm2": ProvenanceTag.COMPUTED_HERE,
         "path2_module_cost_usd_m2": ProvenanceTag.ASSUMED,
+        "demonstrated_path2_utility_lcoe_cents_kwh": ProvenanceTag.COMPUTED_HERE,
+        "demonstrated_path2_rooftop_lcoe_cents_kwh": ProvenanceTag.COMPUTED_HERE,
         "path2_utility_lcoe_cents_kwh": ProvenanceTag.COMPUTED_HERE,
         "path2_rooftop_lcoe_cents_kwh": ProvenanceTag.COMPUTED_HERE,
-        "path3_2t_bif20_pce_percent": ProvenanceTag.COMPUTED_HERE,
+        "path3_2t_bif20_equivalent_power_density_mw_cm2": ProvenanceTag.COMPUTED_HERE,
         "path3_module_cost_usd_m2": ProvenanceTag.ASSUMED,
         "path3_utility_lcoe_cents_kwh": ProvenanceTag.COMPUTED_HERE,
         "path4_bipv_window_pce_percent": ProvenanceTag.COMPUTED_HERE,
         "path4_dgu_cost_usd_m2": ProvenanceTag.ASSUMED,
-        "path4_gross_margin_percent": ProvenanceTag.COMPUTED_HERE,
-        "rouard_base_2l_diff_percent": ProvenanceTag.COMPUTED_HERE,
+        "utility_breakeven_top_pce_percent": ProvenanceTag.COMPUTED_HERE,
+        "rooftop_breakeven_top_pce_percent": ProvenanceTag.COMPUTED_HERE,
+        "optics_only_breakeven_top_pce_percent": ProvenanceTag.COMPUTED_HERE,
+        "rouard_ceiling_2l_diff_percent": ProvenanceTag.COMPUTED_HERE,
     }
 
     pair_id: str
@@ -736,41 +761,55 @@ class Phase11BRealisticCommercializationDossier(_ProvenanceTaggedModel):
     top_formula: str
     bottom_mp_id: str
     bottom_formula: str
+    default_stack_layers: int = 2
+    include_rear_ir_cell: bool = False
+    maturity_case_assumptions: Dict[str, Any]
+    radiative_2l_mono_pce_percent: float
     radiative_3l_mono_pce_percent: float
-    radiative_3l_bif20_pce_percent: float
+    radiative_3l_bif20_equivalent_power_density_mw_cm2: float
     path0_si_mono_pce_percent: float
-    path0_si_bif20_pce_percent: float
+    path0_si_bif20_equivalent_power_density_mw_cm2: float
     path0_utility_lcoe_cents_kwh: float
     path0_rooftop_lcoe_cents_kwh: float
-    conservative_2l_mono_pce_percent: float
-    conservative_3l_mono_pce_percent: float
-    base_top_pce_percent: float
-    base_top_voc_v: float
-    base_bot_mono_pce_percent: float
-    base_bot_mono_voc_v: float
-    base_2l_mono_pce_percent: float
-    base_3l_mono_pce_percent: float
-    mature_2l_mono_pce_percent: float
-    mature_3l_mono_pce_percent: float
+    demonstrated_top_pce_percent: float
+    demonstrated_top_voc_v: float
+    demonstrated_top_ff: float
+    demonstrated_2l_mono_pce_percent: float
+    demonstrated_3l_mono_pce_percent: Optional[float] = None
+    stretch_top_pce_percent: float
+    stretch_top_voc_v: float
+    stretch_2l_mono_pce_percent: float
+    stretch_3l_mono_pce_percent: Optional[float] = None
+    ceiling_top_pce_percent: float
+    ceiling_top_voc_v: float
+    ceiling_bot_mono_pce_percent: Optional[float] = None
+    ceiling_bot_mono_voc_v: Optional[float] = None
+    ceiling_2l_mono_pce_percent: float
+    ceiling_3l_mono_pce_percent: Optional[float] = None
     gap_sens_2l_mono_low_percent: float
     gap_sens_2l_mono_high_percent: float
-    gap_sens_3l_mono_low_percent: float
-    gap_sens_3l_mono_high_percent: float
-    path1_3l_bif20_pce_percent: float
+    gap_sens_3l_mono_low_percent: Optional[float] = None
+    gap_sens_3l_mono_high_percent: Optional[float] = None
+    path1_3l_bif20_equivalent_power_density_mw_cm2: Optional[float] = None
     path1_module_cost_usd_m2: float
-    path1_utility_lcoe_cents_kwh: float
-    path1_rooftop_lcoe_cents_kwh: float
-    path2_2l_bif20_pce_percent: float
+    path1_utility_lcoe_cents_kwh: Optional[float] = None
+    path1_rooftop_lcoe_cents_kwh: Optional[float] = None
+    path2_2l_bif20_equivalent_power_density_mw_cm2: float
     path2_module_cost_usd_m2: float
+    demonstrated_path2_utility_lcoe_cents_kwh: float
+    demonstrated_path2_rooftop_lcoe_cents_kwh: float
     path2_utility_lcoe_cents_kwh: float
     path2_rooftop_lcoe_cents_kwh: float
-    path3_2t_bif20_pce_percent: float
+    path3_2t_bif20_equivalent_power_density_mw_cm2: float
     path3_module_cost_usd_m2: float
     path3_utility_lcoe_cents_kwh: float
     path4_bipv_window_pce_percent: float
     path4_dgu_cost_usd_m2: float
-    path4_gross_margin_percent: float
+    utility_breakeven_top_pce_percent: float
+    rooftop_breakeven_top_pce_percent: float
+    optics_only_breakeven_top_pce_percent: float
     recommended_commercial_path: str
-    rouard_base_2l_diff_percent: float
+    rouard_ceiling_2l_diff_percent: float
     phase11_redundancy_verified: bool
     sha256_digest: str
+

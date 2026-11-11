@@ -80,11 +80,11 @@ To eliminate perovskite-like $J\text{–}V$ hysteresis and metallic $\text{Cu}^0
 
 2. **Single-Layer Absorptance, Unscaled SLME & Exact Shockley-Queisser Ceiling:**
    * Given indirect gap $E_{g,\text{ind}}$ (eV), direct gap $E_{g,\text{dir}}$ (eV), $\varepsilon_\infty$, and film thickness $d = \text{thickness\_nm} \times 10^{-9}\text{ m}$:
-   * Refractive index $n = \sqrt{\varepsilon_\infty}$, Yablonovitch factor $Y = 4 n^2$, front AR reflectance $R_{\text{front}} = 0.020$.
+   * Refractive index $n = \sqrt{\varepsilon_\infty}$, front AR reflectance $R_{\text{front}} = 0.020$.
    * Absorption coefficient $\alpha(E)$ ($\text{m}^{-1}$) at photon energy $E = \frac{hc/q \times 10^9}{\lambda_{\text{nm}}}$ (eV):
      $$\alpha(E) = 1.2\times 10^5 \max(0, E - E_{g,\text{ind}})^2 + 2.8\times 10^7 \sqrt{\max(0, E - E_{g,\text{dir}})}$$
-   * Internal light-trapping absorptance fraction & net external absorptance:
-     $$f_{\text{abs}}(E) = \frac{4 n^2 \alpha(E) d}{1.0 + 4 n^2 \alpha(E) d}, \quad A(E) = (1.0 - R_{\text{front}}) f_{\text{abs}}(E)$$
+   * Double-pass Beer-Lambert thin-film absorptance fraction (planar thin film without Yablonovitch $4n^2$ path-length enhancement) & net external absorptance:
+     $$f_{\text{abs}}(E) = 1.0 - \exp\!\left(-2.0\,\alpha(E)\,d\right), \quad A(E) = (1.0 - R_{\text{front}}) f_{\text{abs}}(E)$$
    * Blackbody photon flux at $T_{\text{cell}} = 300.0\text{ K}$:
      * In wavelength space ($\text{photons}\cdot\text{m}^{-2}\cdot\text{s}^{-1}\cdot\text{nm}^{-1}$, with $\lambda_m = \lambda_{\text{nm}}\times 10^{-9}$):
        $$\Phi_{\text{bb},\lambda}(\lambda_{\text{nm}}) = \frac{2\pi c}{\lambda_m^4 \left[\exp\!\left(\min(500.0, \frac{hc}{\lambda_m k_B T_{\text{cell}}})\right) - 1\right]} \times 10^{-9}$$
@@ -125,8 +125,8 @@ To eliminate perovskite-like $J\text{–}V$ hysteresis and metallic $\text{Cu}^0
        * Transmitted IR photon fluxes entering Layer 3:
          $$\Phi_{3,\text{low}}(\lambda) = \Phi_2(\lambda) \cdot 0.96 \cdot \left(1.0 - f_{\text{abs,Si,3L}}(E)\right) \cdot T_{\text{Si,FCA,low}}(\lambda)$$
          $$\Phi_{3,\text{std}}(\lambda) = \Phi_2(\lambda) \cdot 0.96 \cdot \left(1.0 - f_{\text{abs,Si,3L}}(E)\right) \cdot T_{\text{Si,FCA,std}}(\lambda)$$
-   * **Step C — Layer 3 (Bottom IR Scavenger with $4n_3^2$ Rear Mirror):**
-     * `bottom_ir_cell_eff_percent` $= \eta_3(\Phi_{3,\text{low}})$, and `bottom_ir_std_si_eff_percent` $= \eta_3(\Phi_{3,\text{std}})$.
+   * **Step C — Layer 3 (Bottom IR Scavenger with Double-Pass Beer-Lambert Absorption):**
+     * `bottom_ir_cell_eff_percent` $= \eta_3(\Phi_{3,\text{low}})$, and `bottom_ir_std_si_eff_percent` $= \eta_3(\Phi_{3,\text{std}})$ using double-pass thin-film absorptance $f_{\text{abs},3}(E) = 1.0 - \exp(-2.0\,\alpha_3(E)\,d_3)$.
      * Stack totals:
        * `tandem_2layer_si_eff_percent` $= \eta_1(\Phi_1) + \eta_{\text{Si,2L}}(\Phi_2)$
        * `tandem_4t_std_si_fca_eff_percent` $= \eta_1(\Phi_1) + \eta_{\text{Si,3L}}(\Phi_2) + \eta_3(\Phi_{3,\text{std}})$
@@ -228,16 +228,16 @@ $$r_{m,m+1} = \frac{\tilde{n}_m - \tilde{n}_{m+1}}{\tilde{n}_m + \tilde{n}_{m+1}
   Then $R_{\text{TMM},1}(E) = |R_{\text{amp}}^{(0)}|^2$ and $T_{\text{TMM},1}(E) = \frac{\text{Re}(\tilde{n}_5)}{\text{Re}(\tilde{n}_0)} |T_{\text{amp}}^{(0)}|^2$.
   *(Mathematical identity theorem: $|r_{\text{tot}}|^2 \equiv |R_{\text{amp}}^{(0)}|^2$ and $|t_{\text{tot}}|^2 \equiv |T_{\text{amp}}^{(0)}|^2$ to machine precision $10^{-15}$ at every photon energy!)*
 
-### 7.3 Coupled Coherent Top Stack + Textured Yablonovitch Light-Trapping & Downstream Silicon/IR Propagation
+### 7.3 Coupled Coherent Top Stack + Double-Pass Thin-Film Absorptance & Downstream Silicon/IR Propagation
 1. **Top Active Cell Absorptance $A_{\text{TMM},1}(\lambda)$ and Transmitted Flux $\Phi_{2,\text{TMM}}(\lambda)$:**
-   * Coherent front-entry envelope $(1.0 - R_{\text{TMM},1}(\lambda))$ coupled with rear textured diffuser internal light trapping $f_{\text{abs},1}(E) = \frac{4n_1^2 \alpha_1(E) d_{\text{top}}}{1 + 4n_1^2 \alpha_1(E) d_{\text{top}}}$ and front ITO Beer-Lambert transmission $T_{\text{ITO,front}}(\lambda) = \exp(-4\pi k_{\text{ITO}}(\lambda) d_{\text{ITO}}/\lambda_{\text{nm}})$:
+   * Coherent front-entry envelope $(1.0 - R_{\text{TMM},1}(\lambda))$ coupled with double-pass Beer-Lambert thin-film absorptance $f_{\text{abs},1}(E) = 1.0 - \exp(-2.0\,\alpha_1(E)\,d_{\text{top}})$ and front ITO Beer-Lambert transmission $T_{\text{ITO,front}}(\lambda) = \exp(-4\pi k_{\text{ITO}}(\lambda) d_{\text{ITO}}/\lambda_{\text{nm}})$:
      $$A_{\text{TMM},1}(\lambda) = \left(1.0 - R_{\text{TMM},1}(\lambda)\right) \cdot T_{\text{ITO,front}}(\lambda) \cdot f_{\text{abs},1}(E)$$
    * Sub-bandgap & weakly-absorbed photons transmitted through the coherent multilayer stack into the Silicon wafer:
      $$T_{\text{stack,TMM},1}(\lambda) = T_{\text{TMM},1}(\lambda) \cdot \left(1.0 - f_{\text{abs},1}(E)\right)$$
      *(Note: Since $T_{\text{TMM},1}(\lambda) \le (1 - R_{\text{TMM},1}(\lambda)) T_{\text{ITO,front}}(\lambda)$, strict photon conservation $A_{\text{TMM},1}(\lambda) + T_{\text{stack,TMM},1}(\lambda) + R_{\text{TMM},1}(\lambda) \le 1.0$ holds identically at every wavelength!)*
    * $\Phi_{2,\text{TMM}}(\lambda) = \Phi_{\text{sun}}(\lambda) \cdot T_{\text{stack,TMM},1}(\lambda)$.
 2. **Middle c-Si Wafer ($160\,\mu\text{m}$) & Bottom IR Scavenger under $\Phi_{2,\text{TMM}}$:**
-   * Evaluate Step B (c-Si 2L and 3L cells + Drude FCA) and Step C (Bottom IR cell with $4n_3^2$ rear reflector and coherent $\text{MgF}_2/\text{ITO}$ entrance transmittance $1.0 - R_{\text{int},23}$, where $R_{\text{int},23} = 0.20\left(\frac{n_3 - 1.72}{n_3 + 1.72}\right)^2$ and $A_{\text{TMM},3} = (1.0 - R_{\text{int},23})\,f_{\text{abs},3}$) exactly as in Section 4.3.
+   * Evaluate Step B (c-Si 2L and 3L cells + Drude FCA) and Step C (Bottom IR cell with double-pass thin-film absorptance $f_{\text{abs},3} = 1.0 - \exp(-2.0\,\alpha_3 d_3)$ and coherent $\text{MgF}_2/\text{ITO}$ entrance transmittance $1.0 - R_{\text{int},23}$, where $R_{\text{int},23} = 0.20\left(\frac{n_3 - 1.72}{n_3 + 1.72}\right)^2$ and $A_{\text{TMM},3} = (1.0 - R_{\text{int},23})\,f_{\text{abs},3}$) exactly as in Section 4.3.
    * Report:
      * `tmm_top_pce_percent`, `tmm_si_pce_percent`, `tmm_bottom_pce_percent`, `tmm_bottom_std_si_pce_percent`
      * `tmm_2layer_pce_percent`, `tmm_4t_std_si_pce_percent`, `tmm_4t_low_fca_pce_percent`
@@ -369,41 +369,38 @@ For both 2-Layer ($\eta = \eta_{\text{2L}}, N=2, \Delta C = \Delta C_{\text{2L}}
    * **Optimization Objective:** Maximize the unrounded 1-sun AM1.5G coherent 4T low-FCA stack efficiency $\eta_{\text{4T,opt}}(d_{\text{MgF}_2}^*, d_{\text{TiO}_2}^*, d_{\text{top}}^*, d_{\text{bot}}^*)$ subject to strict photon conservation $A_1(\lambda) + T_1(\lambda) + R_1(\lambda) \le 1.0 + 10^{-9}$ at every wavelength.
    * **Dual-Redundancy Cross-Check:** Primary engine (`atomistic_and_tmm.py`) finds and evaluates $\eta_{\text{4T,opt}}$ via $2\times 2$ Abeles matrix multiplication (`np.trapezoid`), while the blinded verifier (`independent_verifier.py`) independently evaluates the 16-point factorial grid via Recursive Rouard/Airy amplitude addition (`scipy.integrate.simpson`), verifying agreement within $\le 0.05\%$.
 
-### 10.2 Phase 10B — Bifacial Ground-Albedo ($R_{\text{albedo}} \in \{0.00, 0.20, 0.30\}$) Rear-Side IR Harvesting
+### 10.2 Phase 10B — Bifacial Ground-Albedo ($R_{\text{albedo}} \in \{0.00, 0.20, 0.30\}$) Rear-Side IR Harvesting & Bifacial-Equivalent Power Density
 1. **Bifacial Rear-Side Illumination Physics (at Optimal Thickness Tuple $(d_{\text{MgF}_2}^*, d_{\text{TiO}_2}^*, d_{\text{top}}^*, d_{\text{bot}}^*)$):**
    * In a 4-Terminal Silicon-Sandwich with a transparent conductive rear electrode + dielectric/grid aperture ($f_{\text{rear,aperture}} = 0.78$, rear TCO transmittance $T_{\text{ITO,rear}} = 0.92$), diffuse ground-reflected AM1.5G solar photon flux entering the rear of the Bottom IR Scavenger under ground albedo $R_{\text{albedo}} \in \{0.00, 0.20, 0.30\}$ is:
      $$\Phi_{\text{rear}}(\lambda) = R_{\text{albedo}} \cdot f_{\text{rear,aperture}} \cdot \Phi_{\text{sun}}(\lambda) = 0.78\,R_{\text{albedo}}\,\Phi_{\text{sun}}(\lambda)$$
    * The Bottom IR Scavenger receives combined front-transmitted + rear-albedo photon flux:
      $$\Phi_{3,\text{tot}}(\lambda, R_{\text{albedo}}) = \Phi_{3,\text{front}}(\lambda) + \Phi_{\text{rear}}(\lambda)$$
-     and harvests it with external absorptance $A_{\text{ARC},3}(\lambda) = (1.0 - R_{\text{int},23})\,f_{\text{abs},3}(\lambda, d_{\text{bot}}^*)$.
+     and harvests it with double-pass Beer-Lambert external absorptance $A_{\text{ARC},3}(\lambda) = (1.0 - R_{\text{int},23})\,f_{\text{abs},3}(\lambda, d_{\text{bot}}^*)$.
    * Unabsorbed rear-albedo photons transmit upward through the Bottom IR Scavenger and rear TCO ($T_{\text{ITO,rear}} = 0.92$) into the bifacial $160\text{ }\mu\text{m}$ c-Si wafer:
      $$\Phi_{2,\text{rear}}(\lambda, R_{\text{albedo}}) = \Phi_{\text{rear}}(\lambda)\cdot\left(1.0 - f_{\text{abs},3}(\lambda, d_{\text{bot}}^*)\right)\cdot 0.92$$
      so the middle c-Si wafer receives total photon flux:
      $$\Phi_{2,\text{tot}}(\lambda, R_{\text{albedo}}) = \Phi_{2,\text{front}}(\lambda) + \Phi_{2,\text{rear}}(\lambda, R_{\text{albedo}})$$
      and harvests it with external absorptance $0.98\,f_{\text{abs,Si,3L}}(\lambda)$.
-   * **Equivalent Bifacial 1-Sun Efficiency ($\text{PCE}_{\text{bifacial}}$), Power Density ($\text{W/ft}^2$), Bifacial Gain ($\%$), and 25-Year Bifacial LCOE ($\text{cents/kWh}$):**
-     $$\eta_{\text{4T,bifacial}}(R_{\text{albedo}}) = \eta_{\text{top}}^* + \eta_{\text{Si}}^*(R_{\text{albedo}}) + \eta_{\text{bot}}^*(R_{\text{albedo}})$$
-     $$P_{\text{sqft}}(R_{\text{albedo}}) = 10.0 \cdot \eta_{\text{4T,bifacial}}(R_{\text{albedo}}) \cdot 0.09290304\text{ [W/ft}^2\text{]}$$
-     $$\text{Gain}_{\text{bifacial},20\%}(\%) = \frac{\eta_{\text{4T,bifacial}}(0.20) - \eta_{\text{4T,bifacial}}(0.00)}{\eta_{\text{4T,bifacial}}(0.00)} \times 100$$
-   * **25-Year Bifacial LCOE at $R_{\text{albedo}} = 0.20$:** Evaluated using the exact Section 9.3 discounted 25-year LCOE formula (`_compute_lcoe_cents_kwh`) with $P_{\text{m2,bifacial}} = 10.0 \cdot \text{round}(\eta_{\text{4T,bifacial}}(0.20), 2)\text{ [W}_{\text{p}}\text{/m}^2\text{]}$, active layer material costs scaled to the optimized thicknesses $(d_{\text{top}}^* / d_{1,0})\cdot C_{\text{raw,top}}$ and $(d_{\text{bot}}^* / d_{3,0})\cdot C_{\text{raw,bot}}$, NOCT derating factor $f_{\text{NOCT,3L}}$, and Arrhenius degradation rate $r_{\text{deg}}$ (whilst keeping nameplate inverter/power BOS scaled to $P_{\text{m2,bifacial}}$).
+   * **Bifacial-Equivalent Power Density (Front-Irradiance Basis, $\text{mW/cm}^2$ and $\text{W/ft}^2$), Bifacial Gain ($\%$), and 25-Year Bifacial Radiative LCOE ($\text{cents/kWh}$):**
+     $$P_{\text{bif,eq}}(R_{\text{albedo}}) = P_{\text{top}}^* + P_{\text{Si}}^*(R_{\text{albedo}}) + P_{\text{bot}}^*(R_{\text{albedo}})\text{ [mW/cm}^2\text{]}$$
+     $$P_{\text{sqft}}(R_{\text{albedo}}) = 10.0 \cdot P_{\text{bif,eq}}(R_{\text{albedo}}) \cdot 0.09290304\text{ [W/ft}^2\text{]}$$
+     $$\text{Gain}_{\text{bifacial},20\%}(\%) = \frac{P_{\text{bif,eq}}(0.20) - P_{\text{bif,eq}}(0.00)}{P_{\text{bif,eq}}(0.00)} \times 100$$
+   * **25-Year Bifacial Radiative LCOE at $R_{\text{albedo}} = 0.20$:** Evaluated using the exact Section 9.3 discounted 25-year LCOE formula (`_compute_lcoe_cents_kwh`) with $P_{\text{m2,bifacial}} = 10.0 \cdot \text{round}(P_{\text{bif,eq}}(0.20), 2)\text{ [W}_{\text{p}}\text{/m}^2\text{]}$, active layer material costs scaled to the optimized thicknesses $(d_{\text{top}}^* / d_{1,0})\cdot C_{\text{raw,top}}$ and $(d_{\text{bot}}^* / d_{3,0})\cdot C_{\text{raw,bot}}$, NOCT derating factor $f_{\text{NOCT,3L}}$, and Arrhenius degradation rate $r_{\text{deg}}$ (whilst keeping nameplate inverter/power BOS scaled to $P_{\text{m2,bifacial}}$).
 
-### 10.3 Phase 10C — Subcell $J\text{–}V$ Operating-Point (`J_sc`, `V_oc`, `FF`, `V_mp`) & Integer Parallel-String Voltage-Matching Dossier
+### 10.3 Phase 10C — Subcell $J\text{–}V$ Operating-Point (`J_sc`, `V_oc`, `FF`, `V_mp`), `"demonstrated"` Maturity-Case String Matching & ITO Strip Sheet-Resistance Check
 1. **Exact Subcell $J\text{–}V$ Operating Point Decomposition:**
-   * At the optimal 7-medium Graded-ARC stack configuration ($R_{\text{albedo}} = 0.00$, $T = 300\text{ K}$, $V_{\text{th}} = 0.02585199\text{ V}$), both primary and blinded engines extract the full 1-sun operating point for all 3 subcells ($k \in \{\text{Top}, \text{Si}, \text{Bot}\}$):
-     * Short-circuit current density $J_{\text{sc},k}\text{ [mA/cm}^2\text{]}$,
-     * Open-circuit voltage $V_{\text{oc},k}\text{ [V]}$,
-     * Fill factor $\text{FF}_k = \frac{v_k - \ln(v_k + 0.72)}{v_k + 1.0}$ where $v_k = V_{\text{oc},k} / V_{\text{th}}$,
-     * Maximum-power-point voltage $V_{\text{mp},k}\text{ [V]}$ from the analytical single-diode maximum power condition:
-       $$V_{\text{mp},k} = V_{\text{oc},k} - V_{\text{th}}\ln\!\left(\frac{V_{\text{oc},k}}{V_{\text{th}}} + 0.72\right)$$
-2. **4-Terminal Module Integer Series-Cell String Voltage Matching ($N_{\text{top}} : N_{\text{Si}} : N_{\text{bot}}$):**
-   * Given a standard $N_{\text{Si}} = 72$-cell crystalline silicon string with bus voltage $V_{\text{bus,Si}} = N_{\text{Si}} \cdot V_{\text{mp,Si}}$ (using unrounded $V_{\text{mp},k}$ before final rounding), the optimal integer series cell counts $N_{\text{top}}$ and $N_{\text{bot}}$ for parallel DC-bus coupling without DC-DC converter step-up loss are:
-     $$N_{\text{top}} = \text{int}\!\left(\text{round}\!\left(\frac{72 \cdot V_{\text{mp,Si}}}{V_{\text{mp,top}}}\right)\right), \quad N_{\text{bot}} = \text{int}\!\left(\text{round}\!\left(\frac{72 \cdot V_{\text{mp,Si}}}{V_{\text{mp,bot}}}\right)\right)$$
-   * The string voltage mismatch percentage for parallel string connection is:
-     $$\Delta V_{\text{mismatch,top}}(\%) = \frac{|N_{\text{top}} V_{\text{mp,top}} - V_{\text{bus,Si}}|}{V_{\text{bus,Si}}} \times 100, \quad \Delta V_{\text{mismatch,bot}}(\%) = \frac{|N_{\text{bot}} V_{\text{mp,bot}} - V_{\text{bus,Si}}|}{V_{\text{bus,Si}}} \times 100$$
+   * At the optimal 7-medium Graded-ARC stack configuration ($R_{\text{albedo}} = 0.00$, $T = 300\text{ K}$, $V_{\text{th}} = 0.02585199\text{ V}$), both primary and blinded engines extract the radiative 1-sun operating point $(J_{\text{sc},k}, V_{\text{oc},k}, \text{FF}_k, V_{\text{mp},k})$ for all 3 subcells ($k \in \{\text{Top}, \text{Si}, \text{Bot}\}$), plus the non-radiative operating voltage $V_{\text{mp},k}^{(\text{case})}$ under the selected maturity case (`string_maturity_case = "demonstrated"` by default, with `include_rear_ir_cell = False` by default).
+2. **4-Terminal Module Integer Series-Cell String Voltage Matching ($N_{\text{top}} : N_{\text{Si}} : N_{\text{bot}}$) & Resistive-Loss Check:**
+   * Given a standard $N_{\text{Si}} = 72$-cell crystalline silicon string with bus voltage $V_{\text{bus,Si}} = N_{\text{Si}} \cdot V_{\text{mp,Si}}^{(\text{case})}$, the integer series cell count $N_{\text{top}}$ for parallel DC-bus coupling is computed from the operating voltage $V_{\text{mp,top}}^{(\text{case})}$ of the selected maturity case (not the radiative voltage):
+     $$N_{\text{top}} = \text{int}\!\left(\text{round}\!\left(\frac{72 \cdot V_{\text{mp,Si}}^{(\text{case})}}{V_{\text{mp,top}}^{(\text{case})}}\right)\right)$$
+     (When `include_rear_ir_cell = False`, $N_{\text{bot}} = \text{None}$; when `include_rear_ir_cell = True`, $N_{\text{bot}} = \text{int}(\text{round}(72\cdot V_{\text{mp,Si}}^{(\text{case})} / V_{\text{mp,bot}}^{(\text{case})}))$.)
+   * **ITO Strip Sheet-Resistance Power Loss Check:** For a standard module width $W_{\text{mod}} = 100.0\text{ cm}$ divided into $N_{\text{top}}$ monolithically scribed strips of active width $w_{\text{top}} = (W_{\text{mod}} / N_{\text{top}})\cdot f_{\text{ap,scen}}\text{ [cm]}$ on $R_{\text{sh,ITO}} = 12.0\text{ }\Omega/\square$ front ITO, the fractional lateral sheet-resistance power loss is:
+     $$\left(\frac{\Delta P}{P}\right)_{\text{top}}(\%) = \frac{1}{3}\,\frac{(J_{\text{mp,top}}^{(\text{case})} / 1000.0) \cdot R_{\text{sh,ITO}} \cdot w_{\text{top}}^2}{V_{\text{mp,top}}^{(\text{case})}} \times 100$$
+     A strip design is flagged as feasible (`strip_width_feasible = True`) iff $w_{\text{top}} \ge 0.40\text{ cm}$ and $(\Delta P / P)_{\text{top}} \le 2.0\%$ (and similarly for the bottom cell when `include_rear_ir_cell = True`).
 
 ---
 
-## 11. Phase 11 (`v8.0`) — Realistic Synthesis Practicality, Contact Band Alignment, Non-Radiative SRH Device Physics & 4-Path Commercialization Techno-Economics
+## 11. Phase 11 (`v8.0`) — Realistic Synthesis Practicality, Contact Band Alignment, Non-Radiative SRH Maturity Cases & Inverted Techno-Economic Requirements
 
 ### 11.1 Phase 11A — Live DFT Chemical-Potential Synthesis Window, TCO `InterfacialReactivity`, Contact Band Alignment & Supply-Chain Practicality Score ($N=8$ Finalists)
 1. **Live Materials Project DFT Convex-Hull & `InterfacialReactivity` Inputs (`data/mp_thermo_interface_cache.json`):**
@@ -431,44 +428,45 @@ For both 2-Layer ($\eta = \eta_{\text{2L}}, N=2, \Delta C = \Delta C_{\text{2L}}
    * **Synthesis & Commercialization Practicality Score ($\text{SPS} \in [0, 100]$):**
      $$\text{SPS} = \text{clip}\!\Big(92.0 - 0.90\,E_{\text{hull,GGA}} + 10.0\,\min(0.80, \Delta\mu_{\text{anion}}) + 8.0\,\min(0.50, \Delta\mu_{\text{cation,min}}) - 0.25\,|\Delta E_{\text{rxn,In2O3}}| - 0.50\,|\Delta E_{\text{rxn,SnO2}}| - 95.0\,S_{\text{crit}} - 110.0\,\Delta V_{\text{antisite}} - 25.0\,\Delta V_{\text{contact}},\; 0.0,\; 100.0\Big)$$
 
-### 11.2 Phase 11B — Realistic Non-Radiative SRH Device Model vs. Radiative Ceiling & $\pm 0.15\text{ eV}$ Gap Sensitivity ($N=15$ Pairs)
+### 11.2 Phase 11B — Realistic Non-Radiative SRH Device Model (`demonstrated`, `stretch`, `ceiling`) vs. Radiative Ceiling & $\pm 0.15\text{ eV}$ Gap Sensitivity ($N=15$ Pairs)
 1. **Realistic Thin-Film Subcell Operating Solver ($T = 300\text{ K}$, $V_{\text{th}} = 0.02585199\text{ V}$):**
-   * Evaluated at Phase 10 optimal thicknesses $(d_{\text{MgF}_2}^*, d_{\text{TiO}_2}^*, d_{\text{top}}^*, d_{\text{bot}}^*)$ across 3 non-radiative External Radiative Efficiency ($\text{ERE}$) maturity tiers:
-     * **Conservative First-Gen Polycrystalline:** $\text{ERE} = 10^{-5}$, $f_{\text{ap,scen}} = 0.90$, $R_s = 3.2\text{ }\Omega\cdot\text{cm}^2$, $\alpha_{\text{def}} = 1.00$.
-     * **Base-Case Engineered Pilot Module:** $\text{ERE} = 10^{-4}$, $f_{\text{ap,scen}} = 0.96$, $R_s = 1.8\text{ }\Omega\cdot\text{cm}^2$, $\alpha_{\text{def}} = 0.65$.
-     * **Mature Industrial Target:** $\text{ERE} = 5\times 10^{-3}$, $f_{\text{ap,scen}} = 0.98$, $R_s = 0.9\text{ }\Omega\cdot\text{cm}^2$, $\alpha_{\text{def}} = 0.35$.
+   * Evaluated at Phase 10 optimal thicknesses $(d_{\text{MgF}_2}^*, d_{\text{TiO}_2}^*, d_{\text{top}}^*, d_{\text{bot}}^*)$ across 3 non-radiative External Radiative Efficiency ($\text{ERE}$) maturity tiers (each tagged `ASSUMED` with literature citations):
+     * **`"demonstrated"` (Demonstrated Pnictogen Chalcogenide Baseline):** $\text{ERE} = 10^{-9}$, $f_{\text{ap,scen}} = 0.90$, $R_s = 3.2\text{ }\Omega\cdot\text{cm}^2$, $\alpha_{\text{def}} = 1.00$, fill-factor cap $\text{FF}_{\text{cap}} = 0.73$ (`ASSUMED`; Wang et al., *Adv. Energy Mater.* 12, 2200736, 2022, DOI: `10.1002/aenm.202200736`; Kondrotas et al., *Adv. Energy Mater.* 8, 1703055, 2018, DOI: `10.1002/aenm.201703055`).
+     * **`"stretch"` (Stretch Defect-Passivated Thin-Film Target):** $\text{ERE} = 10^{-7}$, $f_{\text{ap,scen}} = 0.95$, $R_s = 1.8\text{ }\Omega\cdot\text{cm}^2$, $\alpha_{\text{def}} = 0.65$, $\text{FF}_{\text{cap}} = 0.80$ (`ASSUMED`; Green et al., *Prog. Photovolt.* 32, 3–13, 2024, DOI: `10.1002/pip.3750`).
+     * **`"ceiling"` (Upper-Bound Defect-Passivated Ceiling):** $\text{ERE} = 10^{-4}$, $f_{\text{ap,scen}} = 0.96$, $R_s = 1.8\text{ }\Omega\cdot\text{cm}^2$, $\alpha_{\text{def}} = 0.65$, $\text{FF}_{\text{cap}} = 1.00$ (`ASSUMED`; Nayak et al., *Nat. Rev. Mater.* 4, 269–285, 2019, DOI: `10.1038/s41578-019-0097-0`).
    * From radiative $(J_{\text{sc,rad},k}, V_{\text{oc,rad},k})$:
      $$f_{\text{coll},k} = f_{\text{orient},k}\cdot f_{\text{ap,scen}}, \qquad J_{\text{sc,real},k} = J_{\text{sc,rad},k}\cdot f_{\text{coll},k}$$
      $$\Delta V_{\text{loss},k} = -V_{\text{th}}\ln(\text{ERE}) + \alpha_{\text{def}}\cdot(\Delta V_{\text{antisite},k} + \Delta V_{\text{contact},k})$$
      $$V_{\text{oc,real},k} = \max\!\left(0.05,\; V_{\text{oc,rad},k} + V_{\text{th}}\ln(f_{\text{coll},k}) - \Delta V_{\text{loss},k}\right)$$
      $$v_k = \frac{V_{\text{oc,real},k}}{V_{\text{th}}}, \quad \text{FF}_{0,k} = \frac{v_k - \ln(v_k + 0.72)}{v_k + 1.0}$$
      $$r_{s,k} = \frac{R_s \cdot (J_{\text{sc,real},k} / 1000.0)}{V_{\text{oc,real},k}}, \quad r_{\text{sh},k} = \frac{1200.0 \cdot (J_{\text{sc,real},k} / 1000.0)}{V_{\text{oc,real},k}}$$
-     $$\text{FF}_{\text{real},k} = \text{FF}_{0,k} \cdot \max(0.35,\; 1.0 - 1.1\,r_{s,k}) \cdot \max\!\left(0.35,\; 1.0 - \frac{(v_k + 0.70)\,\text{FF}_{0,k}}{v_k\,r_{\text{sh},k}}\right)$$
+     $$\text{FF}_{\text{real},k} = \min\!\left(\text{FF}_{\text{cap}},\; \text{FF}_{0,k} \cdot \max(0.35,\; 1.0 - 1.1\,r_{s,k}) \cdot \max\!\left(0.35,\; 1.0 - \frac{(v_k + 0.70)\,\text{FF}_{0,k}}{v_k\,r_{\text{sh},k}}\right)\right)$$
      $$\eta_{\text{real},k} = J_{\text{sc,real},k}\cdot V_{\text{oc,real},k}\cdot \text{FF}_{\text{real},k}$$
 2. **Realistic Commodity Passivated Bifacial TOPCon/SHJ c-Si Subcell Solver:**
    * Fixed industrial c-Si dark saturation current $J_{0,\text{Si,real}} = 2.8\times 10^{-11}\text{ mA/cm}^2$, cell-to-module aperture/encapsulation factor $f_{\text{ap,Si}} = 0.955$, $R_{s,\text{Si}} = 0.55\text{ }\Omega\cdot\text{cm}^2$, $R_{\text{sh,Si}} = 3500.0\text{ }\Omega\cdot\text{cm}^2$, and **standard commercial c-Si free-carrier absorption** $T_{\text{Si,FCA,std}}(\lambda) = \exp(-0.38\,(\lambda_{\text{nm}} / 1200)^2)$:
      $$J_{\text{sc,Si,real}} = 0.955\,J_{\text{sc,Si,rad}}, \quad V_{\text{oc,Si,real}} = V_{\text{oc,Si,rad}} + V_{\text{th}}\ln(0.955)$$
      with $\text{FF}_{\text{Si,real}}$ evaluated identically with $\max(0.50, \dots)$ bounds.
-   * **Path 0 Standalone Commodity Bifacial c-Si Baseline:** Monofacial $\Phi_{\text{Si,mono}} = \Phi_{\text{sun}}$ and $20\%$ ground-albedo bifacial $\Phi_{\text{Si,bif20}} = \Phi_{\text{sun}}\cdot(1.0 + 0.20\times 0.80)$ absorbed with $0.98\,f_{\text{abs,Si,2L}}$.
-3. **Band-Gap Uncertainty Sensitivity ($\delta E_g = \pm 0.15\text{ eV}$):**
-   * Evaluates Base-Case ($\text{ERE} = 10^{-4}$) monofacial 2-Layer and 3-Layer PCE under simultaneous band-gap shifts $\delta E_g \in \{-0.15, +0.15\}\text{ eV}$ applied to $(E_{g,\text{ind},1}, E_{g,\text{dir},1}, E_{g,\text{ind},3}, E_{g,\text{dir},3})$ (with shifted gaps floored at $0.55\text{ eV}$, keeping $E_{g,\text{dir}} \ge E_{g,\text{ind}}$).
+   * **Path 0 Standalone Commodity Bifacial c-Si Baseline:** Monofacial $\Phi_{\text{Si,mono}} = \Phi_{\text{sun}}$ (`22.94%`) and $20\%$ ground-albedo bifacial-equivalent power density $\Phi_{\text{Si,bif20}} = \Phi_{\text{sun}}\cdot(1.0 + 0.20\times 0.80)$ (`26.65 mW/cm²`) absorbed with $0.98\,f_{\text{abs,Si,2L}}$.
+   * Under the `"demonstrated"` case ($\text{ERE} = 10^{-9}$, $\text{FF} \le 0.73$), the 2-layer stack (`demonstrated_2l_mono_pce_percent` $\approx 19.90\%\text{–}19.91\%$) reports lower efficiency than standalone silicon (`22.94%`), matching measured chalcogenide tandems.
+3. **Band-Gap Uncertainty Sensitivity ($\delta E_g = \pm 0.15\text{ eV}$) & Default 2-Layer Architecture:**
+   * The 2-layer stack (`Top + c-Si`) is the default configuration (`include_rear_ir_cell = False`); 3-layer rear IR subcell fields are set to `None` unless `include_rear_ir_cell = True` is explicitly passed.
 
-### 11.3 Phase 11C — Realistic Industrial Fab CAPEX, Yield & 4-Path Commercialization Economics
+### 11.3 Phase 11C — Realistic Industrial Fab Cost & Inverted Techno-Economic Requirements (`requirements_tea.py`)
 1. **Realistic Thin-Film Subcell Manufacturing Cost ($k \in \{\text{top}, \text{bot}\}$):**
    * Criticality surcharge $C_{\text{crit},k} = \$4.50/\text{m}^2$ if $\text{In}$ or $\text{Ag} \in \{n_Z\}$, else $\$2.00/\text{m}^2$ if $\text{Ga} \in \{n_Z\}$, else $\$0.00/\text{m}^2$.
    * Unyielded single-junction deposition cost ($40\%$ PVD utilization $= 2.50\times$ raw cost, $5\text{N}$ target compounding $\$1.20/\text{m}^2$, vacuum PVD/RTP depreciation $\$9.50/\text{m}^2$, TCO + ALD buffer + P1/P2/P3 laser scribing $\$5.80/\text{m}^2$):
      $$C_{\text{fab,unyielded},k} = 16.50 + 2.50\,C_{\text{raw},k} + C_{\text{crit},k}\text{ [\$/m}^2\text{]}$$
-2. **Head-to-Head 4 Strategic Commercialization Paths (Base-Case $\text{ERE} = 10^{-4}$, $20\%$ Ground Albedo for Utility/Rooftop Paths 0–3):**
-   * Discounted 25-year LCOE ($\text{cents/kWh}$) with $C_{\text{BOS,area}} = \$100.00/\text{m}^2$ (utility) or $\$240.00/\text{m}^2$ (area-constrained rooftop/commercial), power BOS $\$0.22/\text{W}_{\text{p}}$, O&M $\$2.50/\text{m}^2/\text{yr}$, discount rate $6\%$, insolation $1800\text{ kWh/m}^2/\text{yr}$:
-     * **Path 0 (Commodity Bifacial TOPCon/SHJ c-Si):** $C_{\text{mod,0}} = \$42.00/\text{m}^2$, $\eta_0 = \eta_{\text{Si,bif20}}$, $f_{\text{NOCT}} = 0.930$, $r_{\text{deg}} = 0.0045$.
-     * **Path 1 (3-Layer 4T Sandwich on Commodity Bifacial c-Si):** Compound two-junction yield $Y_{\text{3L}} = 0.90 \times 0.86 = 0.774$, 4T 3-subcell wiring/interlayer $\$12.00/\text{m}^2$:
-       $$C_{\text{mod,1}} = 42.00 + \frac{C_{\text{fab,unyielded,top}} + C_{\text{fab,unyielded,bot}}}{0.774} + 12.00$$
-       with $\Phi_{2,\text{Path1}} = \Phi_{\text{sun}} T_{\text{stack},1} + 0.20\cdot 0.78\,\Phi_{\text{sun}}(1 - f_{\text{abs},3})\cdot 0.92$, $\Phi_{3,\text{Path1}} = \Phi_{\text{sun}} T_{\text{stack},1}\cdot 0.96\,(1 - f_{\text{abs,Si,3L}})\,T_{\text{Si,FCA,std}} + 0.20\cdot 0.78\,\Phi_{\text{sun}}$, $f_{\text{NOCT}} = 0.925$, $r_{\text{deg}} = 0.0055$.
-     * **Path 2 (2-Layer 4T Active Solar Glass Superstrate on Unobstructed Bifacial c-Si):** Single thin-film yield $Y_{\text{2L}} = 0.90$, 4T 2-subcell wiring/lamination $\$5.50/\text{m}^2$:
-       $$C_{\text{mod,2}} = 42.00 + \frac{C_{\text{fab,unyielded,top}}}{0.90} + 5.50$$
-       with unobstructed rear bifacial c-Si flux $\Phi_{2,\text{Path2}} = \Phi_{\text{sun}} T_{\text{stack},1} + 0.20\cdot 0.80\,\Phi_{\text{sun}}$, $f_{\text{NOCT}} = 0.930$, $r_{\text{deg}} = 0.0050$.
-     * **Path 3 (2-Terminal Monolithic Top-on-Si, $375^\circ\text{C}$ Direct Deposition):** Yield $Y_{\text{2T}} = 0.84$, saves $\$5.50/\text{m}^2$ wiring and $\$3.50/\text{m}^2$ TCO, but incurs $0.84\times$ SHJ thermal-passivation + spectral current-mismatch derating:
-       $$C_{\text{mod,3}} = 42.00 + \frac{C_{\text{fab,unyielded,top}} - 3.50}{0.84}, \qquad \eta_{\text{Path3}} = 0.84\cdot\eta_{\text{Path2}}, \quad f_{\text{NOCT}} = 0.925, \quad r_{\text{deg}} = 0.0060$$
-     * **Path 4 (Standalone BIPV Semi-Transparent Solar Window Glazing, Top Active Glass Only):** Semi-transparent architectural double-glazed unit ($35\%$ daylighting transmittance, $0.72\times$ Base-Case top-cell PCE $\eta_{\text{Path4}} = 0.72\,\eta_{\text{top,base}}$), all-in DGU cost $C_{\text{mod,4}} = 58.00 + C_{\text{fab,unyielded,top}} / 0.90$, commercial solar-control glazing ASP $\$185.00/\text{m}^2$, pilot gross margin $\text{GM}_{\text{Path4}}(\%) = \frac{185.00 - C_{\text{mod,4}}}{185.00}\times 100$.
+   * Added 2-layer module cost over $\$42.00/\text{m}^2$ standalone c-Si ($Y_{\text{2L}} = 0.90$, $\$5.50/\text{m}^2$ 4T wiring/lamination):
+     $$\Delta C_{\text{mod,2L}} = \frac{C_{\text{fab,unyielded,top}}}{0.90} + 5.50\text{ [\$/m}^2\text{]}$$
+2. **Inverted Techno-Economic Break-Even Requirements (`requirements_tea.py`):**
+   * **Optics-Only Break-Even Top-Cell Efficiency ($\eta_{\text{top,BE}}^{\text{optics}}$):** Filtering standalone c-Si with a top cell of sub-bandgap transmittance $T_{\text{sub}} \in (0, 1]$ reduces c-Si power from $\approx 24.5\%$ to $\approx 13.1\,T_{\text{sub}}\%$, so the top cell must exceed:
+     $$\eta_{\text{top,BE}}^{\text{optics}}(T_{\text{sub}}) = 24.5 - 13.1\,T_{\text{sub}}\text{ [\%]}$$
+     ($12.972\%$ at $T_{\text{sub}} = 0.88$).
+   * **25-Year LCOE Break-Even Top-Cell Efficiency ($\eta_{\text{top,BE}}^{\text{LCOE}}$):** Solving $\text{LCOE}_{\text{2L}}(\eta_{\text{top}}, T_{\text{sub}}, \Delta C_{\text{mod}}, r_{\text{deg,2L}}) = \text{LCOE}_{\text{Si,0}}$ yields the exact break-even top-cell efficiency:
+     * At $T_{\text{sub}} = 0.88$, $\Delta C_{\text{mod}} = +\$23.88/\text{m}^2$, $r_{\text{deg,2L}} = 0.50\%/\text{yr}$: $\eta_{\text{top,BE}}^{\text{utility}} = 15.72\%$ (matching $\text{LCOE}_{\text{Si,0}} = 4.246\text{ cents/kWh}$) and $\eta_{\text{top,BE}}^{\text{rooftop}} = 14.02\%$ (matching $\text{LCOE}_{\text{Si,0}} = 6.802\text{ cents/kWh}$).
+   * **Allowable Added Module Cost per Efficiency Point ($\text{d}(\Delta C_{\text{mod}})/\text{d}(\Delta\eta_{\text{sys}})$):**
+     * Utility ($C_{\text{BOS,area}} = \$100/\text{m}^2$): $\$6.53/\text{m}^2$ per $+1.0\%$ system efficiency gain.
+     * Rooftop ($C_{\text{BOS,area}} = \$240/\text{m}^2$): $\$11.78/\text{m}^2$ per $+1.0\%$ system efficiency gain.
+
 
 

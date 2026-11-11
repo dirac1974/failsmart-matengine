@@ -289,6 +289,42 @@ class TestExternalPhysicsTruth(unittest.TestCase):
             self.assertIsNotNone(geom["bvs_gii"])
             self.assertLess(geom["bvs_gii"], 0.20, f"Expected {mp_id} BVS GII < 0.20 v.u., got {geom['bvs_gii']}")
 
+    def test_13_requirements_tea_breakeven_analytical_and_lcoe_targets(self) -> None:
+        """Inverse TEA break-even solver reproduces optics-only 24.5 - 13.1*T and utility/rooftop LCOE break-even targets (Task T8)."""
+        from failsmart_matengine.requirements_tea import (
+            compute_allowable_added_cost_per_eff_point,
+            compute_lcoe_breakeven_top_pce,
+            compute_optics_only_breakeven_top_pce,
+        )
+
+        # Optics-only break-even: 24.5 - 13.1 * T
+        self.assertAlmostEqual(
+            compute_optics_only_breakeven_top_pce(0.88)["breakeven_top_cell_pce_percent"], 12.972, places=3
+        )
+        self.assertAlmostEqual(
+            compute_optics_only_breakeven_top_pce(0.85)["breakeven_top_cell_pce_percent"], 13.365, places=3
+        )
+
+        # Utility & rooftop LCOE break-even at T = 0.88, +$23.88/m^2 added module cost, 0.50%/yr degradation
+        self.assertAlmostEqual(
+            compute_lcoe_breakeven_top_pce(0.88, case="utility")["breakeven_top_cell_pce_percent"], 15.72, delta=0.05
+        )
+        self.assertAlmostEqual(
+            compute_lcoe_breakeven_top_pce(0.88, case="rooftop")["breakeven_top_cell_pce_percent"], 14.02, delta=0.05
+        )
+
+        # Allowable added module cost per efficiency point
+        self.assertAlmostEqual(
+            compute_allowable_added_cost_per_eff_point(case="utility")["allowable_added_cost_usd_m2_per_eff_point"],
+            6.53,
+            delta=0.05,
+        )
+        self.assertAlmostEqual(
+            compute_allowable_added_cost_per_eff_point(case="rooftop")["allowable_added_cost_usd_m2_per_eff_point"],
+            11.78,
+            delta=0.05,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
