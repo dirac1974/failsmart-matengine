@@ -1,6 +1,6 @@
-! FailSmart-MatEngine v2.0 Auto-Generated Quantum ESPRESSO HSE06+SOC Input Deck
+! FailSmart-MatEngine Auto-Generated Quantum ESPRESSO HSE06+SOC Input Deck (not run)
 ! Candidate: mp-22982 (BiCuS2) | Target: BOTTOM_IR_075EV
-! Verified Space Group: Pnma (#62) | nat = 16
+! Space Group: Pnma (#62) | nat = 16
 &CONTROL
   calculation = 'scf',
   prefix = 'bicus2',

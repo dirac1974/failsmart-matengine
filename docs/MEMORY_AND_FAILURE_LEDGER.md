@@ -1,7 +1,7 @@
 # Contrastive Failure Memory Ledger & Negative-Results Architecture
 
 > [!WARNING]
-> **Read first (independent audit, 2026-11):** the ledger is reset at the start of every run, its embedding is a hand-built composition vector (not a MACE embedding), and its score does not feed any gate. Failure labels come from heuristic rules. See [`INDEPENDENT_AUDIT_2026-11.md`](INDEPENDENT_AUDIT_2026-11.md) and [`REMEDIATION_TASKS.md`](REMEDIATION_TASKS.md).
+> **Read first (independent audit, 2026-11):** the ledger is reset at the start of every run, its embedding (`composition_embedding`) is a hand-built composition vector (MACE not run), and its score does not feed any gate. Failure labels come from heuristic rules. See [`INDEPENDENT_AUDIT_2026-11.md`](INDEPENDENT_AUDIT_2026-11.md) and [`REMEDIATION_TASKS.md`](REMEDIATION_TASKS.md).
 
 ## 1. Why Negative Results Are First-Class Data
 
@@ -23,7 +23,7 @@ In computational and experimental materials science, over $90\%$ of candidate co
 | `TIER2_COST_EXCEEDED` | Stage 3 | Scarce Tier-2 element ($\text{Ag, In, Te, Ga}$) pushes active-layer material cost above $\$0.50/\text{m}^2$. | `AgBiSe2` ($\$0.5795/\text{m}^2$) |
 | `LOW_DIM_POLARON_RISK` | Gate A | 0D isolated polyhedra or 1D van der Waals chains trap carriers in self-induced lattice distortions. | `Cs3Bi2I9`, `BiSCl`, `SbSeI` |
 | `ANION_PHASE_SEGREGATION` | Gate A | High configurational anion-mixing enthalpy ($\Delta H_{\text{mix}} \ge 35\text{ meV/atom}$) causes light-induced halide unmixing. | `BiCuSeI2` ($48.5\text{ meV}$), `Cu2SnSeI2` ($41.2\text{ meV}$) |
-| `BANDGAP_OUT_OF_WINDOW` | Stage 4 | Relativistic `HSE06+SOC` spin-orbit splitting shifts fundamental gap outside target spectral window. | `BiCuOS` ($1.18\text{ eV}$), `BaBiO2Cl` ($2.94\text{ eV}$) |
+| `BANDGAP_OUT_OF_WINDOW` | Stage 4 | Estimated band gap (`gap_est_*`; `HSE06+SOC` not run) falls outside target spectral window. | `BiCuOS` ($1.18\text{ eV}$), `BaBiO2Cl` ($2.94\text{ eV}$) |
 | `DEEP_SRH_DEFECT` | Stage 5 | Intrinsic vacancy or antisite defect creates a mid-gap trap $> 0.15\text{ eV}$ from band edges, killing $V_{oc}$. | `Bi2SnSe3I2` ($\text{I}_{\text{Se}}$ trap at $0.36\text{ eV}$) |
 
 ---
@@ -32,13 +32,13 @@ In computational and experimental materials science, over $90\%$ of candidate co
 
 The table below reflects all 23 entries registered in `data/failure_memory.db` and `outputs/pilot_campaign_summary.json`. All metrics—including formation energetics, phonon dispersion minima, ion migration barriers, synthesis temperatures, raw active layer costs, band gaps, SLME efficiencies, 4-terminal stack efficiencies, and SHA-256 provenance hashes—are synchronized bit-for-bit with the verified pipeline output.
 
-| Candidate ID | Formula | Target Track | Stage | Status | Primary Failure Mode / Outcome | $\Delta E_{\text{hull}}$ (meV) | $\omega_{\min}$ (THz) | $E_{\text{mig}}$ (eV) | $T_{\text{synth}}$ ($^\circ\text{C}$) | Active Layer Cost ($\$/\text{m}^2$) | $E_g^{\text{HSE06+SOC}}$ (eV) | Standalone SLME (%) | 4T Stack $\eta$ (%) | Redundancy SHA-256 Verification Hash |
+| Candidate ID | Formula | Target Track | Stage | Status | Primary Failure Mode / Outcome | $\Delta E_{\text{hull}}$ (meV) | $\omega_{\min}$ (THz) | $E_{\text{mig}}$ (eV) | $T_{\text{synth}}$ ($^\circ\text{C}$) | Active Layer Cost ($\$/\text{m}^2$) | $E_g^{\text{est}}$ (eV) | Standalone SLME (%) | 4T Stack $\eta$ (%) | Redundancy SHA-256 Digest |
 | :--- | :--- | :--- | :---: | :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| `CAND-B04` | `Cu2BiSe2I` | Bottom (0.75 eV) | 5 | **PROMOTED** | Passed all 5 stages & Red-Team gates | 11.2 | +1.09 | 0.71 | 345.0 | \$0.0509 | 0.74 (0.76 dir) | 23.59% | **42.08%** | `dbf5b8efc7c5d320279525e1a0b32cf623703c12f9e75cea1bc277c125ecf65c` |
-| `CAND-B02` | `Sn2SbSe2I3` | Bottom (0.75 eV) | 5 | **PROMOTED** | Passed all 5 stages & Red-Team gates | 12.6 | +0.88 | 0.75 | 295.0 | \$0.0865 | 0.75 (0.78 dir) | 23.48% | **41.83%** | `a9b5ab5743b681061d941ab642170bb189857c470ab2a7c5ec7d2c50d0f872a0` |
-| `CAND-A03` | `Cu2SbS2Cl` | Top (1.85 eV) | 5 | **PROMOTED** | Passed all 5 stages & Red-Team gates | 21.0 | +1.05 | 0.74 | 320.0 | \$0.0129 | 1.79 (1.83 dir) | 25.08% | **41.77%** | `25aa24cc65b65879573e7a715d20f15202f3e930c544bc585c2e24352a1eb1f3` |
-| `CAND-A02` | `Bi2CuO2SCl` | Top (1.85 eV) | 5 | **PROMOTED** | Passed all 5 stages & Red-Team gates | 14.5 | +1.18 | 0.88 | 365.0 | \$0.0195 | 1.82 (1.86 dir) | 24.43% | **41.66%** | `cf4bc8846c6ad261ea9e35d4592e30c875f9edd9bb84b5b61c9752ff9678ec20` |
-| `CAND-A06` | `BiZnOSCl` | Top (1.85 eV) | 5 | **PROMOTED** | Passed all 5 stages & Red-Team gates | 18.2 | +1.29 | 0.98 | 380.0 | \$0.0148 | 1.85 (1.89 dir) | 23.81% | **41.55%** | `aa81b5fe44d582d402b25eb0cde0059b85e48008c0db993403b8ad072e040e55` |
+| `CAND-B04` | `Cu2BiSe2I` | Bottom (0.75 eV) | 5 | **PROMOTED** | Passed all 5 stages & Red-Team gates | 11.2 | +1.09 | 0.71 | 345.0 | \$0.0509 | 0.74 (0.76 dir) | 23.59% | **42.08%** | `83b3549e4805d11c3be55a82df02534f37e1ff926bf18a3bb3935492530ce9e9` |
+| `CAND-B02` | `Sn2SbSe2I3` | Bottom (0.75 eV) | 5 | **PROMOTED** | Passed all 5 stages & Red-Team gates | 12.6 | +0.88 | 0.75 | 295.0 | \$0.0865 | 0.75 (0.78 dir) | 23.48% | **41.83%** | `24e5980fa55fb8a5e1a675ac6d5ac7d224cb55cc0a996f2a6a84977078f21350` |
+| `CAND-A03` | `Cu2SbS2Cl` | Top (1.85 eV) | 5 | **PROMOTED** | Passed all 5 stages & Red-Team gates | 21.0 | +1.05 | 0.74 | 320.0 | \$0.0129 | 1.79 (1.83 dir) | 25.08% | **41.77%** | `a6cc389afeaa8cccac8901bd6ea208fe026d6671db2a7c58eefff54afb6b7033` |
+| `CAND-A02` | `Bi2CuO2SCl` | Top (1.85 eV) | 5 | **PROMOTED** | Passed all 5 stages & Red-Team gates | 14.5 | +1.18 | 0.88 | 365.0 | \$0.0195 | 1.82 (1.86 dir) | 24.43% | **41.66%** | `7327ea003865f07f05731062031db534816808ce0ee3ef6c9fe25352a3ebe11d` |
+| `CAND-A06` | `BiZnOSCl` | Top (1.85 eV) | 5 | **PROMOTED** | Passed all 5 stages & Red-Team gates | 18.2 | +1.29 | 0.98 | 380.0 | \$0.0148 | 1.85 (1.89 dir) | 23.81% | **41.55%** | `f7228c7119f0512da697a81e39f7709621af9f891dfa6b9559405770662c75c3` |
 | `CAND-B03` | `Bi2SnSe3I2` | Bottom (0.75 eV) | 4 | `REJECTED` | `DEEP_SRH_DEFECT` | 15.1 | +0.91 | — | 330.0 | \$0.0639 | 0.77 (0.81 dir) | 23.52% | 41.47% | `4e869810388a20b4be69551c6edfc494706041359e6d5d552e443be8a1946736` |
 | `CAND-A04` | `BaBiO2Cl` | Top (1.85 eV) | 4 | `REJECTED` | `BANDGAP_OUT_OF_WINDOW` | 4.2 | +1.38 | — | 440.0 | \$0.0166 | 2.94 (3.12 dir) | 2.55% | 30.37% | `6acc97ab2de8be6d47419021adfd2781f1026504a13fa97df41f3e0b58650778` |
 | `CAND-A01` | `BiCuOS` | Top (1.85 eV) | 4 | `REJECTED` | `BANDGAP_OUT_OF_WINDOW` | 0.0 | +1.62 | — | 340.0 | \$0.0205 | 1.18 (1.52 dir) | 17.88% | 28.51% | `ce72be7fad65563725e11fdf83a196f62a7d1f546185bb58b32c490fe3df4547` |
@@ -60,17 +60,17 @@ The table below reflects all 23 entries registered in `data/failure_memory.db` a
 
 ---
 
-## 4. Promoted Finalists: Dual-Redundancy Verified Physical Metrics
+## 4. Promoted Prescreen Finalists: Dual-Redundancy Self-Consistency Metrics
 
-For the 5 promoted finalists that passed all 5 stages and Gates A & B, every candidate has been independently verified across two distinct physical engines:
+For the 5 promoted v2 fixture finalists that passed all 5 stages and Gates A & B, every candidate has been cross-checked across primary and self-consistency implementations:
 
-| Candidate ID | Formula | Target Track | Space Group | $N_{\text{sites}}$ | $T_{\text{synth}}$ ($^\circ\text{C}$) | Active Layer Cost ($\$/\text{m}^2$) | $\Delta E_{\text{hull}}$ (meV) | $\omega_{\min}$ (THz) | $E_{\text{mig}}$ (eV) | $E_g^{\text{HSE06+SOC}}$ (Ind / Dir) | Single-Layer SLME (%) | SQ Limit (%) | 2-Layer Si $\eta$ (%) | 4T Std Si FCA $\eta$ (%) | **3-Layer 4T Tandem $\eta$ (%)** | Redundancy SHA-256 Hash |
+| Candidate ID | Formula | Target Track | Space Group | $N_{\text{sites}}$ | $T_{\text{synth}}$ ($^\circ\text{C}$) | Active Layer Cost ($\$/\text{m}^2$) | $\Delta E_{\text{hull}}$ (meV) | $\omega_{\min}$ (THz) | $E_{\text{mig}}$ (eV) | $E_g^{\text{est}}$ (Ind / Dir) | Single-Layer SLME (%) | SQ Limit (%) | 2-Layer Si $\eta$ (%) | 4T Std Si FCA $\eta$ (%) | **3-Layer 4T Tandem $\eta$ (%)** | Redundancy SHA-256 Digest |
 | :--- | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| `CAND-A02` | `Bi2CuO2SCl` | Top Active Glass | `I4/mmm` (#139) | 28 | 365.0 | \$0.0195 | 14.5 | 1.18 | 0.88 | 1.82 / 1.86 eV | 24.43% | 26.78% | 38.29% | 40.43% | **41.66%** | `cf4bc8846c6ad261ea9e35d4592e30c875f9edd9bb84b5b61c9752ff9678ec20` |
-| `CAND-A03` | `Cu2SbS2Cl` | Top Active Glass | `Pnma` (#62) | 24 | 320.0 | \$0.0129 | 21.0 | 1.05 | 0.74 | 1.79 / 1.83 eV | 25.08% | 27.32% | 38.41% | 40.54% | **41.77%** | `25aa24cc65b65879573e7a715d20f15202f3e930c544bc585c2e24352a1eb1f3` |
-| `CAND-A06` | `BiZnOSCl` | Top Active Glass | `P4/nmm` (#129) | 10 | 380.0 | \$0.0148 | 18.2 | 1.29 | 0.98 | 1.85 / 1.89 eV | 23.81% | 26.11% | 38.18% | 40.31% | **41.55%** | `aa81b5fe44d582d402b25eb0cde0059b85e48008c0db993403b8ad072e040e55` |
-| `CAND-B02` | `Sn2SbSe2I3` | Bottom IR Scavenger | `Cmcm` (#63) | 32 | 295.0 | \$0.0865 | 12.6 | 0.88 | 0.75 | 0.75 / 0.78 eV | 23.48% | 25.00% | 38.26% | 40.51% | **41.83%** | `a9b5ab5743b681061d941ab642170bb189857c470ab2a7c5ec7d2c50d0f872a0` |
-| `CAND-B04` | `Cu2BiSe2I` | Bottom IR Scavenger | `Pnma` (#62) | 24 | 345.0 | \$0.0509 | 11.2 | 1.09 | 0.71 | 0.74 / 0.76 eV | 23.59% | 24.79% | 38.26% | 40.64% | **42.08%** | `dbf5b8efc7c5d320279525e1a0b32cf623703c12f9e75cea1bc277c125ecf65c` |
+| `CAND-A02` | `Bi2CuO2SCl` | Top Active Glass | `I4/mmm` (#139) | 28 | 365.0 | \$0.0195 | 14.5 | 1.18 | 0.88 | 1.82 / 1.86 eV | 24.43% | 26.78% | 38.29% | 40.43% | **41.66%** | `7327ea003865f07f05731062031db534816808ce0ee3ef6c9fe25352a3ebe11d` |
+| `CAND-A03` | `Cu2SbS2Cl` | Top Active Glass | `Pnma` (#62) | 24 | 320.0 | \$0.0129 | 21.0 | 1.05 | 0.74 | 1.79 / 1.83 eV | 25.08% | 27.32% | 38.41% | 40.54% | **41.77%** | `a6cc389afeaa8cccac8901bd6ea208fe026d6671db2a7c58eefff54afb6b7033` |
+| `CAND-A06` | `BiZnOSCl` | Top Active Glass | `P4/nmm` (#129) | 10 | 380.0 | \$0.0148 | 18.2 | 1.29 | 0.98 | 1.85 / 1.89 eV | 23.81% | 26.11% | 38.18% | 40.31% | **41.55%** | `f7228c7119f0512da697a81e39f7709621af9f891dfa6b9559405770662c75c3` |
+| `CAND-B02` | `Sn2SbSe2I3` | Bottom IR Scavenger | `Cmcm` (#63) | 32 | 295.0 | \$0.0865 | 12.6 | 0.88 | 0.75 | 0.75 / 0.78 eV | 23.48% | 25.00% | 38.26% | 40.51% | **41.83%** | `24e5980fa55fb8a5e1a675ac6d5ac7d224cb55cc0a996f2a6a84977078f21350` |
+| `CAND-B04` | `Cu2BiSe2I` | Bottom IR Scavenger | `Pnma` (#62) | 24 | 345.0 | \$0.0509 | 11.2 | 1.09 | 0.71 | 0.74 / 0.76 eV | 23.59% | 24.79% | 38.26% | 40.64% | **42.08%** | `83b3549e4805d11c3be55a82df02534f37e1ff926bf18a3bb3935492530ce9e9` |
 
 ---
 
@@ -81,23 +81,24 @@ The Contrastive Failure Memory Ledger is expanded via `data/negative_synthesis_p
 1. **LBNL 80k Solid-State Impurity Dataset:** `80,806` parsed solid-state recipes across `4,292` chemical systems with `18,869` phase-impure/failed reactions (Lee, Cruse, Baibakova, Ceder, Jain, *Sci. Data* 12:1969, 2025).
 2. **LBNL A-Lab Precursor Genome:** `1,035` robotic pairwise XRD reactions with `892` negative/stalled reactions (369 unreacted, 384 transformed, 113 partially reacted) (Walters, Szymanski, Fei, Ceder et al., 2026).
 
-### 5.2 Live MP Funnel Results (100 -> 91 -> 52 -> 40 -> 8 Finalists)
-Querying the Materials Project API (`MPRester`) across 100 RoHS-clean chalcohalide and oxychalcogenide candidates yields:
-- **Stage 1 Ingested:** `100` RoHS-compliant compositions ($	ext{Bi/Sb–Cu/Zn/Sn/In/Ga/Ag–S/Se/O–Cl/Br/I}$).
-- **Stage 2 Dynamically & Ion-Stable:** `91` candidates ($6$ Born elastic failures, $3$ superionic migration instabilities vetoed with $E_{\text{mig}} < 0.65\text{ eV}$).
-- **Stage 3 Manufacturable:** `52` candidates ($26$ rejected for `OXIDE_IMPURITY_SINK` from high-$T$ refractory binary oxides, $13$ rejected for `TIER2_COST_EXCEEDED` $> \$0.50/\text{m}^2$).
-- **Gate A Promoted to DFT:** `40` candidates ($8$ vetoed for `LOW_DIM_POLARON_RISK` 1D-chains, $4$ vetoed for `ANION_PHASE_SEGREGATION`).
-- **Stage 4/5 Validated Finalists:** **8 Promoted Finalists** ($32$ rejected for `BANDGAP_OUT_OF_WINDOW` outside $[1.75, 1.95]\text{ eV}$ top or $[0.70, 0.85]\text{ eV}$ bottom windows).
-- **Dual-Redundancy Verifications:** `100/100` passed.
+### 5.2 Live MP Funnel Results (100 -> 91 -> 47 -> 40 -> 9 Prescreen Finalists)
+Querying the cached Materials Project candidate set across 100 RoHS-clean chalcohalide and oxychalcogenide candidates yields:
+- **Stage 1 Ingested:** `100` RoHS-compliant compositions ($\text{Bi/Sb–Cu/Zn/Sn/In/Ga/Ag/Al–S/Se/O–Cl/Br/I}$).
+- **Stage 2 Hull, Born & Migration Screened:** `91` candidates ($6$ Born elastic failures, $3$ superionic migration heuristic failures with $E_{\text{mig}} < 0.65\text{ eV}$).
+- **Stage 3 Manufacturable:** `47` candidates ($26$ rejected for `OXIDE_IMPURITY_SINK` from high-$T$ refractory binary oxides, $5$ rejected for `IMPURITY_SINK_PRIOR` from LBNL empirical impurity rate $> 0.50$, $13$ rejected for `TIER2_COST_EXCEEDED` $> \$0.50/\text{m}^2$).
+- **Gate A Promoted:** `40` candidates ($7$ vetoed for `LOW_DIM_POLARON_RISK` 1D-chains; `hmix` and `tco_rxn` set to `None` / not evaluated at Gate A).
+- **Stage 4/5 Prescreen Finalists:** **9 Promoted Prescreen Finalists** ($31$ rejected for `BANDGAP_OUT_OF_WINDOW` outside $[1.75, 1.95]\text{ eV}$ top or $[0.70, 0.85]\text{ eV}$ bottom windows).
+- **Self-Consistency Checks:** `100/100` passed.
 
-### 5.3 Live Materials Project Finalists (8 Promoted Finalists: 3 Track A + 5 Track B)
+### 5.3 Live Materials Project Prescreen Finalists (9 Promoted Finalists: 4 Track A + 5 Track B)
 
-All 8 live MP finalists have been cross-verified with Quantum ESPRESSO `HSE06+SOC` decks in `outputs/mp_live_qe_decks/`:
+All 9 live MP prescreen finalists have generated Quantum ESPRESSO `HSE06+SOC` input decks (not run) in `outputs/mp_live_qe_decks/`:
 
-| Candidate ID | Formula | Target Track | Space Group | $N_{\text{sites}}$ | $T_{\text{synth}}$ ($^\circ\text{C}$) | Active Layer Cost ($\/\text{m}^2$) | $\Delta E_{\text{hull}}$ (meV) | $\omega_{\min}$ (THz) | $E_{\text{mig}}$ (eV) | $E_g^{\text{HSE06+SOC}}$ (Ind / Dir) | Single-Layer SLME (%) | SQ Limit (%) | 2-Layer Si $\eta$ (%) | 4T Std Si FCA $\eta$ (%) | **3-Layer 4T Tandem $\eta$ (%)** | Redundancy SHA-256 Hash |
+| Candidate ID | Formula | Target Track | Space Group | $N_{\text{sites}}$ | $T_{\text{synth}}$ ($^\circ\text{C}$) | Active Layer Cost ($\$/\text{m}^2$) | $\Delta E_{\text{hull}}$ (meV) | $\omega_{\min}^{\text{heur}}$ (THz) | $E_{\text{mig}}$ (eV) | $E_g^{\text{est}}$ (Ind / Dir) | Single-Layer SLME (%) | SQ Limit (%) | 2-Layer Si $\eta$ (%) | 4T Std Si FCA $\eta$ (%) | **3-Layer 4T Tandem $\eta$ (%)** | Redundancy SHA-256 Digest |
 | :--- | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
 | `mp-861911` | `Sb2OS2` | Top Active Glass | `C2/m` (#12) | 10 | 375.0 | \$0.0157 | 7.07 | 1.40 | 1.18 | 1.76 / 1.80 eV | 25.66% | 27.93% | 38.43% | 40.55% | **41.78%** | `a09dbb1c343327cd5cbb5fe25b0409ec548a0f06b6168ca7feb5d47fc3ae68d1` |
 | `mp-1227486` | `BiSbS3` | Top Active Glass | `Pnma` (#62) | 20 | 375.0 | \$0.0182 | 2.30 | 1.20 | 1.18 | 1.79 / 1.83 eV | 25.10% | 27.32% | 38.36% | 40.48% | **41.70%** | `d8f6b425fa2066a5062437ab9edb68a127d62b3ca1821a2645bbf4f07a9076cb` |
+| `mp-1195160` | `Al2Bi2Cu2S3Cl8` | Top Active Glass | `P6_3/m` (#176) | 34 | 335.0 | \$0.0128 | 6.02 | 1.33 | 0.87 | 1.82 / 1.83 eV | 25.63% | 26.78% | 38.91% | 41.03% | **42.26%** | `b04a50d78a9aa16b7b274b19263ad7a7f6a8fb640603874e8d70b8cb607e05f5` |
 | `mp-1078776` | `BiInS3` | Top Active Glass | `P2_1/m` (#11) | 10 | 375.0 | \$0.2681 | 15.08 | 1.11 | 1.18 | 1.90 / 1.94 eV | 22.87% | 25.00% | 37.89% | 40.00% | **41.23%** | `efd0e571e1da58bcc47487420264fbc3faad1689ffc3bd7e6a5edd8f817ec9f3` |
 | `mp-1223998` | `Bi3InSe6` | Bottom IR Scavenger | `R3m` (#160) | 10 | 375.0 | \$0.1507 | 17.99 | 1.33 | 1.18 | 0.75 / 0.76 eV | 24.11% | 25.00% | 38.26% | 40.72% | **42.19%** | `0dae9392716774ac808f7d90ab583018289674f56443c20fd9ccbb69f01202d5` |
 | `mp-1224922` | `CuGaSnSe4` | Bottom IR Scavenger | `I-4` (#82) | 7 | 375.0 | \$0.1251 | 3.61 | 1.28 | 0.98 | 0.85 / 0.86 eV | 26.50% | 27.20% | 38.26% | 40.53% | **41.66%** | `94e846fe365a26c374eab9715c63f9678401f11dbe6c757cc4f6608bd2464e5c` |
@@ -105,19 +106,19 @@ All 8 live MP finalists have been cross-verified with Quantum ESPRESSO `HSE06+SO
 | `mp-23474` | `AgBi3S5` | Bottom IR Scavenger | `C2/m` (#12) | 18 | 375.0 | \$0.2558 | 0.00 | 1.18 | 0.98 | 0.85 / 0.89 eV | 26.35% | 27.20% | 38.26% | 40.50% | **41.61%** | `28fffc7cc0a9332db420e8769ac9fb9a11b27285bc604d3ee1bd2f9732ceaa72` |
 | `mp-1224129` | `CuInSnSe4` | Bottom IR Scavenger | `I-4` (#82) | 7 | 375.0 | \$0.2664 | 5.17 | 1.21 | 0.98 | 0.78 / 0.82 eV | 23.71% | 25.60% | 38.26% | 40.29% | **41.39%** | `e9f128da15956ed2693b7ddd9cf262a07696ca573313e2164f6491cf979d5d01` |
 
-### 5.4 Top Cross-Layer 4T Tandem Stacks (15 Pairs Screened)
+### 5.4 Top Cross-Layer 4T Tandem Stacks (20 Pairs Screened)
 
-The 3 Top Active Glass and 5 Bottom IR Scavengers form 15 cross-layer (Top + c-Si + Bottom) 4T stacks:
+The 4 Top Active Glass and 5 Bottom IR Scavengers form 20 cross-layer (Top + c-Si + Bottom) 4T stacks:
 - **Maximum 4T PCE (Scalar Idealization):** `mp-861911 Sb2OS2 + c-Si + mp-1223998 Bi3InSe6` achieving **42.32%** 4T PCE ($25.66\%$ top $+ 11.84\%$ middle $+ 4.82\%$ bottom IR) at $\$0.1664/\text{m}^2$.
 - **Cost-Optimal 4T PCE (Scalar Idealization):** `mp-861911 Sb2OS2 + c-Si + mp-22982 BiCuS2` delivering **41.75%** 4T PCE at an ultra-low active layer cost of **\$0.0394/m^2**.
 
 ---
 
-## 6. v4.0 Atomistic 3D Dynamical Matrix, 11-Image NEB & Coherent Multilayer TMM Verification
+## 6. v4.0 Pair-Spring Dynamical Matrix, Closed-Form Migration Heuristic & Coherent Multilayer TMM (DFT Phonons and NEB not run)
 
-1. **Step 1 — 3D Harmonic Dynamical Matrix $\mathbf{D}(\mathbf{q}=\mathbf{0})$ & 11-Image NEB Migration:**
-   - All 8 promoted finalists exhibit **zero imaginary phonon modes (`imag = 0`)** across their $3N \times 3N$ dynamical matrices ($21\times 21$ to $60\times 60$, $r_{\text{cut}} = 4.25\text{ \AA}$) with exact agreement ($\le 10^{-4}\text{ THz}$) between `numpy.linalg.eigh` and blinded `scipy.linalg.eigvalsh`.
-   - 3D 11-image Nudged-Elastic-Band (NEB) saddle barriers span $E_{\text{mig}}^{\text{NEB}} \in [0.990, 1.348]\text{ eV}$, yielding room-temperature Vineyard-Arrhenius ionic diffusivities $D_{\text{ion}}(300\text{ K}) \in [5.59\times 10^{-27}, 5.18\times 10^{-21}]\text{ cm}^2/\text{s} \ll 10^{-18}\text{ cm}^2/\text{s}$.
+1. **Step 1 — Pair-Spring Dynamical Matrix $\mathbf{D}(\mathbf{q}=\mathbf{0})$ & Closed-Form Migration Heuristic (DFT Phonons and NEB not run):**
+   - Across all 9 prescreen finalists, $3N \times 3N$ pair-spring dynamical matrices ($21\times 21$ to $102\times 102$, $r_{\text{cut}} = 4.25\text{ \AA}$) yield positive $\Gamma$-point optical frequency bounds `spring_model_gamma_freq_thz` (`dynamically_stable = None`) with agreement ($\le 10^{-4}\text{ THz}$) between `numpy.linalg.eigh` and `scipy.linalg.eigvalsh`.
+   - Closed-form steric migration heuristic values span `emig_heuristic_ev` $\in [0.990, 1.348]\text{ eV}$ (NEB not run), corresponding to Vineyard-Arrhenius ionic diffusivities $D_{\text{ion}}(300\text{ K}) \ll 10^{-18}\text{ cm}^2/\text{s}$.
    - All unindexed XRD `'unknown'` tokens and non-subset impurity formulas are strictly stripped from `competing_hull_phases` and `competing_impurity_sinks`.
 2. **Step 2 — Coherent Multilayer $2\times 2$ Abeles TMM vs. Recursive Rouard/Airy 4T Stack Optics:**
    - Across all 15 stacks, single-ARC coherent thin-film interference (`Air / 98 nm MgF2 / 105 nm ITO / Absorber / 85 nm Buffer / Couplant`) reveals $11.01\%\text{–}11.97\%$ front reflection loss and $88.25\%\text{–}88.92\%$ sub-bandgap IR transmittance, yielding **40.00% Coherent 4T PCE** for `mp-861911 Sb2OS2 + c-Si + mp-1223998 Bi3InSe6` and **39.32% Coherent 4T PCE** for the **\$0.0394/m²** `mp-861911 Sb2OS2 + c-Si + mp-22982 BiCuS2` stack.

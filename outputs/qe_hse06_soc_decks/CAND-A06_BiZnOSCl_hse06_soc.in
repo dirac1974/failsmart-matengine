@@ -1,6 +1,6 @@
-! FailSmart-MatEngine v2.0 Auto-Generated Quantum ESPRESSO HSE06+SOC Input Deck
+! FailSmart-MatEngine Auto-Generated Quantum ESPRESSO HSE06+SOC Input Deck (not run)
 ! Candidate: CAND-A06 (BiZnOSCl) | Target: TOP_ACTIVE_GLASS_185EV
-! Verified Space Group: P4/nmm (#129) | nat = 10
+! Space Group: P4/nmm (#129) | nat = 10
 &CONTROL
   calculation = 'scf',
   prefix = 'biznoscl',
@@ -20,7 +20,7 @@
   noncolin = .true.,
   lspinorb = .true.,
   input_dft = 'hse',
-  nqx1 = 1, nqx2 = 1, nqx3 = 1,
+  nqx1 = 2, nqx2 = 2, nqx3 = 2,
   x_gamma_extrapolation = .true.,
 /
 &ELECTRONS
@@ -35,19 +35,19 @@ ATOMIC_SPECIES
   O       15.9994  O_ONCV_PBE_FR-1.2.upf
   Cl      35.4530  Cl_ONCV_PBE_FR-1.2.upf
 CELL_PARAMETERS (angstrom)
-      5.05334420      0.00000000      0.00000000
-      0.00000000      5.05334420      0.00000000
-      0.00000000      0.00000000      8.09203454
+     10.93027015      0.00000000      0.00000000
+      0.00000000     10.93027015      0.00000000
+      0.00000000      0.00000000     12.80467354
 ATOMIC_POSITIONS (crystal)
-  Zn     0.25000000    0.25000000    0.00901785
-  Zn     0.75000000    0.75000000    0.99098215
-  Bi     0.75000000    0.25000000    0.50000000
-  Bi     0.25000000    0.75000000    0.50000000
+  Zn     0.25000000    0.25000000    0.00549256
+  Zn     0.75000000    0.75000000    0.99450744
+  Bi     0.25000000    0.25000000    0.46452449
+  Bi     0.75000000    0.75000000    0.53547551
   S      0.75000000    0.25000000    0.00000000
   S      0.25000000    0.75000000    0.00000000
-  Cl     0.25000000    0.25000000    0.38053931
-  Cl     0.75000000    0.75000000    0.61946069
-  O      0.25000000    0.25000000    0.73343820
-  O      0.75000000    0.75000000    0.26656180
+  Cl     0.75000000    0.25000000    0.50000000
+  Cl     0.25000000    0.75000000    0.50000000
+  O      0.25000000    0.25000000    0.29036933
+  O      0.75000000    0.75000000    0.70963067
 K_POINTS automatic
-  5 5 3 0 0 0
+  2 2 2 0 0 0

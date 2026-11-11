@@ -15,7 +15,7 @@ This document defines the 7-agent scientific team architecture, system prompts, 
 | `crystal_explorer` | Solid-State Chemist & Inverse-Design Explorer | Crystallography, Pauling rules, `SMACT`, `MatterGen` | Stage 1 | No |
 | `surrogate_physicist` | Lattice Dynamics & MLIP Surrogate Physicist | Convex hull thermodynamics, Born elasticity, `phonopy` | Stage 2 | Gate 2 |
 | `synthesis_chemist` | Retrosynthesis, Kinetics & Speciation Chemist | $<500^\circ\text{C}$ solid-state/solution kinetics, LBNL impurity sinks, Pourbaix | Stage 3 | Gate 3 |
-| `quantum_defect_physicist` | Quantum Electronic & Defect-Transport Physicist | Relativistic `HSE06+SOC` DFT, Fröhlich polarons, `doped` SRH traps | Stages 4 & 5 | Gate 4/5 |
+| `quantum_defect_physicist` | Quantum Electronic & Defect-Transport Physicist | Heuristic gap shifts, Fröhlich polarons, SRH trap estimates (`HSE06+SOC` and `doped` not run) | Stages 4 & 5 | Gate 4/5 |
 | `photonic_tandem_architect` | Nanophotonics & 4T Tandem Device Architect | Transfer-Matrix optics, $4n^2$ Yablonovitch light trapping, SLME | Stage 5 | Gate 5 |
 | `adversarial_critic` | Adversarial Red-Team Critic & Failure Curator | Phase-segregation thermodynamics, TCO reactivity, Failure Ledger | Gate A & Gate B | **Hard Veto** |
 
@@ -53,9 +53,9 @@ This document defines the 7-agent scientific team architecture, system prompts, 
 
 ### Agent 4: `quantum_defect_physicist`
 * **System Prompt:**
-  > You are Agent 4 (`quantum_defect_physicist`): Quantum Electronic Structure & Defect-Transport Physicist. Audit relativistic `HSE06+SOC` band gaps, carrier effective masses, Fröhlich polaron coupling, and `doped` intrinsic defect supercells.
+  > You are Agent 4 (`quantum_defect_physicist`): Quantum Electronic Structure & Defect-Transport Physicist. Evaluate heuristic band-gap estimates (`gap_est_*`), carrier effective masses, Fröhlich polaron coupling, and SRH defect trap estimates (`HSE06+SOC` and `doped` supercells not run).
 * **Hard Rejection Criteria:**
-  1. `HSE06+SOC` fundamental gap outside $[1.70, 2.00]\text{ eV}$ (Track A) or $[0.68, 0.88]\text{ eV}$ (Track B).
+  1. Estimated fundamental gap `gap_est_indirect_ev` outside $[1.70, 2.00]\text{ eV}$ (Track A) or $[0.68, 0.88]\text{ eV}$ (Track B).
   2. Carrier effective mass $\max(m_e^*, m_h^*) > 0.80\,m_0$ or Fröhlich polaron coupling $\alpha_F > 5.0$.
   3. Intrinsic vacancy or antisite defect trap depth $> 0.15\text{ eV}$ from the band edge (deep SRH killer center).
 

@@ -1,8 +1,7 @@
-"""Inter-Team Communication Bus & Cryptographic Audit Logger.
+"""Inter-Team Communication Bus & Unkeyed SHA-256 Audit Logger.
 
-Bridges Division A (Scientific Research Team) and Division B (Scientific Software
-Engineering & Redundancy Verification Team), persisting all inter-agent messages,
-specifications, redundancy reviews, and test certificates to JSONL logs.
+Persists scripted cross-stage messages, specifications, self-consistency checks,
+and test records with unkeyed SHA-256 payload digests to JSONL logs.
 """
 
 import datetime

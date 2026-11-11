@@ -614,22 +614,22 @@ def independently_verify_cross_layer_4t_pair(
 
 
 # =============================================================================
-# 8. Independent Atomistic Phonon & NEB Solver (Section 6 - v4.0)
+# 8. Independent Pair-Spring Gamma & Ion-Migration Heuristic Checker (Section 6)
 # =============================================================================
 
-def independently_verify_atomistic_phonon_and_neb(
+def independently_verify_spring_and_migration_heuristics(
     cif_text: str,
     stoichiometry: Dict[str, int],
     oxidation_states: Dict[str, int],
 ) -> Dict[str, Any]:
-    """Blinded independent verification of 3D Harmonic Dynamical Matrix D(q=0) & 11-Image NEB.
+    """Independent regression check of pair-spring Gamma frequencies & closed-form migration heuristic.
 
     Per Section 6 of docs/MATHEMATICAL_SPEC_V2.md:
     1. Parse struct = CifParser.from_str(cif_text, occupancy_tolerance=10.0).parse_structures(primitive=False)[0].
-    2. Assemble 3N x 3N Harmonic Force-Constant Hessian Phi over all periodic neighbors 0.50 < r_ij <= 4.25 A.
+    2. Assemble 3N x 3N pair-spring force-constant matrix Phi over all periodic neighbors 0.50 < r_ij <= 4.25 A.
     3. Symmetrize Phi and mass-weight using IUPAC atomic masses.
     4. Diagonalize strictly via scipy.linalg.eigvalsh(D) (sorted ascending) and convert to THz.
-    5. 3D Saddle-Point NEB Migration Solver (Section 6.2).
+    5. Closed-form geometric ion-migration barrier heuristic (Section 6.2).
     """
     struct = CifParser.from_str(cif_text, occupancy_tolerance=10.0).parse_structures(primitive=False)[0]
     n_sites = len(struct)
@@ -766,7 +766,7 @@ def independently_verify_atomistic_phonon_and_neb(
             "emig_heuristic_ev": emig_heur,
         },
     }
-    res["sha256_signature"] = hashlib.sha256(
+    res["sha256_digest"] = hashlib.sha256(
         json.dumps(sig_payload, sort_keys=True).encode("utf-8")
     ).hexdigest()
 
@@ -950,7 +950,7 @@ def independently_verify_coherent_tmm_4t_stack(
         "tmm_bottom_pce_percent": res["tmm_bottom_pce_percent"],
         "tmm_4t_low_fca_pce_percent": res["tmm_4t_low_fca_pce_percent"],
     }
-    res["sha256_signature"] = hashlib.sha256(
+    res["sha256_digest"] = hashlib.sha256(
         json.dumps(sig_payload, sort_keys=True).encode("utf-8")
     ).hexdigest()
 
@@ -1204,7 +1204,7 @@ def independently_verify_graded_arc_and_techno_economics(
         "svi_bos_2l": res["svi_bos_2l"],
         "svi_bos_3l": res["svi_bos_3l"],
     }
-    res["sha256_signature"] = hashlib.sha256(
+    res["sha256_digest"] = hashlib.sha256(
         json.dumps(sig_payload, sort_keys=True).encode("utf-8")
     ).hexdigest()
 
@@ -1275,7 +1275,7 @@ def independently_verify_phase9a_lab_and_defect_dossier(
         "point_charge_image_estimate_ev": res["point_charge_image_estimate_ev"],
         "point_charge_image_estimate_q2_ev": res["point_charge_image_estimate_q2_ev"],
     }
-    res["sha256_signature"] = hashlib.sha256(
+    res["sha256_digest"] = hashlib.sha256(
         json.dumps(sig_payload, sort_keys=True).encode("utf-8")
     ).hexdigest()
 
@@ -1388,7 +1388,7 @@ def independently_verify_phase9c_oblique_thermal_lcoe(
     thickness_nm_3: float,
     raw_cost_top_usd_m2: float,
     raw_cost_bot_usd_m2: float,
-    limiting_neb_barrier_ev: float,
+    limiting_emig_heuristic_ev: float,
 ) -> Dict[str, Any]:
     """Blinded independent verification of Phase 9C oblique-incidence S/P TMM, operating temp, and 25-year Arrhenius LCOE."""
     wl_nm = LAMBDA_GRID_NM
@@ -1527,7 +1527,7 @@ def independently_verify_phase9c_oblique_thermal_lcoe(
     # Section 9.3.3: 25-Year Arrhenius Ion-Migration Reliability & Real-World LCOE
     kb_ev = K_B / Q_E
     t_field_k = 318.15
-    r_deg = 0.0035 + 0.0010 * math.exp(-(limiting_neb_barrier_ev - 0.65) / (kb_ev * t_field_k))
+    r_deg = 0.0035 + 0.0010 * math.exp(-(limiting_emig_heuristic_ev - 0.65) / (kb_ev * t_field_k))
     r_deg_pct = r_deg * 100.0
     year25_retained_pct = ((1.0 - r_deg) ** 25) * 100.0
 
@@ -1592,7 +1592,7 @@ def independently_verify_phase9c_oblique_thermal_lcoe(
         "pce_4t_noct_45c_percent": round(eta_4t_45, 2),
         "pce_4t_desert_65c_percent": round(eta_4t_65, 2),
         "temp_coeff_rel_pct_per_k": round(beta_4t_rel, 4),
-        "limiting_neb_barrier_ev": round(float(limiting_neb_barrier_ev), 4),
+        "limiting_emig_heuristic_ev": round(float(limiting_emig_heuristic_ev), 4),
         "annual_degradation_rate_pct_yr": round(r_deg_pct, 4),
         "year25_retained_power_fraction_percent": round(year25_retained_pct, 2),
         "lcoe_baseline_si_cents_kwh": round(lcoe_si_cents, 4),
@@ -1612,7 +1612,7 @@ def independently_verify_phase9c_oblique_thermal_lcoe(
         "lcoe_3layer_4t_cents_kwh": res["lcoe_3layer_4t_cents_kwh"],
         "lcoe_3layer_vs_si_reduction_percent": res["lcoe_3layer_vs_si_reduction_percent"],
     }
-    res["sha256_signature"] = hashlib.sha256(
+    res["sha256_digest"] = hashlib.sha256(
         json.dumps(sig_payload, sort_keys=True).encode("utf-8")
     ).hexdigest()
 
@@ -1638,7 +1638,7 @@ def independently_verify_phase10_bifacial_and_string_dossier(
     thickness_nm_3: float,
     raw_cost_top_usd_m2: float,
     raw_cost_bot_usd_m2: float,
-    limiting_neb_barrier_ev: float,
+    limiting_emig_heuristic_ev: float,
 ) -> Dict[str, Any]:
     """Blinded independent verification of Phase 10A 2D thickness & ARC optimization,
     Phase 10B bifacial ground-albedo harvesting, and Phase 10C SPICE subcell J-V string matching.
@@ -1845,7 +1845,7 @@ def independently_verify_phase10_bifacial_and_string_dossier(
 
     kb_ev = K_B / Q_E
     t_field_k = 318.15
-    r_deg = 0.0035 + 0.0010 * math.exp(-(limiting_neb_barrier_ev - 0.65) / (kb_ev * t_field_k))
+    r_deg = 0.0035 + 0.0010 * math.exp(-(limiting_emig_heuristic_ev - 0.65) / (kb_ev * t_field_k))
 
     r_disc = 0.06
     c_bos_area = 100.0
@@ -1913,8 +1913,8 @@ def independently_verify_phase10_bifacial_and_string_dossier(
         "photon_conservation_holds": photon_conservation_holds,
     }
 
-    sig_payload = {k: v for k, v in res.items() if k != "sha256_signature"}
-    res["sha256_signature"] = hashlib.sha256(
+    sig_payload = {k: v for k, v in res.items() if k != "sha256_digest"}
+    res["sha256_digest"] = hashlib.sha256(
         json.dumps(sig_payload, sort_keys=True).encode("utf-8")
     ).hexdigest()
 
@@ -2030,8 +2030,8 @@ def independently_verify_phase11a_synthesis_and_contacts(
         "synthesis_practicality_score_100": round(float(sps), 2),
     }
 
-    sig_payload = {k: v for k, v in res.items() if k != "sha256_signature"}
-    res["sha256_signature"] = hashlib.sha256(
+    sig_payload = {k: v for k, v in res.items() if k != "sha256_digest"}
+    res["sha256_digest"] = hashlib.sha256(
         json.dumps(sig_payload, sort_keys=True).encode("utf-8")
     ).hexdigest()
 
@@ -2463,8 +2463,8 @@ def independently_verify_phase11b_realistic_commercialization(
         "recommended_commercial_path": rec_path,
     }
 
-    sig_payload = {k: v for k, v in res.items() if k != "sha256_signature"}
-    res["sha256_signature"] = hashlib.sha256(
+    sig_payload = {k: v for k, v in res.items() if k != "sha256_digest"}
+    res["sha256_digest"] = hashlib.sha256(
         json.dumps(sig_payload, sort_keys=True).encode("utf-8")
     ).hexdigest()
 
@@ -2598,11 +2598,11 @@ def verify_candidate_dossier(
         elec = dossier["electronics"]
 
         # Relativistic SOC splitting
-        hse_nosoc = elec.get("hse06_nosoc_gap_ev")
-        hse_soc_dir = elec.get("hse06_soc_direct_gap_ev")
+        gap_nosoc = elec.get("gap_est_nosoc_ev")
+        gap_dir = elec.get("gap_est_direct_ev")
         stated_soc = elec.get("soc_splitting_ev")
-        if hse_nosoc is not None and hse_soc_dir is not None and stated_soc is not None:
-            expected_soc = round(hse_nosoc - hse_soc_dir, 3)
+        if gap_nosoc is not None and gap_dir is not None and stated_soc is not None:
+            expected_soc = round(gap_nosoc - gap_dir, 3)
             soc_pass = abs(stated_soc - expected_soc) <= 0.005
             checks["soc_splitting"] = {
                 "stated_soc_ev": stated_soc,
@@ -2660,8 +2660,8 @@ def verify_candidate_dossier(
     if "optics" in dossier and dossier["optics"] and "electronics" in dossier and dossier["electronics"]:
         opt = dossier["optics"]
         elec = dossier["electronics"]
-        eg_ind = elec.get("hse06_soc_indirect_gap_ev")
-        eg_dir = elec.get("hse06_soc_direct_gap_ev")
+        eg_ind = elec.get("gap_est_indirect_ev")
+        eg_dir = elec.get("gap_est_direct_ev")
         eps_inf = elec.get("eps_inf")
         thickness_nm = opt.get("film_thickness_nm", 260.0)
         stated_slme = opt.get("standalone_slme_percent")
@@ -2744,5 +2744,5 @@ def verify_candidate_dossier(
         "passed_all_redundancy_checks": passed_all,
         "checks": checks,
         "mismatches": mismatches,
-        "sha256_signature": sha256_hex,
+        "sha256_digest": sha256_hex,
     }

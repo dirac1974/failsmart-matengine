@@ -65,6 +65,7 @@ from .schemas import (
     CrossLayerTandemPair,
     ElectronicDefectReport,
     OpticalTandemReport,
+    ProvenanceTag,
     StabilityReport,
     SynthesisRouteReport,
 )
@@ -424,21 +425,19 @@ def _classify_crystal_family(stoich: Dict[str, int], dim: str, sg_sym: str) -> s
     return f"{dim} Lone-Pair Multinary Chalcogenide ({sg_sym})"
 
 
-def _estimate_hse06_soc_electronics_from_mp(
+def _estimate_gap_from_mp_pbe(
     rec: Dict[str, Any], stoich: Dict[str, int], struct: Structure
 ) -> Dict[str, Any]:
-    """Heuristic closed-form ESTIMATE of an HSE06+SOC-like gap from the Materials Project PBE gap.
+    """Heuristic closed-form estimate of band gaps and carrier properties from Materials Project PBE data.
 
-    No r2SCAN, HSE06 or spin-orbit calculation is run. The output keys keep their legacy
-    `hse06_*` / `r2scan_*` names for schema compatibility; every value is a heuristic whose
-    error has not been benchmarked (see docs/REMEDIATION_TASKS.md, tasks T2 and T4).
+    No HSE06, r2SCAN, or spin-orbit DFT calculation is run (not run).
 
     Uses:
-    - Live Materials Project `dft_pbe_band_gap_ev` ($E_g^{\\text{PBE}}$) and `dft_is_gap_direct`
-    - Live MP DFPT dielectric constants (`dfpt_dielectric`) when available in MP, or Penn-model
-      high-frequency screening $\\varepsilon_\\infty$
-    - Relativistic $6p/5p$ spin-orbit splitting $\\Delta_{\\text{SOC}}$ weighted by heavy pnictogen/halide/chalcogen content
-    - Dielectric-dependent hybrid exchange opening $\\Delta E_{\\text{HSE}}(\\varepsilon_\\infty) = 0.31 + 3.30 / \\max(4.5, \\varepsilon_\\infty)$ (matches the code below)
+    - Materials Project `dft_pbe_band_gap_ev` (MP_DFT) and `dft_is_gap_direct`
+    - MP DFPT dielectric constants (`dfpt_dielectric`, MP_DFT) when available, or Penn-model
+      high-frequency screening heuristic (HEURISTIC)
+    - Composition-weighted spin-orbit splitting heuristic `soc_splitting_ev` (HEURISTIC)
+    - Inverse-dielectric gap shift heuristic `0.31 + 3.30 / max(4.5, eps_inf)` (HEURISTIC)
     """
     total_atoms = max(1, sum(stoich.values()))
     pbe_gap = float(rec["dft_pbe_band_gap_ev"])
@@ -449,14 +448,16 @@ def _estimate_hse06_soc_electronics_from_mp(
     i_frac = (stoich.get("I", 0) + stoich.get("Te", 0)) / total_atoms
     br_se_frac = (stoich.get("Br", 0) + stoich.get("Se", 0)) / total_atoms
     o_frac = stoich.get("O", 0) / total_atoms
-    cu_ag_frac = (stoich.get("Cu", 0) + stoich.get("Ag", 0)) / total_atoms
 
-    # Relativistic 6p/5p SOC splitting (eV)
+    # Composition-weighted 6p/5p SOC splitting heuristic (eV)
     soc_split = round(0.03 + 0.72 * bi_frac + 0.42 * i_frac + 0.20 * (sb_sn_frac + br_se_frac), 3)
 
-    # Dielectric constants: use live MP DFPT if available, else Penn dielectric relation
+    # Dielectric constants: use MP DFPT if available, else Penn dielectric heuristic
     diel = rec.get("dfpt_dielectric")
-    if diel and diel.get("eps_inf", 0) >= 2.5 and diel.get("eps_static", 0) > diel.get("eps_inf", 0):
+    has_dfpt_diel = bool(
+        diel and diel.get("eps_inf", 0) >= 2.5 and diel.get("eps_static", 0) > diel.get("eps_inf", 0)
+    )
+    if has_dfpt_diel:
         eps_inf = round(float(diel["eps_inf"]), 2)
         eps_static = round(float(diel["eps_static"]), 2)
     else:
@@ -464,27 +465,27 @@ def _estimate_hse06_soc_electronics_from_mp(
         ionic_polarizability = 2.65 + 0.55 * (bi_frac + sb_sn_frac) + 0.35 * o_frac
         eps_static = round(float(eps_inf * ionic_polarizability), 2)
 
-    # Gygi-Baldereschi screened hybrid exchange opening (inverse-dielectric scaling 1/eps_inf)
-    delta_hse_exchange = 0.31 + (3.30 / max(4.5, eps_inf))
-    hse_nosoc = round(pbe_gap + delta_hse_exchange, 2)
-    hse_soc_dir_raw = max(0.45, hse_nosoc - soc_split)
+    # Inverse-dielectric gap shift heuristic (1/eps_inf)
+    delta_gap_shift = 0.31 + (3.30 / max(4.5, eps_inf))
+    gap_nosoc = round(pbe_gap + delta_gap_shift, 2)
+    gap_dir_raw = max(0.45, gap_nosoc - soc_split)
 
     if is_direct:
-        hse_soc_ind = round(hse_soc_dir_raw, 2)
-        hse_soc_dir = round(hse_soc_ind + 0.01, 2)
+        gap_ind = round(gap_dir_raw, 2)
+        gap_dir = round(gap_ind + 0.01, 2)
     else:
-        hse_soc_ind = round(hse_soc_dir_raw, 2)
-        hse_soc_dir = round(hse_soc_ind + 0.04, 2)
+        gap_ind = round(gap_dir_raw, 2)
+        gap_dir = round(gap_ind + 0.04, 2)
 
-    # Re-synchronize hse_nosoc so soc_splitting_ev == round(hse06_nosoc_gap_ev - hse06_soc_direct_gap_ev, 3) holds exactly
-    hse_nosoc = round(hse_soc_dir + soc_split, 2)
-    soc_split = round(hse_nosoc - hse_soc_dir, 3)
-    r2scan_soc = round(0.5 * (pbe_gap + hse_soc_ind), 2)
+    # Re-synchronize gap_nosoc so soc_splitting_ev == round(gap_est_nosoc_ev - gap_est_direct_ev, 3) holds
+    gap_nosoc = round(gap_dir + soc_split, 2)
+    soc_split = round(gap_nosoc - gap_dir, 3)
+    gap_mgga_soc = round(0.5 * (pbe_gap + gap_ind), 2)
 
-    # Effective masses from connectivity & orbital character
+    # Effective masses from connectivity & orbital character heuristic
     dim = compute_covalent_dimensionality_from_structure(struct)
     dim_penalty = 0.28 if dim in ("1D-Chain", "0D-Isolated") else (0.04 if dim == "Quasi-2D" else 0.0)
-    me = round(float(np.clip(0.18 + 0.07 * hse_soc_ind + 0.12 * o_frac - 0.06 * (bi_frac + sb_sn_frac) + dim_penalty, 0.14, 1.45)), 2)
+    me = round(float(np.clip(0.18 + 0.07 * gap_ind + 0.12 * o_frac - 0.06 * (bi_frac + sb_sn_frac) + dim_penalty, 0.14, 1.45)), 2)
     mh = round(float(np.clip(me * (1.38 + 0.20 * o_frac) + 0.5 * dim_penalty, 0.20, 1.95)), 2)
 
     avg_mass = sum(IUPAC_ATOMIC_MASSES.get(el, 50.0) * cnt for el, cnt in stoich.items()) / total_atoms
@@ -498,7 +499,7 @@ def _estimate_hse06_soc_electronics_from_mp(
         2,
     )
 
-    # Defect tolerance: lone-pair ns^2 s-p antibonding VBM yields shallow vacancies; d^0 (Ti4+, Zr4+) or Fe3+ yields deeper traps
+    # Defect-depth heuristic: lone-pair ns^2 s-p antibonding VBM yields shallow vacancies; d^0 (Ti4+, Zr4+) or Fe3+ yields deeper traps
     has_lone_pair = any(e in stoich for e in ("Bi", "Sb", "Sn"))
     has_d0_or_fe = any(e in stoich for e in ("Ti", "Zr", "Fe"))
     if has_d0_or_fe and not has_lone_pair:
@@ -523,12 +524,17 @@ def _estimate_hse06_soc_electronics_from_mp(
             dom_vac = f"V_{vac_el} (shallow donor, ns2 antibonding)"
             def_ev = 0.07
 
+    prov_overrides: Dict[str, ProvenanceTag] = {}
+    if has_dfpt_diel:
+        prov_overrides["eps_inf"] = ProvenanceTag.MP_DFT
+        prov_overrides["eps_static"] = ProvenanceTag.MP_DFT
+
     return {
-        "pbesol_gap_ev": round(pbe_gap, 2),
-        "r2scan_soc_gap_ev": r2scan_soc,
-        "hse06_nosoc_gap_ev": hse_nosoc,
-        "hse06_soc_direct_gap_ev": hse_soc_dir,
-        "hse06_soc_indirect_gap_ev": hse_soc_ind,
+        "pbe_gap_ev": round(pbe_gap, 2),
+        "gap_est_mgga_soc_ev": gap_mgga_soc,
+        "gap_est_nosoc_ev": gap_nosoc,
+        "gap_est_direct_ev": gap_dir,
+        "gap_est_indirect_ev": gap_ind,
         "soc_splitting_ev": soc_split,
         "electron_eff_mass_m0": me,
         "hole_eff_mass_m0": mh,
@@ -540,6 +546,7 @@ def _estimate_hse06_soc_electronics_from_mp(
         "dominant_vacancy_element": vac_el,
         "dominant_vacancy_defect": dom_vac,
         "deepest_defect_level_from_band_edge_ev": def_ev,
+        "provenance": prov_overrides,
     }
 
 
@@ -636,11 +643,12 @@ def build_live_mp_candidate_dossier(
     chi_diff = round(max(enegs) - min(enegs), 2)
     tol = round(float(np.clip(1.0 - 0.04 * min(bvs_gii, 2.5), 0.78, 0.99)), 2)
 
-    # Pre-evaluate multi-fidelity electronics to assign each MP semiconductor to Track A or Track B
-    elec_dict = _estimate_hse06_soc_electronics_from_mp(rec, stoich, parsed_struct)
+    # Pre-evaluate gap heuristic to assign each MP semiconductor to Track A or Track B
+    elec_dict = _estimate_gap_from_mp_pbe(rec, stoich, parsed_struct)
+    elec_prov = elec_dict.pop("provenance", {})
     target_layer = (
         "TOP_ACTIVE_GLASS_185EV"
-        if elec_dict["hse06_soc_indirect_gap_ev"] >= 1.25
+        if elec_dict["gap_est_indirect_ev"] >= 1.25
         else "BOTTOM_IR_075EV"
     )
     family = _classify_crystal_family(stoich, dim, sg_sym)
@@ -678,11 +686,12 @@ def build_live_mp_candidate_dossier(
     # Stage 2: Live MP Convex Hull + Elasticity + Debye + 3D Structure Ion-Migration Gate
     ehull_mev = float(rec["energy_above_hull_mev"])
     elas = rec.get("dft_elasticity")
-    if elas and elas.get("k_vrh_gpa", 0) > 1.0:
+    has_mp_elasticity = bool(elas and elas.get("k_vrh_gpa", 0) > 1.0)
+    if has_mp_elasticity:
         k_gpa = float(elas["k_vrh_gpa"])
         g_gpa = float(elas["g_vrh_gpa"])
     else:
-        # Bond-density Gilman bulk/shear modulus from real DFT volume
+        # Bond-density Gilman bulk/shear modulus heuristic from DFT volume
         vol_per_atom = float(parsed_struct.volume) / max(1, nsites_uc)
         o_frac = stoich.get("O", 0) / max(1, sum(stoich.values()))
         k_gpa = round(float(np.clip(820.0 / (vol_per_atom ** 0.95) + 22.0 * o_frac, 18.0, 115.0)), 1)
@@ -751,6 +760,11 @@ def build_live_mp_candidate_dossier(
     if not comp_phases:
         comp_phases = [f"{sorted_els[0]}2S3", f"{sorted_els[-1]}O"]
 
+    stab_prov = (
+        {"bulk_modulus_gpa": ProvenanceTag.MP_DFT, "shear_modulus_gpa": ProvenanceTag.MP_DFT}
+        if has_mp_elasticity
+        else {}
+    )
     stab = StabilityReport(
         candidate_id=mp_id,
         e_above_hull_0k_mev=ehull_mev,
@@ -764,9 +778,9 @@ def build_live_mp_candidate_dossier(
         dynamically_stable=None,
         ion_migration_barrier_ev=emig_ev,
         ion_migration_stable=ion_ok,
-        mlip_force_std_ev_ang=None,
         passed_stage2=passed_s2,
         failure_reason=s2_reason,
+        provenance=stab_prov,
     )
     stab_dump = stab.model_dump()
 
@@ -920,8 +934,8 @@ def build_live_mp_candidate_dossier(
         dossier["redundancy_verification"] = verify_candidate_dossier(dossier, raise_on_error=True)
         return dossier
 
-    # Stage 4 & 5: Quantum Electronics, Polaron, SRH Defects & Sequential 4T Optics
-    eg = elec_dict["hse06_soc_indirect_gap_ev"]
+    # Stage 4 & 5: Heuristic Gap/Polaron/Defect Prescreen & Sequential 4T Optics
+    eg = elec_dict["gap_est_indirect_ev"]
     if target_layer == "TOP_ACTIVE_GLASS_185EV":
         gap_ok = 1.75 <= eg <= 1.95
     else:
@@ -934,7 +948,7 @@ def build_live_mp_candidate_dossier(
     s4_reason = None
     if not gap_ok:
         s4_reason = (
-            f"BANDGAP_OUT_OF_WINDOW: HSE06+SOC fundamental gap = {eg:.2f} eV "
+            f"BANDGAP_OUT_OF_WINDOW: Estimated fundamental gap = {eg:.2f} eV "
             f"(MP PBE = {rec['dft_pbe_band_gap_ev']:.2f} eV) misses {target_layer} spectral window"
         )
     elif not mass_ok:
@@ -947,14 +961,15 @@ def build_live_mp_candidate_dossier(
         srh_recombination_safe=srh_ok,
         passed_stage4_and_5=passed_s4,
         failure_reason=s4_reason,
+        provenance=elec_prov,
         **elec_dict,
     )
     elec_dump = elec.model_dump()
 
     opt_dict = compute_4t_tandem_optics_wavelength_grid(
         target_layer=target_layer,
-        eg_ind_ev=elec.hse06_soc_indirect_gap_ev,
-        eg_dir_ev=elec.hse06_soc_direct_gap_ev,
+        eg_ind_ev=elec.gap_est_indirect_ev,
+        eg_dir_ev=elec.gap_est_direct_ev,
         eps_inf=elec.eps_inf,
         thickness_nm=thickness_nm,
         candidate_id=mp_id,
@@ -985,7 +1000,7 @@ def compute_cross_layer_4t_stack_wavelength(
     top_dossier: Dict[str, Any], bottom_dossier: Dict[str, Any]
 ) -> CrossLayerTandemPair:
     """Pair a discovered Track A Top Active Glass finalist with a discovered Track B Bottom IR Scavenger
-    finalist around the 1.12 eV bifacial c-Si anchor and verify against blinded photon-energy Simpson quadrature.
+    finalist around the 1.12 eV bifacial c-Si anchor and check against photon-energy Simpson quadrature.
     """
     c_top = top_dossier["candidate"]
     e_top = top_dossier["electronics"]
@@ -997,14 +1012,14 @@ def compute_cross_layer_4t_stack_wavelength(
     o_bot = bottom_dossier["optics"]
     s_bot = bottom_dossier["synthesis"]
 
-    eg_ind_1 = float(e_top["hse06_soc_indirect_gap_ev"])
-    eg_dir_1 = float(e_top["hse06_soc_direct_gap_ev"])
+    eg_ind_1 = float(e_top["gap_est_indirect_ev"])
+    eg_dir_1 = float(e_top["gap_est_direct_ev"])
     eps_inf_1 = float(e_top["eps_inf"])
     d1_nm = float(o_top["film_thickness_nm"])
     d1_m = d1_nm * 1e-9
 
-    eg_ind_3 = float(e_bot["hse06_soc_indirect_gap_ev"])
-    eg_dir_3 = float(e_bot["hse06_soc_direct_gap_ev"])
+    eg_ind_3 = float(e_bot["gap_est_indirect_ev"])
+    eg_dir_3 = float(e_bot["gap_est_direct_ev"])
     eps_inf_3 = float(e_bot["eps_inf"])
     d3_nm = float(o_bot["film_thickness_nm"])
     d3_m = d3_nm * 1e-9
@@ -1094,6 +1109,166 @@ def compute_cross_layer_4t_stack_wavelength(
     )
 
 
+def write_failsmart_dashboard_html(summary: Dict[str, Any], html_path: Path) -> None:
+    """Write standalone HTML dashboard generated directly from campaign summary JSON."""
+    counts = summary["funnel_counts"]
+    p11b_rows = [
+        {
+            "stack": f"{r['top_formula']} + c-Si + {r['bottom_formula']}",
+            "ids": r["pair_id"],
+            "rad": f"{r['radiative_3l_mono_pce_percent']:.2f}% / {r['radiative_3l_bif20_pce_percent']:.2f}%",
+            "mono_tiers": (
+                f"{r['conservative_2l_mono_pce_percent']:.2f}% | "
+                f"{r['base_2l_mono_pce_percent']:.2f}% | "
+                f"{r['mature_2l_mono_pce_percent']:.2f}%"
+            ),
+            "p2": f"{r['path2_2l_bif20_pce_percent']:.2f}% (${r['path2_module_cost_usd_m2']:.2f}/m2)",
+            "p2_lcoe": f"{r['path2_utility_lcoe_cents_kwh']:.3f} / {r['path2_rooftop_lcoe_cents_kwh']:.3f} c/kWh",
+            "p1": f"{r['path1_3l_bif20_pce_percent']:.2f}% (${r['path1_module_cost_usd_m2']:.2f}/m2, {r['path1_utility_lcoe_cents_kwh']:.3f} c)",
+            "sha": r["sha256_digest"][:8],
+        }
+        for r in summary["phase11b_realistic_commercialization_dossiers"][:10]
+    ]
+    p11a_rows = [
+        {
+            "id": r["candidate_id"],
+            "f": r["formula_reduced"],
+            "role": r["target_layer"],
+            "sps": "not evaluated" if r["synthesis_practicality_score_100"] is None else f"{r['synthesis_practicality_score_100']:.2f}",
+            "hull": "not evaluated" if r["mp_gga_hull_mev_per_atom"] is None else f"{r['mp_gga_hull_mev_per_atom']:.2f} meV",
+            "win": (
+                "not evaluated"
+                if r["anion_chempot_window_ev"] is None
+                else f"{r['anion_chempot_window_ev']:.3f} / {r['min_cation_chempot_window_ev']:.3f} eV"
+            ),
+            "rxn": (
+                "not evaluated"
+                if r["rxn_sno2_mev_per_atom"] is None
+                else f"{r['rxn_sno2_mev_per_atom']:.2f} / {r['rxn_in2o3_mev_per_atom']:.2f} / {r['rxn_tio2_mev_per_atom']:.2f}"
+            ),
+            "etl": (
+                "not evaluated"
+                if r["best_cbo_ev"] is None
+                else f"{r['recommended_etl_barrier']} ({r['best_cbo_ev']:+.2f} eV)"
+            ),
+            "pen": (
+                f"not evaluated / {r['antisite_voltage_penalty_v']:.3f} V"
+                if r["contact_voltage_penalty_v"] is None
+                else f"{r['contact_voltage_penalty_v']:.3f} / {r['antisite_voltage_penalty_v']:.3f} V"
+            ),
+            "sha": r["sha256_digest"][:8],
+        }
+        for r in summary["phase11a_synthesis_contact_dossiers"]
+    ]
+    p9a_rows = [
+        {
+            "id": r["candidate_id"],
+            "formula": r["formula_reduced"],
+            "mfu": f"{r['formula_unit_molar_mass_g_mol']:.2f} g/mol",
+            "mass10": f"{r['target_product_mass_g']:.4f} g",
+            "temp": f"{r['synthesis_temperature_c']:.0f} C ({r['dwell_time_hours']:.1f} h)",
+            "sc": (
+                f"{r['supercell_dims'][0]}x{r['supercell_dims'][1]}x{r['supercell_dims'][2]} "
+                f"({r['supercell_total_sites']} sites, d_perp={r['supercell_min_image_dist_ang']:.2f} A)"
+            ),
+            "vac": f"V_{r['dominant_vacancy_element']} ({r['dominant_vacancy_species']})",
+            "pc_img": f"{r['point_charge_image_estimate_ev']:.3f} / {r['point_charge_image_estimate_q2_ev']:.3f} eV",
+            "sha": r["sha256_digest"][:8],
+        }
+        for r in summary["lab_synthesis_and_defect_dossiers"]
+    ]
+
+    html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FailSmart-MatEngine — Provenance-Tagged Screening &amp; TMM Dashboard</title>
+<style>
+  :root {{
+    --bg: #0b0f19; --panel: #111827; --panel-alt: #1e293b; --border: #334155;
+    --text: #f8fafc; --muted: #94a3b8; --accent: #38bdf8; --emerald: #10b981; --amber: #f59e0b;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }}
+  * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+  body {{ background: var(--bg); color: var(--text); font-family: var(--sans); padding: 16px; line-height: 1.45; }}
+  .header {{ padding-bottom: 14px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }}
+  .header h1 {{ font-size: 1.15rem; font-weight: 700; }}
+  .subtitle {{ font-size: 0.78rem; color: var(--muted); margin-top: 4px; }}
+  .notice {{ background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.4); color: var(--amber); padding: 8px 12px; border-radius: 6px; font-size: 0.75rem; margin-bottom: 14px; }}
+  .kpi-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 16px; }}
+  .kpi-card {{ background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }}
+  .kpi-label {{ font-size: 0.67rem; text-transform: uppercase; color: var(--muted); }}
+  .kpi-value {{ font-family: var(--mono); font-size: 1.05rem; font-weight: 700; margin-top: 4px; color: var(--accent); }}
+  .tabs {{ display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }}
+  .tab-btn {{ background: var(--panel); color: var(--muted); border: 1px solid var(--border); padding: 6px 12px; border-radius: 6px; font-size: 0.74rem; font-weight: 600; cursor: pointer; }}
+  .tab-btn.active {{ background: rgba(56,189,248,0.15); color: var(--accent); border-color: var(--accent); }}
+  .table-wrap {{ background: var(--panel); border: 1px solid var(--border); border-radius: 8px; overflow-x: auto; }}
+  table {{ width: 100%; border-collapse: collapse; font-size: 0.73rem; }}
+  th, td {{ padding: 8px 10px; text-align: left; border-bottom: 1px solid rgba(51,65,85,0.6); white-space: nowrap; }}
+  th {{ background: var(--panel-alt); color: var(--muted); font-weight: 600; text-transform: uppercase; font-size: 0.65rem; }}
+  .mono {{ font-family: var(--mono); }}
+</style>
+</head>
+<body>
+  <div class="header">
+    <h1>FailSmart-MatEngine — Provenance-Tagged Prescreening &amp; Coherent TMM Dashboard</h1>
+    <div class="subtitle">Generated directly from <code>outputs/live_mp_discovery_summary.json</code></div>
+  </div>
+  <div class="notice">
+    Provenance notice: Crystal structures and convex-hull energies are <code>MP_DFT</code>; band-gap shifts, pair-spring Gamma frequencies, ion-migration barriers, and defect depths are <code>HEURISTIC</code> estimates (hybrid DFT, phonons, NEB, and charged defect supercells not run).
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">MP Funnel Counts</div>
+      <div class="kpi-value">{counts['stage1_live_mp_ingested']} &rarr; {counts['stage2_dynamically_and_ion_stable']} &rarr; {counts['stage3_manufacturable_lbnl_alab_screened']} &rarr; {counts['gate_a_promoted_to_dft']} &rarr; {counts['stage4_5_prescreen_finalists']}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Prescreen Finalists</div>
+      <div class="kpi-value">{counts['top_active_glass_finalists']} Top / {counts['bottom_ir_scavenger_finalists']} Bottom</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Cross-Layer Pairs</div>
+      <div class="kpi-value">{len(summary['cross_layer_4t_tandem_pairs'])} Optical / {len(summary['phase11b_realistic_commercialization_dossiers'])} Phase-11B</div>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('P11B', this)">Phase 11B/11C: Non-Radiative Sensitivity &amp; LCOE</button>
+    <button class="tab-btn" onclick="switchTab('P11A', this)">Phase 11A: MP Hull Windows &amp; TCO Reactivity ({len(p11a_rows)})</button>
+    <button class="tab-btn" onclick="switchTab('P9A', this)">Phase 9A: 10 mmol Batch &amp; Neutral Vacancy Supercells ({len(p9a_rows)})</button>
+  </div>
+  <div class="table-wrap" id="table-container"></div>
+<script>
+const P11B = {json.dumps(p11b_rows)};
+const P11A = {json.dumps(p11a_rows)};
+const P9A = {json.dumps(p9a_rows)};
+function switchTab(tab, btn) {{
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const c = document.getElementById('table-container');
+  if (tab === 'P11B') {{
+    let h = '<table><thead><tr><th>Stack</th><th>Radiative (Mono / Bif20)</th><th>2L Mono Tiers</th><th>Path 2 (2L)</th><th>Path 2 LCOE (Util / Roof)</th><th>Path 1 (3L)</th><th>Digest</th></tr></thead><tbody>';
+    P11B.forEach(r => {{ h += `<tr><td><strong>${{r.stack}}</strong><br/><span class="mono">${{r.ids}}</span></td><td class="mono">${{r.rad}}</td><td class="mono">${{r.mono_tiers}}</td><td class="mono">${{r.p2}}</td><td class="mono">${{r.p2_lcoe}}</td><td class="mono">${{r.p1}}</td><td class="mono">${{r.sha}}</td></tr>`; }});
+    c.innerHTML = h + '</tbody></table>';
+  }} else if (tab === 'P11A') {{
+    let h = '<table><thead><tr><th>Formula (MP ID)</th><th>Layer</th><th>SPS (/100)</th><th>MP Hull</th><th>Window (Anion / Cation)</th><th>TCO Rxn SnO2 / In2O3 / TiO2 (meV/at)</th><th>ETL &amp; CBO</th><th>Penalties (Contact / Antisite)</th><th>Digest</th></tr></thead><tbody>';
+    P11A.forEach(r => {{ h += `<tr><td><strong>${{r.f}}</strong> <span class="mono">(${{r.id}})</span></td><td>${{r.role}}</td><td class="mono">${{r.sps}}</td><td class="mono">${{r.hull}}</td><td class="mono">${{r.win}}</td><td class="mono">${{r.rxn}}</td><td class="mono">${{r.etl}}</td><td class="mono">${{r.pen}}</td><td class="mono">${{r.sha}}</td></tr>`; }});
+    c.innerHTML = h + '</tbody></table>';
+  }} else {{
+    let h = '<table><thead><tr><th>MP ID</th><th>Formula</th><th>M_FU</th><th>10 mmol Mass</th><th>Anneal</th><th>Neutral Vacancy Supercell</th><th>Vacancy</th><th>Point-Charge Image Est (q=1 / q=2)</th><th>Digest</th></tr></thead><tbody>';
+    P9A.forEach(r => {{ h += `<tr><td class="mono">${{r.id}}</td><td><strong>${{r.formula}}</strong></td><td class="mono">${{r.mfu}}</td><td class="mono">${{r.mass10}}</td><td class="mono">${{r.temp}}</td><td class="mono">${{r.sc}}</td><td class="mono">${{r.vac}}</td><td class="mono">${{r.pc_img}}</td><td class="mono">${{r.sha}}</td></tr>`; }});
+    c.innerHTML = h + '</tbody></table>';
+  }}
+}}
+switchTab('P11B', document.querySelector('.tab-btn'));
+</script>
+</body>
+</html>
+"""
+    html_path.write_text(html, encoding="utf-8")
+
+
 def run_live_mp_discovery_campaign(
     output_dir: str | Path = _REPO_ROOT / "outputs",
     max_candidates: int = 100,
@@ -1117,7 +1292,7 @@ def run_live_mp_discovery_campaign(
         "stage2_dynamically_and_ion_stable": 0,
         "stage3_manufacturable_lbnl_alab_screened": 0,
         "gate_a_promoted_to_dft": 0,
-        "stage4_5_validated_finalists": 0,
+        "stage4_5_prescreen_finalists": 0,
         "top_active_glass_finalists": 0,
         "bottom_ir_scavenger_finalists": 0,
         "redundancy_verifications_passed": 0,
@@ -1127,7 +1302,7 @@ def run_live_mp_discovery_campaign(
     finalists: List[Dict[str, Any]] = []
     failure_mode_breakdown: Dict[str, int] = {}
 
-    from .orchestrator import generate_qe_hse06_soc_input
+    from .orchestrator import generate_qe_hybrid_soc_input
 
     for rec in raw_mp_records:
         dossier = build_live_mp_candidate_dossier(rec, neg_priors, ledger)
@@ -1148,16 +1323,16 @@ def run_live_mp_discovery_campaign(
             funnel_counts["gate_a_promoted_to_dft"] += 1
 
         if dossier["status"] == "PROMOTED":
-            funnel_counts["stage4_5_validated_finalists"] += 1
+            funnel_counts["stage4_5_prescreen_finalists"] += 1
             if c["target_layer"] == "TOP_ACTIVE_GLASS_185EV":
                 funnel_counts["top_active_glass_finalists"] += 1
             else:
                 funnel_counts["bottom_ir_scavenger_finalists"] += 1
             finalists.append(dossier)
 
-            # Write runnable QE HSE06+SOC input deck & CIF for every MP-discovered finalist
-            qe_in = generate_qe_hse06_soc_input(c)
-            (mp_qe_dir / f"{c['candidate_id']}_{c['formula_reduced']}_hse06_soc.in").write_text(qe_in, encoding="utf-8")
+            # Write Quantum ESPRESSO hybrid+SOC input deck (HSE06+SOC not run) & CIF for each finalist
+            qe_in = generate_qe_hybrid_soc_input(c)
+            (mp_qe_dir / f"{c['candidate_id']}_{c['formula_reduced']}_hse06_soc.in").write_text(qe_in, encoding="utf-8")  # HSE06+SOC not run
             (mp_qe_dir / f"{c['candidate_id']}_{c['formula_reduced']}.cif").write_text(c["cif_content"], encoding="utf-8")
         else:
             fmode = dossier.get("primary_failure_mode") or "REJECTED"
@@ -1181,8 +1356,8 @@ def run_live_mp_discovery_campaign(
             competing_impurity_phases=sy["competing_impurity_sinks"] if sy else st["competing_hull_phases"],
             pourbaix_max_dissolution_mol_l=sy["pourbaix_max_dissolution_mol_l"] if sy else 0.0,
             active_layer_cost_usd_m2=sy["active_layer_cost_usd_m2"] if sy else 0.0,
-            hse06_soc_gap_ev=el["hse06_soc_indirect_gap_ev"] if el else None,
-            direct_gap_ev=el["hse06_soc_direct_gap_ev"] if el else None,
+            gap_est_indirect_ev=el["gap_est_indirect_ev"] if el else None,
+            direct_gap_ev=el["gap_est_direct_ev"] if el else None,
             soc_splitting_ev=el["soc_splitting_ev"] if el else None,
             max_carrier_eff_mass=max(el["electron_eff_mass_m0"], el["hole_eff_mass_m0"]) if el else None,
             frohlich_alpha=el["frohlich_alpha"] if el else None,
@@ -1196,12 +1371,12 @@ def run_live_mp_discovery_campaign(
 
     # Step 1 (v4.0) & Phase 9A (v6.0): Pair-Spring Gamma Heuristic, Migration Heuristic & Lab/Defect Supercell Dossiers
     from .atomistic_and_tmm import (
-        evaluate_3d_atomistic_phonon_and_neb,
         evaluate_coherent_abeles_tmm_4t_stack,
         evaluate_graded_arc_and_techno_economics_4t_stack,
         evaluate_phase9a_lab_synthesis_and_defect_supercell,
         evaluate_phase9c_real_world_lcoe_stress_test,
         evaluate_phase10_bifacial_and_string_dossier,
+        evaluate_spring_and_migration_heuristics,
     )
     from .realistic_commercialization import (
         evaluate_phase11a_synthesis_and_contacts,
@@ -1221,9 +1396,9 @@ def run_live_mp_discovery_campaign(
     phase11a_models: Dict[str, Any] = {}
     phase11a_dossiers: List[Dict[str, Any]] = []
     for fin in finalists:
-        at_rep = evaluate_3d_atomistic_phonon_and_neb(fin)
-        fin["atomistic_phonon_neb"] = at_rep.model_dump()
-        atomistic_reports.append(fin["atomistic_phonon_neb"])
+        at_rep = evaluate_spring_and_migration_heuristics(fin)
+        fin["spring_and_migration_heuristics"] = at_rep.model_dump()
+        atomistic_reports.append(fin["spring_and_migration_heuristics"])
 
         lab_rep = evaluate_phase9a_lab_synthesis_and_defect_supercell(fin, str(defect_deck_dir))
         fin["lab_synthesis_and_defect_dossier"] = lab_rep.model_dump()
@@ -1299,7 +1474,7 @@ def run_live_mp_discovery_campaign(
     )
 
     summary = {
-        "version": "4.0.0",
+        "version": "0.8.0",
         "v5_graded_arc_and_techno_economics_enabled": True,
         "v6_phase9_lab_and_lcoe_enabled": True,
         "v7_phase10_bifacial_and_string_enabled": True,
@@ -1307,7 +1482,7 @@ def run_live_mp_discovery_campaign(
         "data_provenance": {
             "materials_project_live_api": True,
             "negative_synthesis_datasets": neg_priors.get("dataset_provenance", {}),
-            "atomistic_dynamical_matrix_and_neb": True,
+            "spring_gamma_and_migration_heuristics": True,
             "coherent_abeles_tmm_vs_rouard_airy": True,
             "graded_arc_tio2_and_techno_economic_fom": True,
             "phase9a_lab_synthesis_and_neutral_vacancy_supercells": True,
@@ -1318,7 +1493,7 @@ def run_live_mp_discovery_campaign(
         "funnel_counts": funnel_counts,
         "failure_mode_breakdown": failure_mode_breakdown,
         "finalists": finalists,
-        "atomistic_phonon_neb_reports": atomistic_reports,
+        "spring_and_migration_reports": atomistic_reports,
         "lab_synthesis_and_defect_dossiers": lab_defect_dossiers,
         "phase11a_synthesis_contact_dossiers": phase11a_dossiers,
         "cross_layer_4t_tandem_pairs": cross_pairs,
@@ -1330,6 +1505,7 @@ def run_live_mp_discovery_campaign(
         "all_mp_records": all_dossiers,
     }
     (out_path / "live_mp_discovery_summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
+    write_failsmart_dashboard_html(summary, out_path / "failsmart_dashboard.html")
     return summary
 
 

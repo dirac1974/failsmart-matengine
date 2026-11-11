@@ -1,10 +1,10 @@
 # FailSmart-MatEngine: Expert Scientific Team & Implementation Plan
 
 > [!WARNING]
-> **Read first (independent audit, 2026-11):** this file is a design target. None of the heavy tools it names (MatterGen, MACE/CHGNet, phonopy, rxn_network, Quantum ESPRESSO, doped, LangGraph) is invoked by the code; the reported counts and efficiencies come from heuristic stand-ins. See [`INDEPENDENT_AUDIT_2026-11.md`](INDEPENDENT_AUDIT_2026-11.md) and [`REMEDIATION_TASKS.md`](REMEDIATION_TASKS.md).
+> **Read first (independent audit, 2026-11):** this file is a design target. None of the heavy tools it names (MatterGen, MACE/CHGNet, phonopy, rxn_network, Quantum ESPRESSO, doped, LangGraph — all not run) is invoked by the code; the reported counts and efficiencies come from heuristic stand-ins. See [`INDEPENDENT_AUDIT_2026-11.md`](INDEPENDENT_AUDIT_2026-11.md) and [`REMEDIATION_TASKS.md`](REMEDIATION_TASKS.md).
 
 > [!IMPORTANT]
-> **Mission Objective:** Discover, stress-test, and validate earth-abundant, phase-stable, defect-tolerant **inorganic chalcohalide and oxychalcogenide semiconductors** ($\text{Bi/Sb–Cu/Zn/Sn–S/Se/O–Cl/Br/I}$) for a **mechanically decoupled (4-Terminal) 3-Layer "Silicon-Sandwich" Photovoltaic Stack**:
+> **Mission Objective:** Discover, stress-test, and prescreen earth-abundant, phase-stable, defect-tolerant **inorganic chalcohalide and oxychalcogenide semiconductors** ($\text{Bi/Sb–Cu/Zn/Sn–S/Se/O–Cl/Br/I}$) for a **mechanically decoupled (4-Terminal) 3-Layer "Silicon-Sandwich" Photovoltaic Stack**:
 > 1. **Top "Active Glass" Layer ($E_g \in [1.75, 1.95]\text{ eV}$):** Coated directly on soda-lime cover glass ($T_{\text{synth}} \le 500^\circ\text{C}$), harvesting UV/blue/green photons while transmitting $>85\%$ of red/IR light ($>670\text{ nm}$).
 > 2. **Middle Anchor ($E_g = 1.12\text{ eV}$):** Off-the-shelf commercial bifacial crystalline silicon wafer.
 > 3. **Bottom IR Scavenger ($E_g \in [0.70, 0.85]\text{ eV}$):** Decoupled narrow-gap thin film beneath silicon with a textured rear mirror for $4n^2$ Yablonovitch Total Internal Reflection, harvesting $1100\text{–}1750\text{ nm}$ sub-bandgap infrared photons.
@@ -15,7 +15,7 @@
 
 Before locking in the agent roster, four deep physical failure modes specific to heavy lone-pair ($ns^2$) chalcohalides and 4T tandem stacks must be built directly into the team's mandate:
 
-1. **Relativistic Spin-Orbit Coupling (SOC) is Non-Negotiable:** Heavy pnictogen/post-transition cations ($\text{Bi}^{3+}, \text{Sb}^{3+}, \text{Sn}^{2+}$) and heavy halides/chalcogenides ($\text{I}^-, \text{Br}^-, \text{Se}^{2-}$) exhibit giant spin-orbit splitting ($0.3\text{–}0.8\text{ eV}$) at the conduction/valence band edges. Standard HSE06 without SOC overestimates band gaps by up to $0.5\text{ eV}$ and misidentifies direct vs. indirect transitions.
+1. **Relativistic Spin-Orbit Coupling (SOC) is Non-Negotiable:** Heavy pnictogen/post-transition cations ($\text{Bi}^{3+}, \text{Sb}^{3+}, \text{Sn}^{2+}$) and heavy halides/chalcogenides ($\text{I}^-, \text{Br}^-, \text{Se}^{2-}$) exhibit giant spin-orbit splitting ($0.3\text{–}0.8\text{ eV}$) at the conduction/valence band edges. Standard HSE06 without SOC overestimates band gaps by up to $0.5\text{ eV}$ and misidentifies direct vs. indirect transitions (design target; HSE06+SOC not run in current code).
 2. **The "Bi-Halide Polaron Trap" (Electronic Dimensionality & Carrier Transport):** Many $\text{Bi/Sb}$ halides pass band-gap and defect-tolerance checks yet fail in solar cells (<2% efficiency) because 0D/1D crystal connectivity yields flat bands ($m^* > 1.5\,m_0$) and **self-trapped small polarons**—carriers freeze in local lattice distortions before traversing a $300\text{ nm}$ film. We must enforce 3D/quasi-2D electronic dimensionality, low effective masses ($m_e^*, m_h^* < 0.5\,m_0$), high static dielectric screening ($\varepsilon_0 > 15$), and Fröhlich large-polaron criteria.
 3. **Volatile Halide Precursor Loss Under $500^\circ\text{C}$:** Binary metal halides ($\text{BiCl}_3, \text{SbI}_3, \text{SnI}_4$) sublimate or hydrolyze between $150^\circ\text{C}$ and $350^\circ\text{C}$. Retrosynthesis cannot merely check solid-state $\Delta G_{\text{rxn}}$; it must track vapor-phase chemical potentials and favor nonvolatile oxyhalide/sulfide intermediate pathways or solution-complexed routes.
 4. **Full-Stack Optical & Parasitic Coupling:** A top absorber with high single-layer SLME is useless if high refractive-index mismatch ($R(\lambda)$) or sub-bandgap tail absorption starves the underlying $1.12\text{ eV}$ silicon wafer. Every candidate must be evaluated inside an optical Transfer-Matrix Method (`TMM`) + $4n^2$ light-trapping stack across all three junctions.
@@ -52,7 +52,7 @@ flowchart TD
     end
 
     A5 --> A6_Final["Agent 6: Final Red-Team Audit"]
-    A6_Final -->|Validated Candidates| PI
+    A6_Final -->|Prescreen Candidates| PI
 
     A2 -.->|Hull / Phonon Failures| FML[("Contrastive Failure Memory Ledger (PostgreSQL + pgvector)")]
     A3 -.->|Oxide Sink / Leaching Failures| FML
@@ -80,7 +80,7 @@ flowchart TD
 * **Scientific Persona:** Statistical & Condensed Matter Physicist (Thermodynamics & Phonons).
 * **Core Mandate:** Evaluates $0\text{ K}$ and finite-temperature ($300\text{–}800\text{ K}$) structural, mechanical, and dynamical stability using an ensemble of universal machine-learning interatomic potentials.
 * **Deterministic Tools:**
-  * **4-Member MLIP Ensemble (`MACE-OMat24` + `CHGNet`):** Full cell + atomic position relaxation (`FIRE` / `BFGS` via `ASE`) plus force-variance epistemic uncertainty ($\sigma_F$).
+  * **4-Member MLIP Ensemble (`MACE-OMat24` + `CHGNet`; design target, not run):** Full cell + atomic position relaxation (`FIRE` / `BFGS` via `ASE`) plus force-variance epistemic uncertainty ($\sigma_F$).
   * **Thermodynamic Hull Engine (`pymatgen.analysis.phase_diagram`):** Queries synchronized Materials Project + Alexandria convex hulls (with `MaterialsProject2020Compatibility` corrections). **Hard Gate:** $\Delta E_{\text{hull}} \le 50\text{ meV/atom}$ (or stabilized at $T_{\text{synth}}$ via vibrational/configurational entropy $\Delta G_{\text{hull}}(T) \le 0$).
   * **Dynamic & Mechanical Stability (`phonopy` + `matcalc`):** Finite-displacement supercell phonon spectra and elastic stiffness tensor $C_{ij}$. **Hard Gates:** Rejects imaginary phonon modes ($\omega < -0.5\text{ THz}$ anywhere in the Brillouin zone), checks Born elastic stability ($C_{ij}$ eigenvalues $> 0$), and computes Debye temperature $\Theta_D$ and lattice thermal conductivity proxy.
 
@@ -96,11 +96,11 @@ flowchart TD
 * **Scientific Persona:** Ab Initio Electronic Structure & Semiconductor Defect Theorist.
 * **Core Mandate:** Executes high-fidelity open-source DFT (`Quantum ESPRESSO`) on the top $1.5\%$ of Stage 3 survivors to verify true relativistic band gaps, carrier transport, polaron localization, and intrinsic defect tolerance.
 * **Deterministic Tools:**
-  * **Automated DFT Engine (`atomate2` + `custodian` + `Quantum ESPRESSO` GPU):**
-    * *Step 4a (Fast Meta-GGA Screen):* `r2SCAN + SOC` electronic band structure and density of states (DOS) to check orbital hybridization ($ns^2$ cation $s$–anion $p$ antibonding valence band maximum, which is the signature of defect tolerance).
-    * *Step 4b (Gold-Standard Hybrid):* `HSE06 + SOC` band structure + optical transition dipole matrix elements $|\langle c,\mathbf{k} | \mathbf{p} | v,\mathbf{k} \rangle|^2$.
+  * **Automated DFT Engine (`atomate2` + `custodian` + `Quantum ESPRESSO` GPU; design target, not run):**
+    * *Step 4a (Fast Meta-GGA Screen; not run):* `r2SCAN + SOC` electronic band structure and density of states (DOS) to check orbital hybridization ($ns^2$ cation $s$–anion $p$ antibonding valence band maximum, which is the signature of defect tolerance).
+    * *Step 4b (Gold-Standard Hybrid; not run):* `HSE06 + SOC` band structure + optical transition dipole matrix elements $|\langle c,\mathbf{k} | \mathbf{p} | v,\mathbf{k} \rangle|^2$.
   * **Carrier Transport & Polaron Gate (`boltztrap2` / `amset`):** Computes conductivity effective mass tensors $m_e^*, m_h^*$, static and high-frequency dielectric constants ($\varepsilon_0, \varepsilon_\infty$), and Fröhlich coupling constant $\alpha_{\text{F}}$. **Hard Gate:** Rejects 0D localized states where $\max(m_e^*, m_h^*) > 0.8\,m_0$ or small-polaron trapping energy exceeds thermal energy.
-  * **Stage 5 Killer Defect Audit (`doped`):** Generates charge-state supercells ($q \in [-3, +3]$) for dominant intrinsic vacancies and antisites ($V_{\text{Anion}}, V_{\text{Cation}}, \text{Cation}_{\text{Anion}}$) with Freysoldt (FNV) finite-size charge corrections. **Hard Gate:** Rejects candidates with low-formation-energy deep mid-gap Shockley-Read-Hall (SRH) traps or Fermi-level pinning that prevents carrier extraction.
+  * **Stage 5 Killer Defect Audit (`doped` / Freysoldt FNV design target; not run):** Generates charge-state supercells ($q \in [-3, +3]$) for dominant intrinsic vacancies and antisites ($V_{\text{Anion}}, V_{\text{Cation}}, \text{Cation}_{\text{Anion}}$) with finite-size charge corrections (current code writes neutral vacancy supercells with isotropic `point_charge_image_estimate_ev` only). **Hard Gate:** Rejects candidates with low-formation-energy deep mid-gap Shockley-Read-Hall (SRH) traps or Fermi-level pinning that prevents carrier extraction.
 
 ### Agent 5: Nanophotonics & 4T Tandem Device Architect (`photonic_tandem_architect`)
 * **Scientific Persona:** Optoelectronic Device Physicist & Nanophotonic Engineer.
@@ -120,8 +120,8 @@ flowchart TD
 * **Adversarial Checklist (Automatic Veto Triggers):**
   1. **Pseudopotential / Functional Artifact Check:** Flags inconsistent Hubbard $U$ or relativistic pseudopotential mismatches across phase-diagram references.
   2. **Hidden Phase-Segregation Check:** For mixed-anion candidates (e.g., $\text{S/Cl}$ or $\text{Se/I}$), computes configurational mixing enthalpy $\Delta H_{\text{mix}}$ across anion orderings to verify the crystal won't photo-segregate like mixed $\text{I/Br}$ perovskites!
-  3. **TCO & Interfacial Reactivity Check:** Checks whether the candidate reacts thermodynamically with standard transparent conductive oxides ($\text{ITO}, \text{FTO}, \text{AZO}$) at deposition temperatures ($\Delta G_{\text{interface}} < -100\text{ meV/atom}$).
-  4. **Failure Ledger Write-Back:** Logs every rejected structure, the exact physical mechanism of failure, and a structural graph embedding (`MACE` latent vector) into the Failure Memory Ledger.
+  3. **TCO & Interfacial Reactivity Check:** Checks whether the candidate reacts thermodynamically with standard transparent conductive oxides ($\text{SnO}_2, \text{In}_2\text{O}_3, \text{ZnO}$) at deposition temperatures ($\Delta G_{\text{interface}} < -100\text{ meV/atom}$).
+  4. **Failure Ledger Write-Back:** Logs every rejected structure, the exact physical mechanism of failure, and a composition descriptor (`composition_embedding` in current code; `MACE` latent vector design target not run) into the Failure Memory Ledger.
 
 ---
 
@@ -131,12 +131,12 @@ Every screening sweep follows a deterministic **5-Stage Funnel + 2 Adversarial R
 
 | Stage | Lead Agent | Pilot v2.0 Count ($N=20$) | Physics / Chemistry Gate | Target Compute |
 | :--- | :--- | :--- | :--- | :--- |
-| **Stage 1: Generation** | `crystal_explorer` | $20\text{ crystals}$ ($16\text{ benchmark} + 4\text{ SMACT OOD}$) | SMACT charge/electronegativity + 3-Tier Element Policy + `MatterGen` ($\le 32\text{ atoms}$) + Bond-Valence sanity | Local GPU / CPU |
-| **Stage 2: Dynamics & Ion Migration** | `surrogate_physicist` | $20 \rightarrow 17\text{ dynamically & ion-stable}$ | 4x `MACE-OMat24` relaxation + $\Delta E_{\text{hull}} \le 50\text{ meV/atom}$ + Born $C_{ij} \succ 0$ + `phonopy` $\omega^2 > 0$ + Stage 2b $E_{\text{mig}} \ge 0.65\text{ eV}$ | Local GPU |
+| **Stage 1: Generation** | `crystal_explorer` | $20\text{ crystals}$ ($16\text{ benchmark} + 4\text{ SMACT OOD}$) | SMACT charge/electronegativity + 3-Tier Element Policy + `MatterGen` (design target, not run; $\le 32\text{ atoms}$) + Bond-Valence sanity | Local GPU / CPU |
+| **Stage 2: Dynamics & Ion Migration** | `surrogate_physicist` | $20 \rightarrow 17\text{ dynamically & ion-stable}$ | 4x `MACE-OMat24` relaxation (`phonopy` & `MACE` not run) + $\Delta E_{\text{hull}} \le 50\text{ meV/atom}$ + Born $C_{ij} \succ 0$ + Stage 2b $E_{\text{mig}} \ge 0.65\text{ eV}$ | Local GPU |
 | **Stage 3: Kinetics & Speciation** | `synthesis_chemist` | $17 \rightarrow 12\text{ manufacturable}$ | `rxn_network` ($T \le 500^\circ\text{C}$, no refractory oxide sinks) + Halide volatility + Pourbaix ($\text{pH } 4\text{–}9$) + Cost $< \$0.50/\text{m}^2$ | Multi-core CPU |
 | **Gate A: Pre-DFT Red Team** | `adversarial_critic` | $12 \rightarrow 8\text{ promoted to DFT}$ | Anion unmixing check ($\Delta H_{\text{mix}} < 35\text{ meV/atom}$) + TCO interface stability + 1D polaron veto | CPU |
-| **Stage 4: Quantum & Transport** | `quantum_defect_physicist` | $8 \rightarrow 5\text{ high-mobility absorbers}$ | `QE` `r2SCAN+SOC` $\rightarrow$ `HSE06+SOC` + target bandgap window ($1.75\text{–}1.95\text{ eV}$ top, $0.70\text{–}0.85\text{ eV}$ bottom) + Fröhlich polaron check | Cloud GPU Burst |
-| **Stage 5: Defects & 4T Optics** | `quantum_defect_physicist` + `photonic_tandem_architect` | $5\text{ validated finalists}$ | `doped` vacancy/antisite supercells (no deep SRH traps $> 0.15\text{ eV}$) + Full 3-layer `TMM` $4n^2$ stack $\eta_{\text{4T}} \ge 41.5\%$ | Cloud GPU Burst |
+| **Stage 4: Quantum & Transport** | `quantum_defect_physicist` | $8 \rightarrow 5\text{ high-mobility absorbers}$ | `QE` `r2SCAN+SOC` $\rightarrow$ `HSE06+SOC` (design target, not run; current code uses `gap_est_*`) + target bandgap window ($1.75\text{–}1.95\text{ eV}$ top, $0.70\text{–}0.85\text{ eV}$ bottom) + Fröhlich polaron check | Cloud GPU Burst |
+| **Stage 5: Defects & 4T Optics** | `quantum_defect_physicist` + `photonic_tandem_architect` | $5\text{ prescreen finalists}$ | `doped` vacancy/antisite supercells (design target, not run) + Full 3-layer `TMM` $4n^2$ stack $\eta_{\text{4T}} \ge 41.5\%$ | Cloud GPU Burst |
 
 ### How the Adversarial Debate Protocol Works in Practice
 At **Gate A** (before spending cloud GPU budget on Stage 4 DFT) and **Gate B** (final sign-off), the state machine runs a structured 3-turn debate:
@@ -148,7 +148,7 @@ At **Gate A** (before spending cloud GPU budget on Stage 4 DFT) and **Gate B** (
 
 ## 4. Contrastive Failure Memory Ledger Schema
 
-To ensure negative results become a compounding scientific asset, every failed candidate at Stages 2–5 is recorded in a structured relational + vector store (`SQLite`/`PostgreSQL` + `FAISS`/`pgvector` for local execution):
+To ensure negative results become a compounding scientific asset, every failed candidate at Stages 2–5 is recorded in a structured relational store (`SQLite` in `data/failure_memory.db`):
 
 ```sql
 CREATE TABLE material_evaluations (
@@ -157,7 +157,7 @@ CREATE TABLE material_evaluations (
     target_layer TEXT CHECK (target_layer IN ('TOP_ACTIVE_GLASS_185EV', 'BOTTOM_IR_075EV')),
     space_group_number INTEGER,
     cif_structure TEXT NOT NULL,
-    mace_embedding BLOB,                  -- 128-dim equivariant graph descriptor
+    composition_embedding BLOB,           -- composition feature vector (MACE not run)
     stage_reached INTEGER NOT NULL,       -- 1 to 5
     status TEXT CHECK (status IN ('PROMOTED', 'REJECTED', 'UNCERTAIN_DFT_QUEUE')),
     primary_failure_mode TEXT,            -- e.g., 'IMAGINARY_PHONON', 'HULL_INSTABILITY', 'ION_MIGRATION_INSTABILITY', 'OXIDE_IMPURITY_SINK', 'AQUEOUS_LEACHING', 'SMALL_POLARON_TRAP', 'ANION_PHASE_SEGREGATION', 'DEEP_SRH_DEFECT'
@@ -166,7 +166,7 @@ CREATE TABLE material_evaluations (
     rxn_temp_celsius REAL,
     competing_impurity_phases TEXT,       -- JSON array from rxn_network / LBNL dataset
     pourbaix_max_dissolution_mol_l REAL,
-    hse06_soc_gap_ev REAL,
+    gap_est_indirect_ev REAL,
     direct_gap_ev REAL,
     max_carrier_eff_mass REAL,
     slme_percent REAL,
@@ -176,7 +176,7 @@ CREATE TABLE material_evaluations (
 );
 ```
 
-This ledger directly powers **Contrastive Failure Learning**: after every campaign sweep, `crystal_explorer` and `synthesis_chemist` update a lightweight contrastive classifier on `mace_embedding` vectors to steer generation away from crystal motifs prone to imaginary phonons, $\text{BiOCl}/\text{ZrO}_2$ impurity traps, or 0D polaron localization.
+This ledger stores negative-result rows (`composition_embedding` vectors) alongside failure modes (`OXIDE_IMPURITY_SINK`, `IMPURITY_SINK_PRIOR`, `LOW_DIM_POLARON_RISK`).
 
 ---
 
@@ -189,18 +189,18 @@ We can build and execute this architecture in modular phases right inside this w
 2. **Build the Contrastive Failure Memory Ledger** (local SQLite + vector similarity index) pre-seeded with known chalcohalide/perovskite failure archetypes (e.g., $\text{BaZrS}_3$ high-$T$ $\text{ZrO}_2$ sink, mixed $\text{MAPb(I,Br)}_3$ photo-segregation, $\text{Cs}_3\text{Bi}_2\text{I}_9$ 0D polaron trap).
 3. **Implement the Stage 1–3 & Gate A Tool Suite:**
    * `tools/composition_gen.py`: 3-Tier Element Policy + `SMACT` charge-neutral quaternary/ternary chalcohalide & oxychalcogenide generator + prototype crystal decorator (`pymatgen` / `pyxtal`).
-   * `tools/surrogate_physics.py`: `MACE` / `CHGNet` structural relaxation, convex hull stability against Materials Project, finite-displacement phonon/elasticity checks, and Stage 2b ion-migration barrier evaluation ($E_{\text{mig}} \ge 0.65\text{ eV}$).
+   * `tools/surrogate_physics.py`: `MACE` / `CHGNet` structural relaxation (design target, not run), convex hull stability against Materials Project, elastic checks, and Stage 2b ion-migration barrier evaluation ($E_{\text{mig}} \ge 0.65\text{ eV}$).
    * `tools/synthesis_kinetics.py`: $<500^\circ\text{C}$ precursor reaction driving-force calculator, halide volatility filter, TCO interface reactivity check, and `pymatgen` Pourbaix aqueous leaching gate ($\text{pH } 4\text{–}9$).
    * `tools/tandem_optics.py`: Transfer-Matrix + $4n^2$ Yablonovitch 3-layer "Silicon-Sandwich" (Top Active Glass + $1.12\text{ eV}$ c-Si + Bottom IR Scavenger) detailed-balance efficiency calculator.
 
 ### Phase 2: Multi-Agent State Machine & Subagent Team Wiring
 1. **Define and wire the 7 specialized agents** (`pi_orchestrator`, `crystal_explorer`, `surrogate_physicist`, `synthesis_chemist`, `quantum_defect_physicist`, `photonic_tandem_architect`, and `adversarial_critic`) with the adversarial debate protocol at Gate A and Gate B.
-2. **Configure Stage 4/5 Quantum ESPRESSO & `doped` workflow generators** (`tools/qe_workflows.py`) so promoted candidates automatically emit turnkey, `custodian`-wrapped `Quantum ESPRESSO` (`r2SCAN+SOC` / `HSE06+SOC`) and `doped` defect supercell input decks.
+2. **Configure Stage 4/5 Quantum ESPRESSO workflow generators** so promoted candidates emit syntactically valid `Quantum ESPRESSO` (`HSE06+SOC`, not run) and neutral vacancy supercell input decks (`doped` and `r2SCAN+SOC` not run).
 
 ### Phase 3: Pilot Screening Campaign v2.0 & Interactive Dashboard
 1. **Execute Pilot Sweep v2.0** across 20 candidates (16 benchmark + 4 SMACT OOD compositions) in both target windows:
-   * **Track A (Top Active Glass, $1.75\text{–}1.95\text{ eV}$):** $\text{Bi/Sb–Cu/Zn–S/O–Cl/Br}$ oxy-/chalcohalides (validated finalists: `Bi2CuO2SCl`, `Cu2SbS2Cl`, `BiZnOSCl`).
-   * **Track B (Bottom IR Scavenger, $0.70\text{–}0.85\text{ eV}$):** $\text{Bi/Sb–Sn/Cu–Se/S–I}$ heavy chalcohalides (validated finalists: `Sn2SbSe2I3`, `Cu2BiSe2I`).
+   * **Track A (Top Active Glass, $1.75\text{–}1.95\text{ eV}$):** $\text{Bi/Sb–Cu/Zn–S/O–Cl/Br}$ oxy-/chalcohalides (prescreen finalists: `Bi2CuO2SCl`, `Cu2SbS2Cl`, `BiZnOSCl`).
+   * **Track B (Bottom IR Scavenger, $0.70\text{–}0.85\text{ eV}$):** $\text{Bi/Sb–Sn/Cu–Se/S–I}$ heavy chalcohalides (prescreen finalists: `Sn2SbSe2I3`, `Cu2BiSe2I`).
 2. **Launch an Interactive Discovery & Failure-Ledger Dashboard** (HTML artifact) visualizing the screening funnel ($20 \rightarrow 17 \rightarrow 12 \rightarrow 8 \rightarrow 5$), Pareto frontier ($\eta_{\text{4T}}$ vs. synthesis temperature vs. \$/m² cost), 3-layer spectral absorption curves, and the live Contrastive Failure Memory Ledger.
 
 ---
@@ -217,7 +217,7 @@ To guarantee **zero misstated or unverified results**, the 7-agent Research Divi
 | **Research** | `crystal_explorer` | Solid-State Chemist & Inverse-Design Explorer | **`pro`** | Valence-neutral stoichiometry (`SMACT`), Wyckoff symmetry & 3-Tier Policy |
 | **Research** | `surrogate_physicist` | Lattice Dynamics & MLIP Surrogate Physicist | **`pro`** | Convex hull $\Delta E_{\text{hull}}$, Born elasticity $C_{ij}$ & `phonopy` dynamics |
 | **Research** | `synthesis_chemist` | Retrosynthesis, Kinetics & Speciation Chemist | **`pro`** | $\le 500^\circ\text{C}$ reaction networks, halide volatility & Pourbaix leaching |
-| **Research** | `quantum_defect_physicist` | Quantum Electronic & Defect-Transport Physicist | **`pro`** | Relativistic `HSE06+SOC`, Fröhlich polarons & `doped` SRH defects |
+| **Research** | `quantum_defect_physicist` | Quantum Electronic & Defect-Transport Physicist | **`pro`** | Target `HSE06+SOC` & `doped` defect physics (not run; current code uses `gap_est_*` & Fröhlich polarons) |
 | **Research** | `photonic_tandem_architect` | Nanophotonics & 4T Tandem Device Architect | **`pro`** | AM1.5G spectral integration, $4n^2$ light trapping & 4T stack efficiency |
 | **Research** | `adversarial_critic` | Adversarial Scientific Red-Team Critic | **`pro`** | Physical falsification (anion phase segregation, TCO reactions, 0D/1D polarons) |
 | **Engineering** | `chief_software_architect` | Lead Scientific Software Architect & Bridge | **`pro`** | Inter-team communication bus (`inter_team_bus.py`) & schema enforcement |
@@ -230,38 +230,38 @@ To guarantee **zero misstated or unverified results**, the 7-agent Research Divi
 ### Triple-Gate Redundancy & Logged Verification Flow
 1. **Gate R1 (Chemical & Crystallographic Invariants):** Every candidate is mathematically verified for exact oxidation-state neutrality ($\sum n_i z_i \equiv 0$), GCD-reduced formula-to-stoichiometry equivalence, and 3D periodic minimum interatomic distance $d_{ij} \ge 2.15\text{ \AA}$.
 2. **Gate R2 (Dual-Algorithm Independent Re-Computation):** `redundancy_verifier_alpha` independently re-computes crystallographic geometry, relativistic spin-orbit splitting, Fröhlich coupling $\alpha_F$, and 1-sun AM1.5G SLME (using Simpson's 1/3 rule in photon-energy space vs. trapezoidal integration in wavelength space) and blocks promotion on any mismatch $> 0.15\%$.
-3. **Gate R3 (Automated Test Suite & Cryptographic Audit Trail):** `qa_test_audit_engineer` executes the full test suite and logs every test assertion and SHA-256 dossier signature to `logs/verification_audit_log.jsonl`, `logs/inter_team_communication.jsonl`, and `docs/VERIFICATION_AND_TEST_REPORT.md`.
+3. **Gate R3 (Automated Test Suite & SHA-256 Digest Audit Trail):** `qa_test_audit_engineer` executes the full test suite and logs every test assertion and SHA-256 dossier digest (`sha256_digest`) to `logs/verification_audit_log.jsonl`, `logs/inter_team_communication.jsonl`, and `docs/VERIFICATION_AND_TEST_REPORT.md`.
 
 ---
 
 ## 7. Materials Project Live API Discovery & Negative Synthesis Priors Roadmap (v3.0)
 
-### 7.1 Scope & Funnel Architecture (100 -> 91 -> 52 -> 40 -> 8 Finalists)
-The discovery framework expands to ingest **100 live candidates** directly from the Materials Project API (`MPRester`) targeting the RoHS-compliant mixed-anion chalcohalide/oxychalcogenide space:
+### 7.1 Scope & Funnel Architecture (100 -> 91 -> 47 -> 40 -> 9 Prescreen Finalists)
+The discovery framework expands to ingest **100 candidates** from the cached Materials Project dataset targeting the RoHS-compliant mixed-anion chalcohalide/oxychalcogenide space:
 1. **Stage 1 (100 Ingested):** RoHS whitelist filtering ($\text{Pb, Cd, Hg, Tl, As, Te, P}$ forbidden) + Pauling oxidation neutrality.
-2. **Stage 2 (91 Dynamically & Ion-Stable):** 4-member MLIP ensemble relaxation, Born elastic stability ($6$ failures vetoed), and Stage 2b cuprous/halide ion-migration barrier ($3$ superionic failures vetoed with $E_{\text{mig}} < 0.65\text{ eV}$).
-3. **Stage 3 (52 Manufacturable):** Retrosynthesis under $500^\circ\text{C}$ with negative-synthesis priors ($26$ rejected for `OXIDE_IMPURITY_SINK` from refractory oxide reactions, $13$ rejected for `TIER2_COST_EXCEEDED` $> \$0.50/\text{m}^2$).
-4. **Gate A (40 Promoted to DFT):** Adversarial red-team checks ($8$ vetoed for `LOW_DIM_POLARON_RISK` 1D-chains, $4$ vetoed for `ANION_PHASE_SEGREGATION`).
-5. **Stages 4 & 5 (8 Promoted Finalists):** Relativistic `HSE06+SOC` electronic structure + 3-layer 4T tandem optics ($32$ rejected for `BANDGAP_OUT_OF_WINDOW`).
-6. **Redundancy Verification:** `100/100` verifications passed.
+2. **Stage 2 (91 Hull, Born & Migration Screened):** MP GGA hull ($\le 50\text{ meV/atom}$), Born elastic stability ($6$ failures vetoed), and Stage 2b cuprous/halide ion-migration heuristic ($3$ superionic failures vetoed with $E_{\text{mig}} < 0.65\text{ eV}$).
+3. **Stage 3 (47 Manufacturable):** Retrosynthesis under $500^\circ\text{C}$ with negative-synthesis priors ($26$ rejected for `OXIDE_IMPURITY_SINK`, $5$ rejected for `IMPURITY_SINK_PRIOR`, $13$ rejected for `TIER2_COST_EXCEEDED` $> \$0.50/\text{m}^2$).
+4. **Gate A (40 Promoted):** Covalent connectivity check ($7$ vetoed for `LOW_DIM_POLARON_RISK` 1D-chains).
+5. **Stages 4 & 5 (9 Prescreen Finalists):** Empirical gap estimate from MP PBE (`gap_est_*`; `HSE06+SOC` not run) + 3-layer 4T tandem optics ($31$ rejected for `BANDGAP_OUT_OF_WINDOW`).
+6. **Self-Consistency Verification:** `100/100` checks passed.
 
 ### 7.2 Open-Access Empirical Negative Synthesis Datasets
 - **LBNL Solid-State Impurity Dataset:** `80,806` parsed solid-state recipes across `4,292` chemical systems with `18,869` phase-impure/failed reactions (Lee, Cruse, Baibakova, Ceder, Jain, *Sci. Data* 12:1969, 2025).
 - **LBNL A-Lab Precursor Genome:** `1,035` robotic pairwise XRD reactions with `892` negative/stalled reactions (369 unreacted, 384 transformed, 113 partially reacted) (Walters, Szymanski, Fei, Ceder et al., 2026).
 
-### 7.3 Promoted Live MP Finalists & Top Cross-Layer 4T Stacks
-- **Top Active Glass Finalists (3):** `mp-861911` (`Sb2OS2`), `mp-1227486` (`BiSbS3`), `mp-1078776` (`BiInS3`).
+### 7.3 Promoted Live MP Prescreen Finalists & Top Cross-Layer 4T Stacks
+- **Top Active Glass Finalists (4):** `mp-861911` (`Sb2OS2`), `mp-1227486` (`BiSbS3`), `mp-1195160` (`Al2Bi2Cu2S3Cl8`), `mp-1078776` (`BiInS3`).
 - **Bottom IR Scavenger Finalists (5):** `mp-1223998` (`Bi3InSe6`), `mp-1224922` (`CuGaSnSe4`), `mp-22982` (`BiCuS2`), `mp-23474` (`AgBi3S5`), `mp-1224129` (`CuInSnSe4`).
-- **All 15 Cross-Layer 4T Tandem Stacks Screened:**
+- **All 20 Cross-Layer 4T Tandem Stacks Screened:**
   - **Highest Efficiency:** `mp-861911 Sb2OS2 + c-Si + mp-1223998 Bi3InSe6` achieving **42.32%** scalar 4T PCE (**40.00%** Coherent TMM 4T PCE) at $\$0.1664/\text{m}^2$.
   - **Cost-Optimal Stack:** `mp-861911 Sb2OS2 + c-Si + mp-22982 BiCuS2` achieving **41.75%** scalar 4T PCE (**39.32%** Coherent TMM 4T PCE) at **\$0.0394/m^2**.
 
 ---
 
-## 8. v4.0 Atomistic 3D Dynamical Matrix, 11-Image NEB & Coherent Multilayer TMM Upgrade
+## 8. v4.0 Pair-Spring Dynamical Matrix, Closed-Form Migration Heuristic & Coherent Multilayer TMM Upgrade (DFT Phonons and NEB not run)
 
-1. **Step 1 — 3D Harmonic Dynamical Matrix $\mathbf{D}(\mathbf{q}=\mathbf{0})$ & 11-Image Saddle-Point NEB Migration (`atomistic_and_tmm.py` vs. `independent_verifier.py`):**
-   - Evaluates the exact $3N \times 3N$ Harmonic Force-Constant Hessian ($0.50\text{ \AA} < r_{ij} \le 4.25\text{ \AA}$) with Acoustic Sum Rule projection (`np.linalg.eigh` vs. `scipy.linalg.eigvalsh`) and 3D 11-image NEB migration barriers across all 8 promoted live MP finalists (`imag = 0`, $\omega_{\text{opt,min}} \in [1.36, 9.19]\text{ THz}$, $E_{\text{mig}}^{\text{NEB}} \in [0.990, 1.348]\text{ eV}$, $D_{\text{ion}}(300\text{ K}) \ll 10^{-18}\text{ cm}^2/\text{s}$).
+1. **Step 1 — Pair-Spring Dynamical Matrix $\mathbf{D}(\mathbf{q}=\mathbf{0})$ & Closed-Form Migration Heuristic (`atomistic_and_tmm.py` vs. `independent_verifier.py`; DFT Phonons and NEB not run):**
+   - Evaluates the $3N \times 3N$ pair-spring Hessian ($0.50\text{ \AA} < r_{ij} \le 4.25\text{ \AA}$, `np.linalg.eigh` vs. `scipy.linalg.eigvalsh`) and closed-form migration heuristic across all 9 live MP prescreen finalists (`dynamically_stable = None`, `spring_model_gamma_freq_thz`, `emig_heuristic_ev` $\in [0.990, 1.348]\text{ eV}$, $D_{\text{ion}}(300\text{ K}) \ll 10^{-18}\text{ cm}^2/\text{s}$).
 2. **Step 2 — Wavelength-Resolved Coherent $2\times 2$ Abeles TMM vs. Recursive Rouard/Airy 4T Stack Optics:**
    - Evaluates the 6-medium single-ARC coherent thin-film interference stack across all 15 cross-layer 4T pairs (`0.0000%–0.0100%` dual-method discrepancy), achieving **40.00% Coherent 4T PCE** (`mp-861911__mp-1223998`) and **39.32% Coherent 4T PCE** at **\$0.0394/m²** (`mp-861911__mp-22982`).
 3. **Step 3 — 7-Medium Graded-ARC + $\text{TiO}_2$ Impedance-Matching Stack & 4-Metric Techno-Economic Figure-of-Merit Suite:**

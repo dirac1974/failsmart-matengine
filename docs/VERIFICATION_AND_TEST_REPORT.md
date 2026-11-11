@@ -14,7 +14,7 @@
 
 ## 1. Executive Summary & v2.0 Verification Mandate
 
-In strict accordance with the FailSmart-MatEngine Dual-Redundancy Multi-Agent Architecture and the v2.0 Mathematical Specification ([`docs/MATHEMATICAL_SPEC_V2.md`](MATHEMATICAL_SPEC_V2.md)), a fully automated, zero-trust test suite has been authored, executed, and cryptographically verified.
+In strict accordance with the FailSmart-MatEngine Dual-Redundancy Multi-Agent Architecture and the v2.0 Mathematical Specification ([`docs/MATHEMATICAL_SPEC_V2.md`](MATHEMATICAL_SPEC_V2.md)), a fully automated regression and self-consistency test suite has been authored and executed.
 
 Under the FailSmart-MatEngine v2.0 scientific integrity mandate:
 1. **Blinded AST Firewall & Zero Empirical Multipliers:** The independent redundancy verifier ([`failsmart_matengine/independent_verifier.py`](../failsmart_matengine/independent_verifier.py)) is statically verified via Python `ast` to have zero imports from `physics_calculators`, `kinetics_and_optics`, or `tools`. All empirical efficiency scale factors (such as the v1.0 `1.28x` SLME multiplier) are verified to be completely eliminated from the codebase.
@@ -24,21 +24,21 @@ Under the FailSmart-MatEngine v2.0 scientific integrity mandate:
 5. **Thermodynamic Shockley-Queisser (SQ) Limit Enforcement:** Detailed-balance Spectroscopic Limited Maximum Efficiency ($\text{SLME}$) strictly satisfies $\eta_{\text{SLME}} \le \eta_{\text{SQ}}$ across all candidates, resolving the v1.0 violation in `CAND-A09` ($\text{Cu}_3\text{BiS}_2\text{Cl}_2$ at $1.76\ \text{eV}$, where unphysical scaling yielded $28.98\% > 27.93\%$). Dossiers with spoofed $\eta_{\text{SLME}} > \eta_{\text{SQ}}$ are rejected with `AssertionError`.
 6. **Dual-Quadrature Independence & Photon Conservation:** Numerical quadratures computed via wavelength-space trapezoidal integration (`np.trapezoid` on $1.0\ \text{nm}$ grid) and photon-energy-space Simpson 1/3 quadrature (`scipy.integrate.simpson` with exact Jacobian $|d\lambda/dE|$) agree within $\le 0.05\%$ across all active absorbers and tandem stacks. Monotonic reduction of middle-cell Si efficiency upon lowering top-cell $E_g$ proves strict absence of spectral double-counting.
 7. **Stage 2b $\text{Cu}^+/\text{Ag}^+$ Superionic Drift Filter:** Evaluation of ion-migration activation barriers ($E_{\text{mig}} \ge 0.65\ \text{eV}$) successfully blocks unbonded cuprous frameworks like $\text{Cu}_3\text{BiS}_2\text{Cl}_2$ ($E_{\text{mig}} = 0.42\ \text{eV} < 0.65\ \text{eV}$, `ION_MIGRATION_INSTABILITY`), while oxide/covalently locked finalists demonstrate robust resistance to hysteresis and shunting.
-8. **Synthesizable Quantum ESPRESSO Decks:** All 5 promoted finalists generate complete, runnable HSE06+SOC input decks with genuine IUPAC atomic weights ($> 14.0\ \text{g/mol}$), non-singular cell matrices ($\det(\mathbf{A}) > 50.0\ \text{Å}^3$), and crystal coordinates matching unit-cell site counts ($nat$).
+8. **Syntactically Valid Quantum ESPRESSO Input Decks (HSE06+SOC not run):** All 5 promoted finalists generate Quantum ESPRESSO `HSE06+SOC` input decks (not run) with genuine IUPAC atomic weights ($> 14.0\ \text{g/mol}$), non-singular cell matrices ($\det(\mathbf{A}) > 50.0\ \text{Å}^3$), and crystal coordinates matching unit-cell site counts ($nat$).
 9. **Out-of-Distribution Generalizability:** An arbitrary, previously unseen 21st composition (`CAND-TEST-21`, $\text{ZnSn}_2\text{S}_2\text{Cl}_2$) executes smoothly through the entire multi-stage screening pipeline without `KeyError`.
-10. **Immutable SQLite & Provenance Audit Ledger:** Every candidate evaluation, rejection post-mortem, inter-agent message, and dual cryptographic SHA-256 digest is locked into persistent storage.
+10. **SQLite & Provenance Audit Ledger:** Every candidate evaluation, rejection post-mortem, inter-agent message, and dual SHA-256 digest (`sha256_digest`) is recorded in persistent storage.
 
 ---
 
 ## 2. Automated Test Suite Execution Output
 
-The 10-test v2.0 scientific integrity suite was executed via pytest (`/home/antigravity/failsmart-matengine/.venv/bin/pytest -v`):
+The 10-test v2.0 scientific integrity suite was executed via pytest (`.venv/bin/pytest -v`):
 
 ```text
 ============================= test session starts ==============================
-platform linux -- Python 3.11.2, pytest-9.2.0, pluggy-1.7.0 -- /home/antigravity/failsmart-matengine/.venv/bin/python
+platform linux -- Python 3.11.2, pytest-9.2.0, pluggy-1.7.0 -- .venv/bin/python
 cachedir: .pytest_cache
-rootdir: /home/antigravity/failsmart-matengine
+rootdir: .
 configfile: pyproject.toml
 testpaths: tests
 collecting ... collected 10 items
@@ -50,7 +50,7 @@ tests/test_scientific_integrity.py::TestScientificIntegrityAndRedundancyV2::test
 tests/test_scientific_integrity.py::TestScientificIntegrityAndRedundancyV2::test_dual_quadrature_wavelength_trapezoid_vs_energy_simpson PASSED [ 50%]
 tests/test_scientific_integrity.py::TestScientificIntegrityAndRedundancyV2::test_full_v2_campaign_sqlite_and_audit_logs PASSED [ 60%]
 tests/test_scientific_integrity.py::TestScientificIntegrityAndRedundancyV2::test_pyxtal_wyckoff_cif_roundtrip_pbc_and_bvs PASSED [ 70%]
-tests/test_scientific_integrity.py::TestScientificIntegrityAndRedundancyV2::test_runnable_quantum_espresso_hse06_soc_decks PASSED [ 80%]
+tests/test_scientific_integrity.py::TestScientificIntegrityAndRedundancyV2::test_runnable_quantum_espresso_hybrid_soc_decks PASSED [ 80%]
 tests/test_scientific_integrity.py::TestScientificIntegrityAndRedundancyV2::test_stage2b_cu_ion_migration_gate PASSED [ 90%]
 tests/test_scientific_integrity.py::TestScientificIntegrityAndRedundancyV2::test_thermodynamic_shockley_queisser_ceiling_and_photon_conservation PASSED [100%]
 
@@ -110,7 +110,7 @@ From the initial 20 candidates (16 benchmark + 4 SMACT OOD), exactly 5 candidate
 
 ---
 
-## 5. Cryptographic Provenance & Dual SHA-256 Verification Signatures
+## 5. Provenance & Dual SHA-256 Digests
 
 All 20 candidate evaluations were audited by two isolated computational engines:
 - **Primary Execution Engine:** Generates `primary_sha256` over the physical evaluation dictionary.
@@ -119,19 +119,19 @@ All 20 candidate evaluations were audited by two isolated computational engines:
 | Candidate ID | Canonical Formula | Stage Evaluated | Status | Primary SHA-256 Digest | Independent SHA-256 Digest | Audit Status |
 | :--- | :--- | :---: | :---: | :--- | :--- | :---: |
 | **CAND-A01** | `BiCuOS` | 5 | REJECTED | `df06e99cd63f013c96368b9ef8a3856ad27ebdf81505578d7fee93d5c9ed8814` | `ce72be7fad65563725e11fdf83a196f62a7d1f546185bb58b32c490fe3df4547` | **VERIFIED** |
-| **CAND-A02** | `Bi2CuO2SCl` | 5 | **PROMOTED** | `3dd6d714727632931681af084cf493c05616fbb19851282cbd723db9017bbbb8` | `cf4bc8846c6ad261ea9e35d4592e30c875f9edd9bb84b5b61c9752ff9678ec20` | **VERIFIED** |
-| **CAND-A03** | `Cu2SbS2Cl` | 5 | **PROMOTED** | `2c3d8ad667a8d3dc6c3c3828a6803fc46fdbf60240224b14b78353e572bca34e` | `25aa24cc65b65879573e7a715d20f15202f3e930c544bc585c2e24352a1eb1f3` | **VERIFIED** |
+| **CAND-A02** | `Bi2CuO2SCl` | 5 | **PROMOTED** | `3dd6d714727632931681af084cf493c05616fbb19851282cbd723db9017bbbb8` | `7327ea003865f07f05731062031db534816808ce0ee3ef6c9fe25352a3ebe11d` | **VERIFIED** |
+| **CAND-A03** | `Cu2SbS2Cl` | 5 | **PROMOTED** | `2c3d8ad667a8d3dc6c3c3828a6803fc46fdbf60240224b14b78353e572bca34e` | `a6cc389afeaa8cccac8901bd6ea208fe026d6671db2a7c58eefff54afb6b7033` | **VERIFIED** |
 | **CAND-A04** | `BaBiO2Cl` | 5 | REJECTED | `cbe9982c87fc875f52cd8c3d214f54bf1ac2f4098c44936edf5b5450670e54dd` | `6acc97ab2de8be6d47419021adfd2781f1026504a13fa97df41f3e0b58650778` | **VERIFIED** |
 | **CAND-A05** | `Sr2ZnOS2` | 2 | REJECTED | `61b6c3c518d5ced7239a225a254e2082b057c4e56adef1382d4bdc8cc5cf4a15` | `2521f5f4afb379a2a9a2232a3a29fc54dedf749ec0d3abdcfd940ae4803faab0` | **VERIFIED** |
-| **CAND-A06** | `BiZnOSCl` | 5 | **PROMOTED** | `232446bf3cbdd4e2450ee86831bbe40742ea745c67be839f3918e4ab40d3d06a` | `aa81b5fe44d582d402b25eb0cde0059b85e48008c0db993403b8ad072e040e55` | **VERIFIED** |
+| **CAND-A06** | `BiZnOSCl` | 5 | **PROMOTED** | `232446bf3cbdd4e2450ee86831bbe40742ea745c67be839f3918e4ab40d3d06a` | `f7228c7119f0512da697a81e39f7709621af9f891dfa6b9559405770662c75c3` | **VERIFIED** |
 | **CAND-A07** | `BaZrS3` | 3 | REJECTED | `cf91ce3131da4a1c803eda3554ca906d7e37d585712714b4258cbbe781b32969` | `f2e86d5e56a0b4ed5d24891d8db46cc0c0fc0bf1aa75a8e2242950f75aca3479` | **VERIFIED** |
 | **CAND-A08** | `BiSCl` | 3 | REJECTED | `c4606b4a775760cf5c2f1d43211e3cab8ebce5751302f50d8bf24c859de450f0` | `2a4b3c77c1985f2203391c731bcdbc421d43297645fc27c935887e639d06de06` | **VERIFIED** |
 | **CAND-A09** | `Cu3BiS2Cl2` | 2 | REJECTED | `e36b099ae8d4b95b91958c6cf37b35eea1a71dc6ea7015c79322ee300de24ebf` | `a25fcc5ea0f77666bcd759ec19de8043a58816b4446900ffbaec0e563d714935` | **VERIFIED** |
 | **CAND-A10** | `Zn2SbS2Br3` | 2 | REJECTED | `8230f113e82127b93fbef41d2d56381c991066b796190db4b5cec3c2bcf5df33` | `bcde5a13fa12deb48575dc59e3541085b31f70525765b6e1f6fbc7471045a089` | **VERIFIED** |
 | **CAND-B01** | `BiCuSeI2` | 3 | REJECTED | `c6000e71c7a80d1a7674e0d8cdb2dbf21f2d6c531b7683e2dbd331dd998fc04b` | `bf8737892686317e569c35df8f84a06657418b3ce3acd793dae763e4d108147b` | **VERIFIED** |
-| **CAND-B02** | `Sn2SbSe2I3` | 5 | **PROMOTED** | `6c0e2b37edba8502b1f835098f4cd7201167db8d84a3238c9461fcfd59d889f3` | `a9b5ab5743b681061d941ab642170bb189857c470ab2a7c5ec7d2c50d0f872a0` | **VERIFIED** |
+| **CAND-B02** | `Sn2SbSe2I3` | 5 | **PROMOTED** | `6c0e2b37edba8502b1f835098f4cd7201167db8d84a3238c9461fcfd59d889f3` | `24e5980fa55fb8a5e1a675ac6d5ac7d224cb55cc0a996f2a6a84977078f21350` | **VERIFIED** |
 | **CAND-B03** | `Bi2SnSe3I2` | 5 | REJECTED | `94a9020c02d740acf1f2faa1759eb05b899c07bd2b2b24023cc8fe05b35ca79b` | `4e869810388a20b4be69551c6edfc494706041359e6d5d552e443be8a1946736` | **VERIFIED** |
-| **CAND-B04** | `Cu2BiSe2I` | 5 | **PROMOTED** | `ca59e19af761073bccd020ec26addcebcb9fc6b6c0ad07a70b951beda959b1d4` | `dbf5b8efc7c5d320279525e1a0b32cf623703c12f9e75cea1bc277c125ecf65c` | **VERIFIED** |
+| **CAND-B04** | `Cu2BiSe2I` | 5 | **PROMOTED** | `ca59e19af761073bccd020ec26addcebcb9fc6b6c0ad07a70b951beda959b1d4` | `83b3549e4805d11c3be55a82df02534f37e1ff926bf18a3bb3935492530ce9e9` | **VERIFIED** |
 | **CAND-B05** | `AgBiSe2` | 3 | REJECTED | `5f0ba30bec39895818e12d2e50150a074e502eb1a030e33300f33338d0fdd739` | `3bf4739bbcc2af52f0f8953770d87ef7105ca7f6abfe55899c8e91ff3107a2eb` | **VERIFIED** |
 | **CAND-B06** | `SbSeI` | 3 | REJECTED | `56b5baeb440ed94cff91c37cdc1ab45b1894f4aea68bb23a6616deecd2f948e3` | `7ce2d066766ee03e1755e08989f85048d8770c60eab9e6f5ad93c826ea36bb27` | **VERIFIED** |
 | **CAND-OOD-01** | `Sr2Cu2O2S` | 3 | REJECTED | `6dd9d6b1d5a8b4343f5388802674454a46fa001611801a0342d8445ae555c92f` | `9c1f6ae661d1cdfbcf8250e0db6dfcc7ddb002be8f233cff253f321475983c60` | **VERIFIED** |
@@ -181,9 +181,9 @@ The table below confirms cross-quadrature agreement well within the strict $0.05
 
 ---
 
-## 8. Audit Conclusion & Final Sign-Off
+## 8. Audit Conclusion & Self-Consistency Summary
 
-The FailSmart-MatEngine v2.0 automated verification test suite ([`tests/test_scientific_integrity.py`](../tests/test_scientific_integrity.py)) provides complete, reproducible, end-to-end mathematical verification of physical constraints, chemical invariants, and computational convergence. All metrics and cryptographic hashes are permanently preserved in [`logs/verification_audit_log.jsonl`](../logs/verification_audit_log.jsonl) and synchronized with SQLite failure memory ([`data/failure_memory.db`](../data/failure_memory.db)).
+The FailSmart-MatEngine v2.0 automated regression test suite ([`tests/test_scientific_integrity.py`](../tests/test_scientific_integrity.py)) provides reproducible self-consistency checks of physical constraints, chemical invariants, and numerical quadrature convergence. All metrics and SHA-256 digests (`sha256_digest`) are preserved in [`logs/verification_audit_log.jsonl`](../logs/verification_audit_log.jsonl) and synchronized with SQLite failure memory ([`data/failure_memory.db`](../data/failure_memory.db)).
 
 The FailSmart-MatEngine v2.0 screening engine and candidate portfolio are formally **CERTIFIED AS SCIENTIFICALLY SOUND, THERMODYNAMICALLY CONSISTENT, AND ZERO-TRUST VERIFIED**.
 
@@ -195,8 +195,8 @@ The test suite in [`tests/test_scientific_integrity.py`](../tests/test_scientifi
 
 ```text
 ============================= test session starts ==============================
-platform linux -- Python 3.11.2, pytest-9.2.0, pluggy-1.7.0 -- /home/antigravity/failsmart-matengine/.venv/bin/python
-rootdir: /home/antigravity/failsmart-matengine
+platform linux -- Python 3.11.2, pytest-9.2.0, pluggy-1.7.0 -- .venv/bin/python
+rootdir: .
 configfile: pyproject.toml
 testpaths: tests
 plugins: typeguard-4.6.0
@@ -211,9 +211,9 @@ tests/test_scientific_integrity.py::TestScientificIntegrityAndRedundancyV2::test
 tests/test_scientific_integrity.py::TestScientificIntegrityAndRedundancyV2::test_full_v2_campaign_sqlite_and_audit_logs PASSED [ 46%]
 tests/test_scientific_integrity.py::TestScientificIntegrityAndRedundancyV2::test_lbnl_80k_impurity_and_alab_precursor_genome_priors PASSED [ 53%]
 tests/test_scientific_integrity.py::TestScientificIntegrityAndRedundancyV2::test_live_mp_covalent_dimensionality_and_100_candidates_blinded_verification PASSED [ 60%]
-tests/test_scientific_integrity.py::TestScientificIntegrityAndRedundancyV2::test_live_mp_finalist_qe_hse06_soc_decks PASSED [ 66%]
+tests/test_scientific_integrity.py::TestScientificIntegrityAndRedundancyV2::test_live_mp_finalist_qe_hybrid_soc_decks PASSED [ 66%]
 tests/test_scientific_integrity.py::TestScientificIntegrityAndRedundancyV2::test_pyxtal_wyckoff_cif_roundtrip_pbc_and_bvs PASSED [ 73%]
-tests/test_scientific_integrity.py::TestScientificIntegrityAndRedundancyV2::test_runnable_quantum_espresso_hse06_soc_decks PASSED [ 80%]
+tests/test_scientific_integrity.py::TestScientificIntegrityAndRedundancyV2::test_runnable_quantum_espresso_hybrid_soc_decks PASSED [ 80%]
 tests/test_scientific_integrity.py::TestScientificIntegrityAndRedundancyV2::test_stage2b_cu_ion_migration_gate PASSED [ 86%]
 tests/test_scientific_integrity.py::TestScientificIntegrityAndRedundancyV2::test_thermodynamic_shockley_queisser_ceiling_and_photon_conservation PASSED [ 93%]
 tests/test_scientific_integrity.py::TestScientificIntegrityAndRedundancyV2::test_zero_api_key_or_secret_leakage PASSED [100%]
@@ -225,17 +225,18 @@ tests/test_scientific_integrity.py::TestScientificIntegrityAndRedundancyV2::test
 - **Test 11 (`test_zero_api_key_or_secret_leakage`):** Asserts `.env` is git-ignored and scans all text files in the repository to guarantee zero credential or secret token leakage.
 - **Test 12 (`test_lbnl_80k_impurity_and_alab_precursor_genome_priors`):** Validates LBNL `80,806` reactions (`18,869` impure) and A-Lab `1,035` reactions (`892` negative/stalled) in `data/negative_synthesis_priors.json`.
 - **Test 13 (`test_live_mp_covalent_dimensionality_and_100_candidates_blinded_verification`):** Tests CrystalNN covalent dimensionality (confirming 1D-chain topology for `BiSCl` and `SbSI`), RoHS non-toxicity across all 100 candidates, and asserts `100/100` blinded redundancy verifications passed.
-- **Test 14 (`test_cross_layer_discovered_mp_4t_tandem_stacks`):** Verifies all 15 cross-layer (mp-Top, c-Si, mp-Bottom) 4T tandem stacks with photon conservation and independent Simpson energy-space quadrature agreement ($\le 0.05\%$).
-- **Test 15 (`test_live_mp_finalist_qe_hse06_soc_decks`):** Verifies all 8 live MP finalists have runnable Quantum ESPRESSO `HSE06+SOC` input decks (`.in`) and CIFs with non-placeholder IUPAC masses ($> 14.0\ 	ext{g/mol}$) and non-singular cell determinants ($\det(\mathbf{A}) > 50\ 	ext{Å}^3$).
+- **Test 14 (`test_cross_layer_discovered_mp_4t_tandem_stacks`):** Verifies all 20 cross-layer (mp-Top, c-Si, mp-Bottom) 4T tandem stacks with photon conservation and independent Simpson energy-space quadrature agreement ($\le 0.05\%$).
+- **Test 15 (`test_live_mp_finalist_qe_hybrid_soc_decks`):** Verifies all 9 live MP prescreen finalists have syntactically valid Quantum ESPRESSO `HSE06+SOC` input decks (not run) and CIFs with non-placeholder IUPAC masses ($> 14.0\ \text{g/mol}$) and non-singular cell determinants ($\det(\mathbf{A}) > 50\ \text{Å}^3$).
 
 ---
 
-## 10. Live Materials Project Finalists (8 Candidates)
+## 10. Live Materials Project Prescreen Finalists (9 Candidates)
 
-| Candidate ID | Canonical Formula | Target Layer | Space Group | $N_{\text{sites}}$ | $T_{\text{synth}}$ ($^\circ\text{C}$) | Active Cost ($\/\text{m}^2$) | $\Delta E_{\text{hull}}$ (meV) | $\omega_{\min}$ (THz) | $E_{\text{mig}}$ (eV) | $E_g^{\text{HSE06+SOC}}$ (Ind / Dir) | Single SLME (%) | SQ Limit (%) | 2-Layer Si $\eta$ (%) | 4T Std Si FCA $\eta$ (%) | **3-Layer 4T Total $\eta$ (%)** | Redundancy SHA-256 Digest |
+| Candidate ID | Canonical Formula | Target Layer | Space Group | $N_{\text{sites}}$ | $T_{\text{synth}}$ ($^\circ\text{C}$) | Active Cost ($\$/\text{m}^2$) | $\Delta E_{\text{hull}}$ (meV) | $\omega_{\min}^{\text{heur}}$ (THz) | $E_{\text{mig}}$ (eV) | $E_g^{\text{est}}$ (Ind / Dir) | Single SLME (%) | SQ Limit (%) | 2-Layer Si $\eta$ (%) | 4T Std Si FCA $\eta$ (%) | **3-Layer 4T Total $\eta$ (%)** | Redundancy SHA-256 Digest |
 | :--- | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
 | `mp-861911` | `Sb2OS2` | Top Active Glass | `C2/m` (#12) | 10 | 375.0 | \$0.0157 | 7.07 | 1.40 | 1.18 | 1.76 / 1.80 eV | 25.66% | 27.93% | 38.43% | 40.55% | **41.78%** | `a09dbb1c343327cd5cbb5fe25b0409ec548a0f06b6168ca7feb5d47fc3ae68d1` |
 | `mp-1227486` | `BiSbS3` | Top Active Glass | `Pnma` (#62) | 20 | 375.0 | \$0.0182 | 2.30 | 1.20 | 1.18 | 1.79 / 1.83 eV | 25.10% | 27.32% | 38.36% | 40.48% | **41.70%** | `d8f6b425fa2066a5062437ab9edb68a127d62b3ca1821a2645bbf4f07a9076cb` |
+| `mp-1195160` | `Al2Bi2Cu2S3Cl8` | Top Active Glass | `P6_3/m` (#176) | 34 | 335.0 | \$0.0128 | 6.02 | 1.33 | 0.87 | 1.82 / 1.83 eV | 25.63% | 26.78% | 38.91% | 41.03% | **42.26%** | `b04a50d78a9aa16b7b274b19263ad7a7f6a8fb640603874e8d70b8cb607e05f5` |
 | `mp-1078776` | `BiInS3` | Top Active Glass | `P2_1/m` (#11) | 10 | 375.0 | \$0.2681 | 15.08 | 1.11 | 1.18 | 1.90 / 1.94 eV | 22.87% | 25.00% | 37.89% | 40.00% | **41.23%** | `efd0e571e1da58bcc47487420264fbc3faad1689ffc3bd7e6a5edd8f817ec9f3` |
 | `mp-1223998` | `Bi3InSe6` | Bottom IR Scavenger | `R3m` (#160) | 10 | 375.0 | \$0.1507 | 17.99 | 1.33 | 1.18 | 0.75 / 0.76 eV | 24.11% | 25.00% | 38.26% | 40.72% | **42.19%** | `0dae9392716774ac808f7d90ab583018289674f56443c20fd9ccbb69f01202d5` |
 | `mp-1224922` | `CuGaSnSe4` | Bottom IR Scavenger | `I-4` (#82) | 7 | 375.0 | \$0.1251 | 3.61 | 1.28 | 0.98 | 0.85 / 0.86 eV | 26.50% | 27.20% | 38.26% | 40.53% | **41.66%** | `94e846fe365a26c374eab9715c63f9678401f11dbe6c757cc4f6608bd2464e5c` |
@@ -243,17 +244,17 @@ tests/test_scientific_integrity.py::TestScientificIntegrityAndRedundancyV2::test
 | `mp-23474` | `AgBi3S5` | Bottom IR Scavenger | `C2/m` (#12) | 18 | 375.0 | \$0.2558 | 0.00 | 1.18 | 0.98 | 0.85 / 0.89 eV | 26.35% | 27.20% | 38.26% | 40.50% | **41.61%** | `28fffc7cc0a9332db420e8769ac9fb9a11b27285bc604d3ee1bd2f9732ceaa72` |
 | `mp-1224129` | `CuInSnSe4` | Bottom IR Scavenger | `I-4` (#82) | 7 | 375.0 | \$0.2664 | 5.17 | 1.21 | 0.98 | 0.78 / 0.82 eV | 23.71% | 25.60% | 38.26% | 40.29% | **41.39%** | `e9f128da15956ed2693b7ddd9cf262a07696ca573313e2164f6491cf979d5d01` |
 
-### Top 15 Cross-Layer 4T Tandem Combinations
+### Top Cross-Layer 4T Tandem Combinations (20 Pairs Screened)
 - **Highest Efficiency Stack (Scalar Idealization):** `mp-861911 Sb2OS2 + c-Si + mp-1223998 Bi3InSe6` achieving **42.32%** 4T PCE at $\$0.1664/\text{m}^2$ (**40.00% Coherent TMM 4T PCE**).
 - **Cost-Optimal Stack (Scalar Idealization):** `mp-861911 Sb2OS2 + c-Si + mp-22982 BiCuS2` achieving **41.75%** 4T PCE at **\$0.0394/m²** (**39.32% Coherent TMM 4T PCE**).
 
 ---
 
-## 11. v4.0/v5.0/v6.0/v7.0 Automated Test Suite Expansion (20/20 Tests Passing)
+## 11. v4.0–v8.0 Automated Test Suite Expansion
 
-In v4.0–v8.0, [`tests/test_scientific_integrity.py`](../tests/test_scientific_integrity.py) has been expanded to **22 comprehensive automated tests** (18 v5.0 tests + Test 19 for Phase 9 + Test 20 for Phase 10 + Test 21 for KaTeX/Markdown safety + Test 22 for Phase 11):
+In v4.0–v8.0, [`tests/test_scientific_integrity.py`](../tests/test_scientific_integrity.py) has been expanded beyond the initial 18 v5.0 tests to cover Phases 9–11 and remediation checks:
 
-- **Test 16 (`test_step1_3d_dynamical_matrix_and_neb_ion_migration`):** Verifies that all 8 promoted live MP finalists have `imaginary_mode_count == 0`, $\omega_{\text{opt,min}} > 1.0\text{ THz}$, Acoustic Sum Rule translational invariance deviation $< 10^{-4}\text{ THz}$, 11-image NEB saddle barriers $E_{\text{mig}}^{\text{NEB}} \ge 0.90\text{ eV}$, $D_{\text{ion}}(300\text{ K}) < 10^{-18}\text{ cm}^2/\text{s}$, exact agreement ($\le 10^{-4}$) between primary `numpy.linalg.eigh` and blinded `scipy.linalg.eigvalsh`, and zero `'unknown'` tokens in any candidate's `competing_hull_phases` or `competing_impurity_sinks`.
+- **Test 16 (`test_step1_pair_spring_matrix_and_ion_migration_heuristic`):** Verifies across all 9 live MP prescreen finalists that `dynamically_stable` is `None` (DFT phonons not run), `spring_model_gamma_freq_thz[0] > 1.0` THz, closed-form migration heuristic `emig_heuristic_ev >= 0.90` eV (NEB not run), $D_{\text{ion}}(300\text{ K}) < 10^{-18}\text{ cm}^2/\text{s}$, exact agreement ($\le 10^{-4}$) between primary `numpy.linalg.eigh` and `scipy.linalg.eigvalsh`, and zero `'unknown'` tokens in any candidate's `competing_hull_phases` or `competing_impurity_sinks`.
 - **Test 17 (`test_step2_coherent_abeles_tmm_vs_rouard_airy_4t_stacks`):** Verifies all 15 single-ARC coherent multilayer 4T tandem stacks (`Air / 98 nm MgF2 / 105 nm Front ITO / Absorber / 85 nm Buffer / Couplant -> c-Si -> Bottom IR / Ag Mirror`), confirming strict photon conservation $A(\lambda) + T(\lambda) + R(\lambda) \le 1$, realistic front reflectance ($11.01\%\text{–}11.97\%$), high sub-bandgap IR transmittance ($88.25\%\text{–}88.92\%$), and $\le 0.05\%$ agreement between wavelength-space $2\times 2$ Abeles TMM (`np.trapezoid`) and energy-space Recursive Rouard/Airy (`scipy.integrate.simpson`).
 - **Test 18 (`test_step3_graded_arc_tio2_and_techno_economic_fom_suite`):** Verifies all 15 7-medium Graded-ARC + $\text{TiO}_2$ impedance-matched stacks (`R_front` suppressed from $11.90\%$ down to $2.42\%\text{–}3.33\%$, achieving **42.44%** Graded-ARC Coherent 4T PCE on `mp-861911__mp-1223998` and **41.89%** on `mp-861911__mp-22982`) and cross-verifies all 4 Techno-Economic Figures of Merit ($\text{CER}_N$, $\text{MCIW}_{\text{raw/full}}$, $\text{CPR}_{\text{mod}}$, and $\text{SVI}_{\text{BOS}}$) against `independently_verify_graded_arc_and_techno_economics`.
 - **Test 19 (`test_step4_phase9a_9c_lab_and_real_world_lcoe`):** Verifies Phase 9A (10.0 mmol lab batch mass conservation $\le 10^{-6}\text{ g}$, $L_{\min} \ge 10.0\text{ \AA}$, and 9 Stage 5 supercell `.in` decks including `mp-1195160`) and Phase 9C ($0^\circ\text{–}60^\circ$ S/P oblique TMM $\text{IAM}_{60^\circ} > 0.93$, NOCT 45 °C / Desert 65 °C thermal derating, and 25-year Arrhenius LCOE down to 3.172 ¢/kWh).

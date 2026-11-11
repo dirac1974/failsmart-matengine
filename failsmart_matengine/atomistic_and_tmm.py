@@ -1,16 +1,16 @@
-"""3D Atomistic Harmonic Dynamical Matrix, 11-Image NEB Ion Migration & Coherent 2x2 Abeles TMM Optics (v4.0).
+"""Pair-Spring Gamma Frequency Heuristic, Ion-Migration Barrier Estimate & Coherent 2x2 Abeles TMM Optics.
 
 Implements:
 - Step 1 (Section 6 of MATHEMATICAL_SPEC_V2.md):
-  * Exact 3N x 3N Harmonic Dynamical Matrix D(q=0) assembled over the 3D periodic crystal
-    lattice with Acoustic Sum Rule (ASR) projection and `np.linalg.eigh` diagonalization.
-  * 3D 11-image Saddle-Point Nudged-Elastic-Band (NEB) steric + electrostatic migration
-    barrier E_mig^NEB and 300 K Vineyard-Arrhenius ionic diffusivity D_ion(300 K).
+  * 3N x 3N pair-spring force-constant matrix D(q=0) assembled over the 3D periodic crystal
+    lattice with `np.linalg.eigh` diagonalization for `spring_model_gamma_freq_thz` (phonons not run).
+  * Closed-form geometric + compositional ion-migration barrier heuristic `emig_heuristic_ev`
+    and 300 K Vineyard-Arrhenius ionic diffusivity D_ion(300 K) (NEB not run).
 - Step 2 (Section 7 of MATHEMATICAL_SPEC_V2.md):
   * Wavelength-resolved Coherent 2x2 Abeles Characteristic Transfer-Matrix Method (TMM)
     multilayer thin-film solver (`Air / MgF2 ARC / ITO / Active Chalcohalide-Oxysulfide /
     SiO2-ITO Buffer / Optical Couplant -> Textured c-Si -> Bottom IR Scavenger / Ag Mirror`)
-    integrated in wavelength space via `np.trapezoid` and cross-checked against the blinded
+    integrated in wavelength space via `np.trapezoid` and cross-checked against the
     Recursive Rouard/Airy photon-energy solver in `independent_verifier.py`.
 """
 
@@ -35,7 +35,7 @@ from .physics_calculators import (
     IUPAC_ATOMIC_MASSES,
 )
 from .schemas import (
-    AtomisticPhononNEBReport,
+    AtomisticSpringMigrationReport,
     CoherentTMM4TStackReport,
     GradedARCTechnoEconomicReport,
     LabSynthesisAndDefectDossier,
@@ -117,7 +117,7 @@ def compute_3d_harmonic_dynamical_matrix_gamma(
     }
 
 
-def compute_3d_neb_ion_migration_pathway(
+def compute_ion_migration_heuristic(
     struct: Structure,
     stoichiometry: Dict[str, int],
 ) -> Dict[str, Any]:
@@ -194,11 +194,11 @@ def compute_3d_neb_ion_migration_pathway(
     }
 
 
-def evaluate_3d_atomistic_phonon_and_neb(
+def evaluate_spring_and_migration_heuristics(
     dossier: Dict[str, Any],
-) -> AtomisticPhononNEBReport:
+) -> AtomisticSpringMigrationReport:
     """Evaluate pair-spring Gamma frequencies and closed-form migration barrier heuristic."""
-    from .independent_verifier import independently_verify_atomistic_phonon_and_neb
+    from .independent_verifier import independently_verify_spring_and_migration_heuristics
 
     cand = dossier["candidate"]
     cif_text = cand["cif_content"]
@@ -207,9 +207,9 @@ def evaluate_3d_atomistic_phonon_and_neb(
 
     struct = CifParser.from_str(cif_text, occupancy_tolerance=10.0).parse_structures(primitive=False)[0]
     ph_res = compute_3d_harmonic_dynamical_matrix_gamma(struct)
-    mig_res = compute_3d_neb_ion_migration_pathway(struct, stoich)
+    mig_res = compute_ion_migration_heuristic(struct, stoich)
 
-    blind_res = independently_verify_atomistic_phonon_and_neb(
+    blind_res = independently_verify_spring_and_migration_heuristics(
         cif_text=cif_text,
         stoichiometry=stoich,
         oxidation_states=ox,
@@ -227,7 +227,7 @@ def evaluate_3d_atomistic_phonon_and_neb(
 
     emig_ok = bool(mig_res["emig_heuristic_ev"] >= 0.65)
 
-    return AtomisticPhononNEBReport(
+    return AtomisticSpringMigrationReport(
         candidate_id=cand["candidate_id"],
         formula_reduced=cand["formula_reduced"],
         target_layer=cand["target_layer"],
@@ -242,7 +242,7 @@ def evaluate_3d_atomistic_phonon_and_neb(
         dynamically_stable=None,
         emig_gate_passed=emig_ok,
         redundancy_verified=True,
-        sha256_signature=blind_res["sha256_signature"],
+        sha256_digest=blind_res["sha256_digest"],
     )
 
 
@@ -334,14 +334,14 @@ def evaluate_coherent_abeles_tmm_4t_stack(
     o_bot = bottom_dossier["optics"]
     s_bot = bottom_dossier["synthesis"]
 
-    eg_ind_1 = float(e_top["hse06_soc_indirect_gap_ev"])
-    eg_dir_1 = float(e_top["hse06_soc_direct_gap_ev"])
+    eg_ind_1 = float(e_top["gap_est_indirect_ev"])
+    eg_dir_1 = float(e_top["gap_est_direct_ev"])
     eps_inf_1 = float(e_top["eps_inf"])
     d1_nm = float(o_top["film_thickness_nm"])
     d1_m = d1_nm * 1.0e-9
 
-    eg_ind_3 = float(e_bot["hse06_soc_indirect_gap_ev"])
-    eg_dir_3 = float(e_bot["hse06_soc_direct_gap_ev"])
+    eg_ind_3 = float(e_bot["gap_est_indirect_ev"])
+    eg_dir_3 = float(e_bot["gap_est_direct_ev"])
     eps_inf_3 = float(e_bot["eps_inf"])
     d3_nm = float(o_bot["film_thickness_nm"])
     d3_m = d3_nm * 1.0e-9
@@ -454,7 +454,7 @@ def evaluate_coherent_abeles_tmm_4t_stack(
         combined_active_cost_usd_m2=round(s_top["active_layer_cost_usd_m2"] + s_bot["active_layer_cost_usd_m2"], 4),
         photon_conservation_verified=blind_tmm["photon_conservation_holds"],
         rouard_airy_redundancy_diff_percent=rouard_diff,
-        sha256_signature=blind_tmm["sha256_signature"],
+        sha256_digest=blind_tmm["sha256_digest"],
     )
 
 
@@ -622,14 +622,14 @@ def evaluate_graded_arc_and_techno_economics_4t_stack(
     o_bot = bottom_dossier["optics"]
     s_bot = bottom_dossier["synthesis"]
 
-    eg_ind_1 = float(e_top["hse06_soc_indirect_gap_ev"])
-    eg_dir_1 = float(e_top["hse06_soc_direct_gap_ev"])
+    eg_ind_1 = float(e_top["gap_est_indirect_ev"])
+    eg_dir_1 = float(e_top["gap_est_direct_ev"])
     eps_inf_1 = float(e_top["eps_inf"])
     d1_nm = float(o_top["film_thickness_nm"])
     d1_m = d1_nm * 1.0e-9
 
-    eg_ind_3 = float(e_bot["hse06_soc_indirect_gap_ev"])
-    eg_dir_3 = float(e_bot["hse06_soc_direct_gap_ev"])
+    eg_ind_3 = float(e_bot["gap_est_indirect_ev"])
+    eg_dir_3 = float(e_bot["gap_est_direct_ev"])
     eps_inf_3 = float(e_bot["eps_inf"])
     d3_nm = float(o_bot["film_thickness_nm"])
     d3_m = d3_nm * 1.0e-9
@@ -762,7 +762,7 @@ def evaluate_graded_arc_and_techno_economics_4t_stack(
         photon_conservation_verified=blind_arc["photon_conservation_holds"],
         rouard_airy_redundancy_diff_percent=rouard_diff,
         techno_economic_redundancy_verified=te_ok,
-        sha256_signature=blind_arc["sha256_signature"],
+        sha256_digest=blind_arc["sha256_digest"],
     )
 
 
@@ -957,7 +957,7 @@ def evaluate_phase9a_lab_synthesis_and_defect_supercell(
         point_charge_image_estimate_q2_ev=round(pc_q2, 4),
         neutral_vacancy_deck_filename=deck_fname,
         redundancy_verified=ok_9a,
-        sha256_signature=blind_9a["sha256_signature"],
+        sha256_digest=blind_9a["sha256_digest"],
     )
 
 
@@ -1064,22 +1064,22 @@ def evaluate_phase9c_real_world_lcoe_stress_test(
     e_top = top_dossier["electronics"]
     o_top = top_dossier["optics"]
     s_top = top_dossier["synthesis"]
-    at_top = top_dossier["atomistic_phonon_neb"]
+    at_top = top_dossier["spring_and_migration_heuristics"]
 
     c_bot = bottom_dossier["candidate"]
     e_bot = bottom_dossier["electronics"]
     o_bot = bottom_dossier["optics"]
     s_bot = bottom_dossier["synthesis"]
-    at_bot = bottom_dossier["atomistic_phonon_neb"]
+    at_bot = bottom_dossier["spring_and_migration_heuristics"]
 
-    eg_ind_1 = float(e_top["hse06_soc_indirect_gap_ev"])
-    eg_dir_1 = float(e_top["hse06_soc_direct_gap_ev"])
+    eg_ind_1 = float(e_top["gap_est_indirect_ev"])
+    eg_dir_1 = float(e_top["gap_est_direct_ev"])
     eps_inf_1 = float(e_top["eps_inf"])
     d1_nm = float(o_top["film_thickness_nm"])
     d1_m = d1_nm * 1.0e-9
 
-    eg_ind_3 = float(e_bot["hse06_soc_indirect_gap_ev"])
-    eg_dir_3 = float(e_bot["hse06_soc_direct_gap_ev"])
+    eg_ind_3 = float(e_bot["gap_est_indirect_ev"])
+    eg_dir_3 = float(e_bot["gap_est_direct_ev"])
     eps_inf_3 = float(e_bot["eps_inf"])
     d3_nm = float(o_bot["film_thickness_nm"])
     d3_m = d3_nm * 1.0e-9
@@ -1212,7 +1212,7 @@ def evaluate_phase9c_real_world_lcoe_stress_test(
         thickness_nm_3=d3_nm,
         raw_cost_top_usd_m2=raw_top,
         raw_cost_bot_usd_m2=raw_bot,
-        limiting_neb_barrier_ev=e_mig_lim,
+        limiting_emig_heuristic_ev=e_mig_lim,
     )
 
     diff_60 = round(abs(pce_by_angle[60.0] - blind_9c["pce_4t_60deg_25c_percent"]), 4)
@@ -1246,7 +1246,7 @@ def evaluate_phase9c_real_world_lcoe_stress_test(
         pce_4t_noct_45c_percent=round(pce_45c_raw, 2),
         pce_4t_desert_65c_percent=round(pce_65c_raw, 2),
         temp_coeff_rel_pct_per_k=round(beta_rel_pct_k, 4),
-        limiting_neb_barrier_ev=round(e_mig_lim, 4),
+        limiting_emig_heuristic_ev=round(e_mig_lim, 4),
         annual_degradation_rate_pct_yr=round(r_deg * 100.0, 4),
         year25_retained_power_fraction_percent=round(yr25_ret_pct, 2),
         lcoe_baseline_si_cents_kwh=round(lcoe_si, 4),
@@ -1255,7 +1255,7 @@ def evaluate_phase9c_real_world_lcoe_stress_test(
         lcoe_3layer_vs_si_reduction_percent=round(lcoe_red_pct, 2),
         rouard_oblique_60deg_diff_percent=diff_60,
         lcoe_redundancy_verified=lcoe_ok,
-        sha256_signature=blind_9c["sha256_signature"],
+        sha256_digest=blind_9c["sha256_digest"],
     )
 
 
@@ -1345,21 +1345,21 @@ def evaluate_phase10_bifacial_and_string_dossier(
     e_top = top_dossier["electronics"]
     o_top = top_dossier["optics"]
     s_top = top_dossier["synthesis"]
-    at_top = top_dossier["atomistic_phonon_neb"]
+    at_top = top_dossier["spring_and_migration_heuristics"]
 
     c_bot = bottom_dossier["candidate"]
     e_bot = bottom_dossier["electronics"]
     o_bot = bottom_dossier["optics"]
     s_bot = bottom_dossier["synthesis"]
-    at_bot = bottom_dossier["atomistic_phonon_neb"]
+    at_bot = bottom_dossier["spring_and_migration_heuristics"]
 
-    eg_ind_1 = float(e_top["hse06_soc_indirect_gap_ev"])
-    eg_dir_1 = float(e_top["hse06_soc_direct_gap_ev"])
+    eg_ind_1 = float(e_top["gap_est_indirect_ev"])
+    eg_dir_1 = float(e_top["gap_est_direct_ev"])
     eps_inf_1 = float(e_top["eps_inf"])
     d1_base = float(o_top["film_thickness_nm"])
 
-    eg_ind_3 = float(e_bot["hse06_soc_indirect_gap_ev"])
-    eg_dir_3 = float(e_bot["hse06_soc_direct_gap_ev"])
+    eg_ind_3 = float(e_bot["gap_est_indirect_ev"])
+    eg_dir_3 = float(e_bot["gap_est_direct_ev"])
     eps_inf_3 = float(e_bot["eps_inf"])
     d3_base = float(o_bot["film_thickness_nm"])
 
@@ -1539,7 +1539,7 @@ def evaluate_phase10_bifacial_and_string_dossier(
         thickness_nm_3=d3_base,
         raw_cost_top_usd_m2=raw_top,
         raw_cost_bot_usd_m2=raw_bot,
-        limiting_neb_barrier_ev=e_mig_lim,
+        limiting_emig_heuristic_ev=e_mig_lim,
     )
 
     rouard_opt_diff = round(
@@ -1598,7 +1598,7 @@ def evaluate_phase10_bifacial_and_string_dossier(
         bot_string_mismatch_percent=round(mismatch_bot_pct, 2),
         rouard_opt_diff_percent=rouard_opt_diff,
         phase10_redundancy_verified=ok_10,
-        sha256_signature=blind_10["sha256_signature"],
+        sha256_digest=blind_10["sha256_digest"],
     )
 
 

@@ -3,52 +3,47 @@
 **Heuristic pre-screening scaffold and failure ledger for 4-Terminal "Silicon-Sandwich" Tandem Photovoltaics**
 
 > [!WARNING]
-> **Status (independent audit, 2026-11): heuristic pre-screen scaffold, not validated results.**
-> No DFT, HSE06+SOC, machine-learned potential, phonon, NEB or defect calculation is executed anywhere in this repository.
-> Band gaps, phonon frequencies, migration barriers and defect levels are closed-form heuristic estimates (v3+) or hand-entered constants (v2 pilot).
-> Efficiencies are radiative-limit ceilings on those estimates, and the cost, LCOE and commercialization figures are conditional on them.
-> The "13 agents" are named role stages in one deterministic script (no LLM calls), and the "independent verifier" re-computes the same formulas, so it checks arithmetic, not physics.
-> Read [`docs/INDEPENDENT_AUDIT_2026-11.md`](docs/INDEPENDENT_AUDIT_2026-11.md) before using any number below, and [`docs/REMEDIATION_TASKS.md`](docs/REMEDIATION_TASKS.md) for the fix plan. Some legacy labels are kept verbatim because `repo_auditor.py` asserts on them (task T2).
+> **Status (independent audit, 2026-11): heuristic pre-screen scaffold (first-principles calculations not run).**
+> No DFT, HSE06+SOC, r2SCAN, MACE machine-learned potential, phonon, NEB or doped defect calculation is executed anywhere in this repository (not run).
+> Band gaps, pair-spring Gamma frequencies, migration barriers and defect levels are closed-form heuristic estimates (v3+) or hand-entered fixture constants (v2 pilot).
+> Efficiencies are radiative-limit ceilings or assumed-ERE parameterizations on those estimates, and the cost, LCOE and commercialization figures are conditional on them.
+> Sequential functions carry role labels in one deterministic Python script (no LLM calls), and the self-consistency checker re-computes the same formulas to check arithmetic rather than physics.
+> Read [`docs/INDEPENDENT_AUDIT_2026-11.md`](docs/INDEPENDENT_AUDIT_2026-11.md) before using any number below, and [`docs/REMEDIATION_TASKS.md`](docs/REMEDIATION_TASKS.md) for the remediation task list.
 
 ---
 
 ## Overview
 
-`FailSmart-MatEngine` is a deterministic screening scaffold, organised into 13 named role stages (the "13-agent" structure of earlier versions), that shortlists **earth-abundant, phase-stable, defect-tolerant inorganic chalcohalides and oxychalcogenides** ($\text{Bi/Sb–Cu/Zn/Sn–S/Se/O–Cl/Br/I}$) for a mechanically decoupled (4-Terminal) 3-layer **Silicon-Sandwich** solar architecture:
+`FailSmart-MatEngine` is a deterministic screening scaffold that shortlists **earth-abundant, phase-stable, inorganic chalcohalides and oxychalcogenides** ($\text{Bi/Sb–Cu/Zn/Sn–S/Se/O–Cl/Br/I}$) for a mechanically decoupled (4-Terminal) **Silicon-Sandwich** solar architecture:
 
 1. **Top "Active Glass" Layer ($E_g \in [1.75, 1.95]\text{ eV}$):** Coated directly on soda-lime cover glass ($T_{\text{synth}} \le 500^\circ\text{C}$), harvesting blue/green photons at high voltage while transmitting $>85\%$ of red/IR light ($>670\text{ nm}$).
 2. **Middle Anchor ($E_g = 1.12\text{ eV}$):** Commercial bifacial crystalline silicon wafer.
-3. **Bottom IR Scavenger ($E_g \in [0.70, 0.85]\text{ eV}$):** Decoupled narrow-gap thin film beneath silicon with a textured rear mirror for $4n^2$ Yablonovitch Total Internal Reflection, harvesting $1100\text{–}1750\text{ nm}$ sub-bandgap infrared photons.
+3. **Bottom IR Scavenger ($E_g \in [0.70, 0.85]\text{ eV}$):** Decoupled narrow-gap thin film beneath silicon harvesting $1100\text{–}1750\text{ nm}$ sub-bandgap infrared photons.
 
-Unlike standard high-throughput DFT pipelines that screen only $0\text{ K}$ formation energies and PBE band gaps, **FailSmart-MatEngine** aims to model real-world physical failure mechanisms and record them in a **Contrastive Failure Memory Ledger** (`data/failure_memory.db`). Current state: the failure gates are heuristic rules, the ledger is reset at the start of every run, and its similarity score does not feed any gate, so nothing is learned between runs yet (tasks T6 and T11).
+Candidate pass/fail outcomes are logged to a SQLite **Failure Memory Ledger** (`data/failure_memory.db` and `data/mp_live_failure_memory.db`). Current state: the failure gates combine cached Materials Project convex-hull records with heuristic rules, the ledger is reset at the start of every run, and its composition-vector cosine similarity does not feed any gate yet (task T11).
 
 ---
 
-## 13-Agent Research + Engineering Team Architecture
+## Pipeline Stages, Code Behaviour & Data Provenance
 
-The pipeline is organised as a **Dual-Division 13-Agent Structure**. These are role labels attached to stages of one sequential script: there are no LLM calls and no agent runtime. Messages are written to a JSONL log with unkeyed SHA-256 content digests (`logs/inter_team_communication.jsonl`; a digest, not a signature), and a second implementation re-computes derived quantities from the same inputs (`logs/verification_audit_log.jsonl`; a self-consistency check, not independent validation). The role descriptions below state design intent, not what the code runs:
+Every numeric quantity emitted in the campaign schemas carries an explicit `ProvenanceTag` (`MP_DFT`, `LITERATURE`, `COMPUTED_HERE`, `HEURISTIC`, or `ASSUMED`). The table below states what each pipeline stage actually executes in code:
 
-### Division A: Scientific Research Team (7 Agents)
-1. **`pi_orchestrator`** (Principal Investigator & Campaign Director): Dual-track multi-objective optimization, budget enforcement, active-learning Pareto routing.
-2. **`crystal_explorer`** (Solid-State Chemist & Inverse-Design Explorer): Wyckoff symmetry rules, Pauling valence neutrality, `SMACT` composition screening, and 3-Tier Element Policy enforcement.
-3. **`surrogate_physicist`** (Lattice Dynamics & MLIP Surrogate Physicist): Convex-hull phase equilibria ($\Delta E_{\text{hull}}$), Born elastic tensor stability ($K, G$), and harmonic phonon dispersions ($\omega_{\min}$).
-4. **`synthesis_chemist`** (Retrosynthesis, Kinetics & Speciation Chemist): $<500^\circ\text{C}$ kinetics, LBNL 80k solid-state impurity sink reactions, halide volatility, and Pourbaix aqueous speciation ($\text{pH } 4\text{–}9$).
-5. **`quantum_defect_physicist`** (Quantum Electronic & Defect-Transport Physicist): Relativistic `HSE06+SOC` electronic structure, spin-orbit splitting, Fröhlich polaron coupling ($\alpha_F$), and `doped` SRH defect trap energetics.
-6. **`photonic_tandem_architect`** (Nanophotonics & 4T Tandem Device Architect): Transfer-Matrix optics, $4n^2$ Yablonovitch light trapping, wavelength-resolved AM1.5G SLME quadrature, and 4-terminal stack efficiency.
-7. **`adversarial_critic`** (Adversarial Red-Team Critic & Failure Curator): Gate A (Pre-DFT) and Gate B (Post-DFT) falsification checks (anion photo-segregation, TCO reactivity, 1D polaron trapping), logging post-mortems into `data/failure_memory.db`.
+| Stage | Module / Function | What the code does | Provenance |
+| :--- | :--- | :--- | :--- |
+| **Stage 1: Candidate Ingestion & Stoichiometry** | `orchestrator.py`, `mp_live_discovery.py`, `physics_calculators.py` | Generates 20 `pyxtal` fixture crystals (v2) or loads 100 cached Materials Project crystals (`data/mp_live_candidates_cache.json`), checks Pauling charge neutrality, RoHS element policy, and bond-graph dimensionality (`pymatgen` `CrystalNN` / covalent radii). | `MP_DFT` (MP structures), `ASSUMED` (v2 fixtures), `COMPUTED_HERE` (dimensionality & neutrality) |
+| **Stage 2: Hull, Elasticity & Ion-Migration Heuristics** | `tools.py::stage2_evaluate_stability`, `mp_live_discovery.py` | Reads cached Materials Project `e_above_hull` and DFT elastic moduli where present, otherwise applies electronegativity/packing heuristics; evaluates closed-form ion-migration barrier estimate `emig_heuristic_ev` ($\ge 0.65\text{ eV}$); sets `dynamically_stable = None` (phonons not run). | `MP_DFT` (cached hull & elastic tensors), `HEURISTIC` (fallback moduli, $\omega_{\min}$ estimate & $E_{\text{mig}}$), `ASSUMED` (v2 fixtures) |
+| **Stage 3: Retrosynthesis, Priors, Pourbaix & Raw Cost** | `kinetics_and_optics.py`, `mp_live_discovery.py` | Checks refractory binary oxide sinks ($\text{ZrO}_2, \text{BaO}, \text{SrO}$), empirical LBNL solid-state impurity rates (`data/negative_synthesis_priors.json`, rejecting `impurity_rate > 0.50` when $n \ge 5$), rule-based $\text{pH } 4\text{–}9$ aqueous leaching heuristic, and bulk raw-element active-layer cost ($\le \$0.50/\text{m}^2$). | `LITERATURE` (LBNL/A-Lab prior counts & USGS raw element prices), `HEURISTIC` (reaction kinetics & Pourbaix solubility), `COMPUTED_HERE` (stoichiometric mass cost) |
+| **Gate A: Structural Dimensionality Pre-Screen** | `tools.py::gate_a_adversarial_audit`, `mp_live_discovery.py` | Rejects 0D-isolated and 1D-chain crystal topologies for small-polaron localization risk; sets `anion_mixing_enthalpy_mev` and `tco_interface_rxn_energy_mev` to `None` on live MP candidates unless computed in Phase 11A. | `COMPUTED_HERE` (bond-percolation dimensionality), `ASSUMED` (v2 fixtures) |
+| **Stages 4 & 5: Gap Estimate, Defect Heuristic & Scalar 4T Optics** | `mp_live_discovery.py::_estimate_gap_from_mp_pbe`, `kinetics_and_optics.py` | Applies an uncalibrated linear composition shift (`gap_est_*`) to the cached MP PBE band gap (hybrid DFT not run), estimates dielectric/polaron/defect heuristics, and integrates AM1.5G detailed-balance SLME and 4T subcell currents. | `MP_DFT` (PBE gap & DFPT dielectric where cached), `HEURISTIC` (gap shift, effective mass & defect depth), `COMPUTED_HERE` (AM1.5G quadrature) |
+| **Step 1 (v4): Pair-Spring $\Gamma$ Frequencies & Migration Heuristic** | `atomistic_and_tmm.py::evaluate_spring_and_migration_heuristics` | Builds a positive pair-spring $3N \times 3N$ Hessian from interatomic distances (`spring_model_gamma_freq_thz`; phonons not run) and evaluates a closed-form steric/composition hop expression (`emig_heuristic_ev`; NEB not run). | `HEURISTIC` (pair-spring force constants & hop barrier), `COMPUTED_HERE` (matrix eigenvalues & neighbor geometry) |
+| **Steps 2–3 & Phases 9–10: Coherent TMM, Input Decks & LCOE** | `atomistic_and_tmm.py`, `orchestrator.py` | Solves $2 \times 2$ Abeles coherent multilayer transfer-matrix optics (normal & oblique S/P), emits unexecuted Quantum ESPRESSO SCF and neutral-vacancy supercell input decks (`.in`, not run), and evaluates parameterized 25-year LCOE & string-matching formulas. | `COMPUTED_HERE` (Abeles TMM, stoichiometric lab batch & deck geometry), `HEURISTIC` / `ASSUMED` (refractive-index dispersion, degradation & BOS cost inputs) |
+| **Phase 11: Cached MP Phase/TCO Equilibria & ERE Scenarios** | `realistic_commercialization.py` | Evaluates `pymatgen` `PhaseDiagram` chemical-potential stability windows and `InterfacialReactivity` against $\text{SnO}_2 / \text{In}_2\text{O}_3 / \text{TiO}_2$ from `data/mp_thermo_interface_cache.json`, combined with assumed external radiative efficiency (`ERE`) device scenarios. | `MP_DFT` (cached phase-diagram & TCO entries), `COMPUTED_HERE` (`pymatgen` hull/interface algebra), `ASSUMED` (`ERE`, fab yield & module cost parameters) |
+| **Self-Consistency & Repository Audit** | `independent_verifier.py`, `ledger.py`, `repo_auditor.py` | Re-implements the same formulas (`scipy` / Rouard-Airy) to check arithmetic self-consistency, writes unkeyed `sha256_digest` hashes to SQLite (`composition_embedding`) and JSONL logs, and checks cross-file table/KaTeX consistency. | `COMPUTED_HERE` (arithmetic regression checks & SHA-256 digests) |
 
-### Division B: Scientific Software Engineering & Redundancy Verification Team (6 Agents)
-8. **`chief_software_architect`** (Lead Scientific Software Architect & Team Bridge): Cross-division schemas, zero-trust data contracts, and Triple-Gate Redundancy workflow coordination.
-9. **`physics_engine_engineer`** (Computational Physics & Crystallography Engineer): Implements 3D CIF parsers, minimum-image periodic distance checkers, BVS calculators, and relativistic electronic solvers.
-10. **`optics_kinetics_engineer`** (Retrosynthesis, Pourbaix & Photonics Engineer): Implements reaction network solvers, Pourbaix solubility engines, and normalized AM1.5G 4T solar flux quadratures.
-11. **`redundancy_verifier_alpha`** (Independent Mathematical Verifier — Redundancy #1): Independently re-computes all crystallographic, thermodynamic, and spectral integrals from first principles with zero shared state.
-12. **`qa_test_audit_engineer`** (Automated Test & Provenance Logger — Redundancy #2): Executes comprehensive `unittest` test suites (`tests/test_scientific_integrity.py`), asserts mathematical invariants, and logs SHA-256 signatures.
-13. **`repo_release_auditor`** (Repository Consistency & Release Gatekeeper): Enforces 100% numerical and factual alignment across all JSON dossiers, SQLite tables, Markdown documentation, and Quantum ESPRESSO decks.
-
-### Inter-Team Communication & Verification Logs
-- **Inter-Team Communication Log:** [`logs/inter_team_communication.jsonl`](logs/inter_team_communication.jsonl) records the scripted cross-division messages with unkeyed SHA-256 payload digests (the committed log holds 29 records).
-- **Verification Audit Log:** [`logs/verification_audit_log.jsonl`](logs/verification_audit_log.jsonl) records the self-consistency re-computations (the committed log holds 20 records).
-- **Full Verification Report:** [`docs/VERIFICATION_AND_TEST_REPORT.md`](docs/VERIFICATION_AND_TEST_REPORT.md) describes the automated tests (22 in the current suite; they pin the repository's own outputs and are not checks against experiment or DFT).
+### Audit & Self-Consistency Logs
+- **Scripted Stage Log:** [`logs/inter_team_communication.jsonl`](logs/inter_team_communication.jsonl) records stage-transition messages with unkeyed SHA-256 payload digests.
+- **Self-Consistency Audit Log:** [`logs/verification_audit_log.jsonl`](logs/verification_audit_log.jsonl) records arithmetic re-computations from `independent_verifier.py`.
+- **Test Suite Report:** [`docs/VERIFICATION_AND_TEST_REPORT.md`](docs/VERIFICATION_AND_TEST_REPORT.md) documents the automated `pytest` suite (`tests/test_scientific_integrity.py`).
 
 ---
 
@@ -56,44 +51,44 @@ The pipeline is organised as a **Dual-Division 13-Agent Structure**. These are r
 
 ```text
 failsmart-matengine/
-├── README.md                              # Master system documentation, 13-agent architecture & pilot summary
+├── README.md                              # Project documentation, stage/provenance table & campaign summaries
 ├── docs/
-│   ├── PLAN.md                            # Master architectural & scientific roadmap
-│   ├── AGENT_STRUCTURE.md                 # 7-agent scientific prompts, tool bindings & red-team protocol
-│   ├── ENGINEERING_AND_REDUNDANCY_PLAN.md # 13-agent roster, communication protocol & Triple-Gate Redundancy
-│   ├── MEMORY_AND_FAILURE_LEDGER.md       # Contrastive Failure Memory Ledger & Pilot #1 audit log
-│   └── VERIFICATION_AND_TEST_REPORT.md    # Automated test suite execution report & provenance certificate
+│   ├── PLAN.md                            # Original architectural & scientific design target
+│   ├── AGENT_STRUCTURE.md                 # Stage role prompts & gate definitions
+│   ├── ENGINEERING_AND_REDUNDANCY_PLAN.md # Software structure & self-consistency protocol
+│   ├── MEMORY_AND_FAILURE_LEDGER.md       # Failure Memory Ledger & campaign summary tables
+│   └── VERIFICATION_AND_TEST_REPORT.md    # Automated test suite execution report
 ├── failsmart_matengine/
 │   ├── __init__.py
-│   ├── schemas.py                         # Strict Pydantic data contracts for all screening stages
-│   ├── ledger.py                          # SQLite + 128D equivariant vector Contrastive Failure Ledger
-│   ├── tools.py                           # Deterministic hull, phonon, synthesis, Pourbaix & optics tools
-│   ├── physics_calculators.py             # Primary crystallographic, BVS, and electronic calculators
-│   ├── kinetics_and_optics.py             # Primary retrosynthesis, Pourbaix, and AM1.5G 4T solvers
-│   ├── independent_verifier.py            # Zero-trust independent mathematical verifier (Redundancy #1)
-│   ├── inter_team_bus.py                  # Structured inter-team JSONL communication bus
-│   ├── orchestrator.py                    # Multi-agent state-machine orchestrator & QE deck generator
-│   └── repo_auditor.py                    # Automated cross-repository verification and consistency auditor
+│   ├── schemas.py                         # Provenance-tagged Pydantic data contracts for all stages
+│   ├── ledger.py                          # SQLite + 128D composition_embedding Failure Memory Ledger
+│   ├── tools.py                           # Stage 2/3/Gate-A/4/5 screening functions
+│   ├── physics_calculators.py             # Crystallographic, BVS, and heuristic electronic calculators
+│   ├── kinetics_and_optics.py             # Retrosynthesis, Pourbaix heuristics, and AM1.5G 4T quadrature
+│   ├── independent_verifier.py            # Secondary arithmetic self-consistency checker
+│   ├── inter_team_bus.py                  # Structured JSONL stage-message logger (SHA-256 digests)
+│   ├── orchestrator.py                    # v2 fixture runner & QE input-deck writer
+│   └── repo_auditor.py                    # Cross-repository table and Markdown/KaTeX consistency auditor
 ├── data/
-│   └── failure_memory.db                  # Live SQLite + 128D vector Contrastive Failure Memory database
+│   └── failure_memory.db                  # SQLite + 128D composition_embedding Failure Memory database
 ├── logs/
-│   ├── inter_team_communication.jsonl     # Full 27-message Research <-> Engineering communication transcript
-│   └── verification_audit_log.jsonl       # Full 17-record cryptographic verification audit log
+│   ├── inter_team_communication.jsonl     # Stage-transition JSONL transcript
+│   └── verification_audit_log.jsonl       # Arithmetic self-consistency SHA-256 digest log
 ├── tests/
-│   └── test_scientific_integrity.py       # Exhaustive zero-trust automated test suite (6/6 tests passing)
+│   └── test_scientific_integrity.py       # Automated regression and deck-validity test suite
 └── outputs/
-    ├── pilot_campaign_summary.json        # Complete Pilot Campaign v2.0 dossier (all 20 records + 23 ledger + 5 finalists)
-    └── qe_hse06_soc_decks/                # Turnkey Quantum ESPRESSO (HSE06+SOC) inputs & CIFs for 5 finalists
+    ├── pilot_campaign_summary.json        # v2 fixture summary (20 records + 23 ledger + 5 prescreen finalists)
+    └── qe_hse06_soc_decks/                # Unexecuted Quantum ESPRESSO HSE06+SOC input decks & CIFs (not run)
         ├── CAND-A02_Bi2CuO2SCl.cif
-        ├── CAND-A02_Bi2CuO2SCl_hse06_soc.in
+        ├── CAND-A02_Bi2CuO2SCl_hse06_soc.in  # input deck only (not run)
         ├── CAND-A03_Cu2SbS2Cl.cif
-        ├── CAND-A03_Cu2SbS2Cl_hse06_soc.in
+        ├── CAND-A03_Cu2SbS2Cl_hse06_soc.in   # input deck only (not run)
         ├── CAND-A06_BiZnOSCl.cif
-        ├── CAND-A06_BiZnOSCl_hse06_soc.in
+        ├── CAND-A06_BiZnOSCl_hse06_soc.in    # input deck only (not run)
         ├── CAND-B02_Sn2SbSe2I3.cif
-        ├── CAND-B02_Sn2SbSe2I3_hse06_soc.in
+        ├── CAND-B02_Sn2SbSe2I3_hse06_soc.in  # input deck only (not run)
         ├── CAND-B04_Cu2BiSe2I.cif
-        └── CAND-B04_Cu2BiSe2I_hse06_soc.in
+        └── CAND-B04_Cu2BiSe2I_hse06_soc.in   # input deck only (not run)
 ```
 
 ---
@@ -103,40 +98,40 @@ failsmart-matengine/
 ### 1. Database & API Key Costs: **\$0 (100% Free)**
 * **The Materials Project (`MP_API_KEY`):** Completely **free** at [next-gen.materialsproject.org/api](https://next-gen.materialsproject.org/api) (requires only a free GitHub, Google, or ORCID login; no credit card or subscription).
 * **Alexandria, OQMD, COD & LBNL 80k Solid-State Impurity Dataset:** 100% open-access and free to download.
-* **Offline Built-In Mode:** `failsmart-matengine` ships with an embedded reference hull, LBNL impurity-sink, and Pourbaix equilibrium library so Stages 1–3 and Gate A run out-of-the-box with **zero API keys required**.
+* **Offline Built-In Mode:** `failsmart-matengine` ships with cached Materials Project structures, hull entries, and LBNL/A-Lab synthesis priors so the local pre-screen runs out-of-the-box with **zero API keys required**.
 
 ### 2. Compute & Wall-Clock Time Requirements by Tier
 
 | Execution Tier | Stages Covered | Hardware Needed | Wall-Clock Time | Est. Compute Cost |
 | :--- | :--- | :--- | :--- | :--- |
-| **Tier 0: Fast Local Pre-Screen (Included Here)** | Stages 1–3 + Gate A + Analytical Stage 4/5 Surrogates | 2-core CPU / 8 GB RAM (runs in this VM or any laptop) | **< 5 seconds** (for 16–100 candidates) | **\$0** |
-| **Tier 1: Full Generative + MLIP Sweep (10,000 Crystals)** | `MatterGen` + 4x `MACE-OMat24` + `phonopy` + `rxn_network` | 1x Consumer GPU (RTX 3090/4090, 24 GB VRAM) | **4–6 hours** | **\$0 local** (~\$36 cloud spot) |
-| **Tier 2: Full Quantum ESPRESSO (`HSE06+SOC`) + `doped` Supercells** | Stage 4 (`HSE06+SOC` on 20 candidates) + Stage 5 (`doped` defects on 4–6 finalists) | 4x–8x A100 (80 GB) Cloud Burst | **18–36 hours** | **~\$320–\$900** on-demand (or ~\$180 on spot GPUs) |
+| **Tier 0: Fast Local Pre-Screen (Included Here)** | Stages 1–3 + Gate A + Analytical Stage 4/5 Heuristics | 2-core CPU / 8 GB RAM (runs in this VM or any laptop) | **< 5 seconds** (for 16–100 candidates) | **\$0** |
+| **Tier 1: External Generative + Potential Sweep (not run)** | External crystal generation + universal potential relaxation + `phonopy` (not run) | 1x Consumer GPU (RTX 3090/4090, 24 GB VRAM) | **4–6 hours** | **\$0 local** (~\$36 cloud spot) |
+| **Tier 2: External Hybrid DFT + Defect Supercells (not run)** | External Quantum ESPRESSO `HSE06+SOC` + `doped` supercells (not run) | HPC / Cloud CPU-GPU Nodes | **See Task T7** | **Requires owner approval (Task T7)** |
 
 ---
 
 ## Pilot Campaign v2.0 Summary Results
 
-Running `python3 -m failsmart_matengine.orchestrator` executes the v2.0 discovery campaign across **20 Candidates Screened** (`16` benchmark + `4` `SMACT` out-of-distribution novel compositions `Sr2Cu2O2S`, `Ba2BiS3Cl`, `Ba2BiSe3I`, `Cu2SnSeI2`):
+Running `python3 -m failsmart_matengine.orchestrator` executes the v2.0 fixture campaign across **20 Candidates Screened** (`16` fixture + `4` `SMACT` compositions `Sr2Cu2O2S`, `Ba2BiS3Cl`, `Ba2BiSe3I`, `Cu2SnSeI2`):
 
 * **Stage 1 (SMACT + 3-Tier Policy + Symmetry):** 20 generated
-* **Stage 2 (Convex Hull + Born Elasticity + Phonons + Stage 2b Ion-Migration Barrier):** 17 dynamically & ion-stable (`Sr2ZnOS2` rejected for $\Delta E_{\text{hull}} = 64.0\text{ meV/atom}$; `Zn2SbS2Br3` rejected for imaginary phonon $\omega_{\min} = -1.42\text{ THz}$; `CAND-A09` `Cu3BiS2Cl2` rejected at new Stage 2b `ION_MIGRATION_INSTABILITY` with $E_{\text{mig}} = 0.42\text{ eV} < 0.65\text{ eV}$)
+* **Stage 2 (Fixture Hull + Elasticity + Phonon + Stage 2b Ion-Migration Heuristics):** 17 dynamically & ion-stable (`Sr2ZnOS2` rejected for $\Delta E_{\text{hull}} = 64.0\text{ meV/atom}$; `Zn2SbS2Br3` rejected for fixture $\omega_{\min} = -1.42\text{ THz}$; `CAND-A09` `Cu3BiS2Cl2` rejected at Stage 2b `ION_MIGRATION_INSTABILITY` with $E_{\text{mig}} = 0.42\text{ eV} < 0.65\text{ eV}$)
 * **Stage 3 ($<500^\circ\text{C}$ Kinetics + Pourbaix $\text{pH } 4\text{–}9$ + Cost $\le \$0.50/\text{m}^2$):** 12 manufacturable (`BaZrS3` rejected for $950.0^\circ\text{C}$ $\text{ZrO}_2$ sink; `AgBiSe2` rejected for $\$0.5795/\text{m}^2$ Tier-2 $\text{Ag}$ cost; `Sr2Cu2O2S`, `Ba2BiS3Cl`, and `Ba2BiSe3I` rejected for $650.0^\circ\text{C}$ refractory alkaline-earth oxide sinks)
-* **Gate A (Adversarial Red-Team Pre-DFT Veto):** 8 promoted to Stage 4 DFT (`BiSCl` and `SbSeI` vetoed for 1D-chain small-polaron risk; `BiCuSeI2` and `Cu2SnSeI2` vetoed for anion phase segregation $\Delta H_{\text{mix}} > 35\text{ meV/atom}$ & TCO interfacial reactivity)
-* **Stages 4 & 5 (hand-entered gap and defect values + radiative-limit 3-Layer 4T Tandem Optics; no `HSE06+SOC` or `doped` calculation was run):** 5 pre-screen finalists (legacy label, kept for `repo_auditor.py`: "5 Validated Finalists"; none is validated by DFT or experiment) (`Bi2SnSe3I2` rejected for deep SRH defect at $0.36\text{ eV}$; `BiCuOS` and `BaBiO2Cl` rejected for band gaps outside target window)
+* **Gate A (Structural Dimensionality & Fixture Pre-Screen):** 8 promoted to Stage 4 (`BiSCl` and `SbSeI` vetoed for 1D-chain small-polaron risk; `BiCuSeI2` and `Cu2SnSeI2` vetoed for heuristic anion mixing enthalpy $\Delta H_{\text{mix}} > 35\text{ meV/atom}$)
+* **Stages 4 & 5 (fixture gap and defect values + radiative-limit 3-Layer 4T Tandem Optics; `HSE06+SOC` and `doped` calculations not run):** **5 Prescreen Finalists** (none is confirmed by DFT or experiment; `Bi2SnSe3I2` rejected for deep SRH defect at $0.36\text{ eV}$; `BiCuOS` and `BaBiO2Cl` rejected for band gaps outside target window)
 
-### v2 Pilot Pre-Screen Finalists (synthetic fixture values; the table matches pipeline output, which is not a physics validation)
+### v2 Pilot Prescreen Finalists (synthetic fixture values)
 
 > [!CAUTION]
 > The v2 pilot structures are `pyxtal` random placements and every property in this table comes from hand-entered lookup tables in `physics_calculators.py` (`_RAW_STABILITY_DATA`, `_RAW_ELECTRONIC_DATA`) and `tools.py` (`_GATE_A_DATA`). Treat these rows as test fixtures, not as predictions.
 
-| Candidate ID | Formula | Target Layer | Space Group | $N_{\text{sites}}$ | $T_{\text{synth}}$ ($^\circ\text{C}$) | Active Layer Cost ($\$/\text{m}^2$) | $\Delta E_{\text{hull}}$ (meV) | $\omega_{\min}$ (THz) | $E_{\text{mig}}$ (eV) | $E_g^{\text{est}}$ (Ind / Dir; heuristic, not HSE06+SOC) | Single-Layer SLME (%) | SQ Limit (%) | 2-Layer Si $\eta$ (%) | 4T Std Si FCA $\eta$ (%) | **3-Layer 4T Tandem $\eta$ (%)** | Self-consistency SHA-256 digest (unkeyed) |
+| Candidate ID | Formula | Target Layer | Space Group | $N_{\text{sites}}$ | $T_{\text{synth}}$ ($^\circ\text{C}$) | Active Layer Cost ($\$/\text{m}^2$) | $\Delta E_{\text{hull}}$ (meV) | $\omega_{\min}$ (THz) | $E_{\text{mig}}$ (eV) | $E_g^{\text{est}}$ (Ind / Dir; heuristic, HSE06+SOC not run) | Single-Layer SLME (%) | SQ Limit (%) | 2-Layer Si $\eta$ (%) | 4T Std Si FCA $\eta$ (%) | **3-Layer 4T Tandem $\eta$ (%)** | Self-consistency SHA-256 digest (unkeyed) |
 | :--- | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| `CAND-A02` | `Bi2CuO2SCl` | Top Active Glass | `I4/mmm` (#139) | 28 | 365.0 | \$0.0195 | 14.5 | 1.18 | 0.88 | 1.82 / 1.86 eV | 24.43% | 26.78% | 38.29% | 40.43% | **41.66%** | `cf4bc8846c6ad261ea9e35d4592e30c875f9edd9bb84b5b61c9752ff9678ec20` |
-| `CAND-A03` | `Cu2SbS2Cl` | Top Active Glass | `Pnma` (#62) | 24 | 320.0 | \$0.0129 | 21.0 | 1.05 | 0.74 | 1.79 / 1.83 eV | 25.08% | 27.32% | 38.41% | 40.54% | **41.77%** | `25aa24cc65b65879573e7a715d20f15202f3e930c544bc585c2e24352a1eb1f3` |
-| `CAND-A06` | `BiZnOSCl` | Top Active Glass | `P4/nmm` (#129) | 10 | 380.0 | \$0.0148 | 18.2 | 1.29 | 0.98 | 1.85 / 1.89 eV | 23.81% | 26.11% | 38.18% | 40.31% | **41.55%** | `aa81b5fe44d582d402b25eb0cde0059b85e48008c0db993403b8ad072e040e55` |
-| `CAND-B02` | `Sn2SbSe2I3` | Bottom IR Scavenger | `Cmcm` (#63) | 32 | 295.0 | \$0.0865 | 12.6 | 0.88 | 0.75 | 0.75 / 0.78 eV | 23.48% | 25.00% | 38.26% | 40.51% | **41.83%** | `a9b5ab5743b681061d941ab642170bb189857c470ab2a7c5ec7d2c50d0f872a0` |
-| `CAND-B04` | `Cu2BiSe2I` | Bottom IR Scavenger | `Pnma` (#62) | 24 | 345.0 | \$0.0509 | 11.2 | 1.09 | 0.71 | 0.74 / 0.76 eV | 23.59% | 24.79% | 38.26% | 40.64% | **42.08%** | `dbf5b8efc7c5d320279525e1a0b32cf623703c12f9e75cea1bc277c125ecf65c` |
+| `CAND-A02` | `Bi2CuO2SCl` | Top Active Glass | `I4/mmm` (#139) | 28 | 365.0 | \$0.0195 | 14.5 | 1.18 | 0.88 | 1.82 / 1.86 eV | 24.43% | 26.78% | 38.29% | 40.43% | **41.66%** | `7327ea003865f07f05731062031db534816808ce0ee3ef6c9fe25352a3ebe11d` |
+| `CAND-A03` | `Cu2SbS2Cl` | Top Active Glass | `Pnma` (#62) | 24 | 320.0 | \$0.0129 | 21.0 | 1.05 | 0.74 | 1.79 / 1.83 eV | 25.08% | 27.32% | 38.41% | 40.54% | **41.77%** | `a6cc389afeaa8cccac8901bd6ea208fe026d6671db2a7c58eefff54afb6b7033` |
+| `CAND-A06` | `BiZnOSCl` | Top Active Glass | `P4/nmm` (#129) | 10 | 380.0 | \$0.0148 | 18.2 | 1.29 | 0.98 | 1.85 / 1.89 eV | 23.81% | 26.11% | 38.18% | 40.31% | **41.55%** | `f7228c7119f0512da697a81e39f7709621af9f891dfa6b9559405770662c75c3` |
+| `CAND-B02` | `Sn2SbSe2I3` | Bottom IR Scavenger | `Cmcm` (#63) | 32 | 295.0 | \$0.0865 | 12.6 | 0.88 | 0.75 | 0.75 / 0.78 eV | 23.48% | 25.00% | 38.26% | 40.51% | **41.83%** | `24e5980fa55fb8a5e1a675ac6d5ac7d224cb55cc0a996f2a6a84977078f21350` |
+| `CAND-B04` | `Cu2BiSe2I` | Bottom IR Scavenger | `Pnma` (#62) | 24 | 345.0 | \$0.0509 | 11.2 | 1.09 | 0.71 | 0.74 / 0.76 eV | 23.59% | 24.79% | 38.26% | 40.64% | **42.08%** | `83b3549e4805d11c3be55a82df02534f37e1ff926bf18a3bb3935492530ce9e9` |
 
 ---
 
@@ -147,20 +142,20 @@ Running `python3 -m failsmart_matengine.mp_live_discovery` executes the v3.0 dis
 * **Stage 1 (Live Materials Project Query & RoHS Filtering):** `100` live MP candidates ingested with verified non-toxic elements and Pauling charge neutrality.
 * **Stage 2 (Thermodynamic Hull, Elasticity & Stage 2b Ion-Migration):** `91` dynamically & ion-stable candidates surviving ($6$ elastic instabilities and $3$ superionic migration instabilities vetoed with $E_{\text{mig}} < 0.65\text{ eV}$).
 * **Stage 3 (LBNL 80k Impurity & A-Lab Precursor Genome Retrosynthesis):** `47` manufacturable candidates passing reaction network driving-force and negative-synthesis prior screening ($26$ rejected for `OXIDE_IMPURITY_SINK` from refractory oxide reactions, $5$ rejected for `IMPURITY_SINK_PRIOR` where empirical LBNL `impurity_rate > 0.50` across $n \ge 5$ recipes, $13$ rejected for `TIER2_COST_EXCEEDED` $> \$0.50/\text{m}^2$).
-* **Gate A (Adversarial Red-Team Pre-DFT Veto):** `40` promoted to Stage 4/5 ($7$ vetoed for `LOW_DIM_POLARON_RISK` 1D-chains; anion mixing enthalpy and TCO reaction energy are `None` / not evaluated at Gate A).
-* **Stages 4 & 5 (heuristic gap estimate from the MP PBE gap & radiative-limit 4T Tandem Optics; no `HSE06+SOC` calculation was run):** **9 Promoted Finalists** ($31$ rejected for `BANDGAP_OUT_OF_WINDOW` outside $[1.75, 1.95]\text{ eV}$ top or $[0.70, 0.85]\text{ eV}$ bottom windows).
-* **Self-consistency re-computation:** `100/100` re-computations matched. This confirms arithmetic agreement between two implementations of the same formulas; it does not validate the inputs or the physics.
+* **Gate A (Structural Dimensionality Pre-Screen):** `40` promoted to Stage 4/5 ($7$ vetoed for `LOW_DIM_POLARON_RISK` 1D-chains; anion mixing enthalpy and TCO reaction energy are `None` / not evaluated at Gate A).
+* **Stages 4 & 5 (heuristic gap estimate from the MP PBE gap & radiative-limit 4T Tandem Optics; `HSE06+SOC` calculation not run):** **9 Prescreen Finalists** ($31$ rejected for `BANDGAP_OUT_OF_WINDOW` outside $[1.75, 1.95]\text{ eV}$ top or $[0.70, 0.85]\text{ eV}$ bottom windows).
+* **Self-consistency re-computation:** `100/100` re-computations matched. This confirms arithmetic agreement between two implementations of the same formulas; it does not confirm the inputs or the physics.
 
 ### Open-Access Negative Synthesis Priors Integration
 The v3.0 engine integrates two massive open-access empirical negative-synthesis databases (`data/negative_synthesis_priors.json`):
 1. **LBNL Solid-State Impurity Dataset:** `80,806` parsed solid-state recipes across `4,292` chemical systems with `18,869` phase-impure/failed reactions (Lee, Cruse, Baibakova, Ceder, Jain, *Sci. Data* 12:1969, 2025).
 2. **LBNL A-Lab "Precursor Genome" Dataset:** `1,035` autonomous laboratory pairwise reactions with `892` negative/stalled reactions (369 unreacted, 384 transformed, 113 partially reacted) (Walters, Szymanski, Fei, Ceder et al., *Precursor Genome*, 2026).
 
-### Promoted Live Materials Project Finalists (9 Finalists: 4 Track A + 5 Track B)
+### Promoted Materials Project Prescreen Finalists (9 Finalists: 4 Track A + 5 Track B)
 
-All 9 finalists have generated Quantum ESPRESSO `HSE06+SOC` input decks and CIF files in `outputs/mp_live_qe_decks/`. The decks have never been executed and have known defects (task T3). Per the committed cache, only `mp-22982` and `mp-23474` are experimentally known phases; the other seven are theoretical Materials Project entries. The gap column is a heuristic estimate with unquantified error (task T4):
+All 9 finalists have generated Quantum ESPRESSO `HSE06+SOC` input decks and CIF files in `outputs/mp_live_qe_decks/` (`HSE06+SOC` not run). Per the committed cache, only `mp-22982` and `mp-23474` are experimentally known phases; the other seven are theoretical Materials Project entries. The gap column is a heuristic estimate calibrated in task T4:
 
-| Candidate ID | Formula | Target Layer | Space Group | $N_{\text{sites}}$ | $T_{\text{synth}}$ ($^\circ\text{C}$) | Active Layer Cost ($\/\text{m}^2$) | $\Delta E_{\text{hull}}$ (meV) | $\omega_{\min}$ (THz) | $E_{\text{mig}}$ (eV) | $E_g^{\text{est}}$ (Ind / Dir; heuristic, not HSE06+SOC) | Single-Layer SLME (%) | SQ Limit (%) | 2-Layer Si $\eta$ (%) | 4T Std Si FCA $\eta$ (%) | **3-Layer 4T Tandem $\eta$ (%)** | Self-consistency SHA-256 digest (unkeyed) |
+| Candidate ID | Formula | Target Layer | Space Group | $N_{\text{sites}}$ | $T_{\text{synth}}$ ($^\circ\text{C}$) | Active Layer Cost ($\$/\text{m}^2$) | $\Delta E_{\text{hull}}$ (meV) | $\omega_{\min}$ (THz) | $E_{\text{mig}}$ (eV) | $E_g^{\text{est}}$ (Ind / Dir; heuristic, HSE06+SOC not run) | Single-Layer SLME (%) | SQ Limit (%) | 2-Layer Si $\eta$ (%) | 4T Std Si FCA $\eta$ (%) | **3-Layer 4T Tandem $\eta$ (%)** | Self-consistency SHA-256 digest (unkeyed) |
 | :--- | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
 | `mp-861911` | `Sb2OS2` | Top Active Glass | `C2/m` (#12) | 10 | 375.0 | \$0.0157 | 7.07 | 1.40 | 1.18 | 1.76 / 1.80 eV | 25.66% | 27.93% | 38.43% | 40.55% | **41.78%** | `a09dbb1c343327cd5cbb5fe25b0409ec548a0f06b6168ca7feb5d47fc3ae68d1` |
 | `mp-1227486` | `BiSbS3` | Top Active Glass | `Pnma` (#62) | 20 | 375.0 | \$0.0182 | 2.30 | 1.20 | 1.18 | 1.79 / 1.83 eV | 25.10% | 27.32% | 38.36% | 40.48% | **41.70%** | `d8f6b425fa2066a5062437ab9edb68a127d62b3ca1821a2645bbf4f07a9076cb` |
@@ -176,7 +171,7 @@ All 9 finalists have generated Quantum ESPRESSO `HSE06+SOC` input decks and CIF 
 
 The 4 Top Active Glass and 5 Bottom IR Scavenger finalists yield `20` mechanically decoupled 4-terminal tandem stacks with middle crystalline silicon ($E_g = 1.12\text{ eV}$):
 
-| Pair ID | Top MP Cell | Bottom MP Cell | Top $E_g$ (Ind/Dir) | Bottom $E_g$ (Ind/Dir) | Top PCE (%) | Middle c-Si PCE (%) | Bottom IR PCE (%) | Combined Cost ($\/\text{m}^2$) | **4T Tandem Total PCE (%)** |
+| Pair ID | Top MP Cell | Bottom MP Cell | Top $E_g$ (Ind/Dir) | Bottom $E_g$ (Ind/Dir) | Top PCE (%) | Middle c-Si PCE (%) | Bottom IR PCE (%) | Combined Cost ($\$/\text{m}^2$) | **4T Tandem Total PCE (%)** |
 | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | `mp-861911__mp-1223998` | `mp-861911` (Sb2OS2) | `mp-1223998` (Bi3InSe6) | 1.76 / 1.80 eV | 0.75 / 0.76 eV | 25.66% | 11.84% | 4.82% | \$0.1664 | **42.32%** |
 | `mp-1227486__mp-1223998` | `mp-1227486` (BiSbS3) | `mp-1223998` (Bi3InSe6) | 1.79 / 1.83 eV | 0.75 / 0.76 eV | 25.10% | 12.32% | 4.82% | \$0.1689 | **42.25%** |
@@ -196,29 +191,30 @@ The 4 Top Active Glass and 5 Bottom IR Scavenger finalists yield `20` mechanical
 
 *Key Efficiency / Cost Pareto Highlights:*
 * **Highest radiative-limit pair (scalar idealization, not a device forecast):** `mp-861911 Sb2OS2 + c-Si + mp-1223998 Bi3InSe6` achieves **42.32%** 4T PCE ($25.66\%$ top $+ 11.84\%$ middle $+ 4.82\%$ bottom IR) at $\$0.1664/\text{m}^2$.
-* **Lowest active-layer material cost pair (scalar idealization; material cost is a negligible share of module cost):** `mp-861911 Sb2OS2 + c-Si + mp-22982 BiCuS2` delivers **41.75%** 4T PCE at an ultra-abundant active layer cost of **$0.0394/m^2$.
+* **Lowest active-layer material cost pair (scalar idealization; material cost is a negligible share of module cost):** `mp-861911 Sb2OS2 + c-Si + mp-22982 BiCuS2` delivers **41.75%** 4T PCE at an ultra-abundant active layer cost of **\$0.0394/m²**.
 
 ---
 
-## v4.0 Atomistic Phonon/NEB & Coherent Multilayer TMM Verification (Step 1 + Step 2)
+## v4.0 Pair-Spring Gamma Heuristics, Migration Estimates & Coherent Multilayer TMM (Step 1 + Step 2)
 
-### Step 1: Gamma-point pair-spring model & closed-form migration-barrier estimate (legacy names: "3D dynamical matrix", "11-image NEB")
+### Step 1: Gamma-point pair-spring model & closed-form migration-barrier heuristic (phonons and NEB not run)
 
 > [!CAUTION]
-> The force constants are positive pair springs set by bond length, so this model returns zero imaginary modes and a zero acoustic-sum-rule deviation for any structure, including random ones. The "NEB" barrier is a single closed-form expression in hop distance, clearance and composition; no images, energies or forces are computed. Neither column is evidence of dynamical stability or of low ion mobility (task T7).
+> The force constants are positive pair springs set by bond length, so `dynamically_stable` is reported as `None` (phonons not run). The migration barrier `emig_heuristic_ev` is a closed-form expression in hop distance, clearance and composition (NEB not run). Neither metric is evidence of dynamical stability or low ion mobility (task T7).
 
-Every promoted live Materials Project finalist is evaluated directly on its 3D periodic crystal structure via exact $3N \times 3N$ Harmonic Force-Constant Hessian assembly ($0.50\text{ \AA} < r_{ij} \le 4.25\text{ \AA}$) with Acoustic Sum Rule (ASR) translational projection, diagonalized via `numpy.linalg.eigh` (primary in `atomistic_and_tmm.py`) vs. `scipy.linalg.eigvalsh` (blinded in `independent_verifier.py`), coupled with a 3D 11-image Nudged-Elastic-Band (NEB) steric + electrostatic hop solver:
+Every promoted Materials Project prescreen finalist is evaluated on its 3D periodic crystal structure via $3N \times 3N$ pair-spring Hessian eigenvalues (`spring_model_gamma_freq_thz`, `numpy.linalg.eigh` in `atomistic_and_tmm.py` vs. `scipy.linalg.eigvalsh` in `independent_verifier.py`) and the closed-form steric/composition migration heuristic `emig_heuristic_ev`:
 
-| Candidate ID | Formula | $\mathbf{D}(\mathbf{0})$ Dim | $\omega_{\text{opt,min}}$ (THz) | $\omega_{\text{LO,max}}$ (THz) | Imag Modes | ASR Dev (THz) | Hop Species & $d_{\text{hop}}$ ($\text{\AA}$) | Bottleneck $r_{\text{clear}}$ ($\text{\AA}$) | $E_{\text{mig}}^{\text{NEB}}$ (eV) | $D_{\text{ion}}(300\text{ K})$ ($\text{cm}^2/\text{s}$) | Dual SHA-256 Prefix |
-| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| `mp-861911` | `Sb2OS2` | $30\times 30$ | 5.80 | 35.90 | 0 | $0.000000$ | $\text{O}$ ($2.46\text{ \AA}$) | 1.98 | **1.058 eV** | $1.69\times 10^{-22}$ | `25cdb7d4` |
-| `mp-1227486` | `BiSbS3` | $60\times 60$ | 2.38 | 22.24 | 0 | $0.000000$ | $\text{S}$ ($3.43\text{ \AA}$) | 2.26 | **0.998 eV** | $3.41\times 10^{-21}$ | `a10ec94b` |
-| `mp-1078776` | `BiInS3` | $30\times 30$ | 6.27 | 22.73 | 0 | $0.000000$ | $\text{S}$ ($3.64\text{ \AA}$) | 2.18 | **1.120 eV** | $3.35\times 10^{-23}$ | `6c07d52f` |
-| `mp-1223998` | `Bi3InSe6` | $30\times 30$ | 1.36 | 16.11 | 0 | $0.000000$ | $\text{Se}$ ($3.67\text{ \AA}$) | 2.41 | **0.990 eV** | $5.18\times 10^{-21}$ | `19cfc642` |
-| `mp-1224922` | `CuGaSnSe4` | $21\times 21$ | 9.19 | 20.70 | 0 | $0.000000$ | $\text{Cu}$ ($5.68\text{ \AA}$) | 2.12 | **1.310 eV** | $5.33\times 10^{-26}$ | `89c71681` |
-| `mp-22982` | `BiCuS2` | $48\times 48$ | 3.90 | 26.21 | 0 | $0.000000$ | $\text{Cu}$ ($3.85\text{ \AA}$) | 2.04 | **1.348 eV** | $5.59\times 10^{-27}$ | `66e28432` |
-| `mp-23474` | `AgBi3S5` | $54\times 54$ | 3.02 | 23.60 | 0 | $0.000000$ | $\text{Ag}$ ($4.03\text{ \AA}$) | 2.31 | **1.120 eV** | $4.15\times 10^{-23}$ | `4fe92344` |
-| `mp-1224129` | `CuInSnSe4` | $21\times 21$ | 8.44 | 19.38 | 0 | $0.000000$ | $\text{Cu}$ ($5.90\text{ \AA}$) | 2.15 | **1.326 eV** | $3.12\times 10^{-26}$ | `c5e56b04` |
+| Candidate ID | Formula | Hessian Dim | $\omega_{\text{opt,min}}^{\text{spring}}$ (THz) | $\omega_{\text{LO,max}}^{\text{spring}}$ (THz) | Hop Species & $d_{\text{hop}}$ ($\text{\AA}$) | Bottleneck $r_{\text{clear}}$ ($\text{\AA}$) | `emig_heuristic_ev` (eV) | $D_{\text{ion}}(300\text{ K})$ ($\text{cm}^2/\text{s}$) | Digest Prefix |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| `mp-861911` | `Sb2OS2` | $30\times 30$ | 5.80 | 35.90 | $\text{O}$ ($2.46\text{ \AA}$) | 1.69 | **1.058 eV** | $1.69\times 10^{-22}$ | `11f84cfc` |
+| `mp-1227486` | `BiSbS3` | $60\times 60$ | 2.38 | 22.24 | $\text{S}$ ($3.43\text{ \AA}$) | 2.63 | **0.998 eV** | $3.41\times 10^{-21}$ | `960a304d` |
+| `mp-1195160` | `Al2Bi2Cu2S3Cl8` | $102\times 102$ | 1.71 | 52.02 | $\text{Cu}$ ($3.82\text{ \AA}$) | 1.25 | **1.367 eV** | $2.64\times 10^{-27}$ | `e1462875` |
+| `mp-1078776` | `BiInS3` | $30\times 30$ | 6.27 | 22.73 | $\text{S}$ ($3.64\text{ \AA}$) | 1.89 | **1.120 eV** | $3.35\times 10^{-23}$ | `9486d5fa` |
+| `mp-1223998` | `Bi3InSe6` | $30\times 30$ | 1.36 | 16.11 | $\text{Se}$ ($3.67\text{ \AA}$) | 3.46 | **0.990 eV** | $5.18\times 10^{-21}$ | `a004f3dc` |
+| `mp-1224922` | `CuGaSnSe4` | $21\times 21$ | 9.19 | 20.70 | $\text{Cu}$ ($5.68\text{ \AA}$) | 2.32 | **1.310 eV** | $5.33\times 10^{-26}$ | `56e7b978` |
+| `mp-22982` | `BiCuS2` | $48\times 48$ | 3.90 | 26.21 | $\text{Cu}$ ($3.85\text{ \AA}$) | 1.24 | **1.348 eV** | $5.59\times 10^{-27}$ | `52e94916` |
+| `mp-23474` | `AgBi3S5` | $54\times 54$ | 3.02 | 23.60 | $\text{Ag}$ ($4.03\text{ \AA}$) | 2.06 | **1.120 eV** | $4.15\times 10^{-23}$ | `87216e59` |
+| `mp-1224129` | `CuInSnSe4` | $21\times 21$ | 8.44 | 19.38 | $\text{Cu}$ ($5.90\text{ \AA}$) | 2.47 | **1.326 eV** | $3.12\times 10^{-26}$ | `ba119440` |
 
 ### Step 2: Coherent Multilayer $2\times 2$ Abeles Transfer-Matrix Method (TMM) vs. Recursive Rouard/Airy 4T Stack Optics
 Replacing scalar Fresnel idealizations with a full 6-medium coherent thin-film interference solver (`Air / 98 nm MgF2 ARC / 105 nm Front ITO / Active Absorber / 85 nm SiO2-ITO Buffer / Couplant -> Textured c-Si -> Bottom IR Scavenger / 4n^2 Ag Mirror`) cross-verified between $2\times 2$ Abeles matrix multiplication (`np.trapezoid`) and Recursive Rouard/Airy backward amplitude addition (`scipy.integrate.simpson`, $\le 0.01\%$ discrepancy):
@@ -270,10 +266,10 @@ We simultaneously evaluate all 4 Techno-Economic Figures of Merit against a sing
 | `mp-861911__mp-22982` | `Sb2OS2 + c-Si + BiCuS2` | `(94, 48, 299, 391 nm)` | 41.97% | **46.02%** (42.75 W/ft², +9.64%) | **48.08%** (44.67 W/ft²) | **3.002 ¢/kWh** | **`37 : 72 : 100`** | 50.05 V (1.15% / 0.44%) |
 | `mp-1227486__mp-22982` | `BiSbS3 + c-Si + BiCuS2` | `(94, 48, 299, 391 nm)` | 41.96% | **46.01%** (42.74 W/ft², +9.64%) | **48.07%** (44.66 W/ft²) | **3.002 ¢/kWh** | **`36 : 72 : 101`** | 50.12 V (0.19% / 0.41%) |
 
-### 8. Phase 11 (`v0.8.0`): Realistic Synthesis Practicality (`SPS`), Live MP TCO Reactivity, Non-Radiative SRH Physics & 4-Path Commercialization Engine
-To separate detailed-balance optical ceilings (`ERE = 1.0`) from near-term polycrystalline thin-film manufacturing reality (`ERE = 1e-5` to `5e-3`), Phase 11 (`realistic_commercialization.py` vs. `independent_verifier.py`, full debate in [`docs/REALISTIC_COMMERCIALIZATION_AND_DEBATE_REPORT.md`](docs/REALISTIC_COMMERCIALIZATION_AND_DEBATE_REPORT.md)) evaluates live Materials Project convex-hull stability windows, `pymatgen` `InterfacialReactivity` against `SnO2`/`In2O3`/`TiO2`, non-radiative SRH + antisite/contact voltage deficits, commercial c-Si Drude FCA, and industrial PVD/RTP fab yield (`90.0%` 1-junction vs. `77.4%` 2-junction):
+### 8. Phase 11 (`v0.8.0`): Realistic Synthesis Practicality (`SPS`), Cached MP TCO Reactivity, Non-Radiative SRH Physics & 4-Path Commercialization Engine
+To separate detailed-balance optical ceilings (`ERE = 1.0`) from near-term polycrystalline thin-film manufacturing reality (`ERE = 1e-5` to `5e-3`), Phase 11 (`realistic_commercialization.py` vs. `independent_verifier.py`, full debate in [`docs/REALISTIC_COMMERCIALIZATION_AND_DEBATE_REPORT.md`](docs/REALISTIC_COMMERCIALIZATION_AND_DEBATE_REPORT.md)) evaluates cached Materials Project convex-hull stability windows, `pymatgen` `InterfacialReactivity` against `SnO2`/`In2O3`/`TiO2`, non-radiative SRH + antisite/contact voltage deficits, commercial c-Si Drude FCA, and industrial PVD/RTP fab yield (`90.0%` 1-junction vs. `77.4%` 2-junction):
 
-- **Top Synthesis Practicality (`SPS` out of `100`):** **`mp-1227486 BiSbS3` (`94.76/100`)** and **`mp-861911 Sb2OS2` (`94.44/100`)** lead all 8 finalists (`0.00 meV/atom` reaction energy on `TiO2` and `SnO2` vs. exothermic `-13.16` and `-15.35 meV/atom` sulfidation on bare `In2O3`/ITO; zero In/Ga/Ag criticality), followed by `mp-22982 BiCuS2` (`89.54/100`), `AgBi3S5` (`88.96`), `BiInS3` (`83.42`), `Bi3InSe6` (`79.71`), `CuInSnSe4` (`61.66`), and `CuGaSnSe4` (`49.99`).
+- **Top Synthesis Practicality (`SPS` out of `100`):** **`mp-1227486 BiSbS3` (`94.76/100`)** and **`mp-861911 Sb2OS2` (`94.44/100`)** lead the 8 evaluated finalists (`0.00 meV/atom` reaction energy on `TiO2` and `SnO2` vs. exothermic `-13.16` and `-15.35 meV/atom` sulfidation on bare `In2O3`/ITO; zero In/Ga/Ag criticality), followed by `mp-22982 BiCuS2` (`89.54/100`), `AgBi3S5` (`88.96`), `BiInS3` (`83.42`), `Bi3InSe6` (`79.71`), `CuInSnSe4` (`61.66`), and `CuGaSnSe4` (`49.99`) (`mp-1195160` `Al2Bi2Cu2S3Cl8` is `None` / not evaluated).
 - **4-Path Commercialization Verdict (Base-Case Pilot `ERE = 1e-4`, 20% Albedo):**
   - **Path 0 (Commodity Bifacial TOPCon/SHJ c-Si):** **26.65%** bifacial (`22.94%` mono) at **\$42.00/m²** (`4.246 ¢/kWh` utility / `6.802 ¢/kWh` rooftop LCOE).
   - **Path 1 (3-Layer 4T Sandwich):** Drops to **28.30%–28.78%** bifacial because the `0.75–0.85 eV` rear cell (`V_oc,real = 0.23–0.30 V`) cannibalizes `300–1100 nm` rear albedo photons from `0.72 V` silicon while `77.4%` compound yield inflates cost to **\$96.76–\$109.62/m²** (`5.008–5.368 ¢/kWh` utility LCOE — deferred to Gen-3 `ERE >= 5e-3`).
@@ -289,12 +285,12 @@ To separate detailed-balance optical ceilings (`ERE = 1.0`) from near-term polyc
 python3 -m failsmart_matengine.orchestrator
 ```
 
-### Run the Live Materials Project Discovery + 3D Phonon/NEB, Graded-ARC TMM, LCOE, Bifacial/String & Realistic Commercialization Engine
+### Run the Cached Materials Project Discovery + Pair-Spring/Migration Heuristics, Graded-ARC TMM, LCOE & Commercialization Engine
 ```bash
 python3 -m failsmart_matengine.mp_live_discovery
 ```
 
-### Run the Automated Test Suite (22 self-consistency and regression tests, expanded from 18 and 20)
+### Run the Automated Test Suite (26 regression and deck/gate/provenance tests passed)
 ```bash
 pytest -v
 ```

@@ -1,7 +1,7 @@
 """Repository Consistency & Documentation Gatekeeper Audit Engine (v3.0).
 
 Parses outputs/pilot_campaign_summary.json, outputs/live_mp_discovery_summary.json,
-data/failure_memory.db, data/negative_synthesis_priors.json, outputs/qe_hse06_soc_decks/,
+data/failure_memory.db, data/negative_synthesis_priors.json, outputs/qe_hse06_soc_decks/ (HSE06+SOC not run),
 outputs/mp_live_qe_decks/, README.md, docs/MEMORY_AND_FAILURE_LEDGER.md,
 docs/VERIFICATION_AND_TEST_REPORT.md, and docs/PLAN.md.
 
@@ -27,7 +27,7 @@ class RepoConsistencyAuditor:
         # v2.0 Artifact Paths
         self.summary_json_path = self.root / "outputs" / "pilot_campaign_summary.json"
         self.db_path = self.root / "data" / "failure_memory.db"
-        self.qe_dir = self.root / "outputs" / "qe_hse06_soc_decks"
+        self.qe_dir = self.root / "outputs" / "qe_hse06_soc_decks"  # HSE06+SOC not run
 
         # v3.0 Artifact Paths
         self.live_summary_json_path = self.root / "outputs" / "live_mp_discovery_summary.json"
@@ -89,8 +89,8 @@ class RepoConsistencyAuditor:
             counts["gate_a_promoted_to_dft"] == 8
         ), f"Expected gate_a == 8, got {counts['gate_a_promoted_to_dft']}"
         assert (
-            counts["stage4_5_validated_finalists"] == 5
-        ), f"Expected finalists == 5, got {counts['stage4_5_validated_finalists']}"
+            counts["stage4_5_prescreen_finalists"] == 5
+        ), f"Expected finalists == 5, got {counts['stage4_5_prescreen_finalists']}"
         assert (
             counts["redundancy_verifications_passed"] == 20
         ), f"Expected redundancy passed == 20, got {counts['redundancy_verifications_passed']}"
@@ -134,11 +134,13 @@ class RepoConsistencyAuditor:
             assert db_rec["status"] == j_rec["status"]
             assert db_rec["primary_failure_mode"] == j_rec["primary_failure_mode"]
 
+            assert "composition_embedding" in db_rec, f"Missing composition_embedding column in DB for {cid}"
             for num_col in [
                 "e_above_hull_mev",
                 "omega_min_heuristic_thz",
                 "rxn_temp_celsius",
                 "active_layer_cost_usd_m2",
+                "gap_est_indirect_ev",
                 "slme_percent",
                 "tandem_4t_efficiency_percent",
             ]:
@@ -171,7 +173,7 @@ class RepoConsistencyAuditor:
             expected_ntyp = len(cand["elements"])
 
             cif_file = self.qe_dir / f"{cid}_{formula}.cif"
-            in_file = self.qe_dir / f"{cid}_{formula}_hse06_soc.in"
+            in_file = self.qe_dir / f"{cid}_{formula}_hse06_soc.in"  # HSE06+SOC not run
 
             assert cif_file.exists(), f"Missing CIF deck: {cif_file}"
             assert in_file.exists(), f"Missing QE input deck: {in_file}"
@@ -235,7 +237,7 @@ class RepoConsistencyAuditor:
         assert counts["stage2_dynamically_and_ion_stable"] == 91, f"Expected 91 Stage 2, got {counts.get('stage2_dynamically_and_ion_stable')}"
         assert counts["stage3_manufacturable_lbnl_alab_screened"] == 47, f"Expected 47 Stage 3, got {counts.get('stage3_manufacturable_lbnl_alab_screened')}"
         assert counts["gate_a_promoted_to_dft"] == 40, f"Expected 40 Gate A, got {counts.get('gate_a_promoted_to_dft')}"
-        assert counts["stage4_5_validated_finalists"] == 9, f"Expected 9 finalists, got {counts.get('stage4_5_validated_finalists')}"
+        assert counts["stage4_5_prescreen_finalists"] == 9, f"Expected 9 finalists, got {counts.get('stage4_5_prescreen_finalists')}"
         assert counts["top_active_glass_finalists"] == 4, f"Expected 4 Top Active Glass, got {counts.get('top_active_glass_finalists')}"
         assert counts["bottom_ir_scavenger_finalists"] == 5, f"Expected 5 Bottom IR Scavengers, got {counts.get('bottom_ir_scavenger_finalists')}"
         assert counts["redundancy_verifications_passed"] == 100, f"Expected 100 redundancy passed, got {counts.get('redundancy_verifications_passed')}"
@@ -281,10 +283,13 @@ class RepoConsistencyAuditor:
                 assert "unknown" not in p_tok.lower(), f"Candidate {r['candidate']['candidate_id']} has 'unknown' token: {p_tok}"
 
         # v4.0 Step 1 & Step 2 Checks
-        assert self.live_summary_data.get("version") == "4.0.0", "Expected live_mp_discovery_summary.json version == 4.0.0"
-        phonon_reports = self.live_summary_data.get("atomistic_phonon_neb_reports", [])
-        assert len(phonon_reports) == 9, f"Expected 9 atomistic_phonon_neb_reports, got {len(phonon_reports)}"
-        for pr in phonon_reports:
+        from . import __version__
+        assert self.live_summary_data.get("version") == __version__, (
+            f"Expected live_mp_discovery_summary.json version == {__version__}, got {self.live_summary_data.get('version')}"
+        )
+        spring_reports = self.live_summary_data.get("spring_and_migration_reports", [])
+        assert len(spring_reports) == 9, f"Expected 9 spring_and_migration_reports, got {len(spring_reports)}"
+        for pr in spring_reports:
             assert pr["dynamically_stable"] is None
             assert pr["emig_gate_passed"] is True
             assert pr["redundancy_verified"] is True
@@ -393,7 +398,7 @@ class RepoConsistencyAuditor:
             expected_ntyp = len(cand["elements"])
 
             cif_file = self.mp_live_qe_dir / f"{cid}_{formula}.cif"
-            in_file = self.mp_live_qe_dir / f"{cid}_{formula}_hse06_soc.in"
+            in_file = self.mp_live_qe_dir / f"{cid}_{formula}_hse06_soc.in"  # HSE06+SOC not run
 
             assert cif_file.exists(), f"Missing live MP CIF deck: {cif_file}"
             assert in_file.exists(), f"Missing live MP QE input deck: {in_file}"
@@ -472,36 +477,23 @@ class RepoConsistencyAuditor:
     # =========================================================================
 
     def audit_readme_markdown(self) -> None:
-        """Parse README.md and verify funnel numbers, candidate formulas, and finalist table values (v2.0 + v3.0 + v4.0 + v5.0)."""
+        """Parse README.md and verify stage/provenance table, funnel numbers, candidate formulas, and finalist table values."""
         self.log(f"-> Auditing {self.readme_path} ...")
         assert self.readme_path.exists(), f"Missing {self.readme_path}"
         text = self.readme_path.read_text(encoding="utf-8")
 
-        # 1. 13-agent architecture verification
-        assert "13-Agent Research + Engineering Team Architecture" in text or "13-agent" in text.lower()
-        for agent in [
-            "pi_orchestrator",
-            "crystal_explorer",
-            "surrogate_physicist",
-            "synthesis_chemist",
-            "quantum_defect_physicist",
-            "photonic_tandem_architect",
-            "adversarial_critic",
-            "chief_software_architect",
-            "physics_engine_engineer",
-            "optics_kinetics_engineer",
-            "redundancy_verifier_alpha",
-            "qa_test_audit_engineer",
-            "repo_release_auditor",
-        ]:
-            assert agent in text, f"Missing agent {agent} in README.md"
+        # 1. Pipeline stage, what the code does, and provenance table verification
+        assert "What the code does" in text, "Missing 'What the code does' column in README.md stage table"
+        assert "Provenance" in text, "Missing 'Provenance' column in README.md stage table"
+        for prov_tag in ["MP_DFT", "HEURISTIC", "ASSUMED", "COMPUTED_HERE"]:
+            assert prov_tag in text, f"Missing provenance tag {prov_tag} in README.md"
 
         # 2. v2.0 funnel counts and formulas
         assert "20 Candidates Screened" in text or "20 generated" in text
-        assert "17 dynamically & ion-stable" in text or "17 dynamically" in text
+        assert "17 dynamically & ion-stable" in text or "17 dynamically" in text or "17 Stage 2" in text
         assert "12 manufacturable" in text
-        assert "8 promoted to Stage 4 DFT" in text or "8 promoted to Stage 4" in text
-        assert "5 Validated Finalists" in text
+        assert "8 promoted to Stage 4" in text or "8 Gate A" in text
+        assert "5 Prescreen Finalists" in text or "5 prescreen finalists" in text.lower()
         for f_name in [
             "Sr2ZnOS2", "Zn2SbS2Br3", "Cu3BiS2Cl2", "BaZrS3", "AgBiSe2",
             "BiSCl", "SbSeI", "BiCuSeI2", "Bi2SnSe3I2", "BiCuOS",
@@ -518,7 +510,7 @@ class RepoConsistencyAuditor:
             assert f"${fin['synthesis']['active_layer_cost_usd_m2']:.4f}" in row
             assert f"{fin['optics']['standalone_slme_percent']:.2f}%" in row
             assert f"{fin['optics']['tandem_4t_total_eff_percent']:.2f}%" in row
-            assert fin["redundancy_verification"]["sha256_signature"] in row
+            assert fin["redundancy_verification"]["sha256_digest"] in row
 
         # 4. v3.0, v4.0 & v5.0 Live MP Funnel & Finalists verification
         assert "100" in text, "Missing 100 live MP candidates in README.md"
@@ -543,12 +535,12 @@ class RepoConsistencyAuditor:
         assert "4.354" in text, "Missing CER_3L = 4.354 in README.md"
         assert "0.0394" in text, "Missing $0.0394/m2 cost in README.md"
 
-        # Check 18-test pytest verification
-        assert "18" in text and ("test" in text.lower() or "passed" in text.lower()), (
-            "Missing 18-test pytest verification reference in README.md"
+        # Check pytest verification reference
+        assert "test" in text.lower() and "passed" in text.lower(), (
+            "Missing pytest verification reference in README.md"
         )
 
-        self.log("   [OK] README.md contains verified 13-agent architecture, v2.0 benchmarks, v3.0 live MP funnel, v4.0 D-matrix/NEB & TMM, and v5.0 Graded-ARC & Techno-Economics.")
+        self.log("   [OK] README.md contains stage/provenance table, v2.0 fixture benchmarks, cached MP funnel, pair-spring/migration heuristics, TMM optics, and techno-economic scenarios.")
 
     def audit_memory_and_failure_ledger_markdown(self) -> None:
         """Parse docs/MEMORY_AND_FAILURE_LEDGER.md and verify all 23 v2 entries and 8 v3/v4/v5 finalists."""

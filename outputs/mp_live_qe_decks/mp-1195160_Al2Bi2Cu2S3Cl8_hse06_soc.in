@@ -1,6 +1,6 @@
-! FailSmart-MatEngine v2.0 Auto-Generated Quantum ESPRESSO HSE06+SOC Input Deck
+! FailSmart-MatEngine Auto-Generated Quantum ESPRESSO HSE06+SOC Input Deck (not run)
 ! Candidate: mp-1195160 (Al2Bi2Cu2S3Cl8) | Target: TOP_ACTIVE_GLASS_185EV
-! Verified Space Group: P6_3/m (#176) | nat = 34
+! Space Group: P6_3/m (#176) | nat = 34
 &CONTROL
   calculation = 'scf',
   prefix = 'al2bi2cu2s3cl8',

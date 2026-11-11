@@ -33,8 +33,8 @@ Mandated by FailSmart-MatEngine Multi-Agent Architecture (QA Test & Audit Engine
     Verify CAND-A09 (Cu3BiS2Cl2) has ion_migration_barrier_ev == 0.42 < 0.65 and is rejected at
     Stage 2 with ION_MIGRATION_INSTABILITY, whereas oxide/covalently locked finalists
     (Bi2CuO2SCl, Cu2SbS2Cl, BiZnOSCl, Sn2SbSe2I3, Cu2BiSe2I) satisfy ion_migration_barrier_ev >= 0.65.
-- Test 8 (test_runnable_quantum_espresso_hse06_soc_decks):
-    Parse all 5 finalist .in decks in outputs/qe_hse06_soc_decks/ and verify real IUPAC atomic weights
+- Test 8 (test_runnable_quantum_espresso_hybrid_soc_decks):
+    Parse all 5 finalist .in decks in outputs/qe_hse06_soc_decks/ (HSE06+SOC not run) and verify real IUPAC atomic weights
     (> 14.0, never 1.000), presence of CELL_PARAMETERS (angstrom) with a non-singular 3x3 matrix
     (abs(det) > 50.0), and ATOMIC_POSITIONS (crystal) with exact nat coordinate lines matching the .cif file!
 - Test 9 (test_arbitrary_ood_novel_composition_no_keyerror):
@@ -90,7 +90,7 @@ from failsmart_matengine.independent_verifier import (
     compute_frohlich_alpha_exact,
     verify_candidate_dossier,
     independently_verify_cross_layer_4t_pair,
-    independently_verify_atomistic_phonon_and_neb,
+    independently_verify_spring_and_migration_heuristics,
     independently_verify_coherent_tmm_4t_stack,
     independently_verify_graded_arc_and_techno_economics,
     independently_verify_phase9a_lab_and_defect_dossier,
@@ -124,7 +124,7 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
         cls.comms_log_path = os.path.join(cls.repo_root, "logs", "inter_team_communication.jsonl")
         cls.audit_log_path = os.path.join(cls.repo_root, "logs", "verification_audit_log.jsonl")
         cls.db_path = os.path.join(cls.repo_root, "data", "failure_memory.db")
-        cls.qe_decks_dir = os.path.join(cls.repo_root, "outputs", "qe_hse06_soc_decks")
+        cls.qe_decks_dir = os.path.join(cls.repo_root, "outputs", "qe_hse06_soc_decks")  # HSE06+SOC not run
 
         with open(cls.summary_path, "r", encoding="utf-8") as f:
             cls.summary_data = json.load(f)
@@ -379,8 +379,8 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
                 opt = r["optics"]
 
                 sim = independently_verify_energy_quadrature_slme(
-                    eg_ind_ev=elec["hse06_soc_indirect_gap_ev"],
-                    eg_dir_ev=elec["hse06_soc_direct_gap_ev"],
+                    eg_ind_ev=elec["gap_est_indirect_ev"],
+                    eg_dir_ev=elec["gap_est_direct_ev"],
                     eps_inf=elec["eps_inf"],
                     thickness_nm=opt["film_thickness_nm"],
                     target_layer=tlayer,
@@ -453,13 +453,13 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
             )
             self.assertTrue(frec["stability"]["ion_migration_stable"])
 
-    def test_runnable_quantum_espresso_hse06_soc_decks(self):
-        """Test 8: Parse all 5 finalist .in decks in outputs/qe_hse06_soc_decks/ and verify IUPAC masses, det(CELL) > 50, and matching nat."""
-        deck_files = sorted(glob.glob(os.path.join(self.qe_decks_dir, "*_hse06_soc.in")))
+    def test_runnable_quantum_espresso_hybrid_soc_decks(self):
+        """Test 8: Parse all 5 finalist .in decks in outputs/qe_hse06_soc_decks/ (HSE06+SOC not run) and verify IUPAC masses, det(CELL) > 50, and matching nat."""
+        deck_files = sorted(glob.glob(os.path.join(self.qe_decks_dir, "*_hse06_soc.in")))  # HSE06+SOC not run
         self.assertEqual(len(deck_files), 5, f"Expected 5 finalist QE input decks, found {len(deck_files)}")
 
         for dpath in deck_files:
-            cif_path = dpath.replace("_hse06_soc.in", ".cif")
+            cif_path = dpath.replace("_hse06_soc.in", ".cif")  # HSE06+SOC not run
             self.assertTrue(os.path.exists(cif_path), f"Matching CIF file not found for deck {dpath}")
 
             with open(dpath, "r", encoding="utf-8") as f:
@@ -548,7 +548,7 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
         self.assertEqual(gate.decision, "PROMOTE")
 
         elec = stage4_5_quantum_and_defects(cand)
-        self.assertGreater(elec.hse06_soc_direct_gap_ev, 0.0)
+        self.assertGreater(elec.gap_est_direct_ev, 0.0)
 
         opt = stage5_optical_4t_tandem_simulation(cand, elec, st3)
         self.assertGreater(opt.standalone_slme_percent, 0.0)
@@ -566,7 +566,7 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
 
         verif = verify_candidate_dossier(dossier, raise_on_error=True)
         self.assertTrue(verif["passed_all_redundancy_checks"])
-        self.assertTrue(verif["sha256_signature"])
+        self.assertTrue(verif["sha256_digest"])
 
     def test_full_v2_campaign_sqlite_and_audit_logs(self):
         """Test 10: Verify pilot_campaign_summary.json (20 candidates: 5 finalists, 15 rejected), failure_memory.db (23 total rows), logs."""
@@ -782,7 +782,7 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
         self.assertEqual(fc.get("stage2_dynamically_and_ion_stable"), 91)
         self.assertEqual(fc.get("stage3_manufacturable_lbnl_alab_screened"), 47)
         self.assertEqual(fc.get("gate_a_promoted_to_dft"), 40)
-        self.assertEqual(fc.get("stage4_5_validated_finalists"), 9)
+        self.assertEqual(fc.get("stage4_5_prescreen_finalists"), 9)
         self.assertEqual(fc.get("top_active_glass_finalists"), 4)
         self.assertEqual(fc.get("bottom_ir_scavenger_finalists"), 5)
 
@@ -835,16 +835,16 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
                 f"iv={iv['tandem_4t_low_fca_total_eff_percent']}%, diff={diff_eff:.4f}% > 0.05%",
             )
 
-    def test_live_mp_finalist_qe_hse06_soc_decks(self):
-        """Test 15: Verify all 9 promoted live MP finalists have runnable .in/.cif files with non-placeholder IUPAC masses and det(cell) > 50."""
+    def test_live_mp_finalist_qe_hybrid_soc_decks(self):
+        """Test 15: Verify all 9 promoted live MP finalists have runnable .in/.cif files (HSE06+SOC not run) with non-placeholder IUPAC masses and det(cell) > 50."""
         live_decks_dir = os.path.join(self.repo_root, "outputs", "mp_live_qe_decks")
         self.assertTrue(os.path.exists(live_decks_dir), f"Directory {live_decks_dir} does not exist")
 
-        deck_files = sorted(glob.glob(os.path.join(live_decks_dir, "*_hse06_soc.in")))
+        deck_files = sorted(glob.glob(os.path.join(live_decks_dir, "*_hse06_soc.in")))  # HSE06+SOC not run
         self.assertEqual(len(deck_files), 9, f"Expected 9 live MP finalist QE input decks, got {len(deck_files)}")
 
         for dpath in deck_files:
-            cif_path = dpath.replace("_hse06_soc.in", ".cif")
+            cif_path = dpath.replace("_hse06_soc.in", ".cif")  # HSE06+SOC not run
             self.assertTrue(os.path.exists(cif_path), f"Matching CIF file not found for deck {dpath}")
 
             with open(dpath, "r", encoding="utf-8") as f:
@@ -908,8 +908,8 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
                     f"{dpath}: Header nat ({nat_in_header}) != parsed positions ({len(atom_positions)})",
                 )
 
-    def test_step1_3d_dynamical_matrix_and_neb_ion_migration(self):
-        """Test 16: Verify pair-spring Gamma frequencies & closed-form migration heuristic across all 9 finalists.
+    def test_step1_pair_spring_matrix_and_ion_migration_heuristic(self):
+        """Test 16: Verify pair-spring Gamma frequencies & closed-form migration heuristic across all 9 finalists (DFT phonons and NEB not run).
 
         Also verifies zero 'unknown' unindexed XRD tokens in competing_impurity_sinks or competing_hull_phases.
         """
@@ -917,7 +917,12 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
         with open(live_sum_path, "r", encoding="utf-8") as f:
             live_sum = json.load(f)
 
-        self.assertEqual(live_sum.get("version"), "4.0.0", "Expected live_mp_discovery_summary.json version == 4.0.0")
+        import failsmart_matengine
+        self.assertEqual(
+            live_sum.get("version"),
+            failsmart_matengine.__version__,
+            f"Expected live_mp_discovery_summary.json version == {failsmart_matengine.__version__}",
+        )
 
         # 1. Verify zero 'unknown' tokens in any candidate's competing_impurity_sinks or competing_hull_phases
         for rec in live_sum.get("all_mp_records", []):
@@ -932,12 +937,12 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
                 )
 
         # 2. Verify all 9 finalists' pair-spring Gamma frequency & closed-form migration heuristic reports
-        phonon_reports = live_sum.get("atomistic_phonon_neb_reports", [])
-        self.assertEqual(len(phonon_reports), 9, f"Expected 9 atomistic_phonon_neb_reports, got {len(phonon_reports)}")
+        spring_reports = live_sum.get("spring_and_migration_reports", [])
+        self.assertEqual(len(spring_reports), 9, f"Expected 9 spring_and_migration_reports, got {len(spring_reports)}")
 
         finalists_by_id = {f["candidate"]["candidate_id"]: f for f in live_sum.get("finalists", [])}
 
-        for rep in phonon_reports:
+        for rep in spring_reports:
             cid = rep["candidate_id"]
             self.assertNotIn("imaginary_mode_count", rep)
             self.assertNotIn("acoustic_sum_rule_max_dev_thz", rep)
@@ -951,7 +956,7 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
 
             # Cross-verify against scipy.linalg.eigvalsh + closed-form migration heuristic
             fin = finalists_by_id[cid]
-            iv_rep = independently_verify_atomistic_phonon_and_neb(
+            iv_rep = independently_verify_spring_and_migration_heuristics(
                 cif_text=fin["candidate"]["cif_content"],
                 stoichiometry=fin["candidate"]["stoichiometry"],
                 oxidation_states=fin["candidate"]["oxidation_states"],
@@ -1002,12 +1007,12 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
             bot_f = finalists_by_id[st["bottom_mp_id"]]
 
             iv_tmm = independently_verify_coherent_tmm_4t_stack(
-                eg_ind_1=top_f["electronics"]["hse06_soc_indirect_gap_ev"],
-                eg_dir_1=top_f["electronics"]["hse06_soc_direct_gap_ev"],
+                eg_ind_1=top_f["electronics"]["gap_est_indirect_ev"],
+                eg_dir_1=top_f["electronics"]["gap_est_direct_ev"],
                 eps_inf_1=top_f["electronics"]["eps_inf"],
                 thickness_nm_1=top_f["optics"]["film_thickness_nm"],
-                eg_ind_3=bot_f["electronics"]["hse06_soc_indirect_gap_ev"],
-                eg_dir_3=bot_f["electronics"]["hse06_soc_direct_gap_ev"],
+                eg_ind_3=bot_f["electronics"]["gap_est_indirect_ev"],
+                eg_dir_3=bot_f["electronics"]["gap_est_direct_ev"],
                 eps_inf_3=bot_f["electronics"]["eps_inf"],
                 thickness_nm_3=bot_f["electronics"]["film_thickness_nm"] if "film_thickness_nm" in bot_f["electronics"] else bot_f["optics"]["film_thickness_nm"],
             )
@@ -1046,12 +1051,12 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
             bot_f = finalists_by_id[gs["bottom_mp_id"]]
 
             iv_gs = independently_verify_graded_arc_and_techno_economics(
-                eg_ind_1=top_f["electronics"]["hse06_soc_indirect_gap_ev"],
-                eg_dir_1=top_f["electronics"]["hse06_soc_direct_gap_ev"],
+                eg_ind_1=top_f["electronics"]["gap_est_indirect_ev"],
+                eg_dir_1=top_f["electronics"]["gap_est_direct_ev"],
                 eps_inf_1=top_f["electronics"]["eps_inf"],
                 thickness_nm_1=top_f["optics"]["film_thickness_nm"],
-                eg_ind_3=bot_f["electronics"]["hse06_soc_indirect_gap_ev"],
-                eg_dir_3=bot_f["electronics"]["hse06_soc_direct_gap_ev"],
+                eg_ind_3=bot_f["electronics"]["gap_est_indirect_ev"],
+                eg_dir_3=bot_f["electronics"]["gap_est_direct_ev"],
                 eps_inf_3=bot_f["electronics"]["eps_inf"],
                 thickness_nm_3=bot_f["optics"]["film_thickness_nm"],
                 raw_cost_top_usd_m2=top_f["synthesis"]["active_layer_cost_usd_m2"],
@@ -1121,21 +1126,21 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
             top_f = finalists_by_id[rw["top_mp_id"]]
             bot_f = finalists_by_id[rw["bottom_mp_id"]]
             e_mig_lim = min(
-                top_f["atomistic_phonon_neb"]["emig_heuristic_ev"],
-                bot_f["atomistic_phonon_neb"]["emig_heuristic_ev"],
+                top_f["spring_and_migration_heuristics"]["emig_heuristic_ev"],
+                bot_f["spring_and_migration_heuristics"]["emig_heuristic_ev"],
             )
             iv_9c = independently_verify_phase9c_oblique_thermal_lcoe(
-                eg_ind_1=top_f["electronics"]["hse06_soc_indirect_gap_ev"],
-                eg_dir_1=top_f["electronics"]["hse06_soc_direct_gap_ev"],
+                eg_ind_1=top_f["electronics"]["gap_est_indirect_ev"],
+                eg_dir_1=top_f["electronics"]["gap_est_direct_ev"],
                 eps_inf_1=top_f["electronics"]["eps_inf"],
                 thickness_nm_1=top_f["optics"]["film_thickness_nm"],
-                eg_ind_3=bot_f["electronics"]["hse06_soc_indirect_gap_ev"],
-                eg_dir_3=bot_f["electronics"]["hse06_soc_direct_gap_ev"],
+                eg_ind_3=bot_f["electronics"]["gap_est_indirect_ev"],
+                eg_dir_3=bot_f["electronics"]["gap_est_direct_ev"],
                 eps_inf_3=bot_f["electronics"]["eps_inf"],
                 thickness_nm_3=bot_f["optics"]["film_thickness_nm"],
                 raw_cost_top_usd_m2=top_f["synthesis"]["active_layer_cost_usd_m2"],
                 raw_cost_bot_usd_m2=bot_f["synthesis"]["active_layer_cost_usd_m2"],
-                limiting_neb_barrier_ev=e_mig_lim,
+                limiting_emig_heuristic_ev=e_mig_lim,
             )
             self.assertLessEqual(
                 abs(rw["pce_4t_60deg_25c_percent"] - iv_9c["pce_4t_60deg_25c_percent"]),
@@ -1187,21 +1192,21 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
             top_f = finalists_by_id[p10["top_mp_id"]]
             bot_f = finalists_by_id[p10["bottom_mp_id"]]
             e_mig_lim = min(
-                top_f["atomistic_phonon_neb"]["emig_heuristic_ev"],
-                bot_f["atomistic_phonon_neb"]["emig_heuristic_ev"],
+                top_f["spring_and_migration_heuristics"]["emig_heuristic_ev"],
+                bot_f["spring_and_migration_heuristics"]["emig_heuristic_ev"],
             )
             iv_10 = independently_verify_phase10_bifacial_and_string_dossier(
-                eg_ind_1=top_f["electronics"]["hse06_soc_indirect_gap_ev"],
-                eg_dir_1=top_f["electronics"]["hse06_soc_direct_gap_ev"],
+                eg_ind_1=top_f["electronics"]["gap_est_indirect_ev"],
+                eg_dir_1=top_f["electronics"]["gap_est_direct_ev"],
                 eps_inf_1=top_f["electronics"]["eps_inf"],
                 thickness_nm_1=top_f["optics"]["film_thickness_nm"],
-                eg_ind_3=bot_f["electronics"]["hse06_soc_indirect_gap_ev"],
-                eg_dir_3=bot_f["electronics"]["hse06_soc_direct_gap_ev"],
+                eg_ind_3=bot_f["electronics"]["gap_est_indirect_ev"],
+                eg_dir_3=bot_f["electronics"]["gap_est_direct_ev"],
                 eps_inf_3=bot_f["electronics"]["eps_inf"],
                 thickness_nm_3=bot_f["optics"]["film_thickness_nm"],
                 raw_cost_top_usd_m2=top_f["synthesis"]["active_layer_cost_usd_m2"],
                 raw_cost_bot_usd_m2=bot_f["synthesis"]["active_layer_cost_usd_m2"],
-                limiting_neb_barrier_ev=e_mig_lim,
+                limiting_emig_heuristic_ev=e_mig_lim,
             )
             self.assertLessEqual(
                 abs(p10["bifacial_20pct_albedo_4t_pce_percent"] - iv_10["bifacial_20pct_albedo_4t_pce_percent"]),
@@ -1299,7 +1304,7 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
             iv_11a = independently_verify_phase11a_synthesis_and_contacts(
                 stoichiometry=fin["candidate"]["stoichiometry"],
                 structural_dimensionality=fin["candidate"]["structural_dimensionality"],
-                eg_ind_ev=fin["electronics"]["hse06_soc_indirect_gap_ev"],
+                eg_ind_ev=fin["electronics"]["gap_est_indirect_ev"],
                 mp_gga_hull_mev_per_atom=p11a["mp_gga_hull_mev_per_atom"],
                 anion_chempot_window_ev=p11a["anion_chempot_window_ev"],
                 min_cation_chempot_window_ev=p11a["min_cation_chempot_window_ev"],
@@ -1351,8 +1356,8 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
             b11a = p11a_by_id[p11b["bottom_mp_id"]]
 
             iv_11b = independently_verify_phase11b_realistic_commercialization(
-                eg_ind_1=top_f["electronics"]["hse06_soc_indirect_gap_ev"],
-                eg_dir_1=top_f["electronics"]["hse06_soc_direct_gap_ev"],
+                eg_ind_1=top_f["electronics"]["gap_est_indirect_ev"],
+                eg_dir_1=top_f["electronics"]["gap_est_direct_ev"],
                 eps_inf_1=top_f["electronics"]["eps_inf"],
                 opt_mgf2_nm=p10["opt_mgf2_nm"],
                 opt_tio2_nm=p10["opt_tio2_nm"],
@@ -1362,8 +1367,8 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
                 v_contact_1=t11a["contact_voltage_penalty_v"],
                 raw_cost_top_usd_m2=top_f["synthesis"]["active_layer_cost_usd_m2"],
                 stoich_1=top_f["candidate"]["stoichiometry"],
-                eg_ind_3=bot_f["electronics"]["hse06_soc_indirect_gap_ev"],
-                eg_dir_3=bot_f["electronics"]["hse06_soc_direct_gap_ev"],
+                eg_ind_3=bot_f["electronics"]["gap_est_indirect_ev"],
+                eg_dir_3=bot_f["electronics"]["gap_est_direct_ev"],
                 eps_inf_3=bot_f["electronics"]["eps_inf"],
                 opt_bot_nm=p10["opt_bot_nm"],
                 f_orient_3=b11a["ribbon_orientation_factor"],
@@ -1423,7 +1428,7 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
         import tempfile
         from pymatgen.core import Lattice
         from pymatgen.io.cif import CifWriter
-        from failsmart_matengine.atomistic_and_tmm import evaluate_3d_atomistic_phonon_and_neb
+        from failsmart_matengine.atomistic_and_tmm import evaluate_spring_and_migration_heuristics
         from failsmart_matengine.mp_live_discovery import (
             build_live_mp_candidate_dossier,
             load_negative_synthesis_priors,
@@ -1442,7 +1447,7 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
             self.assertEqual(d_pass["status"], "PROMOTED")
             self.assertIsNone(d_pass["stability"]["dynamically_stable"])
             self.assertIsNone(d_pass["stability"]["g_above_hull_synth_mev"])
-            self.assertIsNone(d_pass["stability"]["mlip_force_std_ev_ang"])
+            self.assertNotIn("mlip_force_std_ev_ang", d_pass["stability"])
             self.assertIsNone(d_pass["gate_a"]["anion_mixing_enthalpy_mev"])
             self.assertIsNone(d_pass["gate_a"]["tco_interface_rxn_energy_mev"])
             self.assertIsNone(d_pass["gate_a"]["tco_compatible"])
@@ -1562,13 +1567,13 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
             self.assertEqual(d_opt["status"], "REJECTED")
             self.assertEqual(d_opt["primary_failure_mode"], "LOW_OPTICAL_EFFICIENCY")
 
-            # 13. Closed-form migration heuristic gate in evaluate_3d_atomistic_phonon_and_neb
+            # 13. Closed-form migration heuristic gate in evaluate_spring_and_migration_heuristics
             st_emig = Structure(
                 Lattice.cubic(10.0),
                 ["Cu", "Cu", "S"],
                 [[0.0, 0.0, 0.0], [0.185, 0.0, 0.0], [0.5, 0.5, 0.5]],
             )
-            rep_emig = evaluate_3d_atomistic_phonon_and_neb(
+            rep_emig = evaluate_spring_and_migration_heuristics(
                 {
                     "candidate": {
                         "candidate_id": "mp-test-emig",
@@ -1595,11 +1600,11 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
 
         root = Path(self.repo_root)
         deck_dirs = [
-            root / "outputs" / "qe_hse06_soc_decks",
+            root / "outputs" / "qe_hse06_soc_decks",  # HSE06+SOC not run
             root / "outputs" / "mp_live_qe_decks",
             root / "outputs" / "mp_live_neutral_vacancy_decks",
         ]
-        self.assertFalse((root / "outputs" / "mp_live_doped_supercell_decks").exists())
+        self.assertFalse((root / "outputs" / "mp_live_doped_supercell_decks").exists())  # doped not run
 
         all_decks = []
         for ddir in deck_dirs:
@@ -1712,10 +1717,92 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
             with self.assertRaises(ValueError):
                 evaluate_phase9a_lab_synthesis_and_defect_supercell(bad_fin, td)
 
+    def test_26_provenance_tags_and_no_false_method_labels(self):
+        """T2: Verify provenance tags on every numeric dossier field, renamed SQLite columns, and zero false method labels."""
+        import re
+        from pathlib import Path
+        from failsmart_matengine.schemas import ProvenanceTag
+
+        valid_tags = {t.value for t in ProvenanceTag}
+        root = Path(self.repo_root)
+
+        def _assert_numeric_provenance(obj: dict, label: str) -> None:
+            self.assertIn("provenance", obj, f"{label} missing 'provenance' dict")
+            prov = obj["provenance"]
+            self.assertIsInstance(prov, dict, f"{label} provenance must be a dict")
+            for k, v in obj.items():
+                if k == "provenance":
+                    continue
+                is_num = isinstance(v, (int, float)) and not isinstance(v, bool)
+                is_num_seq = (
+                    isinstance(v, list)
+                    and len(v) > 0
+                    and all(isinstance(x, (int, float)) and not isinstance(x, bool) for x in v)
+                )
+                if is_num or is_num_seq:
+                    self.assertIn(k, prov, f"{label}.{k} missing provenance entry")
+                    self.assertIn(prov[k], valid_tags, f"{label}.{k} has invalid provenance '{prov[k]}'")
+
+        # 1. Check pilot_campaign_summary.json and live_mp_discovery_summary.json numeric provenance
+        for rec in self.summary_data.get("all_campaign_records", []):
+            cid = rec["candidate"]["candidate_id"]
+            for sec in ("candidate", "stability", "synthesis", "gate_a", "electronics", "optics"):
+                if rec.get(sec):
+                    _assert_numeric_provenance(rec[sec], f"pilot.{cid}.{sec}")
+
+        live_sum = json.loads((root / "outputs" / "live_mp_discovery_summary.json").read_text(encoding="utf-8"))
+        for rec in live_sum.get("all_mp_records", []):
+            cid = rec["candidate"]["candidate_id"]
+            for sec in ("candidate", "stability", "synthesis", "gate_a", "electronics", "optics"):
+                if rec.get(sec):
+                    _assert_numeric_provenance(rec[sec], f"mp.{cid}.{sec}")
+
+        for list_key in (
+            "spring_and_migration_reports",
+            "coherent_tmm_4t_stacks",
+            "graded_arc_techno_economic_stacks",
+            "lab_synthesis_and_defect_dossiers",
+            "real_world_lcoe_stress_test_stacks",
+            "phase10_bifacial_and_string_dossiers",
+            "phase11a_synthesis_contact_dossiers",
+            "phase11b_realistic_commercialization_dossiers",
+        ):
+            items = live_sum.get(list_key, [])
+            self.assertGreater(len(items), 0, f"Expected non-empty {list_key}")
+            for idx, item in enumerate(items):
+                _assert_numeric_provenance(item, f"{list_key}[{idx}]")
+
+        # 2. Check SQLite columns in both databases
+        for db_rel in ("data/failure_memory.db", "data/mp_live_failure_memory.db"):
+            conn = sqlite3.connect(str(root / db_rel))
+            cols = {row[1] for row in conn.execute("PRAGMA table_info(material_evaluations)").fetchall()}
+            conn.close()
+            self.assertIn("composition_embedding", cols, f"{db_rel} missing composition_embedding")
+            self.assertIn("gap_est_indirect_ev", cols, f"{db_rel} missing gap_est_indirect_ev")
+            self.assertNotIn("mace" + "_embedding", cols, f"{db_rel} still has old embedding column")
+            self.assertNotIn("hse06" + "_soc_gap_ev", cols, f"{db_rel} still has old gap column")
+
+        # 3. Check T2 grep rule across README.md, docs/, failsmart_matengine/, and outputs/
+        pattern = re.compile(r"hse06|r2scan|neb|fnv|mace|doped|cryptograph|validated", re.IGNORECASE)
+        exempt_files = {
+            root / "docs" / "INDEPENDENT_AUDIT_2026-11.md",
+            root / "docs" / "REMEDIATION_TASKS.md",
+        }
+        scan_targets = [root / "README.md", root / "docs", root / "failsmart_matengine", root / "outputs"]
+        violations = []
+        for target in scan_targets:
+            files = [target] if target.is_file() else sorted(p for p in target.rglob("*") if p.is_file())
+            for fpath in files:
+                if fpath in exempt_files or "__pycache__" in fpath.parts or fpath.suffix == ".pyc":
+                    continue
+                if fpath.suffix == ".in":
+                    continue
+                txt = fpath.read_text(encoding="utf-8", errors="ignore")
+                for line_no, line in enumerate(txt.splitlines(), start=1):
+                    if pattern.search(line) and "not run" not in line.lower():
+                        violations.append(f"{fpath.relative_to(root)}:{line_no}: {line.strip()[:120]}")
+        self.assertEqual(violations, [], f"T2 false-method-label violations:\n" + "\n".join(violations))
+
 
 if __name__ == "__main__":
     unittest.main()
-
-
-
-

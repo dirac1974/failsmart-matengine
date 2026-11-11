@@ -41,7 +41,7 @@ class ContrastiveFailureLedger:
                     space_group_number INTEGER,
                     structural_dimensionality TEXT,
                     cif_structure TEXT,
-                    mace_embedding TEXT NOT NULL,
+                    composition_embedding TEXT NOT NULL,
                     stage_reached INTEGER NOT NULL,
                     status TEXT NOT NULL,
                     primary_failure_mode TEXT,
@@ -51,7 +51,7 @@ class ContrastiveFailureLedger:
                     competing_impurity_phases TEXT,
                     pourbaix_max_dissolution_mol_l REAL,
                     active_layer_cost_usd_m2 REAL,
-                    hse06_soc_gap_ev REAL,
+                    gap_est_indirect_ev REAL,
                     direct_gap_ev REAL,
                     soc_splitting_ev REAL,
                     max_carrier_eff_mass REAL,
@@ -201,7 +201,7 @@ class ContrastiveFailureLedger:
                 "competing_impurity_phases": ["ZrO2", "BaS", "BaSO4"],
                 "pourbaix_max_dissolution_mol_l": 1e-8,
                 "active_layer_cost_usd_m2": 0.14,
-                "hse06_soc_gap_ev": 1.82,
+                "gap_est_indirect_ev": 1.82,
                 "direct_gap_ev": 1.82,
                 "soc_splitting_ev": 0.08,
                 "max_carrier_eff_mass": 0.32,
@@ -232,7 +232,7 @@ class ContrastiveFailureLedger:
                 "competing_impurity_phases": ["BiI3"],
                 "pourbaix_max_dissolution_mol_l": 4.2e-4,
                 "active_layer_cost_usd_m2": 0.31,
-                "hse06_soc_gap_ev": 2.04,
+                "gap_est_indirect_ev": 2.04,
                 "direct_gap_ev": 2.18,
                 "soc_splitting_ev": 0.62,
                 "max_carrier_eff_mass": 2.45,
@@ -263,7 +263,7 @@ class ContrastiveFailureLedger:
                 "competing_impurity_phases": ["PbI2", "Bi2S3"],
                 "pourbaix_max_dissolution_mol_l": 2.8e-3,
                 "active_layer_cost_usd_m2": 0.22,
-                "hse06_soc_gap_ev": 1.71,
+                "gap_est_indirect_ev": 1.71,
                 "direct_gap_ev": 1.83,
                 "soc_splitting_ev": 0.54,
                 "max_carrier_eff_mass": 0.92,
@@ -303,7 +303,7 @@ class ContrastiveFailureLedger:
                 competing_impurity_phases=item["competing_impurity_phases"],
                 pourbaix_max_dissolution_mol_l=item["pourbaix_max_dissolution_mol_l"],
                 active_layer_cost_usd_m2=item["active_layer_cost_usd_m2"],
-                hse06_soc_gap_ev=item["hse06_soc_gap_ev"],
+                gap_est_indirect_ev=item["gap_est_indirect_ev"],
                 direct_gap_ev=item["direct_gap_ev"],
                 soc_splitting_ev=item["soc_splitting_ev"],
                 max_carrier_eff_mass=item["max_carrier_eff_mass"],
@@ -335,7 +335,7 @@ class ContrastiveFailureLedger:
         competing_impurity_phases: List[str],
         pourbaix_max_dissolution_mol_l: float,
         active_layer_cost_usd_m2: float,
-        hse06_soc_gap_ev: Optional[float] = None,
+        gap_est_indirect_ev: Optional[float] = None,
         direct_gap_ev: Optional[float] = None,
         soc_splitting_ev: Optional[float] = None,
         max_carrier_eff_mass: Optional[float] = None,
@@ -353,10 +353,10 @@ class ContrastiveFailureLedger:
                 INSERT OR REPLACE INTO material_evaluations (
                     candidate_id, formula_reduced, target_layer, crystal_family,
                     space_group_number, structural_dimensionality, cif_structure,
-                    mace_embedding, stage_reached, status, primary_failure_mode,
+                    composition_embedding, stage_reached, status, primary_failure_mode,
                     e_above_hull_mev, omega_min_heuristic_thz, rxn_temp_celsius,
                     competing_impurity_phases, pourbaix_max_dissolution_mol_l,
-                    active_layer_cost_usd_m2, hse06_soc_gap_ev, direct_gap_ev,
+                    active_layer_cost_usd_m2, gap_est_indirect_ev, direct_gap_ev,
                     soc_splitting_ev, max_carrier_eff_mass, frohlich_alpha,
                     deepest_defect_ev, slme_percent, sub_bandgap_transmittance_percent,
                     tandem_4t_efficiency_percent, adversarial_notes, full_dossier_json
@@ -380,7 +380,7 @@ class ContrastiveFailureLedger:
                     json.dumps(competing_impurity_phases),
                     pourbaix_max_dissolution_mol_l,
                     active_layer_cost_usd_m2,
-                    hse06_soc_gap_ev,
+                    gap_est_indirect_ev,
                     direct_gap_ev,
                     soc_splitting_ev,
                     max_carrier_eff_mass,
@@ -396,7 +396,7 @@ class ContrastiveFailureLedger:
             conn.commit()
 
     def score_contrastive_risk(self, query_embedding: List[float]) -> Tuple[float, Optional[str], float]:
-        """Compute contrastive synthesizability score and nearest failure mode in latent space."""
+        """Compute contrastive synthesizability score and nearest failure mode in composition-embedding space."""
         q = np.array(query_embedding, dtype=np.float64)
         q_norm = np.linalg.norm(q)
         if q_norm < 1e-9:
@@ -405,7 +405,7 @@ class ContrastiveFailureLedger:
 
         with self._connect() as conn:
             rows = conn.execute(
-                "SELECT formula_reduced, status, primary_failure_mode, mace_embedding FROM material_evaluations"
+                "SELECT formula_reduced, status, primary_failure_mode, composition_embedding FROM material_evaluations"
             ).fetchall()
 
         max_fail_sim = 0.0
@@ -413,7 +413,7 @@ class ContrastiveFailureLedger:
         for r in rows:
             if r["status"] != "REJECTED":
                 continue
-            emb = np.array(json.loads(r["mace_embedding"]), dtype=np.float64)
+            emb = np.array(json.loads(r["composition_embedding"]), dtype=np.float64)
             sim = float(np.dot(q, emb))
             if sim > max_fail_sim:
                 max_fail_sim = sim
@@ -432,7 +432,7 @@ class ContrastiveFailureLedger:
         for r in rows:
             d = dict(r)
             d["competing_impurity_phases"] = json.loads(d["competing_impurity_phases"] or "[]")
-            d.pop("mace_embedding", None)
+            d.pop("composition_embedding", None)
             d.pop("full_dossier_json", None)
             result.append(d)
         return result

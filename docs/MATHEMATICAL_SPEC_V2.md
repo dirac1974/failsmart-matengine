@@ -1,7 +1,7 @@
 # FailSmart-MatEngine v2.0 — Blinded Mathematical & Physical Specification
 
 > [!WARNING]
-> **Read first (independent audit, 2026-11):** the formulas here are what the code evaluates. Several are heuristics named after the first-principles methods they stand in for (HSE06+SOC gap, NEB barrier, dynamical matrix, FNV correction); none has been calibrated against reference data. See [`INDEPENDENT_AUDIT_2026-11.md`](INDEPENDENT_AUDIT_2026-11.md) and [`REMEDIATION_TASKS.md`](REMEDIATION_TASKS.md).
+> **Read first (independent audit, 2026-11):** the formulas here are what the code evaluates. Several were originally named after first-principles methods that are not run in this repository (HSE06+SOC gap, NEB barrier, DFT dynamical matrix, FNV correction — all not run); they have been renamed to stand-in heuristic identifiers (`gap_est_*`, `spring_model_gamma_freq_thz`, `emig_heuristic_ev`, `point_charge_image_estimate_ev`). See [`INDEPENDENT_AUDIT_2026-11.md`](INDEPENDENT_AUDIT_2026-11.md) and [`REMEDIATION_TASKS.md`](REMEDIATION_TASKS.md).
 
 > **FIREWALL MANDATE:** Primary Engineers (`physics_engine_engineer`, `optics_kinetics_engineer`) and the Independent Redundancy Verifier (`redundancy_verifier_alpha`) MUST implement solely from the physical equations, constants, and module contracts in this specification plus `failsmart_matengine/schemas.py`.
 > - Empirical efficiency multipliers (such as `1.28x` or `0.80x`) are **strictly forbidden**.
@@ -149,9 +149,9 @@ To eliminate perovskite-like $J\text{–}V$ hysteresis and metallic $\text{Cu}^0
 
 ---
 
-## 6. 3D Atomistic Harmonic Dynamical Matrix $\mathbf{D}(\mathbf{q}=\mathbf{0})$ & 3D Saddle-Point NEB Ion Migration (v4.0)
+## 6. 3D Pair-Spring Dynamical Matrix $\mathbf{D}(\mathbf{q}=\mathbf{0})$ & Closed-Form Steric Ion-Migration Heuristic (v4.0; DFT Phonons and NEB not run)
 
-### 6.1 Exact $3N \times 3N$ Harmonic Dynamical Matrix at $\Gamma$ ($\mathbf{q} = \mathbf{0}$)
+### 6.1 Exact $3N \times 3N$ Pair-Spring Dynamical Matrix at $\Gamma$ ($\mathbf{q} = \mathbf{0}$)
 Given a 3D periodic crystal structure (`pymatgen.core.Structure` parsed from `cif_content` with $N = \text{len(struct)}$ sites) and formal oxidation states $z_i$:
 1. **Periodic Cation-Anion & Interlayer Bond Network ($r_{\text{cut}} = 4.25\text{ \AA}$):**
    * For every site $i \in \{0, \dots, N-1\}$, enumerate all periodic neighbor images $(j, \mathbf{R})$ within $0.50\text{ \AA} < r_{ij} \le 4.25\text{ \AA}$ via `struct.get_neighbors(struct[i], r=4.25)`.
@@ -159,10 +159,10 @@ Given a 3D periodic crystal structure (`pymatgen.core.Structure` parsed from `ci
    * Reference bond-valence length $r_{0,ij}$ from `BVS_R0_TABLE` if $(s_i, s_j)$ or $(s_j, s_i)$ is in `BVS_R0_TABLE`, else sum of covalent/ionic radii $r_{\text{cov}}(s_i) + r_{\text{cov}}(s_j)$ (with standard reference $r_{0,\text{default}} = 2.45\text{ \AA}$).
    * Longitudinal Born-Mayer bond-stretching stiffness ($k_{\parallel, ij}$ in $\text{eV/\AA}^2$) and transverse bond-bending stiffness ($k_{\perp, ij}$ in $\text{eV/\AA}^2$):
      $$k_{\parallel, ij} = 48.0 \cdot \exp\!\left(\frac{r_{0,ij} - r_{ij}}{0.37}\right), \quad k_{\perp, ij} = 0.18 \cdot k_{\parallel, ij}$$
-2. **$3N \times 3N$ Force-Constant Hessian $\mathbf{\Phi}$ (Satisfying Exact Acoustic Sum Rule):**
+2. **$3N \times 3N$ Force-Constant Hessian $\mathbf{\Phi}$ (Translational Sum Rule by Construction):**
    * For each neighbor bond $(i, j, \hat{\mathbf{u}}_{ij})$ ($3\times 3$ pairwise block $\mathbf{K}_{ij} = (k_{\parallel, ij} - k_{\perp, ij})\,\hat{\mathbf{u}}_{ij}\hat{\mathbf{u}}_{ij}^T + k_{\perp, ij}\,\mathbf{I}_3$):
      * Off-diagonal block $(3i:3i+3,\; 3j:3j+3)$: subtract $\mathbf{K}_{ij}$.
-     * On-diagonal self-block $(3i:3i+3,\; 3i:3i+3)$: add $+\mathbf{K}_{ij}$ (enforcing exact translational invariance $\sum_j \mathbf{\Phi}_{ij} = \mathbf{0}$).
+     * On-diagonal self-block $(3i:3i+3,\; 3i:3i+3)$: add $+\mathbf{K}_{ij}$ (enforcing translational invariance $\sum_j \mathbf{\Phi}_{ij} = \mathbf{0}$ by construction).
    * Symmetrize $\mathbf{\Phi} \leftarrow \frac{1}{2}(\mathbf{\Phi} + \mathbf{\Phi}^T)$.
 3. **Mass-Weighted Dynamical Matrix $\mathbf{D}(\mathbf{0})$ & THz Conversion:**
    * Using `IUPAC_ATOMIC_MASSES[el]` ($m_i$ in amu):
@@ -174,22 +174,21 @@ Given a 3D periodic crystal structure (`pymatgen.core.Structure` parsed from `ci
      $$f_{\text{THz}} = \frac{1}{2\pi} \sqrt{\frac{1.602176634\times 10^{-19}\text{ J/eV}}{1.66053906660\times 10^{-27}\text{ kg/amu} \times 10^{-20}\text{ m}^2/\text{\AA}^2}} \times 10^{-12} = 15.633302\text{ THz}$$
      $$\omega_m = \text{sign}(\lambda_m)\cdot 15.633302 \cdot \sqrt{|\lambda_m|} \quad [\text{THz}]$$
    * Modes $m = 0, 1, 2$ are the 3 acoustic translational zero-modes ($|\omega_m| < 0.05\text{ THz}$).
-   * Reported optical phonon metrics (for $m \ge 3$):
-     * `gamma_min_optical_freq_thz`: $\text{round}(\omega_3, 4)$
-     * `gamma_max_lo_freq_thz`: $\text{round}(\omega_{3N-1}, 4)$
-     * `imaginary_mode_count`: count of modes $m \ge 3$ with $\omega_m < -0.05\text{ THz}$ (must be `0` for dynamical stability).
+   * Reported pair-spring $\Gamma$-point optical frequency bounds (for $m \ge 3$):
+     * `spring_model_gamma_freq_thz`: $[\text{round}(\omega_3, 4),\; \text{round}(\omega_{3N-1}, 4)]$
+     * `dynamically_stable`: `None` (positive pair springs yield positive semi-definite $\mathbf{\Phi}$ by construction; DFT phonon dispersion not run).
 
-### 6.2 3D Saddle-Point NEB Ion-Migration Pathway Solver
+### 6.2 Closed-Form Steric Ion-Migration Heuristic (NEB not run)
 1. **Mobile Species & Shortest Periodic Hop Identification:**
    * Priority order of migrating species $s_{\text{mig}}$: `"Cu"` if `"Cu"` in stoichiometry, else `"Ag"` if `"Ag"` in stoichiometry, else `"O"` if `"O"` in stoichiometry, else `"S"` if `"S"` in stoichiometry, else `"Se"`.
    * Find the shortest periodic hop between two sites of species $s_{\text{mig}}$ in `struct` with $2.20\text{ \AA} \le d_{\text{hop}} \le 6.50\text{ \AA}$ via `struct.get_neighbors` over all sites of species $s_{\text{mig}}$ (let $\mathbf{r}_A$ be the origin site Cartesian coordinate and $\mathbf{r}_B$ be the target periodic image Cartesian coordinate, $d_{\text{hop}} = \|\mathbf{r}_B - \mathbf{r}_A\|$).
-2. **11-Image Linearly Interpolated Pathway & Steric Cage Bottleneck:**
-   * At the midpoint saddle image $\mathbf{r}_{\text{mid}} = \frac{1}{2}(\mathbf{r}_A + \mathbf{r}_B)$, compute the distance to all surrounding host framework atoms (excluding the endpoint images $\mathbf{r}_A$ and $\mathbf{r}_B$ within $0.25\text{ \AA}$) within $5.0\text{ \AA}$. Let $d_{\text{cage,min}}$ be the minimum distance from $\mathbf{r}_{\text{mid}}$ to any surrounding host atom (`bottleneck_clearance_ang = round(d_cage_min, 4)`).
+2. **Midpoint Steric Cage Bottleneck & Closed-Form Heuristic:**
+   * At the geometric hop midpoint $\mathbf{r}_{\text{mid}} = \frac{1}{2}(\mathbf{r}_A + \mathbf{r}_B)$, compute the distance to all surrounding host framework atoms (excluding the endpoint images $\mathbf{r}_A$ and $\mathbf{r}_B$ within $0.25\text{ \AA}$) within $5.0\text{ \AA}$. Let $d_{\text{cage,min}}$ be the minimum distance from $\mathbf{r}_{\text{mid}}$ to any surrounding host atom (`bottleneck_clearance_ang = round(d_cage_min, 4)`).
    * Let $f_{\text{oxide}} = n_{\text{O}} / N_{\text{total}}$ and $f_{\text{mobile}} = (n_{\text{Cu}} + n_{\text{Ag}}) / N_{\text{total}}$.
-   * The 11-image ($s_k = k/10,\; k=0,\dots,10$) steric + electrostatic migration profile $E_{\text{NEB}}(s)$ has saddle barrier at $s = 0.5$:
-     $$E_{\text{mig}}^{\text{NEB}} = \text{round}\!\left(\text{clip}\!\left(0.42 + 0.14\,d_{\text{hop}} + \frac{0.68}{\max(1.20, d_{\text{cage,min}})^2} + 0.28\,f_{\text{oxide}} - 0.22\,f_{\text{mobile}},\; 0.35,\; 1.45\right),\; 4\right)\text{ [eV]}$$
+   * Closed-form steric + composition migration barrier heuristic `emig_heuristic_ev`:
+     $$E_{\text{mig}}^{\text{heur}} = \text{round}\!\left(\text{clip}\!\left(0.42 + 0.14\,d_{\text{hop}} + \frac{0.68}{\max(1.20, d_{\text{cage,min}})^2} + 0.28\,f_{\text{oxide}} - 0.22\,f_{\text{mobile}},\; 0.35,\; 1.45\right),\; 4\right)\text{ [eV]}$$
    * Room-temperature ($T = 300\text{ K}$) Vineyard-Arrhenius ionic diffusivity ($\nu_0 = 10^{12}\text{ s}^{-1}$, $1\text{ \AA}^2 = 10^{-16}\text{ cm}^2$):
-     $$D_{\text{ion}}(300\text{ K}) = \frac{1}{6} \nu_0 \left(d_{\text{hop}}^2 \times 10^{-16}\right) \exp\!\left(-\frac{E_{\text{mig}}^{\text{NEB}} \cdot q}{k_B \cdot 300.0}\right)\text{ [cm}^2\text{/s]}$$
+     $$D_{\text{ion}}(300\text{ K}) = \frac{1}{6} \nu_0 \left(d_{\text{hop}}^2 \times 10^{-16}\right) \exp\!\left(-\frac{E_{\text{mig}}^{\text{heur}} \cdot q}{k_B \cdot 300.0}\right)\text{ [cm}^2\text{/s]}$$
 
 ---
 
@@ -342,9 +341,9 @@ For both 2-Layer ($\eta = \eta_{\text{2L}}, N=2, \Delta C = \Delta C_{\text{2L}}
      $$\beta_{\text{4T,rel}} = \frac{\eta_{\text{4T}}(65^\circ\text{C}) - \eta_{\text{4T}}(25^\circ\text{C})}{40.0 \cdot \eta_{\text{4T}}(25^\circ\text{C})} \times 100\text{ [\%/K]}$$
 
 3. **25-Year Arrhenius Ion-Migration Reliability & Real-World LCOE ($\$/\text{kWh}$ and $\text{cents/kWh}$):**
-   * Given the 11-image NEB migration barrier $E_{\text{mig}}^{\text{NEB}}\text{ [eV]}$ of the limiting subcell (`min(E_mig_top, E_mig_bot)`), the annual kinetic + environmental degradation rate $r_{\text{deg}}\text{ [yr}^{-1}\text{]}$ at field temperature $T_{\text{field}} = 318.15\text{ K}$ ($45^\circ\text{C}$) is:
-     $$r_{\text{deg}} = 0.0035 + 0.0010 \cdot \exp\!\left(-\frac{E_{\text{mig}}^{\text{NEB}} - 0.65}{k_{\text{B}} T_{\text{field}}}\right)$$
-     *(For immobile lattices with $E_{\text{mig}}^{\text{NEB}} \ge 0.99\text{ eV}$, the exponential ionic drift term vanishes to $< 10^{-8}\text{ yr}^{-1}$, locking degradation at the $0.35\%/\text{yr}$ glass-encapsulated baseline and retaining $91.60\%$ of initial power at Year 25).*
+   * Given the closed-form migration barrier heuristic $E_{\text{mig}}^{\text{heur}}\text{ [eV]}$ of the limiting subcell (`limiting_emig_heuristic_ev = min(E_mig_top, E_mig_bot)`; NEB not run), the annual kinetic + environmental degradation rate $r_{\text{deg}}\text{ [yr}^{-1}\text{]}$ at field temperature $T_{\text{field}} = 318.15\text{ K}$ ($45^\circ\text{C}$) is:
+     $$r_{\text{deg}} = 0.0035 + 0.0010 \cdot \exp\!\left(-\frac{E_{\text{mig}}^{\text{heur}} - 0.65}{k_{\text{B}} T_{\text{field}}}\right)$$
+     *(For immobile lattices with $E_{\text{mig}}^{\text{heur}} \ge 0.99\text{ eV}$, the exponential ionic drift term vanishes to $< 10^{-8}\text{ yr}^{-1}$, locking degradation at the $0.35\%/\text{yr}$ glass-encapsulated baseline and retaining $91.60\%$ of initial power at Year 25).*
    * **25-Year Discounted LCOE ($r_{\text{disc}} = 6.0\%$, Solar Resource $Y_0 = 1800\text{ kWh/kW}_{\text{p}}\text{/yr} = 1.80\text{ kWh/W}_{\text{p}}\text{/yr}$, Inverter/Electronics BOS $C_{\text{BOS,power}} = \$0.22/\text{W}_{\text{p}}$, O&M $C_{\text{OM}} = \$2.50/\text{m}^2/\text{yr}$):**
      * Initial installed CAPEX ($\$/\text{m}^2$) for a stack with module cost $C_{\text{mod}}\text{ [\$/m}^2\text{]}$ and nameplate power $P_{\text{m2}} = 10 \cdot \eta(25^\circ\text{C})\text{ [W}_{\text{p}}\text{/m}^2\text{]}$:
        $$\text{CAPEX}_{\text{m2}} = C_{\text{mod}} + C_{\text{BOS,area}} + C_{\text{BOS,power}} \cdot P_{\text{m2}}$$

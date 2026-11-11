@@ -74,7 +74,7 @@ def evaluate_phase11a_synthesis_and_contacts(
     layer = str(cand["target_layer"])
     stoich: Dict[str, int] = {str(k): int(v) for k, v in cand["stoichiometry"].items()}
     dim = str(cand["structural_dimensionality"])
-    eg_ind = float(elec["hse06_soc_indirect_gap_ev"])
+    eg_ind = float(elec["gap_est_indirect_ev"])
 
     n_tot = sum(stoich.values())
     if len(stoich) >= 4 and ("Cu" in stoich) and ("Sn" in stoich):
@@ -134,7 +134,7 @@ def evaluate_phase11a_synthesis_and_contacts(
             has_critical_mineral=has_crit,
             synthesis_practicality_score_100=None,
             redundancy_verified=True,
-            sha256_signature=sig_hex,
+            sha256_digest=sig_hex,
         )
 
     th_rec = thermo_cache[cid]
@@ -242,7 +242,7 @@ def evaluate_phase11a_synthesis_and_contacts(
         has_critical_mineral=has_crit,
         synthesis_practicality_score_100=round(sps, 2),
         redundancy_verified=verif_ok,
-        sha256_signature=str(blind_11a["sha256_signature"]),
+        sha256_digest=str(blind_11a["sha256_digest"]),
     )
 
 
@@ -344,12 +344,12 @@ def evaluate_phase11b_realistic_commercialization(
     e_bot = bottom_dossier["electronics"]
     s_bot = bottom_dossier["synthesis"]
 
-    eg_ind_1 = float(e_top["hse06_soc_indirect_gap_ev"])
-    eg_dir_1 = float(e_top["hse06_soc_direct_gap_ev"])
+    eg_ind_1 = float(e_top["gap_est_indirect_ev"])
+    eg_dir_1 = float(e_top["gap_est_direct_ev"])
     eps_inf_1 = float(e_top["eps_inf"])
 
-    eg_ind_3 = float(e_bot["hse06_soc_indirect_gap_ev"])
-    eg_dir_3 = float(e_bot["hse06_soc_direct_gap_ev"])
+    eg_ind_3 = float(e_bot["gap_est_indirect_ev"])
+    eg_dir_3 = float(e_bot["gap_est_direct_ev"])
     eps_inf_3 = float(e_bot["eps_inf"])
 
     opt_mgf2 = float(p10_report.opt_mgf2_nm)
@@ -600,5 +600,5 @@ def evaluate_phase11b_realistic_commercialization(
         recommended_commercial_path=rec_path,
         rouard_base_2l_diff_percent=rouard_diff,
         phase11_redundancy_verified=verif_ok,
-        sha256_signature=str(blind_11b["sha256_signature"]),
+        sha256_digest=str(blind_11b["sha256_digest"]),
     )
