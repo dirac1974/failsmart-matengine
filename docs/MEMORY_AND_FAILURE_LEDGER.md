@@ -1,5 +1,8 @@
 # Contrastive Failure Memory Ledger & Negative-Results Architecture
 
+> [!WARNING]
+> **Read first (independent audit, 2026-11):** the ledger is reset at the start of every run, its embedding is a hand-built composition vector (not a MACE embedding), and its score does not feed any gate. Failure labels come from heuristic rules. See [`INDEPENDENT_AUDIT_2026-11.md`](INDEPENDENT_AUDIT_2026-11.md) and [`REMEDIATION_TASKS.md`](REMEDIATION_TASKS.md).
+
 ## 1. Why Negative Results Are First-Class Data
 
 In computational and experimental materials science, over $90\%$ of candidate compounds fail not because of $0\text{ K}$ thermodynamic formation energy, but because of **kinetic impurity traps**, **dynamic phonon collapse**, **superionic ion migration**, **0D/1D small-polaron localization**, **halide photo-segregation**, **aqueous leaching**, or **deep Shockley-Read-Hall (SRH) point defects**.

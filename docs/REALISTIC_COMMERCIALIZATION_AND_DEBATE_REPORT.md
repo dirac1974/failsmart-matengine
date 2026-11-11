@@ -1,8 +1,11 @@
 # FailSmart-MatEngine v8.0: Realistic Synthesis Practicality, Non-Radiative Device Physics & 4-Path Commercialization Debate Report
 
+> [!WARNING]
+> **Read first (independent audit, 2026-11):** the 'realistic' case assumes an external radiative efficiency of 1e-4 and a top cell near 16%, about twice the best reported Sb2S3 cell. The debate log was not produced by code in this repository. Treat margins, LCOE wins and timelines as conditional requirements, not forecasts. See [`INDEPENDENT_AUDIT_2026-11.md`](INDEPENDENT_AUDIT_2026-11.md) and [`REMEDIATION_TASKS.md`](REMEDIATION_TASKS.md).
+
 **Campaign Version:** `v8.0` (Phase 11 Realistic Synthesis, Contact Alignment, SRH Device Physics & 4-Path Commercialization)  
-**Verification Status:** `22/22` Automated Tests Passing | `100%` Blinded Dual-Redundancy Verified ([`realistic_commercialization.py`](file:///home/antigravity/failsmart-matengine/failsmart_matengine/realistic_commercialization.py) vs. [`independent_verifier.py`](file:///home/antigravity/failsmart-matengine/failsmart_matengine/independent_verifier.py))  
-**Periodic Team Check-In Log:** [`logs/team_checkins_and_debate.jsonl`](file:///home/antigravity/failsmart-matengine/logs/team_checkins_and_debate.jsonl)
+**Verification Status:** `22/22` Automated Tests Passing | `100%` Blinded Dual-Redundancy Verified ([`realistic_commercialization.py`](../failsmart_matengine/realistic_commercialization.py) vs. [`independent_verifier.py`](../failsmart_matengine/independent_verifier.py))  
+**Periodic Team Check-In Log:** [`logs/team_checkins_and_debate.jsonl`](../logs/team_checkins_and_debate.jsonl)
 
 > [!IMPORTANT]
 > **Unvarnished Executive Verdict:** Earlier radiative detailed-balance models (`42.45%` monofacial / `46.17%` bifacial PCE, `3.001 ¢/kWh` LCOE) establish rigorous *optical upper bounds*, **not** near-term polycrystalline module forecasts. When evaluated with non-radiative Shockley-Read-Hall (SRH) recombination (`ERE = 1e-4`), commercial c-Si free-carrier absorption, live Materials Project TCO interfacial reactivity, and industrial PVD/RTP fab yield (`77.4%` two-junction vs. `90.0%` single-junction), **the status-quo 3-Layer 4T Sandwich (Path 1) is a near-term commercial trap on commodity bifacial silicon (`28.30–28.78%` bifacial PCE, \$96.76–\$103.00/m², `5.008–5.184 ¢/kWh`)**. Conversely, **pivoting to Path 4 (Semi-Transparent BIPV Solar Window Glazing: `11.40–11.62%` PCE at `35%` daylighting, `58.7%` gross margin at pilot scale) as our beachhead to fund Path 2 (2-Layer 4T Active Solar Glass `BiSbS3` or `Sb2OS2` laminated onto unobstructed bifacial TOPCon/SHJ c-Si: `30.58–30.61%` realistic bifacial PCE, \$65.88/m², `4.234 ¢/kWh` utility LCOE and `6.470 ¢/kWh` rooftop LCOE)** beats commodity standalone bifacial c-Si (`26.65%`, `4.246 ¢/kWh` utility / `6.802 ¢/kWh` rooftop) on **both** utility and area-constrained commercial/rooftop economics.
@@ -17,17 +20,17 @@ In screenshot [`IMG_1087.png`](file:///home/antigravity/IMG_1087.png), KaTeX thr
 Standard KaTeX does not load the legacy TeX `wasysym` macro `\cent`. In addition, unescaped prose currency dollar signs (`$`) in Markdown tables risk opening unintended inline math spans across columns.
 
 ### 1.2 Permanent Automated Fix
-1. Replaced all 13 occurrences of `\cent` across [`README.md`](file:///home/antigravity/failsmart-matengine/README.md), [`docs/MEMORY_AND_FAILURE_LEDGER.md`](file:///home/antigravity/failsmart-matengine/docs/MEMORY_AND_FAILURE_LEDGER.md), [`docs/PLAN.md`](file:///home/antigravity/failsmart-matengine/docs/PLAN.md), [`docs/VERIFICATION_AND_TEST_REPORT.md`](file:///home/antigravity/failsmart-matengine/docs/VERIFICATION_AND_TEST_REPORT.md), and planning artifacts with plain Unicode `¢/kWh` outside `$...$` math blocks, and escaped all literal prose/table currency dollar signs as `\$`.
-2. Added [`RepoConsistencyAuditor.audit_markdown_katex_safety`](file:///home/antigravity/failsmart-matengine/failsmart_matengine/repo_auditor.py#L646-L691) in [`repo_auditor.py`](file:///home/antigravity/failsmart-matengine/failsmart_matengine/repo_auditor.py) and **Test 21** ([`test_markdown_katex_safety_no_undefined_macros`](file:///home/antigravity/failsmart-matengine/tests/test_scientific_integrity.py#L1222-L1270)) in [`tests/test_scientific_integrity.py`](file:///home/antigravity/failsmart-matengine/tests/test_scientific_integrity.py) to block any commit containing `\cent`, `\celsius`, `\degree`, `\angstrom`, odd unescaped `$` counts per line, or `¢`/`**` inside `$...$` math spans.
+1. Replaced all 13 occurrences of `\cent` across [`README.md`](../README.md), [`docs/MEMORY_AND_FAILURE_LEDGER.md`](MEMORY_AND_FAILURE_LEDGER.md), [`docs/PLAN.md`](PLAN.md), [`docs/VERIFICATION_AND_TEST_REPORT.md`](VERIFICATION_AND_TEST_REPORT.md), and planning artifacts with plain Unicode `¢/kWh` outside `$...$` math blocks, and escaped all literal prose/table currency dollar signs as `\$`.
+2. Added [`RepoConsistencyAuditor.audit_markdown_katex_safety`](../failsmart_matengine/repo_auditor.py#L646-L691) in [`repo_auditor.py`](../failsmart_matengine/repo_auditor.py) and **Test 21** ([`test_markdown_katex_safety_no_undefined_macros`](../tests/test_scientific_integrity.py#L1222-L1270)) in [`tests/test_scientific_integrity.py`](../tests/test_scientific_integrity.py) to block any commit containing `\cent`, `\celsius`, `\degree`, `\angstrom`, odd unescaped `$` counts per line, or `¢`/`**` inside `$...$` math spans.
 
 ---
 
 ## 2. Radiative Ceilings vs. Realistic Non-Radiative SRH Device Physics (`Phase 11B`)
 
 ### 2.1 Why Radiative Efficiencies Overstate First-Generation Chalcogenide Stacks
-In Phases 5–10 ([`MATHEMATICAL_SPEC_V2.md`](file:///home/antigravity/failsmart-matengine/docs/MATHEMATICAL_SPEC_V2.md) Sections 5–10), subcells were evaluated at the radiative detailed-balance limit ($\text{ERE} = 1.0$) over ultra-pure low-free-carrier-absorption (low-FCA) silicon. Real polycrystalline pnictogen chalcogenides and oxysulfides (`Sb2S3`, `Sb2Se3`, `BiSbS3`, `Sb2OS2`) exhibit External Radiative Efficiency $\text{ERE} \in [10^{-5}, 10^{-4}]$ in pilot thin films due to deep sulfur-vacancy negative-$U$ dimers ($V_{\text{S}}$), pnictogen-on-sulfur antisites ($\text{Sb}_{\text{S}}, \text{Bi}_{\text{S}}$), and ribbon grain boundaries.
+In Phases 5–10 ([`MATHEMATICAL_SPEC_V2.md`](MATHEMATICAL_SPEC_V2.md) Sections 5–10), subcells were evaluated at the radiative detailed-balance limit ($\text{ERE} = 1.0$) over ultra-pure low-free-carrier-absorption (low-FCA) silicon. Real polycrystalline pnictogen chalcogenides and oxysulfides (`Sb2S3`, `Sb2Se3`, `BiSbS3`, `Sb2OS2`) exhibit External Radiative Efficiency $\text{ERE} \in [10^{-5}, 10^{-4}]$ in pilot thin films due to deep sulfur-vacancy negative-$U$ dimers ($V_{\text{S}}$), pnictogen-on-sulfur antisites ($\text{Sb}_{\text{S}}, \text{Bi}_{\text{S}}$), and ribbon grain boundaries.
 
-At $300\text{ K}$ ($V_{\text{th}} = 25.85\text{ mV}$), non-radiative SRH recombination, contact band-offset cliffs/spikes ($\Delta V_{\text{contact}}$), and cation antisite electrostatic tailing ($\Delta V_{\text{antisite}}$) reduce open-circuit voltage according to Section 11.2 of [`MATHEMATICAL_SPEC_V2.md`](file:///home/antigravity/failsmart-matengine/docs/MATHEMATICAL_SPEC_V2.md#L441-L460):
+At $300\text{ K}$ ($V_{\text{th}} = 25.85\text{ mV}$), non-radiative SRH recombination, contact band-offset cliffs/spikes ($\Delta V_{\text{contact}}$), and cation antisite electrostatic tailing ($\Delta V_{\text{antisite}}$) reduce open-circuit voltage according to Section 11.2 of [`MATHEMATICAL_SPEC_V2.md`](MATHEMATICAL_SPEC_V2.md#L441-L460):
 
 $$V_{\text{oc,real}} = \max\!\left(0.10,\; V_{\text{oc,rad}} + V_{\text{th}}\ln(\text{ERE}) - \Delta V_{\text{antisite}} - \Delta V_{\text{contact}}\right)$$
 
@@ -54,7 +57,7 @@ Subtracting a `~0.25–0.31 V` non-radiative voltage deficit acts **asymmetrical
 
 ## 3. Synthesis Practicality, Live MP Hull Windows & The TCO Reactivity Discovery (`Phase 11A`)
 
-To move beyond idealized bulk stoichiometries, we queried `31` multi-element chemical systems live from the Materials Project API (`GGA_GGA+U` convex-hull phase diagrams in [`data/mp_thermo_interface_cache.json`](file:///home/antigravity/failsmart-matengine/data/mp_thermo_interface_cache.json)) and ran `pymatgen` `InterfacialReactivity` audits for all `8` finalists against commercial `SnO2` (FTO), `In2O3` (ITO), and `TiO2` (ETL/ARC).
+To move beyond idealized bulk stoichiometries, we queried `31` multi-element chemical systems live from the Materials Project API (`GGA_GGA+U` convex-hull phase diagrams in [`data/mp_thermo_interface_cache.json`](../data/mp_thermo_interface_cache.json)) and ran `pymatgen` `InterfacialReactivity` audits for all `8` finalists against commercial `SnO2` (FTO), `In2O3` (ITO), and `TiO2` (ETL/ARC).
 
 ### 3.1 Critical First-Principles Discovery: Bare ITO Sulfidation vs. Inert `TiO2` / `SnO2` Barriers
 > [!WARNING]
@@ -85,7 +88,7 @@ Phase 9A's `11.0 h`, `375 °C` evacuated ampoule recipes prove bulk thermodynami
 
 ## 4. Head-to-Head 5-Path Commercialization Audit (`Phase 11C`)
 
-We model realistic industrial thin-film fab economics (Section 11.3 of [`MATHEMATICAL_SPEC_V2.md`](file:///home/antigravity/failsmart-matengine/docs/MATHEMATICAL_SPEC_V2.md#L462-L480)): `\$16.50/m²` baseline PVD/CSS + TCO + laser-scribe conversion cost per junction, `40%` precursor utilization (`2.5×` raw cost), In/Ag (`+\$4.50/m²`) and Ga (`+\$2.00/m²`) criticality surcharges, single-junction yield `90.0%` vs. compound two-junction yield `90% × 86% = 77.4%`, and 25-year discounted LCOE across both **Utility Fixed-Tilt/Tracker** (`\$100/m²` area BOS) and **Area-Constrained Commercial/Residential Rooftop** (`\$240/m²` area BOS).
+We model realistic industrial thin-film fab economics (Section 11.3 of [`MATHEMATICAL_SPEC_V2.md`](MATHEMATICAL_SPEC_V2.md#L462-L480)): `\$16.50/m²` baseline PVD/CSS + TCO + laser-scribe conversion cost per junction, `40%` precursor utilization (`2.5×` raw cost), In/Ag (`+\$4.50/m²`) and Ga (`+\$2.00/m²`) criticality surcharges, single-junction yield `90.0%` vs. compound two-junction yield `90% × 86% = 77.4%`, and 25-year discounted LCOE across both **Utility Fixed-Tilt/Tracker** (`\$100/m²` area BOS) and **Area-Constrained Commercial/Residential Rooftop** (`\$240/m²` area BOS).
 
 | Architecture Path | Representative Configuration (`BiSbS3` / `Sb2OS2` Lead) | Realistic Bifacial 20% PCE (Mono) | Module / DGU Cost (\$/m²) | Fab Yield & Integration Risk | **25-Yr Utility LCOE** | **25-Yr Rooftop LCOE** | Commercial Verdict |
 | :--- | :--- | :---: | :---: | :--- | :---: | :---: | :--- |
@@ -105,7 +108,7 @@ This was the single sharpest revelation of our Phase 11 simulation and red-team 
 
 ## 5. Multi-Agent Debate Summary & Periodic Check-In Consensus
 
-All periodic check-ins are archived with timestamps and agent IDs in [`logs/team_checkins_and_debate.jsonl`](file:///home/antigravity/failsmart-matengine/logs/team_checkins_and_debate.jsonl):
+All periodic check-ins are archived with timestamps and agent IDs in [`logs/team_checkins_and_debate.jsonl`](../logs/team_checkins_and_debate.jsonl):
 
 1. **Check-In 1A (`synthesis_chemist` — Inline Kinetics & Precursor Chemistry):** Championed `BiSbS3` (`SPS = 94.76`, entropy-stabilized $\Delta G = -13.19\text{ meV/atom}$ at `375 °C`, zero oxygen partial-pressure sensitivity) and `Sb2OS2` (`SPS = 94.44`, congruent solid-source `Sb2O3 + 2 Sb2S3` co-evaporation without `H2O/H2S` gas balancing). Vetoed `BiInS3` for Indium criticality, vetoed `Bi3InSe6` for `17.99 meV/atom` hull metastability, and proved from live MP `InterfacialReactivity` that `TiO2`/`SnO2` (`0.00 meV/atom`) is mandatory over ITO (`-13.16` to `-15.35 meV/atom`).
 2. **Check-In 1B (`quantum_defect_physicist` — Non-Radiative SRH & Antisite Physics):** Demonstrated why `-V_th ln(ERE)` leaves `1.76–1.79 eV` top cells commercially potent (`1.22–1.25 V`, `15.8–16.1%` real PCE at `ERE = 1e-4`) while collapsing `0.75–0.85 eV` bottom cells to `0.20–0.30 V` (`+1.08–1.22%` mono gain). Flagged `110 mV` `[Cu_Sn + Sn_Cu]` antisite tailing in quaternary kesterites (`CuGaSnSe4`, `CuInSnSe4`) and prioritized Stage 5 FNV-corrected `doped` `HSE06+SOC` supercell calculations on $V_{\text{S}}$ negative-$U$ dimers and $\text{Sb}_{\text{S}}/\text{Bi}_{\text{S}}$ antisites.

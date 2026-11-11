@@ -1,5 +1,8 @@
 # FailSmart-MatEngine v1.0 → v2.0 Critical Audit & Remediation Record
 
+> [!WARNING]
+> **Read first (independent audit, 2026-11):** this earlier audit fixed internal consistency only. External validity is addressed in the 2026-11 audit. See [`INDEPENDENT_AUDIT_2026-11.md`](INDEPENDENT_AUDIT_2026-11.md) and [`REMEDIATION_TASKS.md`](REMEDIATION_TASKS.md).
+
 ## 1. Summary of Audit Findings Remediated in v2.0
 
 | ID | v1.0 Issue Identified | v2.0 Engineering & Scientific Fix Implemented | Verification Proof |

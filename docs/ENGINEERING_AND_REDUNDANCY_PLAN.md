@@ -1,5 +1,8 @@
 # Scientific Engineering Team Plan, Research-Engineering Communication Protocol & Redundancy Verification Architecture
 
+> [!WARNING]
+> **Read first (independent audit, 2026-11):** the redundancy verifier re-implements the same formulas as the primary code, so agreement shows arithmetic consistency only. SHA-256 values are unkeyed digests, not signatures. See [`INDEPENDENT_AUDIT_2026-11.md`](INDEPENDENT_AUDIT_2026-11.md) and [`REMEDIATION_TASKS.md`](REMEDIATION_TASKS.md).
+
 ## 1. Root-Cause Audit of Prior Unacceptable Errors (Why Redundancy Is Mandatory)
 
 A zero-trust audit of the initial Phase 0 prototype (`failsmart_matengine/tools.py`) exposed four classes of errors that occurred because single-pass prototype code was written without an independent mathematical verifier:

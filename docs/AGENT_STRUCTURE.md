@@ -1,5 +1,8 @@
 # Agent Team Structure & Adversarial Red-Team Protocol
 
+> [!WARNING]
+> **Read first (independent audit, 2026-11):** the agents described here are role labels in a deterministic script. No LLM or agent runtime exists in the code, and the tool bindings listed are not called. See [`INDEPENDENT_AUDIT_2026-11.md`](INDEPENDENT_AUDIT_2026-11.md) and [`REMEDIATION_TASKS.md`](REMEDIATION_TASKS.md).
+
 This document defines the 7-agent scientific team architecture, system prompts, deterministic tool bindings, and the Gate A / Gate B adversarial red-team protocol implemented in `FailSmart-MatEngine`.
 
 ---
