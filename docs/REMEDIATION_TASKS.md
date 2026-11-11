@@ -51,7 +51,7 @@ T0 -> T1 -> T6 -> T3 -> T2 -> T4 -> T5 -> T8 -> [HUMAN GATE] T7 -> T9 -> T10 -> 
 
 | Task | Title | Status | Notes |
 |---|---|---|---|
-| T0 | Baseline | todo | |
+| T0 | Baseline | done | Editable install fixed (`[tool.setuptools.packages.find]`); `pytest -q`: 22 passed; `repo_auditor`: PASS (11 Markdown files, 0 errors) |
 | T1 | Paths and version | todo | |
 | T2 | Finish relabelling in code and data | todo | README and docs relabelled; code and schema not yet |
 | T3 | Fix deck generators | todo | |

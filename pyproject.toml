@@ -34,3 +34,6 @@ filterwarnings = [
     "ignore:No oxidation states specified on sites.*:UserWarning",
     "ignore:CrystalNN.*:UserWarning",
 ]
+
+[tool.setuptools.packages.find]
+include = ["failsmart_matengine*"]
