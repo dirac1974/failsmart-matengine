@@ -267,15 +267,35 @@ class RepoConsistencyAuditor:
             f"Expected $0.0394/m2 for cheap pair, got {cheap_pair['combined_active_cost_usd_m2']}"
         )
 
-        # Check 100/100 redundancy verifications
+        # Check 100/100 redundancy verifications and zero 'unknown' tokens in competing phases/sinks
         all_recs = self.live_summary_data["all_mp_records"]
         assert len(all_recs) == 100, f"Expected 100 all_mp_records, got {len(all_recs)}"
         for r in all_recs:
             assert r["redundancy_verification"]["passed_all_redundancy_checks"] is True, (
                 f"Candidate {r['candidate']['candidate_id']} failed redundancy check"
             )
+            hull_phases = r.get("stability", {}).get("competing_hull_phases", [])
+            imp_sinks = r.get("synthesis", {}).get("competing_impurity_sinks", [])
+            for p_tok in hull_phases + imp_sinks:
+                assert "unknown" not in p_tok.lower(), f"Candidate {r['candidate']['candidate_id']} has 'unknown' token: {p_tok}"
 
-        self.log("   [OK] live_mp_discovery_summary.json verified: 100 -> 91 -> 52 -> 40 -> 8 finalists, 15 pairs, 100/100 verifications.")
+        # v4.0 Step 1 & Step 2 Checks
+        assert self.live_summary_data.get("version") == "4.0.0", "Expected live_mp_discovery_summary.json version == 4.0.0"
+        phonon_reports = self.live_summary_data.get("atomistic_phonon_neb_reports", [])
+        assert len(phonon_reports) == 8, f"Expected 8 atomistic_phonon_neb_reports, got {len(phonon_reports)}"
+        for pr in phonon_reports:
+            assert pr["imaginary_mode_count"] == 0, f"{pr['candidate_id']} has imaginary modes"
+            assert pr["dynamically_and_kinetically_stable"] is True
+            assert pr["redundancy_verified"] is True
+            assert pr["neb_saddle_barrier_ev"] >= 0.90
+
+        tmm_stacks = self.live_summary_data.get("coherent_tmm_4t_stacks", [])
+        assert len(tmm_stacks) == 15, f"Expected 15 coherent_tmm_4t_stacks, got {len(tmm_stacks)}"
+        for ts in tmm_stacks:
+            assert ts["photon_conservation_verified"] is True
+            assert ts["rouard_airy_redundancy_diff_percent"] <= 0.05
+
+        self.log("   [OK] live_mp_discovery_summary.json v4.0 verified: 100 -> 91 -> 52 -> 40 -> 8 finalists, 8 D-matrix/NEB reports, 15 TMM stacks.")
 
     def audit_negative_synthesis_priors(self) -> None:
         """Audit LBNL 80k solid-state recipes and A-Lab precursor genome negative priors."""
@@ -396,7 +416,7 @@ class RepoConsistencyAuditor:
     # =========================================================================
 
     def audit_readme_markdown(self) -> None:
-        """Parse README.md and verify funnel numbers, candidate formulas, and finalist table values (v2.0 + v3.0)."""
+        """Parse README.md and verify funnel numbers, candidate formulas, and finalist table values (v2.0 + v3.0 + v4.0)."""
         self.log(f"-> Auditing {self.readme_path} ...")
         assert self.readme_path.exists(), f"Missing {self.readme_path}"
         text = self.readme_path.read_text(encoding="utf-8")
@@ -444,7 +464,7 @@ class RepoConsistencyAuditor:
             assert f"{fin['optics']['tandem_4t_total_eff_percent']:.2f}%" in row
             assert fin["redundancy_verification"]["sha256_signature"] in row
 
-        # 4. v3.0 Live MP Funnel & Finalists verification
+        # 4. v3.0 & v4.0 Live MP Funnel & Finalists verification
         assert "100" in text, "Missing 100 live MP candidates in README.md"
         assert "91" in text, "Missing 91 Stage 2 count in README.md"
         assert "52" in text, "Missing 52 Stage 3 count in README.md"
@@ -458,20 +478,22 @@ class RepoConsistencyAuditor:
         for mp_id in self.expected_live_mp_finalists.keys():
             assert mp_id in text, f"Missing live MP finalist ID {mp_id} in README.md"
 
-        # Check top tandem pairs
-        assert "42.32%" in text, "Missing 42.32% top 4T PCE in README.md"
-        assert "41.75%" in text, "Missing 41.75% cost-optimal 4T PCE in README.md"
+        # Check top tandem pairs (scalar + coherent TMM v4.0)
+        assert "42.32%" in text, "Missing 42.32% top scalar 4T PCE in README.md"
+        assert "41.75%" in text, "Missing 41.75% cost-optimal scalar 4T PCE in README.md"
+        assert "40.00%" in text, "Missing 40.00% top coherent TMM 4T PCE in README.md"
+        assert "39.32%" in text, "Missing 39.32% cost-optimal coherent TMM 4T PCE in README.md"
         assert "0.0394" in text, "Missing $0.0394/m2 cost in README.md"
 
-        # Check 15-test pytest verification
-        assert "15" in text and ("test" in text.lower() or "passed" in text.lower()), (
-            "Missing 15-test pytest verification reference in README.md"
+        # Check 17-test pytest verification
+        assert "17" in text and ("test" in text.lower() or "passed" in text.lower()), (
+            "Missing 17-test pytest verification reference in README.md"
         )
 
-        self.log("   [OK] README.md contains verified 13-agent architecture, v2.0 benchmarks, and v3.0 live MP discovery funnel.")
+        self.log("   [OK] README.md contains verified 13-agent architecture, v2.0 benchmarks, v3.0 live MP funnel, and v4.0 D-matrix/NEB & TMM results.")
 
     def audit_memory_and_failure_ledger_markdown(self) -> None:
-        """Parse docs/MEMORY_AND_FAILURE_LEDGER.md and verify all 23 v2 entries and 8 v3 finalists."""
+        """Parse docs/MEMORY_AND_FAILURE_LEDGER.md and verify all 23 v2 entries and 8 v3/v4 finalists."""
         self.log(f"-> Auditing {self.ledger_doc_path} ...")
         assert self.ledger_doc_path.exists(), f"Missing {self.ledger_doc_path}"
         text = self.ledger_doc_path.read_text(encoding="utf-8")
@@ -497,43 +519,47 @@ class RepoConsistencyAuditor:
         for mp_id in self.expected_live_mp_finalists.keys():
             assert mp_id in text, f"Missing live MP finalist ID {mp_id} in {self.ledger_doc_path}"
 
-        # 4. v3.0 negative priors and counts
+        # 4. v3.0 & v4.0 negative priors and counts
         assert "80,806" in text or "80806" in text
         assert "18,869" in text or "18869" in text
         assert "1,035" in text or "1035" in text
         assert "892" in text
         assert "42.32%" in text
         assert "41.75%" in text
+        assert "40.00%" in text
+        assert "39.32%" in text
         assert "0.0394" in text
 
-        self.log("   [OK] docs/MEMORY_AND_FAILURE_LEDGER.md is synchronized with v2.0 (23 entries) and v3.0 live MP discovery.")
+        self.log("   [OK] docs/MEMORY_AND_FAILURE_LEDGER.md is synchronized with v2.0, v3.0, and v4.0 D-matrix/NEB & Coherent TMM results.")
 
     def audit_verification_report_markdown(self) -> None:
-        """Parse docs/VERIFICATION_AND_TEST_REPORT.md and verify 15 tests and all 8 live MP finalists."""
+        """Parse docs/VERIFICATION_AND_TEST_REPORT.md and verify 17 tests and all 8 live MP finalists."""
         self.log(f"-> Auditing {self.verif_report_path} ...")
         assert self.verif_report_path.exists(), f"Missing {self.verif_report_path}"
         text = self.verif_report_path.read_text(encoding="utf-8")
 
-        # 1. 15 comprehensive tests verified
-        assert "15" in text, f"Missing '15' tests count in {self.verif_report_path}"
+        # 1. 17 comprehensive tests verified
+        assert "17" in text, f"Missing '17' tests count in {self.verif_report_path}"
 
         # 2. All 8 live MP finalist IDs present
         for mp_id in self.expected_live_mp_finalists.keys():
             assert mp_id in text, f"Missing live MP finalist ID {mp_id} in {self.verif_report_path}"
 
-        # 3. v3.0 negative priors and top stacks
+        # 3. v3.0 & v4.0 negative priors and top stacks
         assert "80,806" in text or "80806" in text
         assert "18,869" in text or "18869" in text
         assert "1,035" in text or "1035" in text
         assert "892" in text
         assert "42.32%" in text
         assert "41.75%" in text
+        assert "40.00%" in text
+        assert "39.32%" in text
         assert "0.0394" in text
 
-        self.log("   [OK] docs/VERIFICATION_AND_TEST_REPORT.md contains verified 15-test suite and all 8 live MP finalists.")
+        self.log("   [OK] docs/VERIFICATION_AND_TEST_REPORT.md contains verified 17-test suite and all 8 live MP finalists (v4.0).")
 
     def audit_plan_markdown(self) -> None:
-        """Parse docs/PLAN.md and verify consistency with v2.0 + v3.0 roadmap."""
+        """Parse docs/PLAN.md and verify consistency with v2.0 + v3.0 + v4.0 roadmap."""
         self.log(f"-> Auditing {self.plan_doc_path} ...")
         assert self.plan_doc_path.exists(), f"Missing {self.plan_doc_path}"
         text = self.plan_doc_path.read_text(encoding="utf-8")
@@ -545,15 +571,17 @@ class RepoConsistencyAuditor:
             formula = fin["candidate"]["formula_reduced"]
             assert formula in text, f"v2 Finalist formula {formula} not in {self.plan_doc_path}"
 
-        # v3.0 checks
+        # v3.0 & v4.0 checks
         assert "100" in text
         assert "80,806" in text or "80806" in text
         assert "1,035" in text or "1035" in text
         assert "892" in text
+        assert "40.00%" in text
+        assert "39.32%" in text
         for mp_id in self.expected_live_mp_finalists.keys():
             assert mp_id in text, f"Live MP finalist {mp_id} missing in {self.plan_doc_path}"
 
-        self.log("   [OK] docs/PLAN.md contains verified v2.0 workflow counts and v3.0 live MP discovery roadmap.")
+        self.log("   [OK] docs/PLAN.md contains verified v2.0, v3.0, and v4.0 3D Dynamical Matrix + Coherent TMM roadmap.")
 
     # =========================================================================
     # Full Master Audit Runner
@@ -562,7 +590,7 @@ class RepoConsistencyAuditor:
     def run_full_audit(self) -> bool:
         """Run all verification audits and return True if 100% aligned."""
         self.log("=" * 78)
-        self.log("FailSmart-MatEngine Repository Consistency & Documentation Audit (v3.0)")
+        self.log("FailSmart-MatEngine Repository Consistency & Documentation Audit (v4.0)")
         self.log(f"Repository Root: {self.root}")
         self.log("=" * 78)
 
@@ -572,7 +600,7 @@ class RepoConsistencyAuditor:
             self.load_sqlite_db()
             self.audit_qe_decks()
 
-            # v3.0 Checks
+            # v3.0 & v4.0 Checks
             self.load_live_mp_summary_json()
             self.audit_negative_synthesis_priors()
             self.audit_mp_live_qe_decks()
@@ -594,8 +622,8 @@ class RepoConsistencyAuditor:
             return False
 
         self.log("=" * 78)
-        self.log("[PASS] 100% CROSS-REPOSITORY CONSISTENCY & NUMERICAL ALIGNMENT CONFIRMED (v3.0)")
-        self.log("All v2.0 benchmarks and v3.0 live MP discovery metrics, negative priors, and QE decks match.")
+        self.log("[PASS] 100% CROSS-REPOSITORY CONSISTENCY & NUMERICAL ALIGNMENT CONFIRMED (v4.0)")
+        self.log("All v2.0 benchmarks, v3.0 live MP discovery, and v4.0 3D D-matrix/NEB & Coherent TMM metrics match.")
         self.log("=" * 78)
         return True
 

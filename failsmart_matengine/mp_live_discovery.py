@@ -702,18 +702,46 @@ def build_live_mp_candidate_dossier(
             "Superionic Cu+/Ag+ percolation channel"
         )
 
-    # Empirical competing phases from LBNL 80k pair sinks
+    # Empirical competing phases from LBNL 80k pair sinks (strictly filtered to candidate elements + O)
     pair_sinks = neg_priors.get("element_pair_impurity_sinks", {})
     comp_phases: List[str] = []
     sorted_els = sorted(els)
+    allowed_sink_els = set(els) | {"O"}
+
+    def _is_valid_sink_formula(s_str: str) -> bool:
+        if not s_str or s_str.lower() in ("unknown", "none", "null", "amorphous"):
+            return False
+        if s_str == formula:
+            return False
+        try:
+            c_s = Composition(s_str)
+            s_els = {el.symbol for el in c_s.elements}
+            return bool(s_els) and s_els.issubset(allowed_sink_els) and len(s_els) >= 2
+        except Exception:
+            return False
+
     for i in range(len(sorted_els)):
         for j in range(i + 1, len(sorted_els)):
             pk = f"{sorted_els[i]}-{sorted_els[j]}"
-            for sink in pair_sinks.get(pk, [])[:2]:
-                if sink != formula and sink not in comp_phases:
+            for sink in pair_sinks.get(pk, []):
+                if _is_valid_sink_formula(sink) and sink not in comp_phases:
                     comp_phases.append(sink)
+                    if len(comp_phases) >= 4:
+                        break
+    # Deterministic binary decomposition fallbacks if needed
+    cations_list = [e for e in els if e not in ANION_ORDER]
+    anions_list = [e for e in els if e in ANION_ORDER]
+    for c_el in cations_list:
+        for a_el in anions_list:
+            z_c = abs(ox_states.get(c_el, 2))
+            z_a = abs(ox_states.get(a_el, 2))
+            g_ca = math.gcd(z_c, z_a)
+            n_c, n_a = z_a // g_ca, z_c // g_ca
+            bin_f = f"{c_el}{n_c if n_c > 1 else ''}{a_el}{n_a if n_a > 1 else ''}"
+            if bin_f != formula and bin_f not in comp_phases:
+                comp_phases.append(bin_f)
     if not comp_phases:
-        comp_phases = [f"{sorted_els[0]}2S3", f"{sorted_els[-1]}Cl"]
+        comp_phases = [f"{sorted_els[0]}2S3", f"{sorted_els[-1]}O"]
 
     stab = StabilityReport(
         candidate_id=mp_id,
@@ -761,7 +789,8 @@ def build_live_mp_candidate_dossier(
         temp_c = 335.0 if has_halide else 375.0
         sink_risk = round(float(np.clip(float(cs_prior.get("impurity_rate") or 0.16) * 0.65, 0.11, 0.42)), 3)
 
-    sinks = list(cs_prior.get("top_impurities") or comp_phases[:3])
+    raw_cs_sinks = [s for s in (cs_prior.get("top_impurities") or []) if _is_valid_sink_formula(s)]
+    sinks = list(dict.fromkeys(raw_cs_sinks + comp_phases))[:4]
     if not sinks:
         sinks = comp_phases[:2]
 
@@ -1147,28 +1176,51 @@ def run_live_mp_discovery_campaign(
             full_dossier=dossier,
         )
 
+    # Step 1 (v4.0): 3D Atomistic Harmonic Dynamical Matrix D(q=0) & 11-Image Saddle-Point NEB Migration on all Finalists
+    from .atomistic_and_tmm import (
+        evaluate_3d_atomistic_phonon_and_neb,
+        evaluate_coherent_abeles_tmm_4t_stack,
+    )
+
+    atomistic_reports: List[Dict[str, Any]] = []
+    for fin in finalists:
+        at_rep = evaluate_3d_atomistic_phonon_and_neb(fin)
+        fin["atomistic_phonon_neb"] = at_rep.model_dump()
+        atomistic_reports.append(fin["atomistic_phonon_neb"])
+
     # Cross-pair all discovered Track A Top Active Glass finalists with all discovered Track B Bottom IR finalists
     top_finalists = [f for f in finalists if f["candidate"]["target_layer"] == "TOP_ACTIVE_GLASS_185EV"]
     bot_finalists = [f for f in finalists if f["candidate"]["target_layer"] == "BOTTOM_IR_075EV"]
 
     cross_pairs: List[Dict[str, Any]] = []
+    coherent_tmm_stacks: List[Dict[str, Any]] = []
     for tf in top_finalists:
         for bf in bot_finalists:
             pair_model = compute_cross_layer_4t_stack_wavelength(tf, bf)
-            cross_pairs.append(pair_model.model_dump())
+            pair_dump = pair_model.model_dump()
+            cross_pairs.append(pair_dump)
+
+            # Step 2 (v4.0): Coherent 2x2 Abeles TMM vs Recursive Rouard/Airy Multilayer Optics
+            tmm_model = evaluate_coherent_abeles_tmm_4t_stack(tf, bf, pair_dump)
+            coherent_tmm_stacks.append(tmm_model.model_dump())
 
     cross_pairs.sort(key=lambda x: (-x["tandem_4t_low_fca_total_eff_percent"], x["combined_active_cost_usd_m2"]))
+    coherent_tmm_stacks.sort(key=lambda x: (-x["tmm_4t_low_fca_pce_percent"], x["combined_active_cost_usd_m2"]))
 
     summary = {
-        "version": "3.0.0",
+        "version": "4.0.0",
         "data_provenance": {
             "materials_project_live_api": True,
             "negative_synthesis_datasets": neg_priors.get("dataset_provenance", {}),
+            "atomistic_dynamical_matrix_and_neb": True,
+            "coherent_abeles_tmm_vs_rouard_airy": True,
         },
         "funnel_counts": funnel_counts,
         "failure_mode_breakdown": failure_mode_breakdown,
         "finalists": finalists,
+        "atomistic_phonon_neb_reports": atomistic_reports,
         "cross_layer_4t_tandem_pairs": cross_pairs,
+        "coherent_tmm_4t_stacks": coherent_tmm_stacks,
         "all_mp_records": all_dossiers,
     }
     (out_path / "live_mp_discovery_summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
@@ -1177,12 +1229,24 @@ def run_live_mp_discovery_campaign(
 
 if __name__ == "__main__":
     res = run_live_mp_discovery_campaign()
-    print("Live MP v3.0 Funnel Counts:", json.dumps(res["funnel_counts"], indent=2))
+    print("Live MP v4.0 Funnel Counts:", json.dumps(res["funnel_counts"], indent=2))
     print("Failure Mode Breakdown:", json.dumps(res["failure_mode_breakdown"], indent=2))
-    print(f"Total Cross-Paired (Top + c-Si + Bottom) 4T Stacks Verified: {len(res['cross_layer_4t_tandem_pairs'])}")
-    for p in res["cross_layer_4t_tandem_pairs"][:8]:
+    print("\n=== Step 1: 3D Dynamical Matrix D(q=0) & 11-Image NEB Ion-Migration Reports (8 Finalists) ===")
+    for ar in res["atomistic_phonon_neb_reports"]:
         print(
-            f"  * {p['pair_id']} ({p['top_formula']} [{p['top_eg_ind_ev']:.2f} eV] + c-Si + {p['bottom_formula']} [{p['bottom_eg_ind_ev']:.2f} eV]): "
-            f"2L={p['tandem_2layer_si_eff_percent']:.2f}%, 4T(std-Si)={p['tandem_4t_std_si_fca_eff_percent']:.2f}%, "
-            f"4T(low-FCA)={p['tandem_4t_low_fca_total_eff_percent']:.2f}%, Cost=${p['combined_active_cost_usd_m2']:.4f}/m^2"
+            f"  * {ar['candidate_id']} ({ar['formula_reduced']}, {ar['dynamical_matrix_dim']}x{ar['dynamical_matrix_dim']} D-matrix): "
+            f"w_opt,min={ar['gamma_min_optical_freq_thz']:.2f} THz, w_LO,max={ar['gamma_max_lo_freq_thz']:.2f} THz, "
+            f"imag={ar['imaginary_mode_count']}, {ar['migrating_species']} hop={ar['shortest_hop_distance_ang']:.2f} A, "
+            f"E_mig^NEB={ar['neb_saddle_barrier_ev']:.3f} eV, D_300K={ar['room_temp_diffusivity_cm2_s']:.2e} cm^2/s "
+            f"[SHA256: {ar['sha256_signature'][:8]}]"
         )
+    print(f"\n=== Step 2: Coherent 2x2 Abeles TMM vs Rouard/Airy 4T Stacks ({len(res['coherent_tmm_4t_stacks'])} Verified) ===")
+    for ts in res["coherent_tmm_4t_stacks"][:8]:
+        print(
+            f"  * {ts['pair_id']} ({ts['top_formula']} + c-Si + {ts['bottom_formula']}): "
+            f"R_front={ts['tmm_mean_front_reflectance_percent']:.2f}%, T_sub={ts['tmm_sub_bandgap_transmittance_percent']:.2f}%, "
+            f"2L={ts['tmm_2layer_pce_percent']:.2f}%, 4T(std-Si)={ts['tmm_4t_std_si_pce_percent']:.2f}%, "
+            f"4T(low-FCA)={ts['tmm_4t_low_fca_pce_percent']:.2f}% (delta={ts['scalar_to_tmm_delta_pce_percent']:+.2f}%), "
+            f"RouardDiff={ts['rouard_airy_redundancy_diff_percent']:.4f}% [SHA256: {ts['sha256_signature'][:8]}]"
+        )
+

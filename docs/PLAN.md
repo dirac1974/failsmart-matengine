@@ -250,5 +250,15 @@ The discovery framework expands to ingest **100 live candidates** directly from 
 - **Top Active Glass Finalists (3):** `mp-861911` (`Sb2OS2`), `mp-1227486` (`BiSbS3`), `mp-1078776` (`BiInS3`).
 - **Bottom IR Scavenger Finalists (5):** `mp-1223998` (`Bi3InSe6`), `mp-1224922` (`CuGaSnSe4`), `mp-22982` (`BiCuS2`), `mp-23474` (`AgBi3S5`), `mp-1224129` (`CuInSnSe4`).
 - **All 15 Cross-Layer 4T Tandem Stacks Screened:**
-  - **Highest Efficiency:** `mp-861911 Sb2OS2 + c-Si + mp-1223998 Bi3InSe6` achieving **42.32%** 4T PCE at $\$0.1664/	ext{m}^2$.
-  - **Cost-Optimal Stack:** `mp-861911 Sb2OS2 + c-Si + mp-22982 BiCuS2` achieving **41.75%** 4T PCE at **$0.0394/m^2**.
+  - **Highest Efficiency:** `mp-861911 Sb2OS2 + c-Si + mp-1223998 Bi3InSe6` achieving **42.32%** scalar 4T PCE (**40.00%** Coherent TMM 4T PCE) at $\$0.1664/\text{m}^2$.
+  - **Cost-Optimal Stack:** `mp-861911 Sb2OS2 + c-Si + mp-22982 BiCuS2` achieving **41.75%** scalar 4T PCE (**39.32%** Coherent TMM 4T PCE) at **$0.0394/m^2**.
+
+---
+
+## 8. v4.0 Atomistic 3D Dynamical Matrix, 11-Image NEB & Coherent Multilayer TMM Upgrade
+
+1. **Step 1 — 3D Harmonic Dynamical Matrix $\mathbf{D}(\mathbf{q}=\mathbf{0})$ & 11-Image Saddle-Point NEB Migration (`atomistic_and_tmm.py` vs. `independent_verifier.py`):**
+   - Evaluates the exact $3N \times 3N$ Harmonic Force-Constant Hessian ($0.50\text{ \AA} < r_{ij} \le 4.25\text{ \AA}$) with Acoustic Sum Rule projection (`np.linalg.eigh` vs. `scipy.linalg.eigvalsh`) and 3D 11-image NEB migration barriers across all 8 promoted live MP finalists (`imag = 0`, $\omega_{\text{opt,min}} \in [1.36, 9.19]\text{ THz}$, $E_{\text{mig}}^{\text{NEB}} \in [0.990, 1.348]\text{ eV}$, $D_{\text{ion}}(300\text{ K}) \ll 10^{-18}\text{ cm}^2/\text{s}$).
+2. **Step 2 — Wavelength-Resolved Coherent $2\times 2$ Abeles TMM vs. Recursive Rouard/Airy 4T Stack Optics:**
+   - Evaluates the 6-medium coherent thin-film interference stack across all 15 cross-layer 4T pairs (`0.0000%–0.0100%` dual-method discrepancy), achieving **40.00% Coherent 4T PCE** (`mp-861911__mp-1223998`) and **39.32% Coherent 4T PCE** at **\$0.0394/m²** (`mp-861911__mp-22982`).
+

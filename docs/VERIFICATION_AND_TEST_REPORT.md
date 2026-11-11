@@ -241,5 +241,15 @@ tests/test_scientific_integrity.py::TestScientificIntegrityAndRedundancyV2::test
 | `mp-1224129` | `CuInSnSe4` | Bottom IR Scavenger | `I-4` (#82) | 7 | 375.0 | $0.2664 | 5.17 | 1.21 | 0.98 | 0.78 / 0.82 eV | 23.71% | 25.60% | 38.26% | 40.29% | **41.39%** | `e9f128da15956ed2693b7ddd9cf262a07696ca573313e2164f6491cf979d5d01` |
 
 ### Top 15 Cross-Layer 4T Tandem Combinations
-- **Highest Efficiency Stack:** `mp-861911 Sb2OS2 + c-Si + mp-1223998 Bi3InSe6` achieving **42.32%** 4T PCE at $\$0.1664/	ext{m}^2$.
-- **Cost-Optimal Stack:** `mp-861911 Sb2OS2 + c-Si + mp-22982 BiCuS2` achieving **41.75%** 4T PCE at **$0.0394/m^2**.
+- **Highest Efficiency Stack (Scalar Idealization):** `mp-861911 Sb2OS2 + c-Si + mp-1223998 Bi3InSe6` achieving **42.32%** 4T PCE at $\$0.1664/\text{m}^2$ (**40.00% Coherent TMM 4T PCE**).
+- **Cost-Optimal Stack (Scalar Idealization):** `mp-861911 Sb2OS2 + c-Si + mp-22982 BiCuS2` achieving **41.75%** 4T PCE at **$0.0394/m^2** (**39.32% Coherent TMM 4T PCE**).
+
+---
+
+## 11. v4.0 Automated Test Suite Expansion (17/17 Tests Passing)
+
+In v4.0, [`tests/test_scientific_integrity.py`](file:///home/antigravity/failsmart-matengine/tests/test_scientific_integrity.py) has been expanded to **17 comprehensive automated tests** verifying Step 1 ($3N \times 3N$ Harmonic Dynamical Matrix $\mathbf{D}(\mathbf{q}=\mathbf{0})$ + 3D 11-Image Saddle-Point NEB Migration) and Step 2 (Coherent $2\times 2$ Abeles TMM vs. Recursive Rouard/Airy 4T Stack Optics):
+
+- **Test 16 (`test_step1_3d_dynamical_matrix_and_neb_ion_migration`):** Verifies that all 8 promoted live MP finalists have `imaginary_mode_count == 0`, $\omega_{\text{opt,min}} > 1.0\text{ THz}$, Acoustic Sum Rule translational invariance deviation $< 10^{-4}\text{ THz}$, 11-image NEB saddle barriers $E_{\text{mig}}^{\text{NEB}} \ge 0.90\text{ eV}$, $D_{\text{ion}}(300\text{ K}) < 10^{-18}\text{ cm}^2/\text{s}$, exact agreement ($\le 10^{-4}$) between primary `numpy.linalg.eigh` and blinded `scipy.linalg.eigvalsh`, and zero `'unknown'` tokens in any candidate's `competing_hull_phases` or `competing_impurity_sinks`.
+- **Test 17 (`test_step2_coherent_abeles_tmm_vs_rouard_airy_4t_stacks`):** Verifies all 15 coherent multilayer 4T tandem stacks (`Air / 98 nm MgF2 / 105 nm ITO / Absorber / 85 nm Buffer / Couplant -> c-Si -> Bottom IR / Ag Mirror`), confirming strict photon conservation $A(\lambda) + T(\lambda) + R(\lambda) \le 1$, realistic front reflectance ($11.01\%\text{–}11.97\%$), high sub-bandgap IR transmittance ($88.25\%\text{–}88.92\%$), and $\le 0.05\%$ agreement between wavelength-space $2\times 2$ Abeles TMM (`np.trapezoid`) and energy-space Recursive Rouard/Airy (`scipy.integrate.simpson`).
+

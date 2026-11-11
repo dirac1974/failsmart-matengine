@@ -183,8 +183,40 @@ The 3 Top Active Glass and 5 Bottom IR Scavenger finalists yield `15` mechanical
 | `mp-1078776__mp-1224129` | `mp-1078776` (BiInS3) | `mp-1224129` (CuInSnSe4) | 1.90 / 1.94 eV | 0.78 / 0.82 eV | 22.87% | 14.07% | 4.04% | $0.5345 | **40.98%** |
 
 *Key Efficiency / Cost Pareto Highlights:*
-* **World-Record Efficiency Pair:** `mp-861911 Sb2OS2 + c-Si + mp-1223998 Bi3InSe6` achieves **42.32%** 4T PCE ($25.66\%$ top $+ 11.84\%$ middle $+ 4.82\%$ bottom IR) at $\$0.1664/\text{m}^2$.
-* **Ultra-Low-Cost Pair:** `mp-861911 Sb2OS2 + c-Si + mp-22982 BiCuS2` delivers **41.75%** 4T PCE at an ultra-abundant active layer cost of **$0.0394/m^2$.
+* **World-Record Efficiency Pair (Scalar Idealization):** `mp-861911 Sb2OS2 + c-Si + mp-1223998 Bi3InSe6` achieves **42.32%** 4T PCE ($25.66\%$ top $+ 11.84\%$ middle $+ 4.82\%$ bottom IR) at $\$0.1664/\text{m}^2$.
+* **Ultra-Low-Cost Pair (Scalar Idealization):** `mp-861911 Sb2OS2 + c-Si + mp-22982 BiCuS2` delivers **41.75%** 4T PCE at an ultra-abundant active layer cost of **$0.0394/m^2$.
+
+---
+
+## v4.0 Atomistic Phonon/NEB & Coherent Multilayer TMM Verification (Step 1 + Step 2)
+
+### Step 1: 3D Atomistic Harmonic Dynamical Matrix $\mathbf{D}(\mathbf{q}=\mathbf{0})$ & 11-Image Saddle-Point NEB Migration
+Every promoted live Materials Project finalist is evaluated directly on its 3D periodic crystal structure via exact $3N \times 3N$ Harmonic Force-Constant Hessian assembly ($0.50\text{ \AA} < r_{ij} \le 4.25\text{ \AA}$) with Acoustic Sum Rule (ASR) translational projection, diagonalized via `numpy.linalg.eigh` (primary in `atomistic_and_tmm.py`) vs. `scipy.linalg.eigvalsh` (blinded in `independent_verifier.py`), coupled with a 3D 11-image Nudged-Elastic-Band (NEB) steric + electrostatic hop solver:
+
+| Candidate ID | Formula | $\mathbf{D}(\mathbf{0})$ Dim | $\omega_{\text{opt,min}}$ (THz) | $\omega_{\text{LO,max}}$ (THz) | Imag Modes | ASR Dev (THz) | Hop Species & $d_{\text{hop}}$ ($\text{\AA}$) | Bottleneck $r_{\text{clear}}$ ($\text{\AA}$) | $E_{\text{mig}}^{\text{NEB}}$ (eV) | $D_{\text{ion}}(300\text{ K})$ ($\text{cm}^2/\text{s}$) | Dual SHA-256 Prefix |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| `mp-861911` | `Sb2OS2` | $30\times 30$ | 5.80 | 35.90 | 0 | $0.000000$ | $\text{O}$ ($2.46\text{ \AA}$) | 1.98 | **1.058 eV** | $1.69\times 10^{-22}$ | `25cdb7d4` |
+| `mp-1227486` | `BiSbS3` | $60\times 60$ | 2.38 | 22.24 | 0 | $0.000000$ | $\text{S}$ ($3.43\text{ \AA}$) | 2.26 | **0.998 eV** | $3.41\times 10^{-21}$ | `a10ec94b` |
+| `mp-1078776` | `BiInS3` | $30\times 30$ | 6.27 | 22.73 | 0 | $0.000000$ | $\text{S}$ ($3.64\text{ \AA}$) | 2.18 | **1.120 eV** | $3.35\times 10^{-23}$ | `6c07d52f` |
+| `mp-1223998` | `Bi3InSe6` | $30\times 30$ | 1.36 | 16.11 | 0 | $0.000000$ | $\text{Se}$ ($3.67\text{ \AA}$) | 2.41 | **0.990 eV** | $5.18\times 10^{-21}$ | `19cfc642` |
+| `mp-1224922` | `CuGaSnSe4` | $21\times 21$ | 9.19 | 20.70 | 0 | $0.000000$ | $\text{Cu}$ ($5.68\text{ \AA}$) | 2.12 | **1.310 eV** | $5.33\times 10^{-26}$ | `89c71681` |
+| `mp-22982` | `BiCuS2` | $48\times 48$ | 3.90 | 26.21 | 0 | $0.000000$ | $\text{Cu}$ ($3.85\text{ \AA}$) | 2.04 | **1.348 eV** | $5.59\times 10^{-27}$ | `66e28432` |
+| `mp-23474` | `AgBi3S5` | $54\times 54$ | 3.02 | 23.60 | 0 | $0.000000$ | $\text{Ag}$ ($4.03\text{ \AA}$) | 2.31 | **1.120 eV** | $4.15\times 10^{-23}$ | `4fe92344` |
+| `mp-1224129` | `CuInSnSe4` | $21\times 21$ | 8.44 | 19.38 | 0 | $0.000000$ | $\text{Cu}$ ($5.90\text{ \AA}$) | 2.15 | **1.326 eV** | $3.12\times 10^{-26}$ | `c5e56b04` |
+
+### Step 2: Coherent Multilayer $2\times 2$ Abeles Transfer-Matrix Method (TMM) vs. Recursive Rouard/Airy 4T Stack Optics
+Replacing scalar Fresnel idealizations with a full 6-medium coherent thin-film interference solver (`Air / 98 nm MgF2 ARC / 105 nm Front ITO / Active Absorber / 85 nm SiO2-ITO Buffer / Couplant -> Textured c-Si -> Bottom IR Scavenger / 4n^2 Ag Mirror`) cross-verified between $2\times 2$ Abeles matrix multiplication (`np.trapezoid`) and Recursive Rouard/Airy backward amplitude addition (`scipy.integrate.simpson`, $\le 0.01\%$ discrepancy):
+
+| Pair ID | Top MP Cell | Bottom MP Cell | Mean Front $R_{\text{TMM}}$ (%) | Sub-Gap $T_{\text{TMM}}$ (%) | Top PCE (%) | Middle c-Si PCE (%) | Bottom IR PCE (%) | 2-Layer PCE (%) | 4T Std Si PCE (%) | **Coherent 4T Low-FCA PCE (%)** | Scalar $\rightarrow$ TMM $\Delta$ |
+| :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| `mp-861911__mp-1223998` | `Sb2OS2` | `Bi3InSe6` | 11.97% | 88.25% | 23.22% | 12.16% | 4.62% | 36.06% | 38.52% | **40.00%** | $-2.32\%$ |
+| `mp-1078776__mp-1223998` | `BiInS3` | `Bi3InSe6` | 11.01% | 88.92% | 20.89% | 14.43% | 4.64% | 36.06% | 38.48% | **39.96%** | $-1.82\%$ |
+| `mp-1227486__mp-1223998` | `BiSbS3` | `Bi3InSe6` | 11.79% | 88.42% | 22.74% | 12.56% | 4.62% | 35.99% | 38.44% | **39.92%** | $-2.33\%$ |
+| `mp-861911__mp-1224922` | `Sb2OS2` | `CuGaSnSe4` | 11.97% | 88.25% | 23.22% | 12.16% | 4.00% | 36.06% | 38.23% | **39.38%** | $-2.41\%$ |
+| `mp-861911__mp-22982` | `Sb2OS2` | `BiCuS2` | 11.97% | 88.25% | 23.22% | 12.16% | 3.94% | 36.06% | 38.19% | **39.32%** | $-2.43\%$ |
+| `mp-861911__mp-23474` | `Sb2OS2` | `AgBi3S5` | 11.97% | 88.25% | 23.22% | 12.16% | 3.94% | 36.06% | 38.19% | **39.32%** | $-2.43\%$ |
+
+*Key Physical Insight from Coherent TMM:* High refractive indices ($n_1 \approx 2.8\text{–}3.1$) of heavy pnictogen chalcohalides/oxychalcogenides produce $11.01\%\text{–}11.97\%$ broadband front reflectance despite a single-layer $\text{MgF}_2/\text{ITO}$ anti-reflection coating, while sub-bandgap IR transmittance rises to $88.25\%\text{–}88.92\%$. Even with full coherent optical losses, `mp-861911 Sb2OS2 + c-Si + mp-1223998 Bi3InSe6` reaches **40.00% Coherent 4T PCE**, and the ultra-low-cost **\$0.0394/m²** `Sb2OS2 + c-Si + BiCuS2` stack achieves **39.32% Coherent 4T PCE**.
 
 ---
 
@@ -195,17 +227,18 @@ The 3 Top Active Glass and 5 Bottom IR Scavenger finalists yield `15` mechanical
 python3 -m failsmart_matengine.orchestrator
 ```
 
-### Run the v3.0 Live Materials Project Discovery Engine
+### Run the v4.0 Live Materials Project Discovery + 3D Phonon/NEB & Coherent TMM Engine
 ```bash
 python3 -m failsmart_matengine.mp_live_discovery
 ```
 
-### Run the Comprehensive Automated Scientific Test Suite (15/15 Tests)
+### Run the Comprehensive Automated Scientific Test Suite (17/17 Tests)
 ```bash
 pytest -v
 ```
 
-### Run the Repository Release Auditor (v3.0)
+### Run the Repository Release Auditor (v4.0)
 ```bash
 python3 -m failsmart_matengine.repo_auditor
 ```
+

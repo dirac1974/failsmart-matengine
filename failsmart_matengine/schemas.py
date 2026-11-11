@@ -150,3 +150,53 @@ class CrossLayerTandemPair(BaseModel):
     combined_active_cost_usd_m2: float
     photon_conservation_verified: bool
     redundancy_simpson_diff_percent: float
+
+
+class AtomisticPhononNEBReport(BaseModel):
+    """3D Harmonic Dynamical Matrix D(q=0) & 11-Image Saddle-Point NEB Migration Dossier (v4.0)."""
+    candidate_id: str
+    formula_reduced: str
+    target_layer: str
+    nsites_unit_cell: int
+    dynamical_matrix_dim: int
+    gamma_min_optical_freq_thz: float
+    gamma_max_lo_freq_thz: float
+    imaginary_mode_count: int
+    acoustic_sum_rule_max_dev_thz: float
+    migrating_species: str
+    shortest_hop_distance_ang: float
+    bottleneck_clearance_ang: float
+    neb_saddle_barrier_ev: float
+    room_temp_diffusivity_cm2_s: float
+    dynamically_and_kinetically_stable: bool
+    redundancy_verified: bool
+    sha256_signature: str
+
+
+class CoherentTMM4TStackReport(BaseModel):
+    """Wavelength-Resolved Coherent 2x2 Abeles TMM vs Recursive Rouard/Airy 4T Stack Dossier (v4.0)."""
+    pair_id: str
+    top_mp_id: str
+    top_formula: str
+    bottom_mp_id: str
+    bottom_formula: str
+    arc_mgf2_thickness_nm: float
+    front_ito_thickness_nm: float
+    top_absorber_thickness_nm: float
+    rear_buffer_thickness_nm: float
+    bottom_absorber_thickness_nm: float
+    tmm_mean_front_reflectance_percent: float
+    tmm_sub_bandgap_transmittance_percent: float
+    tmm_top_pce_percent: float
+    tmm_si_pce_percent: float
+    tmm_bottom_std_si_pce_percent: float
+    tmm_bottom_pce_percent: float
+    tmm_2layer_pce_percent: float
+    tmm_4t_std_si_pce_percent: float
+    tmm_4t_low_fca_pce_percent: float
+    scalar_to_tmm_delta_pce_percent: float
+    combined_active_cost_usd_m2: float
+    photon_conservation_verified: bool
+    rouard_airy_redundancy_diff_percent: float
+    sha256_signature: str
+

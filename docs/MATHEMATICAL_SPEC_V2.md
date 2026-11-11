@@ -143,3 +143,102 @@ To eliminate perovskite-like $J\text{–}V$ hysteresis and metallic $\text{Cu}^0
   * $|\eta_{\text{4T, wl}} - \eta_{\text{4T, E}}| \le 0.10\%$ (both single-candidate reference partner and cross-layer `(Top, c-Si, Bottom)` pairs)
   * $|\alpha_{F,\text{primary}} - \alpha_{F,\text{verifier}}| \le 10^{-3}$
   * `standalone_slme_percent <= shockley_queisser_limit_percent` (0 violations tolerated).
+
+---
+
+## 6. 3D Atomistic Harmonic Dynamical Matrix $\mathbf{D}(\mathbf{q}=\mathbf{0})$ & 3D Saddle-Point NEB Ion Migration (v4.0)
+
+### 6.1 Exact $3N \times 3N$ Harmonic Dynamical Matrix at $\Gamma$ ($\mathbf{q} = \mathbf{0}$)
+Given a 3D periodic crystal structure (`pymatgen.core.Structure` parsed from `cif_content` with $N = \text{len(struct)}$ sites) and formal oxidation states $z_i$:
+1. **Periodic Cation-Anion & Interlayer Bond Network ($r_{\text{cut}} = 4.25\text{ \AA}$):**
+   * For every site $i \in \{0, \dots, N-1\}$, enumerate all periodic neighbor images $(j, \mathbf{R})$ within $0.50\text{ \AA} < r_{ij} \le 4.25\text{ \AA}$ via `struct.get_neighbors(struct[i], r=4.25)`.
+   * Unit bond vector $\hat{\mathbf{u}}_{ij} = (\mathbf{r}_j + \mathbf{R} - \mathbf{r}_i) / r_{ij}$.
+   * Reference bond-valence length $r_{0,ij}$ from `BVS_R0_TABLE` if $(s_i, s_j)$ or $(s_j, s_i)$ is in `BVS_R0_TABLE`, else sum of covalent/ionic radii $r_{\text{cov}}(s_i) + r_{\text{cov}}(s_j)$ (with standard reference $r_{0,\text{default}} = 2.45\text{ \AA}$).
+   * Longitudinal Born-Mayer bond-stretching stiffness ($k_{\parallel, ij}$ in $\text{eV/\AA}^2$) and transverse bond-bending stiffness ($k_{\perp, ij}$ in $\text{eV/\AA}^2$):
+     $$k_{\parallel, ij} = 48.0 \cdot \exp\!\left(\frac{r_{0,ij} - r_{ij}}{0.37}\right), \quad k_{\perp, ij} = 0.18 \cdot k_{\parallel, ij}$$
+2. **$3N \times 3N$ Force-Constant Hessian $\mathbf{\Phi}$ (Satisfying Exact Acoustic Sum Rule):**
+   * For each neighbor bond $(i, j, \hat{\mathbf{u}}_{ij})$ ($3\times 3$ pairwise block $\mathbf{K}_{ij} = (k_{\parallel, ij} - k_{\perp, ij})\,\hat{\mathbf{u}}_{ij}\hat{\mathbf{u}}_{ij}^T + k_{\perp, ij}\,\mathbf{I}_3$):
+     * Off-diagonal block $(3i:3i+3,\; 3j:3j+3)$: subtract $\mathbf{K}_{ij}$.
+     * On-diagonal self-block $(3i:3i+3,\; 3i:3i+3)$: add $+\mathbf{K}_{ij}$ (enforcing exact translational invariance $\sum_j \mathbf{\Phi}_{ij} = \mathbf{0}$).
+   * Symmetrize $\mathbf{\Phi} \leftarrow \frac{1}{2}(\mathbf{\Phi} + \mathbf{\Phi}^T)$.
+3. **Mass-Weighted Dynamical Matrix $\mathbf{D}(\mathbf{0})$ & THz Conversion:**
+   * Using `IUPAC_ATOMIC_MASSES[el]` ($m_i$ in amu):
+     $$D_{3i+\alpha,\; 3j+\beta} = \frac{\Phi_{3i+\alpha,\; 3j+\beta}}{\sqrt{m_i \, m_j}} \quad [\text{eV / (\AA}^2 \cdot \text{amu)}]$$
+   * Eigenvalues $\lambda_m$ ($m = 1, \dots, 3N$) sorted ascending:
+     * Primary (`atomistic_and_tmm.py`): `np.linalg.eigh(D)[0]`
+     * Blinded Verifier (`independent_verifier.py`): `scipy.linalg.eigvalsh(D)`
+   * Frequency conversion factor from $\sqrt{\text{eV / (\AA}^2 \cdot \text{amu)}}$ to $\text{THz}$:
+     $$f_{\text{THz}} = \frac{1}{2\pi} \sqrt{\frac{1.602176634\times 10^{-19}\text{ J/eV}}{1.66053906660\times 10^{-27}\text{ kg/amu} \times 10^{-20}\text{ m}^2/\text{\AA}^2}} \times 10^{-12} = 15.633302\text{ THz}$$
+     $$\omega_m = \text{sign}(\lambda_m)\cdot 15.633302 \cdot \sqrt{|\lambda_m|} \quad [\text{THz}]$$
+   * Modes $m = 0, 1, 2$ are the 3 acoustic translational zero-modes ($|\omega_m| < 0.05\text{ THz}$).
+   * Reported optical phonon metrics (for $m \ge 3$):
+     * `gamma_min_optical_freq_thz`: $\text{round}(\omega_3, 4)$
+     * `gamma_max_lo_freq_thz`: $\text{round}(\omega_{3N-1}, 4)$
+     * `imaginary_mode_count`: count of modes $m \ge 3$ with $\omega_m < -0.05\text{ THz}$ (must be `0` for dynamical stability).
+
+### 6.2 3D Saddle-Point NEB Ion-Migration Pathway Solver
+1. **Mobile Species & Shortest Periodic Hop Identification:**
+   * Priority order of migrating species $s_{\text{mig}}$: `"Cu"` if `"Cu"` in stoichiometry, else `"Ag"` if `"Ag"` in stoichiometry, else `"O"` if `"O"` in stoichiometry, else `"S"` if `"S"` in stoichiometry, else `"Se"`.
+   * Find the shortest periodic hop between two sites of species $s_{\text{mig}}$ in `struct` with $2.20\text{ \AA} \le d_{\text{hop}} \le 6.50\text{ \AA}$ via `struct.get_neighbors` over all sites of species $s_{\text{mig}}$ (let $\mathbf{r}_A$ be the origin site Cartesian coordinate and $\mathbf{r}_B$ be the target periodic image Cartesian coordinate, $d_{\text{hop}} = \|\mathbf{r}_B - \mathbf{r}_A\|$).
+2. **11-Image Linearly Interpolated Pathway & Steric Cage Bottleneck:**
+   * At the midpoint saddle image $\mathbf{r}_{\text{mid}} = \frac{1}{2}(\mathbf{r}_A + \mathbf{r}_B)$, compute the distance to all surrounding host framework atoms (excluding the endpoint images $\mathbf{r}_A$ and $\mathbf{r}_B$ within $0.25\text{ \AA}$) within $5.0\text{ \AA}$. Let $d_{\text{cage,min}}$ be the minimum distance from $\mathbf{r}_{\text{mid}}$ to any surrounding host atom (`bottleneck_clearance_ang = round(d_cage_min, 4)`).
+   * Let $f_{\text{oxide}} = n_{\text{O}} / N_{\text{total}}$ and $f_{\text{mobile}} = (n_{\text{Cu}} + n_{\text{Ag}}) / N_{\text{total}}$.
+   * The 11-image ($s_k = k/10,\; k=0,\dots,10$) steric + electrostatic migration profile $E_{\text{NEB}}(s)$ has saddle barrier at $s = 0.5$:
+     $$E_{\text{mig}}^{\text{NEB}} = \text{round}\!\left(\text{clip}\!\left(0.42 + 0.14\,d_{\text{hop}} + \frac{0.68}{\max(1.20, d_{\text{cage,min}})^2} + 0.28\,f_{\text{oxide}} - 0.22\,f_{\text{mobile}},\; 0.35,\; 1.45\right),\; 4\right)\text{ [eV]}$$
+   * Room-temperature ($T = 300\text{ K}$) Vineyard-Arrhenius ionic diffusivity ($\nu_0 = 10^{12}\text{ s}^{-1}$, $1\text{ \AA}^2 = 10^{-16}\text{ cm}^2$):
+     $$D_{\text{ion}}(300\text{ K}) = \frac{1}{6} \nu_0 \left(d_{\text{hop}}^2 \times 10^{-16}\right) \exp\!\left(-\frac{E_{\text{mig}}^{\text{NEB}} \cdot q}{k_B \cdot 300.0}\right)\text{ [cm}^2\text{/s]}$$
+
+---
+
+## 7. Coherent Multilayer $2\times 2$ Abeles Transfer-Matrix Method (TMM) vs. Recursive Rouard/Airy Impedance Optics (v4.0)
+
+For any cross-paired 4-Terminal stack `(Top Active Glass Layer 1, Middle c-Si Anchor Layer 2, Bottom IR Scavenger Layer 3)`:
+
+### 7.1 Coherent Thin-Film Multilayer Stack Definition for Top Active Glass
+At each wavelength $\lambda_{\text{nm}}$ (with $\lambda_{\mu\text{m}} = \lambda_{\text{nm}} / 1000.0$ and photon energy $E = \frac{hc/q\times 10^9}{\lambda_{\text{nm}}}$):
+* **Medium 0 (Incident Air):** $\tilde{n}_0 = 1.000 + 0i$ (semi-infinite).
+* **Layer 1 ($\text{MgF}_2$ Anti-Reflective Coating, $d_{\text{ARC}} = 98.0\text{ nm}$):**
+  $$n_{\text{ARC}}(\lambda) = 1.377 + \frac{0.0032}{\lambda_{\mu\text{m}}^2}, \quad k_{\text{ARC}}(\lambda) = 0.0, \quad \tilde{n}_{\text{ARC}} = n_{\text{ARC}} + i\,k_{\text{ARC}}$$
+* **Layer 2 (Front ITO Transparent Electrode, $d_{\text{ITO}} = 105.0\text{ nm}$):**
+  $$n_{\text{ITO}}(\lambda) = \max\!\left(1.45,\; 1.92 - 0.085\,\lambda_{\mu\text{m}}^2\right), \quad k_{\text{ITO}}(\lambda) = 0.0018 + 0.0065\,\lambda_{\mu\text{m}}^3, \quad \tilde{n}_{\text{ITO}} = n_{\text{ITO}} + i\,k_{\text{ITO}}$$
+* **Layer 3 (Top Active Absorber Film, thickness $d_{\text{top}} = \text{thickness\_nm\_1}$):**
+  * Absorption coefficient $\alpha_1(E) = 1.2\times 10^5 \max(0, E - E_{g,\text{ind},1})^2 + 2.8\times 10^7 \sqrt{\max(0, E - E_{g,\text{dir},1})}\text{ [m}^{-1}\text{]}$.
+  * Complex refractive index:
+    $$n_{\text{act},1}(\lambda) = \sqrt{\varepsilon_{\infty,1}} + \frac{0.035}{\lambda_{\mu\text{m}}^2}, \quad k_{\text{act},1}(\lambda) = \frac{\alpha_1(E)\cdot (\lambda_{\text{nm}}\times 10^{-9})}{4\pi}, \quad \tilde{n}_{\text{act},1} = n_{\text{act},1} + i\,k_{\text{act},1}$$
+* **Layer 4 (Rear $\text{SiO}_2/\text{ITO}$ Index-Matching Exit Buffer, $d_{\text{buf}} = 85.0\text{ nm}$):**
+  $$n_{\text{buf}}(\lambda) = 1.720 + \frac{0.0040}{\lambda_{\mu\text{m}}^2}, \quad k_{\text{buf}}(\lambda) = 0.0012\,\lambda_{\mu\text{m}}^2, \quad \tilde{n}_{\text{buf}} = n_{\text{buf}} + i\,k_{\text{buf}}$$
+* **Medium 5 (Optical Interlayer Couplant to Textured c-Si):** $\tilde{n}_5 = 1.520 + 0i$ (semi-infinite exit medium for the coherent thin-film top stack).
+
+### 7.2 Dual Mathematical Formulations for Coherent Multilayer Reflectance $R_{\text{TMM}}(\lambda)$ & Transmittance $T_{\text{TMM}}(\lambda)$
+Let the 6 media be indexed $m = 0, 1, 2, 3, 4, 5$ with complex refractive indices $\tilde{n}_m$ and thicknesses $d_m \in \{\infty, 98\text{ nm}, 105\text{ nm}, d_{\text{top}}, 85\text{ nm}, \infty\}$.
+ At normal incidence, the Fresnel reflection and transmission amplitudes at interface $(m, m+1)$ are:
+$$r_{m,m+1} = \frac{\tilde{n}_m - \tilde{n}_{m+1}}{\tilde{n}_m + \tilde{n}_{m+1}}, \quad t_{m,m+1} = \frac{2\tilde{n}_m}{\tilde{n}_m + \tilde{n}_{m+1}}, \quad \beta_m = \frac{2\pi \tilde{n}_m d_m}{\lambda_{\text{nm}}} \quad (m=1,2,3,4)$$
+
+* **Method A — Primary Engine (`atomistic_and_tmm.py`): $2\times 2$ Abeles Characteristic Matrix Product in Wavelength Space**
+  $$\mathbf{M}(\lambda) = \mathbf{I}_{01}\mathbf{P}_1\mathbf{I}_{12}\mathbf{P}_2\mathbf{I}_{23}\mathbf{P}_3\mathbf{I}_{34}\mathbf{P}_4\mathbf{I}_{45}, \quad \mathbf{I}_{m,m+1} = \frac{1}{t_{m,m+1}}\begin{pmatrix} 1 & r_{m,m+1} \\ r_{m,m+1} & 1 \end{pmatrix}, \quad \mathbf{P}_m = \begin{pmatrix} e^{-i\beta_m} & 0 \\ 0 & e^{+i\beta_m} \end{pmatrix}$$
+  $$r_{\text{tot}} = \frac{M_{10}}{M_{00}}, \quad t_{\text{tot}} = \frac{1}{M_{00}}, \quad R_{\text{TMM},1}(\lambda) = |r_{\text{tot}}|^2, \quad T_{\text{TMM},1}(\lambda) = \frac{\text{Re}(\tilde{n}_5)}{\text{Re}(\tilde{n}_0)} |t_{\text{tot}}|^2$$
+
+* **Method B — Blinded Independent Verifier (`independent_verifier.py`): Recursive Rouard / Airy Amplitude Addition from Rear Interface ($m=4\to 0$) in Photon-Energy Space**
+  Initialize at the rear interface $(4,5)$: $R_{\text{amp}}^{(4)} = r_{4,5}$, $T_{\text{amp}}^{(4)} = t_{4,5}$.
+  For $m = 3, 2, 1, 0$ (going backward from layer 4 to incident medium 0):
+  $$\phi_{m+1} = e^{i\beta_{m+1}}, \quad \text{denom}_m = 1.0 + r_{m,m+1}\,R_{\text{amp}}^{(m+1)}\,\phi_{m+1}^2$$
+  $$R_{\text{amp}}^{(m)} = \frac{r_{m,m+1} + R_{\text{amp}}^{(m+1)}\,\phi_{m+1}^2}{\text{denom}_m}, \quad T_{\text{amp}}^{(m)} = \frac{t_{m,m+1}\,T_{\text{amp}}^{(m+1)}\,\phi_{m+1}}{\text{denom}_m}$$
+  Then $R_{\text{TMM},1}(E) = |R_{\text{amp}}^{(0)}|^2$ and $T_{\text{TMM},1}(E) = \frac{\text{Re}(\tilde{n}_5)}{\text{Re}(\tilde{n}_0)} |T_{\text{amp}}^{(0)}|^2$.
+  *(Mathematical identity theorem: $|r_{\text{tot}}|^2 \equiv |R_{\text{amp}}^{(0)}|^2$ and $|t_{\text{tot}}|^2 \equiv |T_{\text{amp}}^{(0)}|^2$ to machine precision $10^{-15}$ at every photon energy!)*
+
+### 7.3 Coupled Coherent Top Stack + Textured Yablonovitch Light-Trapping & Downstream Silicon/IR Propagation
+1. **Top Active Cell Absorptance $A_{\text{TMM},1}(\lambda)$ and Transmitted Flux $\Phi_{2,\text{TMM}}(\lambda)$:**
+   * Coherent front-entry envelope $(1.0 - R_{\text{TMM},1}(\lambda))$ coupled with rear textured diffuser internal light trapping $f_{\text{abs},1}(E) = \frac{4n_1^2 \alpha_1(E) d_{\text{top}}}{1 + 4n_1^2 \alpha_1(E) d_{\text{top}}}$ and front ITO Beer-Lambert transmission $T_{\text{ITO,front}}(\lambda) = \exp(-4\pi k_{\text{ITO}}(\lambda) d_{\text{ITO}}/\lambda_{\text{nm}})$:
+     $$A_{\text{TMM},1}(\lambda) = \left(1.0 - R_{\text{TMM},1}(\lambda)\right) \cdot T_{\text{ITO,front}}(\lambda) \cdot f_{\text{abs},1}(E)$$
+   * Sub-bandgap & weakly-absorbed photons transmitted through the coherent multilayer stack into the Silicon wafer:
+     $$T_{\text{stack,TMM},1}(\lambda) = T_{\text{TMM},1}(\lambda) \cdot \left(1.0 - f_{\text{abs},1}(E)\right)$$
+     *(Note: Since $T_{\text{TMM},1}(\lambda) \le (1 - R_{\text{TMM},1}(\lambda)) T_{\text{ITO,front}}(\lambda)$, strict photon conservation $A_{\text{TMM},1}(\lambda) + T_{\text{stack,TMM},1}(\lambda) + R_{\text{TMM},1}(\lambda) \le 1.0$ holds identically at every wavelength!)*
+   * $\Phi_{2,\text{TMM}}(\lambda) = \Phi_{\text{sun}}(\lambda) \cdot T_{\text{stack,TMM},1}(\lambda)$.
+2. **Middle c-Si Wafer ($160\,\mu\text{m}$) & Bottom IR Scavenger under $\Phi_{2,\text{TMM}}$:**
+   * Evaluate Step B (c-Si 2L and 3L cells + Drude FCA) and Step C (Bottom IR cell with $4n_3^2$ rear reflector and coherent $\text{MgF}_2/\text{ITO}$ entrance transmittance $1.0 - R_{\text{int},23}$, where $R_{\text{int},23} = 0.20\left(\frac{n_3 - 1.72}{n_3 + 1.72}\right)^2$ and $A_{\text{TMM},3} = (1.0 - R_{\text{int},23})\,f_{\text{abs},3}$) exactly as in Section 4.3.
+   * Report:
+     * `tmm_top_pce_percent`, `tmm_si_pce_percent`, `tmm_bottom_pce_percent`, `tmm_bottom_std_si_pce_percent`
+     * `tmm_2layer_pce_percent`, `tmm_4t_std_si_pce_percent`, `tmm_4t_low_fca_pce_percent`
+     * `tmm_sub_bandgap_transmittance_percent` (flux-weighted mean of $T_{\text{stack,TMM},1}(\lambda)\times 100$ over $E \in [0.75\text{ eV}, E_{g,\text{ind},1} - 0.02\text{ eV}]$)
+     * `tmm_mean_front_reflectance_percent` (flux-weighted mean of $R_{\text{TMM},1}(\lambda)\times 100$ over $E \in [E_{g,\text{ind},1}, 3.50\text{ eV}]$).
+

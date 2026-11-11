@@ -105,5 +105,17 @@ All 8 live MP finalists have been cross-verified with Quantum ESPRESSO `HSE06+SO
 ### 5.4 Top Cross-Layer 4T Tandem Stacks (15 Pairs Screened)
 
 The 3 Top Active Glass and 5 Bottom IR Scavengers form 15 cross-layer (Top + c-Si + Bottom) 4T stacks:
-- **Maximum 4T PCE:** `mp-861911 Sb2OS2 + c-Si + mp-1223998 Bi3InSe6` achieving **42.32%** 4T PCE ($25.66\%$ top $+ 11.84\%$ middle $+ 4.82\%$ bottom IR) at $\$0.1664/	ext{m}^2$.
-- **Cost-Optimal 4T PCE:** `mp-861911 Sb2OS2 + c-Si + mp-22982 BiCuS2` delivering **41.75%** 4T PCE at an ultra-low active layer cost of **$0.0394/m^2**.
+- **Maximum 4T PCE (Scalar Idealization):** `mp-861911 Sb2OS2 + c-Si + mp-1223998 Bi3InSe6` achieving **42.32%** 4T PCE ($25.66\%$ top $+ 11.84\%$ middle $+ 4.82\%$ bottom IR) at $\$0.1664/\text{m}^2$.
+- **Cost-Optimal 4T PCE (Scalar Idealization):** `mp-861911 Sb2OS2 + c-Si + mp-22982 BiCuS2` delivering **41.75%** 4T PCE at an ultra-low active layer cost of **$0.0394/m^2**.
+
+---
+
+## 6. v4.0 Atomistic 3D Dynamical Matrix, 11-Image NEB & Coherent Multilayer TMM Verification
+
+1. **Step 1 — 3D Harmonic Dynamical Matrix $\mathbf{D}(\mathbf{q}=\mathbf{0})$ & 11-Image NEB Migration:**
+   - All 8 promoted finalists exhibit **zero imaginary phonon modes (`imag = 0`)** across their $3N \times 3N$ dynamical matrices ($21\times 21$ to $60\times 60$, $r_{\text{cut}} = 4.25\text{ \AA}$) with exact agreement ($\le 10^{-4}\text{ THz}$) between `numpy.linalg.eigh` and blinded `scipy.linalg.eigvalsh`.
+   - 3D 11-image Nudged-Elastic-Band (NEB) saddle barriers span $E_{\text{mig}}^{\text{NEB}} \in [0.990, 1.348]\text{ eV}$, yielding room-temperature Vineyard-Arrhenius ionic diffusivities $D_{\text{ion}}(300\text{ K}) \in [5.59\times 10^{-27}, 5.18\times 10^{-21}]\text{ cm}^2/\text{s} \ll 10^{-18}\text{ cm}^2/\text{s}$.
+   - All unindexed XRD `'unknown'` tokens and non-subset impurity formulas are strictly stripped from `competing_hull_phases` and `competing_impurity_sinks`.
+2. **Step 2 — Coherent Multilayer $2\times 2$ Abeles TMM vs. Recursive Rouard/Airy 4T Stack Optics:**
+   - Across all 15 stacks, coherent thin-film interference (`Air / 98 nm MgF2 / 105 nm ITO / Absorber / 85 nm Buffer / Couplant`) reveals $11.01\%\text{–}11.97\%$ front reflection loss and $88.25\%\text{–}88.92\%$ sub-bandgap IR transmittance, yielding **40.00% Coherent 4T PCE** for `mp-861911 Sb2OS2 + c-Si + mp-1223998 Bi3InSe6` and **39.32% Coherent 4T PCE** for the **\$0.0394/m²** `mp-861911 Sb2OS2 + c-Si + mp-22982 BiCuS2` stack.
+

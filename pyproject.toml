@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "failsmart-matengine"
-version = "3.0.0"
-description = "13-Agent Fail-Smart Photovoltaic Materials Discovery Engine with Live Materials Project API & Blinded Redundancy"
+version = "4.0.0"
+description = "13-Agent Fail-Smart Photovoltaic Materials Discovery Engine with Live MP API, 3D Dynamical Matrix/NEB, Coherent TMM & Blinded Redundancy"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -31,4 +31,6 @@ dev = [
 testpaths = ["tests"]
 filterwarnings = [
     "ignore:Issues encountered while parsing CIF.*:UserWarning",
+    "ignore:No oxidation states specified on sites.*:UserWarning",
+    "ignore:CrystalNN.*:UserWarning",
 ]

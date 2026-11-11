@@ -1,5 +1,5 @@
 {
-  "version": "3.0.0",
+  "version": "4.0.0",
   "data_provenance": {
     "materials_project_live_api": true,
     "negative_synthesis_datasets": {
@@ -8,13 +8,26 @@
         "figshare_doi": "10.6084/m9.figshare.30423274",
         "citation": "Lee, Cruse, Baibakova, Ceder, Jain, Scientific Data 12:1969 (2025)",
         "total_recipes": 80806,
+        "total_reactions_parsed": 80806,
         "phase_pure_recipes": 61937,
-        "phase_impure_failed_recipes": 18869
+        "phase_impure_failed_recipes": 18869,
+        "impure_failed_reactions_count": 18869
+      },
+      "lbnl_solid_state_impurity_dataset": {
+        "source_repo": "https://github.com/slee-lab/solid-state-recipes-with-impurity",
+        "figshare_doi": "10.6084/m9.figshare.30423274",
+        "citation": "Lee, Cruse, Baibakova, Ceder, Jain, Scientific Data 12:1969 (2025)",
+        "total_recipes": 80806,
+        "total_reactions_parsed": 80806,
+        "phase_pure_recipes": 61937,
+        "phase_impure_failed_recipes": 18869,
+        "impure_failed_reactions_count": 18869
       },
       "alab_precursor_genome": {
         "source_repo": "https://github.com/lauren-walters/precursor-genome",
         "citation": "Walters, Szymanski, Fei, Ceder et al., Precursor Genome (2026)",
         "total_pairwise_reactions": 1035,
+        "total_pairwise_reactions_parsed": 1035,
         "outcome_breakdown": {
           "transformed": 384,
           "completely_reacted": 143,
@@ -22,9 +35,27 @@
           "partially_reacted": 113,
           "unknown": 26
         },
-        "negative_or_stalled_reactions": 892
+        "negative_or_stalled_reactions": 892,
+        "negative_stalled_or_impure_count": 892
+      },
+      "alab_precursor_genome_dataset": {
+        "source_repo": "https://github.com/lauren-walters/precursor-genome",
+        "citation": "Walters, Szymanski, Fei, Ceder et al., Precursor Genome (2026)",
+        "total_pairwise_reactions": 1035,
+        "total_pairwise_reactions_parsed": 1035,
+        "outcome_breakdown": {
+          "transformed": 384,
+          "completely_reacted": 143,
+          "unreacted": 369,
+          "partially_reacted": 113,
+          "unknown": 26
+        },
+        "negative_or_stalled_reactions": 892,
+        "negative_stalled_or_impure_count": 892
       }
-    }
+    },
+    "atomistic_dynamical_matrix_and_neb": true,
+    "coherent_abeles_tmm_vs_rouard_airy": true
   },
   "funnel_counts": {
     "stage1_live_mp_ingested": 100,
@@ -221,10 +252,10 @@
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "unknown",
           "CuO",
+          "Bi2O3",
           "Bi2S3",
-          "ZnS"
+          "BiS2"
         ],
         "bulk_modulus_gpa": 49.8,
         "shear_modulus_gpa": 22.7,
@@ -415,6 +446,25 @@
         },
         "mismatches": [],
         "sha256_signature": "4572d1324fa4eeafde04a92ab39f889912192afae5214cd9c08a90f83dce9303"
+      },
+      "atomistic_phonon_neb": {
+        "candidate_id": "mp-22982",
+        "formula_reduced": "BiCuS2",
+        "target_layer": "BOTTOM_IR_075EV",
+        "nsites_unit_cell": 16,
+        "dynamical_matrix_dim": 48,
+        "gamma_min_optical_freq_thz": 3.9036,
+        "gamma_max_lo_freq_thz": 26.2092,
+        "imaginary_mode_count": 0,
+        "acoustic_sum_rule_max_dev_thz": 0.0,
+        "migrating_species": "Cu",
+        "shortest_hop_distance_ang": 3.8501,
+        "bottleneck_clearance_ang": 1.2376,
+        "neb_saddle_barrier_ev": 1.348,
+        "room_temp_diffusivity_cm2_s": 5.59e-27,
+        "dynamically_and_kinetically_stable": true,
+        "redundancy_verified": true,
+        "sha256_signature": "66e28432a7519ec8a45a83a2eb7ba9f45c1dfc164c671b69f47e8e69ef32eeb3"
       }
     },
     {
@@ -594,10 +644,9 @@
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "unknown",
-          "AgBiSe2",
-          "CS In6S7",
-          "Bi2S3"
+          "Bi2S3",
+          "BiS2",
+          "Ag2S"
         ],
         "bulk_modulus_gpa": 38.6,
         "shear_modulus_gpa": 19.7,
@@ -623,7 +672,8 @@
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
           "Bi2S3",
-          "unknown"
+          "BiS2",
+          "Ag2S"
         ],
         "impurity_sink_risk_score": 0.186,
         "halide_volatility_pressure_pa": 82.88,
@@ -786,6 +836,25 @@
         },
         "mismatches": [],
         "sha256_signature": "28fffc7cc0a9332db420e8769ac9fb9a11b27285bc604d3ee1bd2f9732ceaa72"
+      },
+      "atomistic_phonon_neb": {
+        "candidate_id": "mp-23474",
+        "formula_reduced": "AgBi3S5",
+        "target_layer": "BOTTOM_IR_075EV",
+        "nsites_unit_cell": 18,
+        "dynamical_matrix_dim": 54,
+        "gamma_min_optical_freq_thz": 3.0238,
+        "gamma_max_lo_freq_thz": 23.6022,
+        "imaginary_mode_count": 0,
+        "acoustic_sum_rule_max_dev_thz": 1e-06,
+        "migrating_species": "Ag",
+        "shortest_hop_distance_ang": 4.0341,
+        "bottleneck_clearance_ang": 2.0637,
+        "neb_saddle_barrier_ev": 1.12,
+        "room_temp_diffusivity_cm2_s": 4.151e-23,
+        "dynamically_and_kinetically_stable": true,
+        "redundancy_verified": true,
+        "sha256_signature": "4fe923441b3a661212f9369883f5511c0b7b3570621bb35a74448f945434cef6"
       }
     },
     {
@@ -965,10 +1034,10 @@
         "e_above_hull_0k_mev": 2.3,
         "g_above_hull_synth_mev": -8.2,
         "competing_hull_phases": [
-          "unknown",
           "Bi2S3",
-          "Te",
-          "Cu3SbS4"
+          "BiS2",
+          "BiSb2O7",
+          "Sb2S3"
         ],
         "bulk_modulus_gpa": 36.6,
         "shear_modulus_gpa": 18.7,
@@ -993,9 +1062,10 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -143.16,
         "competing_impurity_sinks": [
-          "unknown",
           "Bi2S3",
-          "Te"
+          "BiS2",
+          "BiSb2O7",
+          "Sb2S3"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 82.88,
@@ -1158,6 +1228,25 @@
         },
         "mismatches": [],
         "sha256_signature": "d8f6b425fa2066a5062437ab9edb68a127d62b3ca1821a2645bbf4f07a9076cb"
+      },
+      "atomistic_phonon_neb": {
+        "candidate_id": "mp-1227486",
+        "formula_reduced": "BiSbS3",
+        "target_layer": "TOP_ACTIVE_GLASS_185EV",
+        "nsites_unit_cell": 20,
+        "dynamical_matrix_dim": 60,
+        "gamma_min_optical_freq_thz": 2.3825,
+        "gamma_max_lo_freq_thz": 22.243,
+        "imaginary_mode_count": 0,
+        "acoustic_sum_rule_max_dev_thz": 0.0,
+        "migrating_species": "S",
+        "shortest_hop_distance_ang": 3.4258,
+        "bottleneck_clearance_ang": 2.6343,
+        "neb_saddle_barrier_ev": 0.9976,
+        "room_temp_diffusivity_cm2_s": 3.407e-21,
+        "dynamically_and_kinetically_stable": true,
+        "redundancy_verified": true,
+        "sha256_signature": "a10ec94bcf91d21c7eaed65922de15e2ed32f6b5ab34b101d3937128ad1b6ced"
       }
     },
     {
@@ -1341,10 +1430,10 @@
         "e_above_hull_0k_mev": 3.61,
         "g_above_hull_synth_mev": -6.89,
         "competing_hull_phases": [
-          "unknown",
           "CuGa2O4",
-          "CuSe",
-          "ZnS"
+          "Cu2Se",
+          "CuO",
+          "CuSe"
         ],
         "bulk_modulus_gpa": 37.0,
         "shear_modulus_gpa": 18.9,
@@ -1369,8 +1458,9 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -142.11,
         "competing_impurity_sinks": [
-          "unknown",
           "CuGa2O4",
+          "Cu2Se",
+          "CuO",
           "CuSe"
         ],
         "impurity_sink_risk_score": 0.11,
@@ -1538,6 +1628,25 @@
         },
         "mismatches": [],
         "sha256_signature": "94e846fe365a26c374eab9715c63f9678401f11dbe6c757cc4f6608bd2464e5c"
+      },
+      "atomistic_phonon_neb": {
+        "candidate_id": "mp-1224922",
+        "formula_reduced": "CuGaSnSe4",
+        "target_layer": "BOTTOM_IR_075EV",
+        "nsites_unit_cell": 7,
+        "dynamical_matrix_dim": 21,
+        "gamma_min_optical_freq_thz": 9.1927,
+        "gamma_max_lo_freq_thz": 20.7018,
+        "imaginary_mode_count": 0,
+        "acoustic_sum_rule_max_dev_thz": 0.0,
+        "migrating_species": "Cu",
+        "shortest_hop_distance_ang": 5.6792,
+        "bottleneck_clearance_ang": 2.3217,
+        "neb_saddle_barrier_ev": 1.3098,
+        "room_temp_diffusivity_cm2_s": 5.33e-26,
+        "dynamically_and_kinetically_stable": true,
+        "redundancy_verified": true,
+        "sha256_signature": "89c71681771f483b56189028916caebabfa5f1a6b0c88607581ea7d55766a1be"
       }
     },
     {
@@ -1721,10 +1830,10 @@
         "e_above_hull_0k_mev": 5.17,
         "g_above_hull_synth_mev": -5.33,
         "competing_hull_phases": [
-          "unknown",
           "CuSe",
-          "ZnS",
-          "InSn4"
+          "In2O3",
+          "Cu2Se",
+          "SnSe"
         ],
         "bulk_modulus_gpa": 34.0,
         "shear_modulus_gpa": 17.3,
@@ -1749,9 +1858,10 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -140.86,
         "competing_impurity_sinks": [
-          "unknown",
           "CuSe",
-          "ZnS"
+          "In2O3",
+          "Cu2Se",
+          "SnSe"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 500.0,
@@ -1918,6 +2028,25 @@
         },
         "mismatches": [],
         "sha256_signature": "e9f128da15956ed2693b7ddd9cf262a07696ca573313e2164f6491cf979d5d01"
+      },
+      "atomistic_phonon_neb": {
+        "candidate_id": "mp-1224129",
+        "formula_reduced": "CuInSnSe4",
+        "target_layer": "BOTTOM_IR_075EV",
+        "nsites_unit_cell": 7,
+        "dynamical_matrix_dim": 21,
+        "gamma_min_optical_freq_thz": 8.4441,
+        "gamma_max_lo_freq_thz": 19.382,
+        "imaginary_mode_count": 0,
+        "acoustic_sum_rule_max_dev_thz": 0.0,
+        "migrating_species": "Cu",
+        "shortest_hop_distance_ang": 5.9002,
+        "bottleneck_clearance_ang": 2.4748,
+        "neb_saddle_barrier_ev": 1.3256,
+        "room_temp_diffusivity_cm2_s": 3.122e-26,
+        "dynamically_and_kinetically_stable": true,
+        "redundancy_verified": true,
+        "sha256_signature": "c5e56b04e365aff7ed54335fa6e2da3c9fd003e5d2b96657fdb45e4ebb142fc5"
       }
     },
     {
@@ -2097,10 +2226,8 @@
         "e_above_hull_0k_mev": 7.07,
         "g_above_hull_synth_mev": -3.43,
         "competing_hull_phases": [
-          "unknown",
-          "CaO",
-          "ZnSb",
-          "Cu3SbS4"
+          "Sb2O3",
+          "Sb2S3"
         ],
         "bulk_modulus_gpa": 46.4,
         "shear_modulus_gpa": 23.7,
@@ -2125,9 +2252,8 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -139.34,
         "competing_impurity_sinks": [
-          "unknown",
-          "CaO",
-          "ZnSb"
+          "Sb2O3",
+          "Sb2S3"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 82.88,
@@ -2290,6 +2416,25 @@
         },
         "mismatches": [],
         "sha256_signature": "a09dbb1c343327cd5cbb5fe25b0409ec548a0f06b6168ca7feb5d47fc3ae68d1"
+      },
+      "atomistic_phonon_neb": {
+        "candidate_id": "mp-861911",
+        "formula_reduced": "Sb2OS2",
+        "target_layer": "TOP_ACTIVE_GLASS_185EV",
+        "nsites_unit_cell": 10,
+        "dynamical_matrix_dim": 30,
+        "gamma_min_optical_freq_thz": 5.7996,
+        "gamma_max_lo_freq_thz": 35.8981,
+        "imaginary_mode_count": 0,
+        "acoustic_sum_rule_max_dev_thz": 0.0,
+        "migrating_species": "O",
+        "shortest_hop_distance_ang": 2.4555,
+        "bottleneck_clearance_ang": 1.6896,
+        "neb_saddle_barrier_ev": 1.058,
+        "room_temp_diffusivity_cm2_s": 1.692e-22,
+        "dynamically_and_kinetically_stable": true,
+        "redundancy_verified": true,
+        "sha256_signature": "25cdb7d416a5fb6dfcad119a2778fbdaadd55f10b3cf4be6b9e52cb8a9da132e"
       }
     },
     {
@@ -2469,10 +2614,10 @@
         "e_above_hull_0k_mev": 15.08,
         "g_above_hull_synth_mev": 4.58,
         "competing_hull_phases": [
-          "unknown",
-          "Ge",
+          "In2O3",
+          "BiIn2",
           "Bi2S3",
-          "S"
+          "BiS2"
         ],
         "bulk_modulus_gpa": 37.8,
         "shear_modulus_gpa": 19.3,
@@ -2497,9 +2642,10 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -132.94,
         "competing_impurity_sinks": [
-          "unknown",
-          "Ge",
-          "Bi2S3"
+          "In2O3",
+          "BiIn2",
+          "Bi2S3",
+          "BiS2"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 500.0,
@@ -2662,6 +2808,25 @@
         },
         "mismatches": [],
         "sha256_signature": "efd0e571e1da58bcc47487420264fbc3faad1689ffc3bd7e6a5edd8f817ec9f3"
+      },
+      "atomistic_phonon_neb": {
+        "candidate_id": "mp-1078776",
+        "formula_reduced": "BiInS3",
+        "target_layer": "TOP_ACTIVE_GLASS_185EV",
+        "nsites_unit_cell": 10,
+        "dynamical_matrix_dim": 30,
+        "gamma_min_optical_freq_thz": 6.2733,
+        "gamma_max_lo_freq_thz": 22.7309,
+        "imaginary_mode_count": 0,
+        "acoustic_sum_rule_max_dev_thz": 0.0,
+        "migrating_species": "S",
+        "shortest_hop_distance_ang": 3.6364,
+        "bottleneck_clearance_ang": 1.8865,
+        "neb_saddle_barrier_ev": 1.1202,
+        "room_temp_diffusivity_cm2_s": 3.347e-23,
+        "dynamically_and_kinetically_stable": true,
+        "redundancy_verified": true,
+        "sha256_signature": "6c07d52f2ca54f5444d25b5af7f196d1ef2b1ad465e9677a5e1fea1d3a09f5a4"
       }
     },
     {
@@ -2842,10 +3007,10 @@
         "e_above_hull_0k_mev": 17.99,
         "g_above_hull_synth_mev": 7.49,
         "competing_hull_phases": [
-          "unknown",
-          "Ge",
+          "In2O3",
+          "BiIn2",
           "Bi2Se3",
-          "CuSe"
+          "Bi2O3"
         ],
         "bulk_modulus_gpa": 33.2,
         "shear_modulus_gpa": 16.9,
@@ -2870,10 +3035,10 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -130.61,
         "competing_impurity_sinks": [
-          "Bi",
           "BiSe",
           "Bi2Se3",
-          "In2Se3"
+          "In2Se3",
+          "In2O3"
         ],
         "impurity_sink_risk_score": 0.325,
         "halide_volatility_pressure_pa": 500.0,
@@ -3036,7 +3201,180 @@
         },
         "mismatches": [],
         "sha256_signature": "0dae9392716774ac808f7d90ab583018289674f56443c20fd9ccbb69f01202d5"
+      },
+      "atomistic_phonon_neb": {
+        "candidate_id": "mp-1223998",
+        "formula_reduced": "Bi3InSe6",
+        "target_layer": "BOTTOM_IR_075EV",
+        "nsites_unit_cell": 10,
+        "dynamical_matrix_dim": 30,
+        "gamma_min_optical_freq_thz": 1.3553,
+        "gamma_max_lo_freq_thz": 16.1117,
+        "imaginary_mode_count": 0,
+        "acoustic_sum_rule_max_dev_thz": 0.0,
+        "migrating_species": "Se",
+        "shortest_hop_distance_ang": 3.6687,
+        "bottleneck_clearance_ang": 3.4646,
+        "neb_saddle_barrier_ev": 0.9903,
+        "room_temp_diffusivity_cm2_s": 5.183e-21,
+        "dynamically_and_kinetically_stable": true,
+        "redundancy_verified": true,
+        "sha256_signature": "19cfc642b2062a8e2c84d35530349cbde30554e6f7e5f3c0034bd75d17a2169b"
       }
+    }
+  ],
+  "atomistic_phonon_neb_reports": [
+    {
+      "candidate_id": "mp-22982",
+      "formula_reduced": "BiCuS2",
+      "target_layer": "BOTTOM_IR_075EV",
+      "nsites_unit_cell": 16,
+      "dynamical_matrix_dim": 48,
+      "gamma_min_optical_freq_thz": 3.9036,
+      "gamma_max_lo_freq_thz": 26.2092,
+      "imaginary_mode_count": 0,
+      "acoustic_sum_rule_max_dev_thz": 0.0,
+      "migrating_species": "Cu",
+      "shortest_hop_distance_ang": 3.8501,
+      "bottleneck_clearance_ang": 1.2376,
+      "neb_saddle_barrier_ev": 1.348,
+      "room_temp_diffusivity_cm2_s": 5.59e-27,
+      "dynamically_and_kinetically_stable": true,
+      "redundancy_verified": true,
+      "sha256_signature": "66e28432a7519ec8a45a83a2eb7ba9f45c1dfc164c671b69f47e8e69ef32eeb3"
+    },
+    {
+      "candidate_id": "mp-23474",
+      "formula_reduced": "AgBi3S5",
+      "target_layer": "BOTTOM_IR_075EV",
+      "nsites_unit_cell": 18,
+      "dynamical_matrix_dim": 54,
+      "gamma_min_optical_freq_thz": 3.0238,
+      "gamma_max_lo_freq_thz": 23.6022,
+      "imaginary_mode_count": 0,
+      "acoustic_sum_rule_max_dev_thz": 1e-06,
+      "migrating_species": "Ag",
+      "shortest_hop_distance_ang": 4.0341,
+      "bottleneck_clearance_ang": 2.0637,
+      "neb_saddle_barrier_ev": 1.12,
+      "room_temp_diffusivity_cm2_s": 4.151e-23,
+      "dynamically_and_kinetically_stable": true,
+      "redundancy_verified": true,
+      "sha256_signature": "4fe923441b3a661212f9369883f5511c0b7b3570621bb35a74448f945434cef6"
+    },
+    {
+      "candidate_id": "mp-1227486",
+      "formula_reduced": "BiSbS3",
+      "target_layer": "TOP_ACTIVE_GLASS_185EV",
+      "nsites_unit_cell": 20,
+      "dynamical_matrix_dim": 60,
+      "gamma_min_optical_freq_thz": 2.3825,
+      "gamma_max_lo_freq_thz": 22.243,
+      "imaginary_mode_count": 0,
+      "acoustic_sum_rule_max_dev_thz": 0.0,
+      "migrating_species": "S",
+      "shortest_hop_distance_ang": 3.4258,
+      "bottleneck_clearance_ang": 2.6343,
+      "neb_saddle_barrier_ev": 0.9976,
+      "room_temp_diffusivity_cm2_s": 3.407e-21,
+      "dynamically_and_kinetically_stable": true,
+      "redundancy_verified": true,
+      "sha256_signature": "a10ec94bcf91d21c7eaed65922de15e2ed32f6b5ab34b101d3937128ad1b6ced"
+    },
+    {
+      "candidate_id": "mp-1224922",
+      "formula_reduced": "CuGaSnSe4",
+      "target_layer": "BOTTOM_IR_075EV",
+      "nsites_unit_cell": 7,
+      "dynamical_matrix_dim": 21,
+      "gamma_min_optical_freq_thz": 9.1927,
+      "gamma_max_lo_freq_thz": 20.7018,
+      "imaginary_mode_count": 0,
+      "acoustic_sum_rule_max_dev_thz": 0.0,
+      "migrating_species": "Cu",
+      "shortest_hop_distance_ang": 5.6792,
+      "bottleneck_clearance_ang": 2.3217,
+      "neb_saddle_barrier_ev": 1.3098,
+      "room_temp_diffusivity_cm2_s": 5.33e-26,
+      "dynamically_and_kinetically_stable": true,
+      "redundancy_verified": true,
+      "sha256_signature": "89c71681771f483b56189028916caebabfa5f1a6b0c88607581ea7d55766a1be"
+    },
+    {
+      "candidate_id": "mp-1224129",
+      "formula_reduced": "CuInSnSe4",
+      "target_layer": "BOTTOM_IR_075EV",
+      "nsites_unit_cell": 7,
+      "dynamical_matrix_dim": 21,
+      "gamma_min_optical_freq_thz": 8.4441,
+      "gamma_max_lo_freq_thz": 19.382,
+      "imaginary_mode_count": 0,
+      "acoustic_sum_rule_max_dev_thz": 0.0,
+      "migrating_species": "Cu",
+      "shortest_hop_distance_ang": 5.9002,
+      "bottleneck_clearance_ang": 2.4748,
+      "neb_saddle_barrier_ev": 1.3256,
+      "room_temp_diffusivity_cm2_s": 3.122e-26,
+      "dynamically_and_kinetically_stable": true,
+      "redundancy_verified": true,
+      "sha256_signature": "c5e56b04e365aff7ed54335fa6e2da3c9fd003e5d2b96657fdb45e4ebb142fc5"
+    },
+    {
+      "candidate_id": "mp-861911",
+      "formula_reduced": "Sb2OS2",
+      "target_layer": "TOP_ACTIVE_GLASS_185EV",
+      "nsites_unit_cell": 10,
+      "dynamical_matrix_dim": 30,
+      "gamma_min_optical_freq_thz": 5.7996,
+      "gamma_max_lo_freq_thz": 35.8981,
+      "imaginary_mode_count": 0,
+      "acoustic_sum_rule_max_dev_thz": 0.0,
+      "migrating_species": "O",
+      "shortest_hop_distance_ang": 2.4555,
+      "bottleneck_clearance_ang": 1.6896,
+      "neb_saddle_barrier_ev": 1.058,
+      "room_temp_diffusivity_cm2_s": 1.692e-22,
+      "dynamically_and_kinetically_stable": true,
+      "redundancy_verified": true,
+      "sha256_signature": "25cdb7d416a5fb6dfcad119a2778fbdaadd55f10b3cf4be6b9e52cb8a9da132e"
+    },
+    {
+      "candidate_id": "mp-1078776",
+      "formula_reduced": "BiInS3",
+      "target_layer": "TOP_ACTIVE_GLASS_185EV",
+      "nsites_unit_cell": 10,
+      "dynamical_matrix_dim": 30,
+      "gamma_min_optical_freq_thz": 6.2733,
+      "gamma_max_lo_freq_thz": 22.7309,
+      "imaginary_mode_count": 0,
+      "acoustic_sum_rule_max_dev_thz": 0.0,
+      "migrating_species": "S",
+      "shortest_hop_distance_ang": 3.6364,
+      "bottleneck_clearance_ang": 1.8865,
+      "neb_saddle_barrier_ev": 1.1202,
+      "room_temp_diffusivity_cm2_s": 3.347e-23,
+      "dynamically_and_kinetically_stable": true,
+      "redundancy_verified": true,
+      "sha256_signature": "6c07d52f2ca54f5444d25b5af7f196d1ef2b1ad465e9677a5e1fea1d3a09f5a4"
+    },
+    {
+      "candidate_id": "mp-1223998",
+      "formula_reduced": "Bi3InSe6",
+      "target_layer": "BOTTOM_IR_075EV",
+      "nsites_unit_cell": 10,
+      "dynamical_matrix_dim": 30,
+      "gamma_min_optical_freq_thz": 1.3553,
+      "gamma_max_lo_freq_thz": 16.1117,
+      "imaginary_mode_count": 0,
+      "acoustic_sum_rule_max_dev_thz": 0.0,
+      "migrating_species": "Se",
+      "shortest_hop_distance_ang": 3.6687,
+      "bottleneck_clearance_ang": 3.4646,
+      "neb_saddle_barrier_ev": 0.9903,
+      "room_temp_diffusivity_cm2_s": 5.183e-21,
+      "dynamically_and_kinetically_stable": true,
+      "redundancy_verified": true,
+      "sha256_signature": "19cfc642b2062a8e2c84d35530349cbde30554e6f7e5f3c0034bd75d17a2169b"
     }
   ],
   "cross_layer_4t_tandem_pairs": [
@@ -3371,6 +3709,398 @@
       "redundancy_simpson_diff_percent": 0.0
     }
   ],
+  "coherent_tmm_4t_stacks": [
+    {
+      "pair_id": "mp-861911__mp-1223998",
+      "top_mp_id": "mp-861911",
+      "top_formula": "Sb2OS2",
+      "bottom_mp_id": "mp-1223998",
+      "bottom_formula": "Bi3InSe6",
+      "arc_mgf2_thickness_nm": 98.0,
+      "front_ito_thickness_nm": 105.0,
+      "top_absorber_thickness_nm": 260.0,
+      "rear_buffer_thickness_nm": 85.0,
+      "bottom_absorber_thickness_nm": 340.0,
+      "tmm_mean_front_reflectance_percent": 11.9,
+      "tmm_sub_bandgap_transmittance_percent": 88.41,
+      "tmm_top_pce_percent": 22.95,
+      "tmm_si_pce_percent": 12.16,
+      "tmm_bottom_std_si_pce_percent": 3.41,
+      "tmm_bottom_pce_percent": 4.89,
+      "tmm_2layer_pce_percent": 36.06,
+      "tmm_4t_std_si_pce_percent": 38.52,
+      "tmm_4t_low_fca_pce_percent": 40.0,
+      "scalar_to_tmm_delta_pce_percent": -2.32,
+      "combined_active_cost_usd_m2": 0.1664,
+      "photon_conservation_verified": true,
+      "rouard_airy_redundancy_diff_percent": 0.0,
+      "sha256_signature": "dab665e7c578057987c774aaaab461bff99fd34c749cf06c7a0729b26ca4451b"
+    },
+    {
+      "pair_id": "mp-1078776__mp-1223998",
+      "top_mp_id": "mp-1078776",
+      "top_formula": "BiInS3",
+      "bottom_mp_id": "mp-1223998",
+      "bottom_formula": "Bi3InSe6",
+      "arc_mgf2_thickness_nm": 98.0,
+      "front_ito_thickness_nm": 105.0,
+      "top_absorber_thickness_nm": 260.0,
+      "rear_buffer_thickness_nm": 85.0,
+      "bottom_absorber_thickness_nm": 340.0,
+      "tmm_mean_front_reflectance_percent": 11.01,
+      "tmm_sub_bandgap_transmittance_percent": 88.92,
+      "tmm_top_pce_percent": 20.72,
+      "tmm_si_pce_percent": 14.24,
+      "tmm_bottom_std_si_pce_percent": 3.49,
+      "tmm_bottom_pce_percent": 5.0,
+      "tmm_2layer_pce_percent": 35.93,
+      "tmm_4t_std_si_pce_percent": 38.44,
+      "tmm_4t_low_fca_pce_percent": 39.96,
+      "scalar_to_tmm_delta_pce_percent": -1.82,
+      "combined_active_cost_usd_m2": 0.4188,
+      "photon_conservation_verified": true,
+      "rouard_airy_redundancy_diff_percent": 0.0,
+      "sha256_signature": "3de6bb6f8f99437c333e73077bc191a9296135ab2b17e7cb96c89dff6317245e"
+    },
+    {
+      "pair_id": "mp-1227486__mp-1223998",
+      "top_mp_id": "mp-1227486",
+      "top_formula": "BiSbS3",
+      "bottom_mp_id": "mp-1223998",
+      "bottom_formula": "Bi3InSe6",
+      "arc_mgf2_thickness_nm": 98.0,
+      "front_ito_thickness_nm": 105.0,
+      "top_absorber_thickness_nm": 260.0,
+      "rear_buffer_thickness_nm": 85.0,
+      "bottom_absorber_thickness_nm": 340.0,
+      "tmm_mean_front_reflectance_percent": 11.97,
+      "tmm_sub_bandgap_transmittance_percent": 88.25,
+      "tmm_top_pce_percent": 22.47,
+      "tmm_si_pce_percent": 12.58,
+      "tmm_bottom_std_si_pce_percent": 3.41,
+      "tmm_bottom_pce_percent": 4.89,
+      "tmm_2layer_pce_percent": 36.0,
+      "tmm_4t_std_si_pce_percent": 38.46,
+      "tmm_4t_low_fca_pce_percent": 39.93,
+      "scalar_to_tmm_delta_pce_percent": -2.32,
+      "combined_active_cost_usd_m2": 0.1689,
+      "photon_conservation_verified": true,
+      "rouard_airy_redundancy_diff_percent": 0.0,
+      "sha256_signature": "e31767b3303de95fedfe29dce28a226d0c087e5af1683b41d9accde108f9d147"
+    },
+    {
+      "pair_id": "mp-861911__mp-1224922",
+      "top_mp_id": "mp-861911",
+      "top_formula": "Sb2OS2",
+      "bottom_mp_id": "mp-1224922",
+      "bottom_formula": "CuGaSnSe4",
+      "arc_mgf2_thickness_nm": 98.0,
+      "front_ito_thickness_nm": 105.0,
+      "top_absorber_thickness_nm": 260.0,
+      "rear_buffer_thickness_nm": 85.0,
+      "bottom_absorber_thickness_nm": 340.0,
+      "tmm_mean_front_reflectance_percent": 11.9,
+      "tmm_sub_bandgap_transmittance_percent": 88.41,
+      "tmm_top_pce_percent": 22.95,
+      "tmm_si_pce_percent": 12.16,
+      "tmm_bottom_std_si_pce_percent": 3.15,
+      "tmm_bottom_pce_percent": 4.25,
+      "tmm_2layer_pce_percent": 36.06,
+      "tmm_4t_std_si_pce_percent": 38.27,
+      "tmm_4t_low_fca_pce_percent": 39.36,
+      "scalar_to_tmm_delta_pce_percent": -2.43,
+      "combined_active_cost_usd_m2": 0.1408,
+      "photon_conservation_verified": true,
+      "rouard_airy_redundancy_diff_percent": 0.0,
+      "sha256_signature": "994671aa602c200f65bd7fb2c10eedd26386671816661f91c139a9f3cc15a33d"
+    },
+    {
+      "pair_id": "mp-861911__mp-22982",
+      "top_mp_id": "mp-861911",
+      "top_formula": "Sb2OS2",
+      "bottom_mp_id": "mp-22982",
+      "bottom_formula": "BiCuS2",
+      "arc_mgf2_thickness_nm": 98.0,
+      "front_ito_thickness_nm": 105.0,
+      "top_absorber_thickness_nm": 260.0,
+      "rear_buffer_thickness_nm": 85.0,
+      "bottom_absorber_thickness_nm": 340.0,
+      "tmm_mean_front_reflectance_percent": 11.9,
+      "tmm_sub_bandgap_transmittance_percent": 88.41,
+      "tmm_top_pce_percent": 22.95,
+      "tmm_si_pce_percent": 12.16,
+      "tmm_bottom_std_si_pce_percent": 3.12,
+      "tmm_bottom_pce_percent": 4.2,
+      "tmm_2layer_pce_percent": 36.06,
+      "tmm_4t_std_si_pce_percent": 38.23,
+      "tmm_4t_low_fca_pce_percent": 39.32,
+      "scalar_to_tmm_delta_pce_percent": -2.43,
+      "combined_active_cost_usd_m2": 0.0394,
+      "photon_conservation_verified": true,
+      "rouard_airy_redundancy_diff_percent": 0.01,
+      "sha256_signature": "61f3448777bb4179cb4f0a552170b626c0dbdca34daedc8c536182109a4555a6"
+    },
+    {
+      "pair_id": "mp-861911__mp-23474",
+      "top_mp_id": "mp-861911",
+      "top_formula": "Sb2OS2",
+      "bottom_mp_id": "mp-23474",
+      "bottom_formula": "AgBi3S5",
+      "arc_mgf2_thickness_nm": 98.0,
+      "front_ito_thickness_nm": 105.0,
+      "top_absorber_thickness_nm": 260.0,
+      "rear_buffer_thickness_nm": 85.0,
+      "bottom_absorber_thickness_nm": 340.0,
+      "tmm_mean_front_reflectance_percent": 11.9,
+      "tmm_sub_bandgap_transmittance_percent": 88.41,
+      "tmm_top_pce_percent": 22.95,
+      "tmm_si_pce_percent": 12.16,
+      "tmm_bottom_std_si_pce_percent": 3.12,
+      "tmm_bottom_pce_percent": 4.2,
+      "tmm_2layer_pce_percent": 36.06,
+      "tmm_4t_std_si_pce_percent": 38.23,
+      "tmm_4t_low_fca_pce_percent": 39.32,
+      "scalar_to_tmm_delta_pce_percent": -2.43,
+      "combined_active_cost_usd_m2": 0.2715,
+      "photon_conservation_verified": true,
+      "rouard_airy_redundancy_diff_percent": 0.01,
+      "sha256_signature": "61f3448777bb4179cb4f0a552170b626c0dbdca34daedc8c536182109a4555a6"
+    },
+    {
+      "pair_id": "mp-1227486__mp-1224922",
+      "top_mp_id": "mp-1227486",
+      "top_formula": "BiSbS3",
+      "bottom_mp_id": "mp-1224922",
+      "bottom_formula": "CuGaSnSe4",
+      "arc_mgf2_thickness_nm": 98.0,
+      "front_ito_thickness_nm": 105.0,
+      "top_absorber_thickness_nm": 260.0,
+      "rear_buffer_thickness_nm": 85.0,
+      "bottom_absorber_thickness_nm": 340.0,
+      "tmm_mean_front_reflectance_percent": 11.97,
+      "tmm_sub_bandgap_transmittance_percent": 88.25,
+      "tmm_top_pce_percent": 22.47,
+      "tmm_si_pce_percent": 12.58,
+      "tmm_bottom_std_si_pce_percent": 3.15,
+      "tmm_bottom_pce_percent": 4.25,
+      "tmm_2layer_pce_percent": 36.0,
+      "tmm_4t_std_si_pce_percent": 38.2,
+      "tmm_4t_low_fca_pce_percent": 39.3,
+      "scalar_to_tmm_delta_pce_percent": -2.42,
+      "combined_active_cost_usd_m2": 0.1433,
+      "photon_conservation_verified": true,
+      "rouard_airy_redundancy_diff_percent": 0.0,
+      "sha256_signature": "4a3d61e35d3a8777218bde4b39bd42c38f0b7206142c50950ca194f929de2e45"
+    },
+    {
+      "pair_id": "mp-1078776__mp-1224922",
+      "top_mp_id": "mp-1078776",
+      "top_formula": "BiInS3",
+      "bottom_mp_id": "mp-1224922",
+      "bottom_formula": "CuGaSnSe4",
+      "arc_mgf2_thickness_nm": 98.0,
+      "front_ito_thickness_nm": 105.0,
+      "top_absorber_thickness_nm": 260.0,
+      "rear_buffer_thickness_nm": 85.0,
+      "bottom_absorber_thickness_nm": 340.0,
+      "tmm_mean_front_reflectance_percent": 11.01,
+      "tmm_sub_bandgap_transmittance_percent": 88.92,
+      "tmm_top_pce_percent": 20.72,
+      "tmm_si_pce_percent": 14.24,
+      "tmm_bottom_std_si_pce_percent": 3.22,
+      "tmm_bottom_pce_percent": 4.34,
+      "tmm_2layer_pce_percent": 35.93,
+      "tmm_4t_std_si_pce_percent": 38.17,
+      "tmm_4t_low_fca_pce_percent": 39.29,
+      "scalar_to_tmm_delta_pce_percent": -1.96,
+      "combined_active_cost_usd_m2": 0.3932,
+      "photon_conservation_verified": true,
+      "rouard_airy_redundancy_diff_percent": 0.0,
+      "sha256_signature": "bc83c97e786f2efe32f6e23a7e18c9604c42e052b0b4cbcf31cfd8ba4ec2f87d"
+    },
+    {
+      "pair_id": "mp-1227486__mp-22982",
+      "top_mp_id": "mp-1227486",
+      "top_formula": "BiSbS3",
+      "bottom_mp_id": "mp-22982",
+      "bottom_formula": "BiCuS2",
+      "arc_mgf2_thickness_nm": 98.0,
+      "front_ito_thickness_nm": 105.0,
+      "top_absorber_thickness_nm": 260.0,
+      "rear_buffer_thickness_nm": 85.0,
+      "bottom_absorber_thickness_nm": 340.0,
+      "tmm_mean_front_reflectance_percent": 11.97,
+      "tmm_sub_bandgap_transmittance_percent": 88.25,
+      "tmm_top_pce_percent": 22.47,
+      "tmm_si_pce_percent": 12.58,
+      "tmm_bottom_std_si_pce_percent": 3.12,
+      "tmm_bottom_pce_percent": 4.2,
+      "tmm_2layer_pce_percent": 36.0,
+      "tmm_4t_std_si_pce_percent": 38.17,
+      "tmm_4t_low_fca_pce_percent": 39.25,
+      "scalar_to_tmm_delta_pce_percent": -2.42,
+      "combined_active_cost_usd_m2": 0.0419,
+      "photon_conservation_verified": true,
+      "rouard_airy_redundancy_diff_percent": 0.0,
+      "sha256_signature": "edf9ca07cd7d92c7d5880c0c8884e4e8057d9f6f5d80c1a1b90a03bf9f6df247"
+    },
+    {
+      "pair_id": "mp-1227486__mp-23474",
+      "top_mp_id": "mp-1227486",
+      "top_formula": "BiSbS3",
+      "bottom_mp_id": "mp-23474",
+      "bottom_formula": "AgBi3S5",
+      "arc_mgf2_thickness_nm": 98.0,
+      "front_ito_thickness_nm": 105.0,
+      "top_absorber_thickness_nm": 260.0,
+      "rear_buffer_thickness_nm": 85.0,
+      "bottom_absorber_thickness_nm": 340.0,
+      "tmm_mean_front_reflectance_percent": 11.97,
+      "tmm_sub_bandgap_transmittance_percent": 88.25,
+      "tmm_top_pce_percent": 22.47,
+      "tmm_si_pce_percent": 12.58,
+      "tmm_bottom_std_si_pce_percent": 3.12,
+      "tmm_bottom_pce_percent": 4.2,
+      "tmm_2layer_pce_percent": 36.0,
+      "tmm_4t_std_si_pce_percent": 38.17,
+      "tmm_4t_low_fca_pce_percent": 39.25,
+      "scalar_to_tmm_delta_pce_percent": -2.42,
+      "combined_active_cost_usd_m2": 0.274,
+      "photon_conservation_verified": true,
+      "rouard_airy_redundancy_diff_percent": 0.0,
+      "sha256_signature": "edf9ca07cd7d92c7d5880c0c8884e4e8057d9f6f5d80c1a1b90a03bf9f6df247"
+    },
+    {
+      "pair_id": "mp-1078776__mp-22982",
+      "top_mp_id": "mp-1078776",
+      "top_formula": "BiInS3",
+      "bottom_mp_id": "mp-22982",
+      "bottom_formula": "BiCuS2",
+      "arc_mgf2_thickness_nm": 98.0,
+      "front_ito_thickness_nm": 105.0,
+      "top_absorber_thickness_nm": 260.0,
+      "rear_buffer_thickness_nm": 85.0,
+      "bottom_absorber_thickness_nm": 340.0,
+      "tmm_mean_front_reflectance_percent": 11.01,
+      "tmm_sub_bandgap_transmittance_percent": 88.92,
+      "tmm_top_pce_percent": 20.72,
+      "tmm_si_pce_percent": 14.24,
+      "tmm_bottom_std_si_pce_percent": 3.19,
+      "tmm_bottom_pce_percent": 4.29,
+      "tmm_2layer_pce_percent": 35.93,
+      "tmm_4t_std_si_pce_percent": 38.14,
+      "tmm_4t_low_fca_pce_percent": 39.24,
+      "scalar_to_tmm_delta_pce_percent": -1.96,
+      "combined_active_cost_usd_m2": 0.2918,
+      "photon_conservation_verified": true,
+      "rouard_airy_redundancy_diff_percent": 0.0,
+      "sha256_signature": "aaca51b06c6da1bccd88fc6876fc76f39b5de6dcc94845e17506d8988048aa46"
+    },
+    {
+      "pair_id": "mp-1078776__mp-23474",
+      "top_mp_id": "mp-1078776",
+      "top_formula": "BiInS3",
+      "bottom_mp_id": "mp-23474",
+      "bottom_formula": "AgBi3S5",
+      "arc_mgf2_thickness_nm": 98.0,
+      "front_ito_thickness_nm": 105.0,
+      "top_absorber_thickness_nm": 260.0,
+      "rear_buffer_thickness_nm": 85.0,
+      "bottom_absorber_thickness_nm": 340.0,
+      "tmm_mean_front_reflectance_percent": 11.01,
+      "tmm_sub_bandgap_transmittance_percent": 88.92,
+      "tmm_top_pce_percent": 20.72,
+      "tmm_si_pce_percent": 14.24,
+      "tmm_bottom_std_si_pce_percent": 3.19,
+      "tmm_bottom_pce_percent": 4.29,
+      "tmm_2layer_pce_percent": 35.93,
+      "tmm_4t_std_si_pce_percent": 38.14,
+      "tmm_4t_low_fca_pce_percent": 39.24,
+      "scalar_to_tmm_delta_pce_percent": -1.96,
+      "combined_active_cost_usd_m2": 0.5239,
+      "photon_conservation_verified": true,
+      "rouard_airy_redundancy_diff_percent": 0.0,
+      "sha256_signature": "aaca51b06c6da1bccd88fc6876fc76f39b5de6dcc94845e17506d8988048aa46"
+    },
+    {
+      "pair_id": "mp-861911__mp-1224129",
+      "top_mp_id": "mp-861911",
+      "top_formula": "Sb2OS2",
+      "bottom_mp_id": "mp-1224129",
+      "bottom_formula": "CuInSnSe4",
+      "arc_mgf2_thickness_nm": 98.0,
+      "front_ito_thickness_nm": 105.0,
+      "top_absorber_thickness_nm": 260.0,
+      "rear_buffer_thickness_nm": 85.0,
+      "bottom_absorber_thickness_nm": 340.0,
+      "tmm_mean_front_reflectance_percent": 11.9,
+      "tmm_sub_bandgap_transmittance_percent": 88.41,
+      "tmm_top_pce_percent": 22.95,
+      "tmm_si_pce_percent": 12.16,
+      "tmm_bottom_std_si_pce_percent": 2.92,
+      "tmm_bottom_pce_percent": 3.99,
+      "tmm_2layer_pce_percent": 36.06,
+      "tmm_4t_std_si_pce_percent": 38.03,
+      "tmm_4t_low_fca_pce_percent": 39.11,
+      "scalar_to_tmm_delta_pce_percent": -2.42,
+      "combined_active_cost_usd_m2": 0.2821,
+      "photon_conservation_verified": true,
+      "rouard_airy_redundancy_diff_percent": 0.0,
+      "sha256_signature": "457baf2ff17ee19a8c23f5b4aa4f96afd62f9e692f0be887b018203d0735cfff"
+    },
+    {
+      "pair_id": "mp-1227486__mp-1224129",
+      "top_mp_id": "mp-1227486",
+      "top_formula": "BiSbS3",
+      "bottom_mp_id": "mp-1224129",
+      "bottom_formula": "CuInSnSe4",
+      "arc_mgf2_thickness_nm": 98.0,
+      "front_ito_thickness_nm": 105.0,
+      "top_absorber_thickness_nm": 260.0,
+      "rear_buffer_thickness_nm": 85.0,
+      "bottom_absorber_thickness_nm": 340.0,
+      "tmm_mean_front_reflectance_percent": 11.97,
+      "tmm_sub_bandgap_transmittance_percent": 88.25,
+      "tmm_top_pce_percent": 22.47,
+      "tmm_si_pce_percent": 12.58,
+      "tmm_bottom_std_si_pce_percent": 2.92,
+      "tmm_bottom_pce_percent": 3.99,
+      "tmm_2layer_pce_percent": 36.0,
+      "tmm_4t_std_si_pce_percent": 37.97,
+      "tmm_4t_low_fca_pce_percent": 39.04,
+      "scalar_to_tmm_delta_pce_percent": -2.41,
+      "combined_active_cost_usd_m2": 0.2846,
+      "photon_conservation_verified": true,
+      "rouard_airy_redundancy_diff_percent": 0.01,
+      "sha256_signature": "9dc471daa90881cfe67f4654076b0f5f5cb692e76043152aef7ca6050162dd46"
+    },
+    {
+      "pair_id": "mp-1078776__mp-1224129",
+      "top_mp_id": "mp-1078776",
+      "top_formula": "BiInS3",
+      "bottom_mp_id": "mp-1224129",
+      "bottom_formula": "CuInSnSe4",
+      "arc_mgf2_thickness_nm": 98.0,
+      "front_ito_thickness_nm": 105.0,
+      "top_absorber_thickness_nm": 260.0,
+      "rear_buffer_thickness_nm": 85.0,
+      "bottom_absorber_thickness_nm": 340.0,
+      "tmm_mean_front_reflectance_percent": 11.01,
+      "tmm_sub_bandgap_transmittance_percent": 88.92,
+      "tmm_top_pce_percent": 20.72,
+      "tmm_si_pce_percent": 14.24,
+      "tmm_bottom_std_si_pce_percent": 2.98,
+      "tmm_bottom_pce_percent": 4.08,
+      "tmm_2layer_pce_percent": 35.93,
+      "tmm_4t_std_si_pce_percent": 37.94,
+      "tmm_4t_low_fca_pce_percent": 39.04,
+      "scalar_to_tmm_delta_pce_percent": -1.94,
+      "combined_active_cost_usd_m2": 0.5345,
+      "photon_conservation_verified": true,
+      "rouard_airy_redundancy_diff_percent": 0.0,
+      "sha256_signature": "4bbfccf54b230ef4cda0ebd2540445e0c8e7ab5dc02f7863e38c1ae3366cf725"
+    }
+  ],
   "all_mp_records": [
     {
       "candidate": {
@@ -3547,10 +4277,9 @@
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "unknown",
-          "Bi2Fe4O9",
+          "Bi2O3",
           "Bi2S3",
-          "CaO"
+          "BiS2"
         ],
         "bulk_modulus_gpa": 48.0,
         "shear_modulus_gpa": 24.5,
@@ -3575,10 +4304,9 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
-          "Bi",
           "Bi2S3",
           "Bi2O3",
-          "Bi2OS2"
+          "BiS2"
         ],
         "impurity_sink_risk_score": 0.371,
         "halide_volatility_pressure_pa": 82.88,
@@ -3923,10 +4651,10 @@
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "unknown",
-          "CS In6S7",
           "Ag79Sn21",
-          "AZn2As2"
+          "ZnS",
+          "SnS",
+          "SnS2"
         ],
         "bulk_modulus_gpa": 40.6,
         "shear_modulus_gpa": 20.7,
@@ -3951,9 +4679,10 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
-          "unknown",
-          "CS In6S7",
-          "Ag79Sn21"
+          "Ag79Sn21",
+          "ZnS",
+          "SnS",
+          "SnS2"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 82.88,
@@ -4207,16 +4936,16 @@
       "stage_reached": 3,
       "status": "REJECTED",
       "primary_failure_mode": "OXIDE_IMPURITY_SINK",
-      "reason": "OXIDE_IMPURITY_SINK: Requires 1000 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)",
+      "reason": "OXIDE_IMPURITY_SINK: Requires 1000 C (> 500 C soda-lime glass ceiling) to overcome refractory In2O3 impurity sink (LBNL-80k/A-Lab prior)",
       "stability": {
         "candidate_id": "mp-1105202",
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "unknown",
-          "Bi2Fe4O9",
           "In2O3",
-          "Fe7Se8"
+          "BiIn2",
+          "Bi2Se3",
+          "Bi2O3"
         ],
         "bulk_modulus_gpa": 30.7,
         "shear_modulus_gpa": 15.7,
@@ -4241,9 +4970,10 @@
         "min_synthesis_temp_c": 999.9,
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
-          "unknown",
-          "Bi2Fe4O9",
-          "In2O3"
+          "In2O3",
+          "BiIn2",
+          "Bi2Se3",
+          "Bi2O3"
         ],
         "impurity_sink_risk_score": 0.82,
         "halide_volatility_pressure_pa": 500.0,
@@ -4252,7 +4982,7 @@
         "active_layer_cost_usd_m2": 0.1296,
         "contrastive_synthesizability_score": 0.743,
         "passed_stage3": false,
-        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 1000 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)"
+        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 1000 C (> 500 C soda-lime glass ceiling) to overcome refractory In2O3 impurity sink (LBNL-80k/A-Lab prior)"
       },
       "redundancy_verification": {
         "candidate_id": "mp-1105202",
@@ -4498,16 +5228,16 @@
       "stage_reached": 3,
       "status": "REJECTED",
       "primary_failure_mode": "OXIDE_IMPURITY_SINK",
-      "reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)",
+      "reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory In2O3 impurity sink (LBNL-80k/A-Lab prior)",
       "stability": {
         "candidate_id": "mp-1189339",
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "unknown",
           "In2O3",
-          "Sb",
-          "Fe7Se8"
+          "Ba5Sb3",
+          "InSb",
+          "In2Se3"
         ],
         "bulk_modulus_gpa": 31.1,
         "shear_modulus_gpa": 15.9,
@@ -4532,9 +5262,10 @@
         "min_synthesis_temp_c": 680.0,
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
-          "unknown",
           "In2O3",
-          "Sb"
+          "Ba5Sb3",
+          "InSb",
+          "In2Se3"
         ],
         "impurity_sink_risk_score": 0.82,
         "halide_volatility_pressure_pa": 500.0,
@@ -4543,7 +5274,7 @@
         "active_layer_cost_usd_m2": 0.1819,
         "contrastive_synthesizability_score": 0.645,
         "passed_stage3": false,
-        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)"
+        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory In2O3 impurity sink (LBNL-80k/A-Lab prior)"
       },
       "redundancy_verification": {
         "candidate_id": "mp-1189339",
@@ -4788,16 +5519,16 @@
       "stage_reached": 3,
       "status": "REJECTED",
       "primary_failure_mode": "OXIDE_IMPURITY_SINK",
-      "reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory BaSc2Te4 impurity sink (LBNL-80k/A-Lab prior)",
+      "reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory Ag3Sb impurity sink (LBNL-80k/A-Lab prior)",
       "stability": {
         "candidate_id": "mp-1190401",
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "BaSc2Te4",
-          "BaCO3",
-          "unknown",
-          "CS In6S7"
+          "Ag3Sb",
+          "BaS",
+          "Ba5Sb3",
+          "Sb2S3"
         ],
         "bulk_modulus_gpa": 35.0,
         "shear_modulus_gpa": 17.9,
@@ -4822,9 +5553,10 @@
         "min_synthesis_temp_c": 680.0,
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
-          "BaSc2Te4",
-          "BaCO3",
-          "unknown"
+          "Ag3Sb",
+          "BaS",
+          "Ba5Sb3",
+          "Sb2S3"
         ],
         "impurity_sink_risk_score": 0.82,
         "halide_volatility_pressure_pa": 500.0,
@@ -4833,7 +5565,7 @@
         "active_layer_cost_usd_m2": 0.3518,
         "contrastive_synthesizability_score": 0.75,
         "passed_stage3": false,
-        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory BaSc2Te4 impurity sink (LBNL-80k/A-Lab prior)"
+        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory Ag3Sb impurity sink (LBNL-80k/A-Lab prior)"
       },
       "redundancy_verification": {
         "candidate_id": "mp-1190401",
@@ -5074,16 +5806,16 @@
       "stage_reached": 3,
       "status": "REJECTED",
       "primary_failure_mode": "OXIDE_IMPURITY_SINK",
-      "reason": "OXIDE_IMPURITY_SINK: Requires 750 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)",
+      "reason": "OXIDE_IMPURITY_SINK: Requires 750 C (> 500 C soda-lime glass ceiling) to overcome refractory SnSe2 impurity sink (LBNL-80k/A-Lab prior)",
       "stability": {
         "candidate_id": "mp-1192595",
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "unknown",
-          "Fe7Se8",
-          "Sn",
-          "SnSe2"
+          "SnSe2",
+          "SnSe",
+          "SnO2",
+          "BaSe"
         ],
         "bulk_modulus_gpa": 29.3,
         "shear_modulus_gpa": 14.9,
@@ -5108,7 +5840,10 @@
         "min_synthesis_temp_c": 749.9,
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
-          "unknown"
+          "SnSe2",
+          "SnSe",
+          "SnO2",
+          "BaSe"
         ],
         "impurity_sink_risk_score": 1.0,
         "halide_volatility_pressure_pa": 500.0,
@@ -5117,7 +5852,7 @@
         "active_layer_cost_usd_m2": 0.0261,
         "contrastive_synthesizability_score": 0.644,
         "passed_stage3": false,
-        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 750 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)"
+        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 750 C (> 500 C soda-lime glass ceiling) to overcome refractory SnSe2 impurity sink (LBNL-80k/A-Lab prior)"
       },
       "redundancy_verification": {
         "candidate_id": "mp-1192595",
@@ -5366,10 +6101,10 @@
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "unknown",
-          "AgBiSe2",
-          "Cs3InCl6",
-          "CsAgCl2"
+          "BiSCl",
+          "Bi2S3",
+          "BiS2",
+          "Ag2S"
         ],
         "bulk_modulus_gpa": 34.0,
         "shear_modulus_gpa": 17.3,
@@ -5394,9 +6129,10 @@
         "min_synthesis_temp_c": 335.0,
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
-          "unknown",
-          "AgBiSe2",
-          "Cs3InCl6"
+          "BiSCl",
+          "Bi2S3",
+          "BiS2",
+          "Ag2S"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 500.0,
@@ -5668,16 +6404,16 @@
       "stage_reached": 3,
       "status": "REJECTED",
       "primary_failure_mode": "OXIDE_IMPURITY_SINK",
-      "reason": "OXIDE_IMPURITY_SINK: Requires 800 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)",
+      "reason": "OXIDE_IMPURITY_SINK: Requires 800 C (> 500 C soda-lime glass ceiling) to overcome refractory Ba5Sb3 impurity sink (LBNL-80k/A-Lab prior)",
       "stability": {
         "candidate_id": "mp-1203387",
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "unknown",
-          "Sn",
-          "Sb",
-          "Fe7Se8"
+          "Ba5Sb3",
+          "GaSb",
+          "Ga2Se3",
+          "GaSe"
         ],
         "bulk_modulus_gpa": 31.2,
         "shear_modulus_gpa": 15.9,
@@ -5702,9 +6438,10 @@
         "min_synthesis_temp_c": 799.9,
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
-          "unknown",
-          "Sn",
-          "Sb"
+          "Ba5Sb3",
+          "GaSb",
+          "Ga2Se3",
+          "GaSe"
         ],
         "impurity_sink_risk_score": 0.82,
         "halide_volatility_pressure_pa": 500.0,
@@ -5713,7 +6450,7 @@
         "active_layer_cost_usd_m2": 0.0644,
         "contrastive_synthesizability_score": 0.645,
         "passed_stage3": false,
-        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 800 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)"
+        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 800 C (> 500 C soda-lime glass ceiling) to overcome refractory Ba5Sb3 impurity sink (LBNL-80k/A-Lab prior)"
       },
       "redundancy_verification": {
         "candidate_id": "mp-1203387",
@@ -5958,16 +6695,16 @@
       "stage_reached": 3,
       "status": "REJECTED",
       "primary_failure_mode": "OXIDE_IMPURITY_SINK",
-      "reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)",
+      "reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory Bi2O3 impurity sink (LBNL-80k/A-Lab prior)",
       "stability": {
         "candidate_id": "mp-1203584",
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "unknown",
-          "Bi2Fe4O9",
-          "Sn",
-          "Fe7Se8"
+          "Bi2O3",
+          "Bi2Se3",
+          "Ga2Se3",
+          "GaSe"
         ],
         "bulk_modulus_gpa": 31.1,
         "shear_modulus_gpa": 15.9,
@@ -5992,9 +6729,10 @@
         "min_synthesis_temp_c": 680.0,
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
-          "unknown",
-          "Bi2Fe4O9",
-          "Sn"
+          "Bi2O3",
+          "Bi2Se3",
+          "Ga2Se3",
+          "GaSe"
         ],
         "impurity_sink_risk_score": 0.82,
         "halide_volatility_pressure_pa": 500.0,
@@ -6003,7 +6741,7 @@
         "active_layer_cost_usd_m2": 0.0613,
         "contrastive_synthesizability_score": 0.644,
         "passed_stage3": false,
-        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)"
+        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory Bi2O3 impurity sink (LBNL-80k/A-Lab prior)"
       },
       "redundancy_verification": {
         "candidate_id": "mp-1203584",
@@ -6242,16 +6980,16 @@
       "stage_reached": 3,
       "status": "REJECTED",
       "primary_failure_mode": "OXIDE_IMPURITY_SINK",
-      "reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)",
+      "reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory SnS impurity sink (LBNL-80k/A-Lab prior)",
       "stability": {
         "candidate_id": "mp-1205419",
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "unknown",
-          "ZnS",
-          "SrS",
-          "La2Sn2O7"
+          "SnS",
+          "SnS2",
+          "SnO2",
+          "SrS"
         ],
         "bulk_modulus_gpa": 41.8,
         "shear_modulus_gpa": 21.3,
@@ -6276,8 +7014,9 @@
         "min_synthesis_temp_c": 680.0,
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
-          "unknown",
-          "ZnS",
+          "SnS",
+          "SnS2",
+          "SnO2",
           "SrS"
         ],
         "impurity_sink_risk_score": 0.82,
@@ -6287,7 +7026,7 @@
         "active_layer_cost_usd_m2": 0.02,
         "contrastive_synthesizability_score": 0.683,
         "passed_stage3": false,
-        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)"
+        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory SnS impurity sink (LBNL-80k/A-Lab prior)"
       },
       "redundancy_verification": {
         "candidate_id": "mp-1205419",
@@ -6522,16 +7261,16 @@
       "stage_reached": 3,
       "status": "REJECTED",
       "primary_failure_mode": "OXIDE_IMPURITY_SINK",
-      "reason": "OXIDE_IMPURITY_SINK: Requires 800 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)",
+      "reason": "OXIDE_IMPURITY_SINK: Requires 800 C (> 500 C soda-lime glass ceiling) to overcome refractory BaS impurity sink (LBNL-80k/A-Lab prior)",
       "stability": {
         "candidate_id": "mp-12181",
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "unknown",
           "BaS",
-          "Sn",
-          "ZnS"
+          "SnS",
+          "SnS2",
+          "SnO2"
         ],
         "bulk_modulus_gpa": 32.5,
         "shear_modulus_gpa": 16.6,
@@ -6556,9 +7295,10 @@
         "min_synthesis_temp_c": 799.9,
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
-          "unknown",
           "BaS",
-          "Sn"
+          "SnS",
+          "SnS2",
+          "SnO2"
         ],
         "impurity_sink_risk_score": 0.82,
         "halide_volatility_pressure_pa": 500.0,
@@ -6567,7 +7307,7 @@
         "active_layer_cost_usd_m2": 0.0192,
         "contrastive_synthesizability_score": 0.664,
         "passed_stage3": false,
-        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 800 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)"
+        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 800 C (> 500 C soda-lime glass ceiling) to overcome refractory BaS impurity sink (LBNL-80k/A-Lab prior)"
       },
       "redundancy_verification": {
         "candidate_id": "mp-12181",
@@ -6814,10 +7554,10 @@
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "CS In6S7",
-          "S",
-          "unknown",
-          "Ag79Sn21"
+          "Ag79Sn21",
+          "InSn4",
+          "SnO2",
+          "SnS"
         ],
         "bulk_modulus_gpa": 41.1,
         "shear_modulus_gpa": 21.0,
@@ -6842,9 +7582,10 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
-          "CS In6S7",
-          "S",
-          "unknown"
+          "Ag79Sn21",
+          "InSn4",
+          "SnO2",
+          "SnS"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 500.0,
@@ -7104,10 +7845,10 @@
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "Cs3InCl6",
-          "CsAgCl2",
-          "CS In6S7",
-          "S"
+          "InOCl",
+          "In2O3",
+          "Ag2S",
+          "AgCl"
         ],
         "bulk_modulus_gpa": 39.9,
         "shear_modulus_gpa": 20.3,
@@ -7132,9 +7873,10 @@
         "min_synthesis_temp_c": 335.0,
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
-          "Cs3InCl6",
-          "CsAgCl2",
-          "CS In6S7"
+          "InOCl",
+          "In2O3",
+          "Ag2S",
+          "AgCl"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 500.0,
@@ -7396,9 +8138,9 @@
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
           "Ga2O3",
-          "Ag",
-          "unknown",
-          "Ag2Se"
+          "Ag2Se",
+          "Ag79Sn21",
+          "Ga2Se3"
         ],
         "bulk_modulus_gpa": 33.9,
         "shear_modulus_gpa": 17.3,
@@ -7424,8 +8166,9 @@
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
           "Ga2O3",
-          "Ag",
-          "unknown"
+          "Ag2Se",
+          "Ag79Sn21",
+          "Ga2Se3"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 82.88,
@@ -7772,8 +8515,10 @@
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "unknown",
-          "ZnS"
+          "CuS",
+          "SnS",
+          "SnO2",
+          "SnS2"
         ],
         "bulk_modulus_gpa": 49.0,
         "shear_modulus_gpa": 25.0,
@@ -7798,8 +8543,10 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
-          "unknown",
-          "ZnS"
+          "CuS",
+          "SnS",
+          "SnO2",
+          "SnS2"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 82.88,
@@ -8149,10 +8896,10 @@
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "unknown",
           "Ag2Se",
           "Ag79Sn21",
-          "SnSe2"
+          "SnSe2",
+          "SnSe"
         ],
         "bulk_modulus_gpa": 34.2,
         "shear_modulus_gpa": 17.4,
@@ -8177,9 +8924,10 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
-          "unknown",
           "Ag2Se",
-          "Ag79Sn21"
+          "Ag79Sn21",
+          "SnSe2",
+          "SnSe"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 82.88,
@@ -8528,10 +9276,10 @@
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "unknown",
           "CuSe",
-          "ZnS",
-          "SnSe2"
+          "Cu2Se",
+          "SnSe",
+          "SnO2"
         ],
         "bulk_modulus_gpa": 37.2,
         "shear_modulus_gpa": 19.0,
@@ -8556,9 +9304,10 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
-          "unknown",
           "CuSe",
-          "ZnS"
+          "Cu2Se",
+          "SnSe",
+          "SnO2"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 82.88,
@@ -8901,16 +9650,16 @@
       "stage_reached": 3,
       "status": "REJECTED",
       "primary_failure_mode": "OXIDE_IMPURITY_SINK",
-      "reason": "OXIDE_IMPURITY_SINK: Requires 650 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)",
+      "reason": "OXIDE_IMPURITY_SINK: Requires 650 C (> 500 C soda-lime glass ceiling) to overcome refractory BaCuO2 impurity sink (LBNL-80k/A-Lab prior)",
       "stability": {
         "candidate_id": "mp-12364",
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "unknown",
           "BaCuO2",
-          "Fe7Se8",
-          "Sn"
+          "CuO",
+          "CuSe",
+          "Cu2Se"
         ],
         "bulk_modulus_gpa": 35.3,
         "shear_modulus_gpa": 18.0,
@@ -8935,7 +9684,10 @@
         "min_synthesis_temp_c": 650.0,
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
-          "unknown"
+          "BaCuO2",
+          "CuO",
+          "CuSe",
+          "Cu2Se"
         ],
         "impurity_sink_risk_score": 0.76,
         "halide_volatility_pressure_pa": 500.0,
@@ -8944,7 +9696,7 @@
         "active_layer_cost_usd_m2": 0.0361,
         "contrastive_synthesizability_score": 0.646,
         "passed_stage3": false,
-        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 650 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)"
+        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 650 C (> 500 C soda-lime glass ceiling) to overcome refractory BaCuO2 impurity sink (LBNL-80k/A-Lab prior)"
       },
       "redundancy_verification": {
         "candidate_id": "mp-12364",
@@ -9191,10 +9943,10 @@
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "unknown",
           "Ga2S3",
-          "Sn",
-          "ZnS"
+          "SnS",
+          "SnS2",
+          "SnO2"
         ],
         "bulk_modulus_gpa": 39.7,
         "shear_modulus_gpa": 20.2,
@@ -9219,9 +9971,10 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
-          "unknown",
           "Ga2S3",
-          "Sn"
+          "SnS",
+          "SnS2",
+          "SnO2"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 82.88,
@@ -9555,16 +10308,16 @@
       "stage_reached": 3,
       "status": "REJECTED",
       "primary_failure_mode": "OXIDE_IMPURITY_SINK",
-      "reason": "OXIDE_IMPURITY_SINK: Requires 920 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)",
+      "reason": "OXIDE_IMPURITY_SINK: Requires 920 C (> 500 C soda-lime glass ceiling) to overcome refractory SnS impurity sink (LBNL-80k/A-Lab prior)",
       "stability": {
         "candidate_id": "mp-17324",
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "unknown",
-          "ZnS",
-          "ZrO2",
-          "Ni3Sn4"
+          "SnS",
+          "SnS2",
+          "SnO2",
+          "ZrO2"
         ],
         "bulk_modulus_gpa": 38.7,
         "shear_modulus_gpa": 19.7,
@@ -9589,8 +10342,9 @@
         "min_synthesis_temp_c": 920.0,
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
-          "unknown",
-          "ZnS",
+          "SnS",
+          "SnS2",
+          "SnO2",
           "ZrO2"
         ],
         "impurity_sink_risk_score": 0.82,
@@ -9600,7 +10354,7 @@
         "active_layer_cost_usd_m2": 0.0297,
         "contrastive_synthesizability_score": 0.877,
         "passed_stage3": false,
-        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 920 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)"
+        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 920 C (> 500 C soda-lime glass ceiling) to overcome refractory SnS impurity sink (LBNL-80k/A-Lab prior)"
       },
       "redundancy_verification": {
         "candidate_id": "mp-17324",
@@ -9838,16 +10592,16 @@
       "stage_reached": 3,
       "status": "REJECTED",
       "primary_failure_mode": "OXIDE_IMPURITY_SINK",
-      "reason": "OXIDE_IMPURITY_SINK: Requires 650 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)",
+      "reason": "OXIDE_IMPURITY_SINK: Requires 650 C (> 500 C soda-lime glass ceiling) to overcome refractory BaCuO2 impurity sink (LBNL-80k/A-Lab prior)",
       "stability": {
         "candidate_id": "mp-17954",
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "unknown",
           "BaCuO2",
+          "CuO",
           "BaS",
-          "Sn"
+          "CuS"
         ],
         "bulk_modulus_gpa": 40.6,
         "shear_modulus_gpa": 20.7,
@@ -9872,9 +10626,10 @@
         "min_synthesis_temp_c": 650.0,
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
-          "unknown",
           "BaCuO2",
-          "BaS"
+          "CuO",
+          "BaS",
+          "CuS"
         ],
         "impurity_sink_risk_score": 0.82,
         "halide_volatility_pressure_pa": 500.0,
@@ -9883,7 +10638,7 @@
         "active_layer_cost_usd_m2": 0.0203,
         "contrastive_synthesizability_score": 0.676,
         "passed_stage3": false,
-        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 650 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)"
+        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 650 C (> 500 C soda-lime glass ceiling) to overcome refractory BaCuO2 impurity sink (LBNL-80k/A-Lab prior)"
       },
       "redundancy_verification": {
         "candidate_id": "mp-17954",
@@ -10131,10 +10886,9 @@
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "unknown",
-          "S",
           "InSb",
-          "Cu3SbS4"
+          "Sb2S3",
+          "In2S3"
         ],
         "bulk_modulus_gpa": 39.2,
         "shear_modulus_gpa": 20.0,
@@ -10159,9 +10913,9 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
-          "unknown",
-          "S",
-          "InSb"
+          "InSb",
+          "Sb2S3",
+          "In2S3"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 500.0,
@@ -10426,9 +11180,8 @@
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "unknown",
-          "Li2S",
-          "Cu3SbS4"
+          "Sb2S3",
+          "SbBr3"
         ],
         "bulk_modulus_gpa": 7.3,
         "shear_modulus_gpa": 3.8,
@@ -10681,10 +11434,10 @@
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "unknown",
           "CuO",
+          "Bi2O3",
           "Bi2S3",
-          "ZnS"
+          "BiS2"
         ],
         "bulk_modulus_gpa": 49.8,
         "shear_modulus_gpa": 22.7,
@@ -10875,6 +11628,25 @@
         },
         "mismatches": [],
         "sha256_signature": "4572d1324fa4eeafde04a92ab39f889912192afae5214cd9c08a90f83dce9303"
+      },
+      "atomistic_phonon_neb": {
+        "candidate_id": "mp-22982",
+        "formula_reduced": "BiCuS2",
+        "target_layer": "BOTTOM_IR_075EV",
+        "nsites_unit_cell": 16,
+        "dynamical_matrix_dim": 48,
+        "gamma_min_optical_freq_thz": 3.9036,
+        "gamma_max_lo_freq_thz": 26.2092,
+        "imaginary_mode_count": 0,
+        "acoustic_sum_rule_max_dev_thz": 0.0,
+        "migrating_species": "Cu",
+        "shortest_hop_distance_ang": 3.8501,
+        "bottleneck_clearance_ang": 1.2376,
+        "neb_saddle_barrier_ev": 1.348,
+        "room_temp_diffusivity_cm2_s": 5.59e-27,
+        "dynamically_and_kinetically_stable": true,
+        "redundancy_verified": true,
+        "sha256_signature": "66e28432a7519ec8a45a83a2eb7ba9f45c1dfc164c671b69f47e8e69ef32eeb3"
       }
     },
     {
@@ -11054,9 +11826,9 @@
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "unknown",
-          "BiI3",
-          "Cu3SbS4"
+          "SbI3",
+          "Sb2O3",
+          "Sb2S3"
         ],
         "bulk_modulus_gpa": 6.9,
         "shear_modulus_gpa": 46.0,
@@ -11309,10 +12081,9 @@
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "unknown",
-          "Bi4O4SeCl2",
           "Bi2S3",
-          "Li2S"
+          "BiS2",
+          "BiCl3"
         ],
         "bulk_modulus_gpa": 35.7,
         "shear_modulus_gpa": 18.2,
@@ -11337,9 +12108,9 @@
         "min_synthesis_temp_c": 335.0,
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
-          "unknown",
-          "Bi4O4SeCl2",
-          "Bi2S3"
+          "Bi2S3",
+          "BiS2",
+          "BiCl3"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 500.0,
@@ -11602,10 +12373,10 @@
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "unknown",
           "BiOBr",
           "Bi2S3",
-          "Li2S"
+          "BiS2",
+          "BiBr3"
         ],
         "bulk_modulus_gpa": 33.9,
         "shear_modulus_gpa": 17.3,
@@ -11630,9 +12401,10 @@
         "min_synthesis_temp_c": 335.0,
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
-          "unknown",
           "BiOBr",
-          "Bi2S3"
+          "Bi2S3",
+          "BiS2",
+          "BiBr3"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 500.0,
@@ -11897,10 +12669,9 @@
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "unknown",
-          "AgBiSe2",
-          "CS In6S7",
-          "Bi2S3"
+          "Bi2S3",
+          "BiS2",
+          "Ag2S"
         ],
         "bulk_modulus_gpa": 38.6,
         "shear_modulus_gpa": 19.7,
@@ -11926,7 +12697,8 @@
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
           "Bi2S3",
-          "unknown"
+          "BiS2",
+          "Ag2S"
         ],
         "impurity_sink_risk_score": 0.186,
         "halide_volatility_pressure_pa": 82.88,
@@ -12089,6 +12861,25 @@
         },
         "mismatches": [],
         "sha256_signature": "28fffc7cc0a9332db420e8769ac9fb9a11b27285bc604d3ee1bd2f9732ceaa72"
+      },
+      "atomistic_phonon_neb": {
+        "candidate_id": "mp-23474",
+        "formula_reduced": "AgBi3S5",
+        "target_layer": "BOTTOM_IR_075EV",
+        "nsites_unit_cell": 18,
+        "dynamical_matrix_dim": 54,
+        "gamma_min_optical_freq_thz": 3.0238,
+        "gamma_max_lo_freq_thz": 23.6022,
+        "imaginary_mode_count": 0,
+        "acoustic_sum_rule_max_dev_thz": 1e-06,
+        "migrating_species": "Ag",
+        "shortest_hop_distance_ang": 4.0341,
+        "bottleneck_clearance_ang": 2.0637,
+        "neb_saddle_barrier_ev": 1.12,
+        "room_temp_diffusivity_cm2_s": 4.151e-23,
+        "dynamically_and_kinetically_stable": true,
+        "redundancy_verified": true,
+        "sha256_signature": "4fe923441b3a661212f9369883f5511c0b7b3570621bb35a74448f945434cef6"
       }
     },
     {
@@ -12260,16 +13051,16 @@
       "stage_reached": 3,
       "status": "REJECTED",
       "primary_failure_mode": "OXIDE_IMPURITY_SINK",
-      "reason": "OXIDE_IMPURITY_SINK: Requires 800 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)",
+      "reason": "OXIDE_IMPURITY_SINK: Requires 800 C (> 500 C soda-lime glass ceiling) to overcome refractory BaS impurity sink (LBNL-80k/A-Lab prior)",
       "stability": {
         "candidate_id": "mp-27802",
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "unknown",
           "BaS",
-          "Sn",
-          "ZnS"
+          "SnS",
+          "SnS2",
+          "SnO2"
         ],
         "bulk_modulus_gpa": 34.6,
         "shear_modulus_gpa": 17.6,
@@ -12294,9 +13085,10 @@
         "min_synthesis_temp_c": 799.9,
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
-          "unknown",
           "BaS",
-          "Sn"
+          "SnS",
+          "SnS2",
+          "SnO2"
         ],
         "impurity_sink_risk_score": 0.82,
         "halide_volatility_pressure_pa": 500.0,
@@ -12305,7 +13097,7 @@
         "active_layer_cost_usd_m2": 0.0241,
         "contrastive_synthesizability_score": 0.643,
         "passed_stage3": false,
-        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 800 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)"
+        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 800 C (> 500 C soda-lime glass ceiling) to overcome refractory BaS impurity sink (LBNL-80k/A-Lab prior)"
       },
       "redundancy_verification": {
         "candidate_id": "mp-27802",
@@ -12546,10 +13338,9 @@
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "unknown",
-          "Bi2Fe4O9",
+          "Bi2O3",
           "Bi2S3",
-          "CaO"
+          "BiS2"
         ],
         "bulk_modulus_gpa": 43.2,
         "shear_modulus_gpa": 25.8,
@@ -12574,10 +13365,10 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
-          "Bi",
           "Bi2S3",
           "Bi2O3",
-          "Bi2OS2"
+          "Bi2OS2",
+          "BiS2"
         ],
         "impurity_sink_risk_score": 0.371,
         "halide_volatility_pressure_pa": 82.88,
@@ -12920,9 +13711,9 @@
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
           "CaO",
-          "unknown",
+          "CaS",
           "CaSb2",
-          "Cu3SbS4"
+          "Sb2S3"
         ],
         "bulk_modulus_gpa": 37.4,
         "shear_modulus_gpa": 19.1,
@@ -12948,8 +13739,9 @@
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
           "CaO",
-          "unknown",
-          "CaSb2"
+          "CaS",
+          "CaSb2",
+          "Sb2S3"
         ],
         "impurity_sink_risk_score": 0.82,
         "halide_volatility_pressure_pa": 500.0,
@@ -13202,10 +13994,9 @@
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "unknown",
-          "CS In6S7",
-          "Ag2Te",
-          "Cu3SbS4"
+          "Ag3Sb",
+          "Sb2S3",
+          "Ag2S"
         ],
         "bulk_modulus_gpa": 39.7,
         "shear_modulus_gpa": 20.2,
@@ -13230,9 +14021,9 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
-          "unknown",
-          "CS In6S7",
-          "Ag2Te"
+          "Ag3Sb",
+          "Sb2S3",
+          "Ag2S"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 82.88,
@@ -13484,9 +14275,10 @@
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "unknown",
-          "ZnS",
-          "Cu3SbS4"
+          "Cu3SbS4",
+          "CuS",
+          "Cu2Sb",
+          "Sb2S3"
         ],
         "bulk_modulus_gpa": 46.6,
         "shear_modulus_gpa": 26.3,
@@ -13512,9 +14304,9 @@
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
           "Cu3SbS4",
-          "unknown",
           "CuS",
-          "Cu12+xSb4S13"
+          "Cu2Sb",
+          "Sb2S3"
         ],
         "impurity_sink_risk_score": 0.403,
         "halide_volatility_pressure_pa": 82.88,
@@ -13856,8 +14648,10 @@
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "unknown",
-          "ZnS"
+          "SnS",
+          "SnS2",
+          "SnO2",
+          "GeS2"
         ],
         "bulk_modulus_gpa": 36.3,
         "shear_modulus_gpa": 18.5,
@@ -13882,8 +14676,10 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
-          "unknown",
-          "ZnS"
+          "SnS",
+          "SnS2",
+          "SnO2",
+          "GeS2"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 82.88,
@@ -14217,16 +15013,16 @@
       "stage_reached": 3,
       "status": "REJECTED",
       "primary_failure_mode": "OXIDE_IMPURITY_SINK",
-      "reason": "OXIDE_IMPURITY_SINK: Requires 800 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)",
+      "reason": "OXIDE_IMPURITY_SINK: Requires 800 C (> 500 C soda-lime glass ceiling) to overcome refractory BaS impurity sink (LBNL-80k/A-Lab prior)",
       "stability": {
         "candidate_id": "mp-541832",
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "unknown",
           "BaS",
-          "Sn",
-          "ZnS"
+          "SnS",
+          "SnS2",
+          "SnO2"
         ],
         "bulk_modulus_gpa": 32.8,
         "shear_modulus_gpa": 16.7,
@@ -14251,9 +15047,10 @@
         "min_synthesis_temp_c": 799.9,
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
-          "unknown",
           "BaS",
-          "Sn"
+          "SnS",
+          "SnS2",
+          "SnO2"
         ],
         "impurity_sink_risk_score": 0.82,
         "halide_volatility_pressure_pa": 500.0,
@@ -14262,7 +15059,7 @@
         "active_layer_cost_usd_m2": 0.0136,
         "contrastive_synthesizability_score": 0.643,
         "passed_stage3": false,
-        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 800 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)"
+        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 800 C (> 500 C soda-lime glass ceiling) to overcome refractory BaS impurity sink (LBNL-80k/A-Lab prior)"
       },
       "redundancy_verification": {
         "candidate_id": "mp-541832",
@@ -14502,16 +15299,16 @@
       "stage_reached": 3,
       "status": "REJECTED",
       "primary_failure_mode": "OXIDE_IMPURITY_SINK",
-      "reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory BaSc2Te4 impurity sink (LBNL-80k/A-Lab prior)",
+      "reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory Ag79Sn21 impurity sink (LBNL-80k/A-Lab prior)",
       "stability": {
         "candidate_id": "mp-555166",
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "BaSc2Te4",
-          "BaCO3",
-          "unknown",
-          "CS In6S7"
+          "Ag79Sn21",
+          "BaS",
+          "SnS",
+          "SnS2"
         ],
         "bulk_modulus_gpa": 31.4,
         "shear_modulus_gpa": 13.9,
@@ -14536,9 +15333,10 @@
         "min_synthesis_temp_c": 680.0,
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
-          "BaSc2Te4",
-          "BaCO3",
-          "unknown"
+          "Ag79Sn21",
+          "BaS",
+          "SnS",
+          "SnS2"
         ],
         "impurity_sink_risk_score": 0.82,
         "halide_volatility_pressure_pa": 500.0,
@@ -14547,7 +15345,7 @@
         "active_layer_cost_usd_m2": 0.7083,
         "contrastive_synthesizability_score": 0.644,
         "passed_stage3": false,
-        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory BaSc2Te4 impurity sink (LBNL-80k/A-Lab prior)"
+        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory Ag79Sn21 impurity sink (LBNL-80k/A-Lab prior)"
       },
       "redundancy_verification": {
         "candidate_id": "mp-555166",
@@ -14795,10 +15593,9 @@
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "unknown",
-          "CS In6S7",
-          "Ag2Te",
-          "Cu3SbS4"
+          "Ag3Sb",
+          "Sb2S3",
+          "Ag2S"
         ],
         "bulk_modulus_gpa": 43.2,
         "shear_modulus_gpa": 22.0,
@@ -15056,10 +15853,10 @@
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "unknown",
-          "AgBiSe2",
-          "Cs3InCl6",
-          "CsAgCl2"
+          "BiSCl",
+          "Bi2S3",
+          "BiS2",
+          "Ag2S"
         ],
         "bulk_modulus_gpa": 36.8,
         "shear_modulus_gpa": 14.4,
@@ -15084,7 +15881,10 @@
         "min_synthesis_temp_c": 335.0,
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
-          "unknown"
+          "BiSCl",
+          "Bi2S3",
+          "BiS2",
+          "Ag2S"
         ],
         "impurity_sink_risk_score": 0.42,
         "halide_volatility_pressure_pa": 500.0,
@@ -15357,10 +16157,10 @@
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "unknown",
-          "Cs3InCl6",
-          "Li2S",
-          "S"
+          "InOCl",
+          "In2O3",
+          "InSb",
+          "Sb2S3"
         ],
         "bulk_modulus_gpa": 37.7,
         "shear_modulus_gpa": 19.2,
@@ -15385,9 +16185,10 @@
         "min_synthesis_temp_c": 335.0,
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
-          "unknown",
-          "Cs3InCl6",
-          "Li2S"
+          "InOCl",
+          "In2O3",
+          "InSb",
+          "Sb2S3"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 500.0,
@@ -15736,9 +16537,9 @@
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "unknown",
-          "Bi4O4SeCl2",
-          "Ge",
+          "BiSCl",
+          "In2O3",
+          "BiIn2",
           "Bi2S3"
         ],
         "bulk_modulus_gpa": 39.8,
@@ -15764,9 +16565,10 @@
         "min_synthesis_temp_c": 335.0,
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
-          "unknown",
-          "Bi4O4SeCl2",
-          "Ge"
+          "BiSCl",
+          "In2O3",
+          "BiIn2",
+          "Bi2S3"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 500.0,
@@ -16117,9 +16919,9 @@
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
           "InBr",
-          "InSe",
-          "unknown",
-          "Li2S"
+          "InSb",
+          "Sb2S3",
+          "In2S3"
         ],
         "bulk_modulus_gpa": 37.3,
         "shear_modulus_gpa": 19.0,
@@ -16145,8 +16947,9 @@
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
           "InBr",
-          "InSe",
-          "unknown"
+          "InSb",
+          "Sb2S3",
+          "In2S3"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 500.0,
@@ -16489,16 +17292,16 @@
       "stage_reached": 3,
       "status": "REJECTED",
       "primary_failure_mode": "OXIDE_IMPURITY_SINK",
-      "reason": "OXIDE_IMPURITY_SINK: Requires 1000 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)",
+      "reason": "OXIDE_IMPURITY_SINK: Requires 1000 C (> 500 C soda-lime glass ceiling) to overcome refractory In2O3 impurity sink (LBNL-80k/A-Lab prior)",
       "stability": {
         "candidate_id": "mp-864638",
         "e_above_hull_0k_mev": 0.0,
         "g_above_hull_synth_mev": -10.5,
         "competing_hull_phases": [
-          "unknown",
-          "Bi2Fe4O9",
           "In2O3",
-          "BaS"
+          "BaS",
+          "BiIn2",
+          "Bi2S3"
         ],
         "bulk_modulus_gpa": 34.3,
         "shear_modulus_gpa": 17.5,
@@ -16523,9 +17326,10 @@
         "min_synthesis_temp_c": 999.9,
         "rxn_driving_force_mev_atom": -145.0,
         "competing_impurity_sinks": [
-          "unknown",
-          "Bi2Fe4O9",
-          "In2O3"
+          "In2O3",
+          "BaS",
+          "BiIn2",
+          "Bi2S3"
         ],
         "impurity_sink_risk_score": 0.82,
         "halide_volatility_pressure_pa": 500.0,
@@ -16534,7 +17338,7 @@
         "active_layer_cost_usd_m2": 0.1509,
         "contrastive_synthesizability_score": 0.646,
         "passed_stage3": false,
-        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 1000 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)"
+        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 1000 C (> 500 C soda-lime glass ceiling) to overcome refractory In2O3 impurity sink (LBNL-80k/A-Lab prior)"
       },
       "redundancy_verification": {
         "candidate_id": "mp-864638",
@@ -16779,10 +17583,10 @@
         "e_above_hull_0k_mev": 0.56,
         "g_above_hull_synth_mev": -9.94,
         "competing_hull_phases": [
-          "unknown",
-          "BiI3",
           "SnO2",
-          "Cs2SnI6"
+          "SnI4",
+          "SnO",
+          "SnS"
         ],
         "bulk_modulus_gpa": 25.8,
         "shear_modulus_gpa": 13.2,
@@ -16807,9 +17611,10 @@
         "min_synthesis_temp_c": 335.0,
         "rxn_driving_force_mev_atom": -144.55,
         "competing_impurity_sinks": [
-          "unknown",
-          "BiI3",
-          "SnO2"
+          "SnO2",
+          "SnI4",
+          "SnO",
+          "SnS"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 500.0,
@@ -17079,10 +17884,10 @@
         "e_above_hull_0k_mev": 0.75,
         "g_above_hull_synth_mev": -9.75,
         "competing_hull_phases": [
-          "CS In6S7",
-          "S",
-          "unknown",
-          "Ag2Se"
+          "Ag2Se",
+          "Ag79Sn21",
+          "In2Se3",
+          "In4Se3"
         ],
         "bulk_modulus_gpa": 32.7,
         "shear_modulus_gpa": 16.7,
@@ -17107,9 +17912,10 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -144.4,
         "competing_impurity_sinks": [
-          "CS In6S7",
-          "S",
-          "unknown"
+          "Ag2Se",
+          "Ag79Sn21",
+          "In2Se3",
+          "In4Se3"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 500.0,
@@ -17369,9 +18175,9 @@
         "e_above_hull_0k_mev": 0.87,
         "g_above_hull_synth_mev": -9.63,
         "competing_hull_phases": [
-          "unknown",
           "Bi2O3",
-          "Ge",
+          "In2O3",
+          "BiIn2",
           "Bi2S3"
         ],
         "bulk_modulus_gpa": 38.7,
@@ -17397,9 +18203,10 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -144.3,
         "competing_impurity_sinks": [
-          "unknown",
           "Bi2O3",
-          "Ge"
+          "In2O3",
+          "BiIn2",
+          "Bi2S3"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 500.0,
@@ -17746,10 +18553,9 @@
         "e_above_hull_0k_mev": 1.05,
         "g_above_hull_synth_mev": -9.45,
         "competing_hull_phases": [
-          "unknown",
-          "CS In6S7",
-          "Ag2Te",
-          "Cu3SbS4"
+          "Ag3Sb",
+          "Sb2S3",
+          "Ag2S"
         ],
         "bulk_modulus_gpa": 39.3,
         "shear_modulus_gpa": 20.0,
@@ -17774,9 +18580,9 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -144.16,
         "competing_impurity_sinks": [
-          "unknown",
-          "CS In6S7",
-          "Ag2Te"
+          "Ag3Sb",
+          "Sb2S3",
+          "Ag2S"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 82.88,
@@ -18028,10 +18834,8 @@
         "e_above_hull_0k_mev": 1.1,
         "g_above_hull_synth_mev": -9.4,
         "competing_hull_phases": [
-          "unknown",
-          "CaO",
-          "ZnSb",
-          "Cu3SbS4"
+          "Sb2O3",
+          "Sb2S3"
         ],
         "bulk_modulus_gpa": 11.7,
         "shear_modulus_gpa": 10.6,
@@ -18290,9 +19094,9 @@
         "e_above_hull_0k_mev": 1.3,
         "g_above_hull_synth_mev": -9.2,
         "competing_hull_phases": [
-          "unknown",
           "Bi2O3",
-          "Ge",
+          "In2O3",
+          "BiIn2",
           "Bi2S3"
         ],
         "bulk_modulus_gpa": 39.5,
@@ -18318,9 +19122,10 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -143.96,
         "competing_impurity_sinks": [
-          "unknown",
           "Bi2O3",
-          "Ge"
+          "In2O3",
+          "BiIn2",
+          "Bi2S3"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 500.0,
@@ -18669,10 +19474,10 @@
         "e_above_hull_0k_mev": 1.63,
         "g_above_hull_synth_mev": -8.87,
         "competing_hull_phases": [
-          "unknown",
-          "CuSe",
-          "ZnS",
-          "S"
+          "In2O3",
+          "CuS",
+          "SnS",
+          "SnO2"
         ],
         "bulk_modulus_gpa": 45.1,
         "shear_modulus_gpa": 23.0,
@@ -18697,7 +19502,10 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -143.7,
         "competing_impurity_sinks": [
-          "unknown"
+          "In2O3",
+          "CuS",
+          "SnS",
+          "SnO2"
         ],
         "impurity_sink_risk_score": 0.42,
         "halide_volatility_pressure_pa": 500.0,
@@ -19049,9 +19857,9 @@
         "g_above_hull_synth_mev": -8.59,
         "competing_hull_phases": [
           "Ga2O3",
-          "Ag",
-          "unknown",
-          "Ag2Se"
+          "Ag2Se",
+          "Ag79Sn21",
+          "Ga2Se3"
         ],
         "bulk_modulus_gpa": 34.1,
         "shear_modulus_gpa": 17.4,
@@ -19077,8 +19885,9 @@
         "rxn_driving_force_mev_atom": -143.47,
         "competing_impurity_sinks": [
           "Ga2O3",
-          "Ag",
-          "unknown"
+          "Ag2Se",
+          "Ag79Sn21",
+          "Ga2Se3"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 82.88,
@@ -19424,9 +20233,8 @@
         "e_above_hull_0k_mev": 2.01,
         "g_above_hull_synth_mev": -8.49,
         "competing_hull_phases": [
-          "unknown",
-          "Li2S",
-          "Cu3SbS4"
+          "Sb2S3",
+          "SbBr3"
         ],
         "bulk_modulus_gpa": 32.4,
         "shear_modulus_gpa": 16.5,
@@ -19451,9 +20259,8 @@
         "min_synthesis_temp_c": 335.0,
         "rxn_driving_force_mev_atom": -143.39,
         "competing_impurity_sinks": [
-          "unknown",
-          "Li2S",
-          "Cu3SbS4"
+          "Sb2S3",
+          "SbBr3"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 500.0,
@@ -19718,10 +20525,10 @@
         "e_above_hull_0k_mev": 2.15,
         "g_above_hull_synth_mev": -8.35,
         "competing_hull_phases": [
-          "unknown",
-          "Ge",
+          "In2O3",
+          "BiIn2",
           "Bi2S3",
-          "S"
+          "BiS2"
         ],
         "bulk_modulus_gpa": 39.6,
         "shear_modulus_gpa": 20.2,
@@ -19746,9 +20553,10 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -143.28,
         "competing_impurity_sinks": [
-          "unknown",
-          "Ge",
-          "Bi2S3"
+          "In2O3",
+          "BiIn2",
+          "Bi2S3",
+          "BiS2"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 500.0,
@@ -20090,10 +20898,10 @@
         "e_above_hull_0k_mev": 2.3,
         "g_above_hull_synth_mev": -8.2,
         "competing_hull_phases": [
-          "unknown",
           "Bi2S3",
-          "Te",
-          "Cu3SbS4"
+          "BiS2",
+          "BiSb2O7",
+          "Sb2S3"
         ],
         "bulk_modulus_gpa": 36.6,
         "shear_modulus_gpa": 18.7,
@@ -20118,9 +20926,10 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -143.16,
         "competing_impurity_sinks": [
-          "unknown",
           "Bi2S3",
-          "Te"
+          "BiS2",
+          "BiSb2O7",
+          "Sb2S3"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 82.88,
@@ -20283,6 +21092,25 @@
         },
         "mismatches": [],
         "sha256_signature": "d8f6b425fa2066a5062437ab9edb68a127d62b3ca1821a2645bbf4f07a9076cb"
+      },
+      "atomistic_phonon_neb": {
+        "candidate_id": "mp-1227486",
+        "formula_reduced": "BiSbS3",
+        "target_layer": "TOP_ACTIVE_GLASS_185EV",
+        "nsites_unit_cell": 20,
+        "dynamical_matrix_dim": 60,
+        "gamma_min_optical_freq_thz": 2.3825,
+        "gamma_max_lo_freq_thz": 22.243,
+        "imaginary_mode_count": 0,
+        "acoustic_sum_rule_max_dev_thz": 0.0,
+        "migrating_species": "S",
+        "shortest_hop_distance_ang": 3.4258,
+        "bottleneck_clearance_ang": 2.6343,
+        "neb_saddle_barrier_ev": 0.9976,
+        "room_temp_diffusivity_cm2_s": 3.407e-21,
+        "dynamically_and_kinetically_stable": true,
+        "redundancy_verified": true,
+        "sha256_signature": "a10ec94bcf91d21c7eaed65922de15e2ed32f6b5ab34b101d3937128ad1b6ced"
       }
     },
     {
@@ -20462,9 +21290,9 @@
         "e_above_hull_0k_mev": 2.51,
         "g_above_hull_synth_mev": -7.99,
         "competing_hull_phases": [
-          "unknown",
-          "BiI3",
-          "Cu3SbS4"
+          "SbI3",
+          "Sb2O3",
+          "Sb2S3"
         ],
         "bulk_modulus_gpa": 28.9,
         "shear_modulus_gpa": 14.7,
@@ -20489,7 +21317,9 @@
         "min_synthesis_temp_c": 335.0,
         "rxn_driving_force_mev_atom": -142.99,
         "competing_impurity_sinks": [
-          "unknown"
+          "SbI3",
+          "Sb2O3",
+          "Sb2S3"
         ],
         "impurity_sink_risk_score": 0.39,
         "halide_volatility_pressure_pa": 500.0,
@@ -20754,16 +21584,16 @@
       "stage_reached": 3,
       "status": "REJECTED",
       "primary_failure_mode": "OXIDE_IMPURITY_SINK",
-      "reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)",
+      "reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory BaS impurity sink (LBNL-80k/A-Lab prior)",
       "stability": {
         "candidate_id": "mp-1228355",
         "e_above_hull_0k_mev": 2.54,
         "g_above_hull_synth_mev": -7.96,
         "competing_hull_phases": [
-          "unknown",
-          "BaF2",
           "BaS",
-          "Sn"
+          "SnO2",
+          "SnS",
+          "SnS2"
         ],
         "bulk_modulus_gpa": 32.3,
         "shear_modulus_gpa": 16.5,
@@ -20788,9 +21618,10 @@
         "min_synthesis_temp_c": 680.0,
         "rxn_driving_force_mev_atom": -142.97,
         "competing_impurity_sinks": [
-          "unknown",
-          "BaF2",
-          "BaS"
+          "BaS",
+          "SnO2",
+          "SnS",
+          "SnS2"
         ],
         "impurity_sink_risk_score": 0.82,
         "halide_volatility_pressure_pa": 500.0,
@@ -20799,7 +21630,7 @@
         "active_layer_cost_usd_m2": 0.2219,
         "contrastive_synthesizability_score": 0.728,
         "passed_stage3": false,
-        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)"
+        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory BaS impurity sink (LBNL-80k/A-Lab prior)"
       },
       "redundancy_verification": {
         "candidate_id": "mp-1228355",
@@ -21053,9 +21884,9 @@
         "e_above_hull_0k_mev": 2.74,
         "g_above_hull_synth_mev": -7.76,
         "competing_hull_phases": [
-          "unknown",
           "BiOBr",
-          "Ge",
+          "In2O3",
+          "BiIn2",
           "Bi2S3"
         ],
         "bulk_modulus_gpa": 37.7,
@@ -21081,9 +21912,10 @@
         "min_synthesis_temp_c": 335.0,
         "rxn_driving_force_mev_atom": -142.81,
         "competing_impurity_sinks": [
-          "unknown",
           "BiOBr",
-          "Ge"
+          "In2O3",
+          "BiIn2",
+          "Bi2S3"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 500.0,
@@ -21427,9 +22259,9 @@
         "e_above_hull_0k_mev": 2.77,
         "g_above_hull_synth_mev": -7.73,
         "competing_hull_phases": [
-          "unknown",
           "BiI3",
-          "Bi2S3"
+          "Bi2S3",
+          "BiS2"
         ],
         "bulk_modulus_gpa": 7.2,
         "shear_modulus_gpa": 20.5,
@@ -21676,16 +22508,16 @@
       "stage_reached": 3,
       "status": "REJECTED",
       "primary_failure_mode": "OXIDE_IMPURITY_SINK",
-      "reason": "OXIDE_IMPURITY_SINK: Requires 800 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)",
+      "reason": "OXIDE_IMPURITY_SINK: Requires 800 C (> 500 C soda-lime glass ceiling) to overcome refractory BaS impurity sink (LBNL-80k/A-Lab prior)",
       "stability": {
         "candidate_id": "mp-1202711",
         "e_above_hull_0k_mev": 2.93,
         "g_above_hull_synth_mev": -7.57,
         "competing_hull_phases": [
-          "unknown",
           "BaS",
-          "Sn",
-          "ZnS"
+          "SnS",
+          "SnS2",
+          "SnO2"
         ],
         "bulk_modulus_gpa": 36.9,
         "shear_modulus_gpa": 18.8,
@@ -21710,9 +22542,10 @@
         "min_synthesis_temp_c": 799.9,
         "rxn_driving_force_mev_atom": -142.66,
         "competing_impurity_sinks": [
-          "unknown",
           "BaS",
-          "Sn"
+          "SnS",
+          "SnS2",
+          "SnO2"
         ],
         "impurity_sink_risk_score": 0.82,
         "halide_volatility_pressure_pa": 500.0,
@@ -21721,7 +22554,7 @@
         "active_layer_cost_usd_m2": 0.0213,
         "contrastive_synthesizability_score": 0.646,
         "passed_stage3": false,
-        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 800 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)"
+        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 800 C (> 500 C soda-lime glass ceiling) to overcome refractory BaS impurity sink (LBNL-80k/A-Lab prior)"
       },
       "redundancy_verification": {
         "candidate_id": "mp-1202711",
@@ -21968,10 +22801,10 @@
         "e_above_hull_0k_mev": 3.61,
         "g_above_hull_synth_mev": -6.89,
         "competing_hull_phases": [
-          "unknown",
           "CuGa2O4",
-          "CuSe",
-          "ZnS"
+          "Cu2Se",
+          "CuO",
+          "CuSe"
         ],
         "bulk_modulus_gpa": 37.0,
         "shear_modulus_gpa": 18.9,
@@ -21996,8 +22829,9 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -142.11,
         "competing_impurity_sinks": [
-          "unknown",
           "CuGa2O4",
+          "Cu2Se",
+          "CuO",
           "CuSe"
         ],
         "impurity_sink_risk_score": 0.11,
@@ -22165,6 +22999,25 @@
         },
         "mismatches": [],
         "sha256_signature": "94e846fe365a26c374eab9715c63f9678401f11dbe6c757cc4f6608bd2464e5c"
+      },
+      "atomistic_phonon_neb": {
+        "candidate_id": "mp-1224922",
+        "formula_reduced": "CuGaSnSe4",
+        "target_layer": "BOTTOM_IR_075EV",
+        "nsites_unit_cell": 7,
+        "dynamical_matrix_dim": 21,
+        "gamma_min_optical_freq_thz": 9.1927,
+        "gamma_max_lo_freq_thz": 20.7018,
+        "imaginary_mode_count": 0,
+        "acoustic_sum_rule_max_dev_thz": 0.0,
+        "migrating_species": "Cu",
+        "shortest_hop_distance_ang": 5.6792,
+        "bottleneck_clearance_ang": 2.3217,
+        "neb_saddle_barrier_ev": 1.3098,
+        "room_temp_diffusivity_cm2_s": 5.33e-26,
+        "dynamically_and_kinetically_stable": true,
+        "redundancy_verified": true,
+        "sha256_signature": "89c71681771f483b56189028916caebabfa5f1a6b0c88607581ea7d55766a1be"
       }
     },
     {
@@ -22345,9 +23198,9 @@
         "e_above_hull_0k_mev": 4.63,
         "g_above_hull_synth_mev": -5.87,
         "competing_hull_phases": [
-          "unknown",
-          "Bi4O4SeCl2",
+          "BiSCl",
           "CuO",
+          "Bi2O3",
           "Bi2S3"
         ],
         "bulk_modulus_gpa": 43.6,
@@ -22373,9 +23226,10 @@
         "min_synthesis_temp_c": 335.0,
         "rxn_driving_force_mev_atom": -141.3,
         "competing_impurity_sinks": [
-          "unknown",
-          "Bi4O4SeCl2",
-          "CuO"
+          "BiSCl",
+          "CuO",
+          "Bi2O3",
+          "Bi2S3"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 500.0,
@@ -22722,9 +23576,10 @@
         "e_above_hull_0k_mev": 4.84,
         "g_above_hull_synth_mev": -5.66,
         "competing_hull_phases": [
-          "unknown",
+          "Bi2Se3",
+          "Bi4Se3",
           "Ag2Se",
-          "Bi2Se3"
+          "Bi2O3"
         ],
         "bulk_modulus_gpa": 55.4,
         "shear_modulus_gpa": 16.4,
@@ -22751,8 +23606,8 @@
         "competing_impurity_sinks": [
           "Bi2Se3",
           "Bi4Se3",
-          "AgBiSe2",
-          "unknown"
+          "Ag2Se",
+          "Bi2O3"
         ],
         "impurity_sink_risk_score": 0.42,
         "halide_volatility_pressure_pa": 82.88,
@@ -23094,10 +23949,10 @@
         "e_above_hull_0k_mev": 4.86,
         "g_above_hull_synth_mev": -5.64,
         "competing_hull_phases": [
-          "unknown",
-          "Se",
-          "ZnS",
-          "SnSe2"
+          "SnO",
+          "SO3",
+          "SnS",
+          "SnS2"
         ],
         "bulk_modulus_gpa": 35.8,
         "shear_modulus_gpa": 18.3,
@@ -23122,10 +23977,10 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -141.11,
         "competing_impurity_sinks": [
-          "Se",
           "SnO",
           "SO3",
-          "unknown"
+          "SnS",
+          "SnS2"
         ],
         "impurity_sink_risk_score": 0.144,
         "halide_volatility_pressure_pa": 82.88,
@@ -23470,10 +24325,10 @@
         "e_above_hull_0k_mev": 4.9,
         "g_above_hull_synth_mev": -5.6,
         "competing_hull_phases": [
-          "unknown",
           "CuSe",
-          "ZnS",
-          "SnSe2"
+          "Cu2Se",
+          "SnSe",
+          "SnO2"
         ],
         "bulk_modulus_gpa": 40.2,
         "shear_modulus_gpa": 20.5,
@@ -23499,9 +24354,9 @@
         "rxn_driving_force_mev_atom": -141.08,
         "competing_impurity_sinks": [
           "CuSe",
-          "MoSe2",
-          "unknown",
-          "SnSe2"
+          "SnSe2",
+          "Cu2Se",
+          "SnSe"
         ],
         "impurity_sink_risk_score": 0.39,
         "halide_volatility_pressure_pa": 82.88,
@@ -23850,10 +24705,10 @@
         "e_above_hull_0k_mev": 4.96,
         "g_above_hull_synth_mev": -5.54,
         "competing_hull_phases": [
-          "unknown",
-          "AgBiSe2",
-          "Cs3InCl6",
-          "CsAgCl2"
+          "BiSCl",
+          "Bi2S3",
+          "BiS2",
+          "Ag2S"
         ],
         "bulk_modulus_gpa": 38.4,
         "shear_modulus_gpa": 19.6,
@@ -23878,7 +24733,10 @@
         "min_synthesis_temp_c": 335.0,
         "rxn_driving_force_mev_atom": -141.03,
         "competing_impurity_sinks": [
-          "unknown"
+          "BiSCl",
+          "Bi2S3",
+          "BiS2",
+          "Ag2S"
         ],
         "impurity_sink_risk_score": 0.42,
         "halide_volatility_pressure_pa": 500.0,
@@ -24228,10 +25086,10 @@
         "e_above_hull_0k_mev": 5.17,
         "g_above_hull_synth_mev": -5.33,
         "competing_hull_phases": [
-          "unknown",
           "CuSe",
-          "ZnS",
-          "InSn4"
+          "In2O3",
+          "Cu2Se",
+          "SnSe"
         ],
         "bulk_modulus_gpa": 34.0,
         "shear_modulus_gpa": 17.3,
@@ -24256,9 +25114,10 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -140.86,
         "competing_impurity_sinks": [
-          "unknown",
           "CuSe",
-          "ZnS"
+          "In2O3",
+          "Cu2Se",
+          "SnSe"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 500.0,
@@ -24425,6 +25284,25 @@
         },
         "mismatches": [],
         "sha256_signature": "e9f128da15956ed2693b7ddd9cf262a07696ca573313e2164f6491cf979d5d01"
+      },
+      "atomistic_phonon_neb": {
+        "candidate_id": "mp-1224129",
+        "formula_reduced": "CuInSnSe4",
+        "target_layer": "BOTTOM_IR_075EV",
+        "nsites_unit_cell": 7,
+        "dynamical_matrix_dim": 21,
+        "gamma_min_optical_freq_thz": 8.4441,
+        "gamma_max_lo_freq_thz": 19.382,
+        "imaginary_mode_count": 0,
+        "acoustic_sum_rule_max_dev_thz": 0.0,
+        "migrating_species": "Cu",
+        "shortest_hop_distance_ang": 5.9002,
+        "bottleneck_clearance_ang": 2.4748,
+        "neb_saddle_barrier_ev": 1.3256,
+        "room_temp_diffusivity_cm2_s": 3.122e-26,
+        "dynamically_and_kinetically_stable": true,
+        "redundancy_verified": true,
+        "sha256_signature": "c5e56b04e365aff7ed54335fa6e2da3c9fd003e5d2b96657fdb45e4ebb142fc5"
       }
     },
     {
@@ -24604,9 +25482,8 @@
         "e_above_hull_0k_mev": 5.33,
         "g_above_hull_synth_mev": -5.17,
         "competing_hull_phases": [
-          "unknown",
           "Bi2Se3",
-          "Ca2PbO4",
+          "Bi2O3",
           "SrSe"
         ],
         "bulk_modulus_gpa": 32.3,
@@ -24634,7 +25511,8 @@
         "competing_impurity_sinks": [
           "BiSe",
           "SrBi2Se4",
-          "unknown"
+          "Bi2Se3",
+          "Bi2O3"
         ],
         "impurity_sink_risk_score": 0.76,
         "halide_volatility_pressure_pa": 500.0,
@@ -24886,9 +25764,8 @@
         "e_above_hull_0k_mev": 5.98,
         "g_above_hull_synth_mev": -4.52,
         "competing_hull_phases": [
-          "unknown",
-          "Li2S",
-          "Cu3SbS4"
+          "Sb2S3",
+          "SbCl3"
         ],
         "bulk_modulus_gpa": 33.0,
         "shear_modulus_gpa": 16.8,
@@ -24913,9 +25790,8 @@
         "min_synthesis_temp_c": 335.0,
         "rxn_driving_force_mev_atom": -140.22,
         "competing_impurity_sinks": [
-          "unknown",
-          "Li2S",
-          "Cu3SbS4"
+          "Sb2S3",
+          "SbCl3"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 500.0,
@@ -25184,9 +26060,9 @@
         "e_above_hull_0k_mev": 6.02,
         "g_above_hull_synth_mev": -4.48,
         "competing_hull_phases": [
-          "unknown",
-          "Bi4O4SeCl2",
+          "BiSCl",
           "CuO",
+          "Bi2O3",
           "Bi2S3"
         ],
         "bulk_modulus_gpa": 37.0,
@@ -25212,9 +26088,10 @@
         "min_synthesis_temp_c": 335.0,
         "rxn_driving_force_mev_atom": -140.18,
         "competing_impurity_sinks": [
-          "unknown",
-          "Bi4O4SeCl2",
-          "CuO"
+          "BiSCl",
+          "CuO",
+          "Bi2O3",
+          "Bi2S3"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 500.0,
@@ -25485,10 +26362,10 @@
         "e_above_hull_0k_mev": 6.68,
         "g_above_hull_synth_mev": -3.82,
         "competing_hull_phases": [
-          "unknown",
           "CuO",
+          "Bi2O3",
           "Bi2S3",
-          "ZnS"
+          "BiS2"
         ],
         "bulk_modulus_gpa": 38.5,
         "shear_modulus_gpa": 19.6,
@@ -25858,10 +26735,8 @@
         "e_above_hull_0k_mev": 7.07,
         "g_above_hull_synth_mev": -3.43,
         "competing_hull_phases": [
-          "unknown",
-          "CaO",
-          "ZnSb",
-          "Cu3SbS4"
+          "Sb2O3",
+          "Sb2S3"
         ],
         "bulk_modulus_gpa": 46.4,
         "shear_modulus_gpa": 23.7,
@@ -25886,9 +26761,8 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -139.34,
         "competing_impurity_sinks": [
-          "unknown",
-          "CaO",
-          "ZnSb"
+          "Sb2O3",
+          "Sb2S3"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 82.88,
@@ -26051,6 +26925,25 @@
         },
         "mismatches": [],
         "sha256_signature": "a09dbb1c343327cd5cbb5fe25b0409ec548a0f06b6168ca7feb5d47fc3ae68d1"
+      },
+      "atomistic_phonon_neb": {
+        "candidate_id": "mp-861911",
+        "formula_reduced": "Sb2OS2",
+        "target_layer": "TOP_ACTIVE_GLASS_185EV",
+        "nsites_unit_cell": 10,
+        "dynamical_matrix_dim": 30,
+        "gamma_min_optical_freq_thz": 5.7996,
+        "gamma_max_lo_freq_thz": 35.8981,
+        "imaginary_mode_count": 0,
+        "acoustic_sum_rule_max_dev_thz": 0.0,
+        "migrating_species": "O",
+        "shortest_hop_distance_ang": 2.4555,
+        "bottleneck_clearance_ang": 1.6896,
+        "neb_saddle_barrier_ev": 1.058,
+        "room_temp_diffusivity_cm2_s": 1.692e-22,
+        "dynamically_and_kinetically_stable": true,
+        "redundancy_verified": true,
+        "sha256_signature": "25cdb7d416a5fb6dfcad119a2778fbdaadd55f10b3cf4be6b9e52cb8a9da132e"
       }
     },
     {
@@ -26233,9 +27126,9 @@
         "g_above_hull_synth_mev": -3.32,
         "competing_hull_phases": [
           "InSb",
-          "unknown",
-          "CuSe",
-          "Sb2Se3"
+          "In2Se3",
+          "In4Se3",
+          "InSe"
         ],
         "bulk_modulus_gpa": 33.7,
         "shear_modulus_gpa": 17.2,
@@ -26261,8 +27154,9 @@
         "rxn_driving_force_mev_atom": -139.26,
         "competing_impurity_sinks": [
           "InSb",
-          "unknown",
-          "CuSe"
+          "In2Se3",
+          "In4Se3",
+          "InSe"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 500.0,
@@ -26604,10 +27498,10 @@
         "e_above_hull_0k_mev": 7.46,
         "g_above_hull_synth_mev": -3.04,
         "competing_hull_phases": [
-          "unknown",
-          "Cu3SbS4",
-          "ZnS",
-          "MgO"
+          "Sb2S3",
+          "SnS",
+          "SnS2",
+          "SnO2"
         ],
         "bulk_modulus_gpa": 36.6,
         "shear_modulus_gpa": 18.7,
@@ -26632,9 +27526,10 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -139.03,
         "competing_impurity_sinks": [
-          "unknown",
-          "Cu3SbS4",
-          "ZnS"
+          "Sb2S3",
+          "SnS",
+          "SnS2",
+          "SnO2"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 82.88,
@@ -26894,16 +27789,16 @@
       "stage_reached": 3,
       "status": "REJECTED",
       "primary_failure_mode": "OXIDE_IMPURITY_SINK",
-      "reason": "OXIDE_IMPURITY_SINK: Requires 627 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)",
+      "reason": "OXIDE_IMPURITY_SINK: Requires 627 C (> 500 C soda-lime glass ceiling) to overcome refractory CuS impurity sink (LBNL-80k/A-Lab prior)",
       "stability": {
         "candidate_id": "mp-17322",
         "e_above_hull_0k_mev": 7.62,
         "g_above_hull_synth_mev": -2.88,
         "competing_hull_phases": [
-          "unknown",
-          "ZnS",
-          "CuO",
-          "SrS"
+          "CuS",
+          "SnS",
+          "SnO2",
+          "CuO"
         ],
         "bulk_modulus_gpa": 42.3,
         "shear_modulus_gpa": 21.6,
@@ -26928,8 +27823,9 @@
         "min_synthesis_temp_c": 626.9,
         "rxn_driving_force_mev_atom": -138.9,
         "competing_impurity_sinks": [
-          "unknown",
-          "ZnS",
+          "CuS",
+          "SnS",
+          "SnO2",
           "CuO"
         ],
         "impurity_sink_risk_score": 0.82,
@@ -26939,7 +27835,7 @@
         "active_layer_cost_usd_m2": 0.0222,
         "contrastive_synthesizability_score": 0.66,
         "passed_stage3": false,
-        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 627 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)"
+        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 627 C (> 500 C soda-lime glass ceiling) to overcome refractory CuS impurity sink (LBNL-80k/A-Lab prior)"
       },
       "redundancy_verification": {
         "candidate_id": "mp-17322",
@@ -27181,16 +28077,16 @@
       "stage_reached": 3,
       "status": "REJECTED",
       "primary_failure_mode": "OXIDE_IMPURITY_SINK",
-      "reason": "OXIDE_IMPURITY_SINK: Requires 627 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)",
+      "reason": "OXIDE_IMPURITY_SINK: Requires 627 C (> 500 C soda-lime glass ceiling) to overcome refractory CuS impurity sink (LBNL-80k/A-Lab prior)",
       "stability": {
         "candidate_id": "mp-16988",
         "e_above_hull_0k_mev": 7.64,
         "g_above_hull_synth_mev": -2.86,
         "competing_hull_phases": [
-          "unknown",
-          "ZnS",
-          "CuO",
-          "SrS"
+          "CuS",
+          "SnS",
+          "SnO2",
+          "CuO"
         ],
         "bulk_modulus_gpa": 42.3,
         "shear_modulus_gpa": 21.6,
@@ -27215,8 +28111,9 @@
         "min_synthesis_temp_c": 626.9,
         "rxn_driving_force_mev_atom": -138.89,
         "competing_impurity_sinks": [
-          "unknown",
-          "ZnS",
+          "CuS",
+          "SnS",
+          "SnO2",
           "CuO"
         ],
         "impurity_sink_risk_score": 0.82,
@@ -27226,7 +28123,7 @@
         "active_layer_cost_usd_m2": 0.0222,
         "contrastive_synthesizability_score": 0.643,
         "passed_stage3": false,
-        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 627 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)"
+        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 627 C (> 500 C soda-lime glass ceiling) to overcome refractory CuS impurity sink (LBNL-80k/A-Lab prior)"
       },
       "redundancy_verification": {
         "candidate_id": "mp-16988",
@@ -27471,16 +28368,16 @@
       "stage_reached": 3,
       "status": "REJECTED",
       "primary_failure_mode": "OXIDE_IMPURITY_SINK",
-      "reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)",
+      "reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory Ga2Se3 impurity sink (LBNL-80k/A-Lab prior)",
       "stability": {
         "candidate_id": "mp-1195344",
         "e_above_hull_0k_mev": 7.87,
         "g_above_hull_synth_mev": -2.63,
         "competing_hull_phases": [
-          "unknown",
-          "Sn",
-          "Fe7Se8",
-          "Ga2Se3"
+          "Ga2Se3",
+          "GaSe",
+          "SnSe2",
+          "SnSe"
         ],
         "bulk_modulus_gpa": 31.8,
         "shear_modulus_gpa": 16.2,
@@ -27505,7 +28402,10 @@
         "min_synthesis_temp_c": 680.0,
         "rxn_driving_force_mev_atom": -138.7,
         "competing_impurity_sinks": [
-          "unknown"
+          "Ga2Se3",
+          "GaSe",
+          "SnSe2",
+          "SnSe"
         ],
         "impurity_sink_risk_score": 0.76,
         "halide_volatility_pressure_pa": 500.0,
@@ -27514,7 +28414,7 @@
         "active_layer_cost_usd_m2": 0.1005,
         "contrastive_synthesizability_score": 0.648,
         "passed_stage3": false,
-        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)"
+        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory Ga2Se3 impurity sink (LBNL-80k/A-Lab prior)"
       },
       "redundancy_verification": {
         "candidate_id": "mp-1195344",
@@ -27753,16 +28653,16 @@
       "stage_reached": 3,
       "status": "REJECTED",
       "primary_failure_mode": "OXIDE_IMPURITY_SINK",
-      "reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)",
+      "reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory SnS impurity sink (LBNL-80k/A-Lab prior)",
       "stability": {
         "candidate_id": "mp-1208730",
         "e_above_hull_0k_mev": 7.99,
         "g_above_hull_synth_mev": -2.51,
         "competing_hull_phases": [
-          "unknown",
-          "ZnS",
-          "SrS",
-          "La2Sn2O7"
+          "SnS",
+          "SnS2",
+          "SnO2",
+          "SrS"
         ],
         "bulk_modulus_gpa": 38.9,
         "shear_modulus_gpa": 19.8,
@@ -27787,8 +28687,9 @@
         "min_synthesis_temp_c": 680.0,
         "rxn_driving_force_mev_atom": -138.61,
         "competing_impurity_sinks": [
-          "unknown",
-          "ZnS",
+          "SnS",
+          "SnS2",
+          "SnO2",
           "SrS"
         ],
         "impurity_sink_risk_score": 0.82,
@@ -27798,7 +28699,7 @@
         "active_layer_cost_usd_m2": 0.0178,
         "contrastive_synthesizability_score": 0.643,
         "passed_stage3": false,
-        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)"
+        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory SnS impurity sink (LBNL-80k/A-Lab prior)"
       },
       "redundancy_verification": {
         "candidate_id": "mp-1208730",
@@ -28042,9 +28943,9 @@
         "e_above_hull_0k_mev": 8.11,
         "g_above_hull_synth_mev": -2.39,
         "competing_hull_phases": [
-          "unknown",
           "BiOBr",
           "CuO",
+          "Bi2O3",
           "Bi2S3"
         ],
         "bulk_modulus_gpa": 43.0,
@@ -28070,9 +28971,10 @@
         "min_synthesis_temp_c": 335.0,
         "rxn_driving_force_mev_atom": -138.51,
         "competing_impurity_sinks": [
-          "unknown",
           "BiOBr",
-          "CuO"
+          "CuO",
+          "Bi2O3",
+          "Bi2S3"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 500.0,
@@ -28423,9 +29325,9 @@
         "g_above_hull_synth_mev": -2.0,
         "competing_hull_phases": [
           "AgBr",
-          "Cs3Bi2Br9",
-          "CS In6S7",
-          "S"
+          "InBr",
+          "Ag2S",
+          "In2S3"
         ],
         "bulk_modulus_gpa": 39.2,
         "shear_modulus_gpa": 20.0,
@@ -28451,8 +29353,9 @@
         "rxn_driving_force_mev_atom": -138.2,
         "competing_impurity_sinks": [
           "AgBr",
-          "Cs3Bi2Br9",
-          "CS In6S7"
+          "InBr",
+          "Ag2S",
+          "In2S3"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 500.0,
@@ -28709,10 +29612,9 @@
         "e_above_hull_0k_mev": 8.79,
         "g_above_hull_synth_mev": -1.71,
         "competing_hull_phases": [
-          "unknown",
-          "CS In6S7",
-          "Ag2Te",
-          "Cu3SbS4"
+          "Ag3Sb",
+          "Sb2S3",
+          "Ag2S"
         ],
         "bulk_modulus_gpa": 42.1,
         "shear_modulus_gpa": 21.5,
@@ -28737,9 +29639,9 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -137.97,
         "competing_impurity_sinks": [
-          "unknown",
-          "CS In6S7",
-          "Ag2Te"
+          "Ag3Sb",
+          "Sb2S3",
+          "Ag2S"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 82.88,
@@ -28992,8 +29894,10 @@
         "e_above_hull_0k_mev": 9.11,
         "g_above_hull_synth_mev": -1.39,
         "competing_hull_phases": [
-          "unknown",
-          "SnSe2"
+          "SnSe2",
+          "SnSe",
+          "SnO2",
+          "GeSe"
         ],
         "bulk_modulus_gpa": 36.7,
         "shear_modulus_gpa": 18.7,
@@ -29018,8 +29922,10 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -137.71,
         "competing_impurity_sinks": [
-          "unknown",
-          "SnSe2"
+          "SnSe2",
+          "SnSe",
+          "SnO2",
+          "GeSe"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 82.88,
@@ -29271,16 +30177,16 @@
       "stage_reached": 3,
       "status": "REJECTED",
       "primary_failure_mode": "OXIDE_IMPURITY_SINK",
-      "reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory BaSc2Te4 impurity sink (LBNL-80k/A-Lab prior)",
+      "reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory CuO impurity sink (LBNL-80k/A-Lab prior)",
       "stability": {
         "candidate_id": "mp-1228525",
         "e_above_hull_0k_mev": 9.4,
         "g_above_hull_synth_mev": -1.1,
         "competing_hull_phases": [
-          "BaSc2Te4",
-          "BaCO3",
-          "unknown",
-          "Cu2O"
+          "CuO",
+          "Cu2O",
+          "Ag79Sn21",
+          "BaCuO2"
         ],
         "bulk_modulus_gpa": 37.3,
         "shear_modulus_gpa": 19.0,
@@ -29305,9 +30211,10 @@
         "min_synthesis_temp_c": 680.0,
         "rxn_driving_force_mev_atom": -137.48,
         "competing_impurity_sinks": [
-          "BaSc2Te4",
-          "BaCO3",
-          "unknown"
+          "CuO",
+          "Cu2O",
+          "Ag79Sn21",
+          "BaCuO2"
         ],
         "impurity_sink_risk_score": 0.82,
         "halide_volatility_pressure_pa": 500.0,
@@ -29316,7 +30223,7 @@
         "active_layer_cost_usd_m2": 0.4252,
         "contrastive_synthesizability_score": 0.644,
         "passed_stage3": false,
-        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory BaSc2Te4 impurity sink (LBNL-80k/A-Lab prior)"
+        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory CuO impurity sink (LBNL-80k/A-Lab prior)"
       },
       "redundancy_verification": {
         "candidate_id": "mp-1228525",
@@ -29567,10 +30474,9 @@
         "e_above_hull_0k_mev": 9.43,
         "g_above_hull_synth_mev": -1.07,
         "competing_hull_phases": [
-          "unknown",
-          "AgBiSe2",
-          "CS In6S7",
-          "Bi2S3"
+          "Bi2S3",
+          "BiS2",
+          "Ag2S"
         ],
         "bulk_modulus_gpa": 38.6,
         "shear_modulus_gpa": 19.7,
@@ -29596,7 +30502,8 @@
         "rxn_driving_force_mev_atom": -137.46,
         "competing_impurity_sinks": [
           "Bi2S3",
-          "unknown"
+          "BiS2",
+          "Ag2S"
         ],
         "impurity_sink_risk_score": 0.186,
         "halide_volatility_pressure_pa": 82.88,
@@ -29945,10 +30852,10 @@
         "e_above_hull_0k_mev": 9.46,
         "g_above_hull_synth_mev": -1.04,
         "competing_hull_phases": [
-          "unknown",
           "Cu2O",
-          "CS In6S7",
-          "S"
+          "Ag79Sn21",
+          "In2O3",
+          "CuS"
         ],
         "bulk_modulus_gpa": 43.0,
         "shear_modulus_gpa": 21.9,
@@ -29973,9 +30880,10 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -137.43,
         "competing_impurity_sinks": [
-          "unknown",
           "Cu2O",
-          "CS In6S7"
+          "Ag79Sn21",
+          "In2O3",
+          "CuS"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 500.0,
@@ -30238,10 +31146,10 @@
         "e_above_hull_0k_mev": 9.77,
         "g_above_hull_synth_mev": -0.73,
         "competing_hull_phases": [
-          "unknown",
-          "AgBiSe2",
-          "Cs3InCl6",
-          "CsAgCl2"
+          "BiSCl",
+          "Bi2S3",
+          "BiS2",
+          "Ag2S"
         ],
         "bulk_modulus_gpa": 40.0,
         "shear_modulus_gpa": 20.4,
@@ -30266,7 +31174,10 @@
         "min_synthesis_temp_c": 335.0,
         "rxn_driving_force_mev_atom": -137.18,
         "competing_impurity_sinks": [
-          "unknown"
+          "BiSCl",
+          "Bi2S3",
+          "BiS2",
+          "Ag2S"
         ],
         "impurity_sink_risk_score": 0.42,
         "halide_volatility_pressure_pa": 500.0,
@@ -30606,14 +31517,15 @@
       "stage_reached": 3,
       "status": "REJECTED",
       "primary_failure_mode": "OXIDE_IMPURITY_SINK",
-      "reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)",
+      "reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory MgO impurity sink (LBNL-80k/A-Lab prior)",
       "stability": {
         "candidate_id": "mp-1194265",
         "e_above_hull_0k_mev": 10.61,
         "g_above_hull_synth_mev": 0.11,
         "competing_hull_phases": [
-          "unknown",
           "MgO",
+          "MgSe",
+          "SnO2",
           "SnSe2"
         ],
         "bulk_modulus_gpa": 38.0,
@@ -30639,8 +31551,9 @@
         "min_synthesis_temp_c": 680.0,
         "rxn_driving_force_mev_atom": -136.51,
         "competing_impurity_sinks": [
-          "unknown",
           "MgO",
+          "MgSe",
+          "SnO2",
           "SnSe2"
         ],
         "impurity_sink_risk_score": 0.82,
@@ -30650,7 +31563,7 @@
         "active_layer_cost_usd_m2": 0.0349,
         "contrastive_synthesizability_score": 0.714,
         "passed_stage3": false,
-        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)"
+        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 680 C (> 500 C soda-lime glass ceiling) to overcome refractory MgO impurity sink (LBNL-80k/A-Lab prior)"
       },
       "redundancy_verification": {
         "candidate_id": "mp-1194265",
@@ -30891,10 +31804,10 @@
         "e_above_hull_0k_mev": 13.63,
         "g_above_hull_synth_mev": 3.13,
         "competing_hull_phases": [
-          "unknown",
           "CuO",
+          "Bi2O3",
           "Bi2S3",
-          "ZnS"
+          "BiS2"
         ],
         "bulk_modulus_gpa": 33.4,
         "shear_modulus_gpa": 10.5,
@@ -31149,10 +32062,10 @@
         "e_above_hull_0k_mev": 13.73,
         "g_above_hull_synth_mev": 3.23,
         "competing_hull_phases": [
-          "unknown",
-          "S",
           "InSn4",
-          "ZnS"
+          "SnO2",
+          "SnS",
+          "SnS2"
         ],
         "bulk_modulus_gpa": 39.2,
         "shear_modulus_gpa": 20.0,
@@ -31177,9 +32090,10 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -134.02,
         "competing_impurity_sinks": [
-          "unknown",
-          "S",
-          "InSn4"
+          "InSn4",
+          "SnO2",
+          "SnS",
+          "SnS2"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 500.0,
@@ -31431,10 +32345,10 @@
         "e_above_hull_0k_mev": 14.59,
         "g_above_hull_synth_mev": 4.09,
         "competing_hull_phases": [
-          "unknown",
-          "Se",
-          "ZnS",
-          "SnSe2"
+          "SnO",
+          "SO3",
+          "SnS",
+          "SnS2"
         ],
         "bulk_modulus_gpa": 37.2,
         "shear_modulus_gpa": 19.0,
@@ -31459,10 +32373,10 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -133.33,
         "competing_impurity_sinks": [
-          "Se",
           "SnO",
           "SO3",
-          "unknown"
+          "SnS",
+          "SnS2"
         ],
         "impurity_sink_risk_score": 0.144,
         "halide_volatility_pressure_pa": 82.88,
@@ -31805,10 +32719,10 @@
         "e_above_hull_0k_mev": 14.68,
         "g_above_hull_synth_mev": 4.18,
         "competing_hull_phases": [
-          "unknown",
-          "Cu3SbS4",
+          "Cu2Sb",
+          "Sb2Se3",
           "CuSe",
-          "Sb2Se3"
+          "Cu2Se"
         ],
         "bulk_modulus_gpa": 40.1,
         "shear_modulus_gpa": 20.5,
@@ -31833,10 +32747,10 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -133.26,
         "competing_impurity_sinks": [
-          "unknown",
           "Sb2Se3",
           "Cu3SbSe3",
-          "Cu3SbSe4"
+          "Cu3SbSe4",
+          "Cu2Sb"
         ],
         "impurity_sink_risk_score": 0.175,
         "halide_volatility_pressure_pa": 82.88,
@@ -32179,9 +33093,9 @@
         "e_above_hull_0k_mev": 15.03,
         "g_above_hull_synth_mev": 4.53,
         "competing_hull_phases": [
-          "unknown",
-          "Te",
+          "BiSb2O7",
           "Bi2Se3",
+          "Bi2O3",
           "Sb2Se3"
         ],
         "bulk_modulus_gpa": 32.7,
@@ -32207,9 +33121,10 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -132.98,
         "competing_impurity_sinks": [
-          "unknown",
-          "Te",
-          "Bi2Se3"
+          "BiSb2O7",
+          "Bi2Se3",
+          "Bi2O3",
+          "Sb2Se3"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 82.88,
@@ -32551,10 +33466,10 @@
         "e_above_hull_0k_mev": 15.08,
         "g_above_hull_synth_mev": 4.58,
         "competing_hull_phases": [
-          "unknown",
-          "Ge",
+          "In2O3",
+          "BiIn2",
           "Bi2S3",
-          "S"
+          "BiS2"
         ],
         "bulk_modulus_gpa": 37.8,
         "shear_modulus_gpa": 19.3,
@@ -32579,9 +33494,10 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -132.94,
         "competing_impurity_sinks": [
-          "unknown",
-          "Ge",
-          "Bi2S3"
+          "In2O3",
+          "BiIn2",
+          "Bi2S3",
+          "BiS2"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 500.0,
@@ -32744,6 +33660,25 @@
         },
         "mismatches": [],
         "sha256_signature": "efd0e571e1da58bcc47487420264fbc3faad1689ffc3bd7e6a5edd8f817ec9f3"
+      },
+      "atomistic_phonon_neb": {
+        "candidate_id": "mp-1078776",
+        "formula_reduced": "BiInS3",
+        "target_layer": "TOP_ACTIVE_GLASS_185EV",
+        "nsites_unit_cell": 10,
+        "dynamical_matrix_dim": 30,
+        "gamma_min_optical_freq_thz": 6.2733,
+        "gamma_max_lo_freq_thz": 22.7309,
+        "imaginary_mode_count": 0,
+        "acoustic_sum_rule_max_dev_thz": 0.0,
+        "migrating_species": "S",
+        "shortest_hop_distance_ang": 3.6364,
+        "bottleneck_clearance_ang": 1.8865,
+        "neb_saddle_barrier_ev": 1.1202,
+        "room_temp_diffusivity_cm2_s": 3.347e-23,
+        "dynamically_and_kinetically_stable": true,
+        "redundancy_verified": true,
+        "sha256_signature": "6c07d52f2ca54f5444d25b5af7f196d1ef2b1ad465e9677a5e1fea1d3a09f5a4"
       }
     },
     {
@@ -32924,10 +33859,9 @@
         "e_above_hull_0k_mev": 15.29,
         "g_above_hull_synth_mev": 4.79,
         "competing_hull_phases": [
-          "unknown",
-          "CS In6S7",
-          "Ag2Te",
-          "Cu3SbS4"
+          "Ag3Sb",
+          "Sb2S3",
+          "Ag2S"
         ],
         "bulk_modulus_gpa": 43.1,
         "shear_modulus_gpa": 22.0,
@@ -33174,16 +34108,16 @@
       "stage_reached": 3,
       "status": "REJECTED",
       "primary_failure_mode": "OXIDE_IMPURITY_SINK",
-      "reason": "OXIDE_IMPURITY_SINK: Requires 800 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)",
+      "reason": "OXIDE_IMPURITY_SINK: Requires 800 C (> 500 C soda-lime glass ceiling) to overcome refractory BaS impurity sink (LBNL-80k/A-Lab prior)",
       "stability": {
         "candidate_id": "mp-1183370",
         "e_above_hull_0k_mev": 15.67,
         "g_above_hull_synth_mev": 5.17,
         "competing_hull_phases": [
-          "unknown",
           "BaS",
-          "Sn",
-          "ZnS"
+          "SnS",
+          "SnS2",
+          "SnO2"
         ],
         "bulk_modulus_gpa": 38.4,
         "shear_modulus_gpa": 19.6,
@@ -33208,9 +34142,10 @@
         "min_synthesis_temp_c": 799.9,
         "rxn_driving_force_mev_atom": -132.46,
         "competing_impurity_sinks": [
-          "unknown",
           "BaS",
-          "Sn"
+          "SnS",
+          "SnS2",
+          "SnO2"
         ],
         "impurity_sink_risk_score": 0.82,
         "halide_volatility_pressure_pa": 500.0,
@@ -33219,7 +34154,7 @@
         "active_layer_cost_usd_m2": 0.0175,
         "contrastive_synthesizability_score": 0.647,
         "passed_stage3": false,
-        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 800 C (> 500 C soda-lime glass ceiling) to overcome refractory unknown impurity sink (LBNL-80k/A-Lab prior)"
+        "failure_reason": "OXIDE_IMPURITY_SINK: Requires 800 C (> 500 C soda-lime glass ceiling) to overcome refractory BaS impurity sink (LBNL-80k/A-Lab prior)"
       },
       "redundancy_verification": {
         "candidate_id": "mp-1183370",
@@ -33462,10 +34397,9 @@
         "e_above_hull_0k_mev": 16.83,
         "g_above_hull_synth_mev": 6.33,
         "competing_hull_phases": [
-          "unknown",
-          "AgBiSe2",
-          "CS In6S7",
-          "Bi2S3"
+          "Bi2S3",
+          "BiS2",
+          "Ag2S"
         ],
         "bulk_modulus_gpa": 42.4,
         "shear_modulus_gpa": 21.6,
@@ -33491,7 +34425,8 @@
         "rxn_driving_force_mev_atom": -131.54,
         "competing_impurity_sinks": [
           "Bi2S3",
-          "unknown"
+          "BiS2",
+          "Ag2S"
         ],
         "impurity_sink_risk_score": 0.186,
         "halide_volatility_pressure_pa": 82.88,
@@ -33743,10 +34678,10 @@
         "e_above_hull_0k_mev": 17.4,
         "g_above_hull_synth_mev": 6.9,
         "competing_hull_phases": [
-          "unknown",
-          "Cu3SbS4",
-          "ZnS",
-          "MgO"
+          "Sb2S3",
+          "SnS",
+          "SnS2",
+          "SnO2"
         ],
         "bulk_modulus_gpa": 36.9,
         "shear_modulus_gpa": 18.8,
@@ -33771,9 +34706,10 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -131.08,
         "competing_impurity_sinks": [
-          "unknown",
-          "Cu3SbS4",
-          "ZnS"
+          "Sb2S3",
+          "SnS",
+          "SnS2",
+          "SnO2"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 82.88,
@@ -34039,10 +34975,10 @@
         "e_above_hull_0k_mev": 17.99,
         "g_above_hull_synth_mev": 7.49,
         "competing_hull_phases": [
-          "unknown",
-          "Ge",
+          "In2O3",
+          "BiIn2",
           "Bi2Se3",
-          "CuSe"
+          "Bi2O3"
         ],
         "bulk_modulus_gpa": 33.2,
         "shear_modulus_gpa": 16.9,
@@ -34067,10 +35003,10 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -130.61,
         "competing_impurity_sinks": [
-          "Bi",
           "BiSe",
           "Bi2Se3",
-          "In2Se3"
+          "In2Se3",
+          "In2O3"
         ],
         "impurity_sink_risk_score": 0.325,
         "halide_volatility_pressure_pa": 500.0,
@@ -34233,6 +35169,25 @@
         },
         "mismatches": [],
         "sha256_signature": "0dae9392716774ac808f7d90ab583018289674f56443c20fd9ccbb69f01202d5"
+      },
+      "atomistic_phonon_neb": {
+        "candidate_id": "mp-1223998",
+        "formula_reduced": "Bi3InSe6",
+        "target_layer": "BOTTOM_IR_075EV",
+        "nsites_unit_cell": 10,
+        "dynamical_matrix_dim": 30,
+        "gamma_min_optical_freq_thz": 1.3553,
+        "gamma_max_lo_freq_thz": 16.1117,
+        "imaginary_mode_count": 0,
+        "acoustic_sum_rule_max_dev_thz": 0.0,
+        "migrating_species": "Se",
+        "shortest_hop_distance_ang": 3.6687,
+        "bottleneck_clearance_ang": 3.4646,
+        "neb_saddle_barrier_ev": 0.9903,
+        "room_temp_diffusivity_cm2_s": 5.183e-21,
+        "dynamically_and_kinetically_stable": true,
+        "redundancy_verified": true,
+        "sha256_signature": "19cfc642b2062a8e2c84d35530349cbde30554e6f7e5f3c0034bd75d17a2169b"
       }
     },
     {
@@ -34412,10 +35367,10 @@
         "e_above_hull_0k_mev": 18.25,
         "g_above_hull_synth_mev": 7.75,
         "competing_hull_phases": [
-          "unknown",
-          "Ge",
+          "In2O3",
+          "BiIn2",
           "Bi2S3",
-          "S"
+          "BiS2"
         ],
         "bulk_modulus_gpa": 40.2,
         "shear_modulus_gpa": 20.5,
@@ -34440,9 +35395,10 @@
         "min_synthesis_temp_c": 375.0,
         "rxn_driving_force_mev_atom": -130.4,
         "competing_impurity_sinks": [
-          "unknown",
-          "Ge",
-          "Bi2S3"
+          "In2O3",
+          "BiIn2",
+          "Bi2S3",
+          "BiS2"
         ],
         "impurity_sink_risk_score": 0.11,
         "halide_volatility_pressure_pa": 500.0,
@@ -34784,10 +35740,9 @@
         "e_above_hull_0k_mev": 18.92,
         "g_above_hull_synth_mev": 8.42,
         "competing_hull_phases": [
-          "unknown",
-          "AgBiSe2",
-          "CS In6S7",
-          "Bi2S3"
+          "Bi2S3",
+          "BiS2",
+          "Ag2S"
         ],
         "bulk_modulus_gpa": 61.7,
         "shear_modulus_gpa": 14.3,
@@ -34813,7 +35768,8 @@
         "rxn_driving_force_mev_atom": -129.86,
         "competing_impurity_sinks": [
           "Bi2S3",
-          "unknown"
+          "BiS2",
+          "Ag2S"
         ],
         "impurity_sink_risk_score": 0.186,
         "halide_volatility_pressure_pa": 82.88,
@@ -35065,9 +36021,9 @@
         "e_above_hull_0k_mev": 19.99,
         "g_above_hull_synth_mev": 9.49,
         "competing_hull_phases": [
-          "unknown",
-          "BiI3",
-          "Cu3SbS4"
+          "SbI3",
+          "Sb2O3",
+          "Sb2S3"
         ],
         "bulk_modulus_gpa": 6.3,
         "shear_modulus_gpa": 1.9,
@@ -35322,9 +36278,10 @@
         "e_above_hull_0k_mev": 20.5,
         "g_above_hull_synth_mev": 10.0,
         "competing_hull_phases": [
-          "unknown",
-          "ZnS",
-          "Cu3SbS4"
+          "Cu3SbS4",
+          "CuS",
+          "Cu2Sb",
+          "Sb2S3"
         ],
         "bulk_modulus_gpa": 49.0,
         "shear_modulus_gpa": 25.0,

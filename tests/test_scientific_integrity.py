@@ -90,6 +90,8 @@ from failsmart_matengine.independent_verifier import (
     compute_frohlich_alpha_exact,
     verify_candidate_dossier,
     independently_verify_cross_layer_4t_pair,
+    independently_verify_atomistic_phonon_and_neb,
+    independently_verify_coherent_tmm_4t_stack,
 )
 from pymatgen.core import Structure
 import subprocess
@@ -106,7 +108,7 @@ from failsmart_matengine.tools import (
 
 
 class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
-    """Rigorous scientific integrity, zero-trust mathematical verification & physical constraint test suite v2.0."""
+    """Rigorous scientific integrity, zero-trust mathematical verification & physical constraint test suite v4.0."""
 
     @classmethod
     def setUpClass(cls):
@@ -133,7 +135,13 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
         with open(iv_path, "r", encoding="utf-8") as f:
             iv_tree = ast.parse(f.read(), filename="independent_verifier.py")
 
-        banned_modules = {"physics_calculators", "kinetics_and_optics", "tools", "mp_live_discovery"}
+        banned_modules = {
+            "physics_calculators",
+            "kinetics_and_optics",
+            "tools",
+            "mp_live_discovery",
+            "atomistic_and_tmm",
+        }
         for node in ast.walk(iv_tree):
             if isinstance(node, ast.Import):
                 for alias in node.names:
@@ -888,7 +896,120 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
                     f"{dpath}: Header nat ({nat_in_header}) != parsed positions ({len(atom_positions)})",
                 )
 
+    def test_step1_3d_dynamical_matrix_and_neb_ion_migration(self):
+        """Test 16: Verify Step 1 3D Harmonic Dynamical Matrix D(q=0) & 11-Image NEB Ion-Migration across all 8 finalists.
+
+        Also verifies zero 'unknown' unindexed XRD tokens in competing_impurity_sinks or competing_hull_phases.
+        """
+        live_sum_path = os.path.join(self.repo_root, "outputs", "live_mp_discovery_summary.json")
+        with open(live_sum_path, "r", encoding="utf-8") as f:
+            live_sum = json.load(f)
+
+        self.assertEqual(live_sum.get("version"), "4.0.0", "Expected live_mp_discovery_summary.json version == 4.0.0")
+
+        # 1. Verify zero 'unknown' tokens in any candidate's competing_impurity_sinks or competing_hull_phases
+        for rec in live_sum.get("all_mp_records", []):
+            cid = rec["candidate"]["candidate_id"]
+            hull_phases = rec.get("stability", {}).get("competing_hull_phases", [])
+            imp_sinks = rec.get("synthesis", {}).get("competing_impurity_sinks", [])
+            for phase in hull_phases + imp_sinks:
+                self.assertNotIn(
+                    "unknown",
+                    phase.lower(),
+                    f"Candidate {cid} contains unindexed 'unknown' token in competing phase/sink: {phase}",
+                )
+
+        # 2. Verify all 8 finalists' 3D Dynamical Matrix & 11-Image NEB reports and independent scipy.linalg.eigvalsh verification
+        phonon_reports = live_sum.get("atomistic_phonon_neb_reports", [])
+        self.assertEqual(len(phonon_reports), 8, f"Expected 8 atomistic_phonon_neb_reports, got {len(phonon_reports)}")
+
+        cache_path = os.path.join(self.repo_root, "data", "mp_live_candidates_cache.json")
+        with open(cache_path, "r", encoding="utf-8") as f:
+            cache_by_id = {c["mp_id"]: c for c in json.load(f)}
+
+        finalists_by_id = {f["candidate"]["candidate_id"]: f for f in live_sum.get("finalists", [])}
+
+        for rep in phonon_reports:
+            cid = rep["candidate_id"]
+            self.assertEqual(rep["imaginary_mode_count"], 0, f"{cid}: Expected 0 imaginary modes, got {rep['imaginary_mode_count']}")
+            self.assertTrue(rep["dynamically_and_kinetically_stable"], f"{cid}: Expected dynamically_and_kinetically_stable == True")
+            self.assertTrue(rep["redundancy_verified"], f"{cid}: Expected redundancy_verified == True")
+            self.assertGreater(rep["gamma_min_optical_freq_thz"], 1.0, f"{cid}: Expected min optical phonon > 1.0 THz")
+            self.assertLess(rep["acoustic_sum_rule_max_dev_thz"], 1e-4, f"{cid}: Acoustic sum rule dev >= 1e-4 THz")
+            self.assertGreaterEqual(rep["neb_saddle_barrier_ev"], 0.90, f"{cid}: Expected NEB barrier >= 0.90 eV")
+            self.assertLess(rep["room_temp_diffusivity_cm2_s"], 1e-18, f"{cid}: Expected D_ion(300K) < 1e-18 cm^2/s")
+
+            # Cross-verify against blinded scipy.linalg.eigvalsh + independent NEB solver
+            fin = finalists_by_id[cid]
+            iv_rep = independently_verify_atomistic_phonon_and_neb(
+                cif_text=fin["candidate"]["cif_content"],
+                stoichiometry=fin["candidate"]["stoichiometry"],
+                oxidation_states=fin["candidate"]["oxidation_states"],
+            )
+            self.assertAlmostEqual(
+                rep["gamma_min_optical_freq_thz"],
+                iv_rep["gamma_min_optical_freq_thz"],
+                places=4,
+                msg=f"{cid}: w_opt,min mismatch between np.linalg.eigh and scipy.linalg.eigvalsh",
+            )
+            self.assertAlmostEqual(
+                rep["gamma_max_lo_freq_thz"],
+                iv_rep["gamma_max_lo_freq_thz"],
+                places=4,
+                msg=f"{cid}: w_LO,max mismatch between np.linalg.eigh and scipy.linalg.eigvalsh",
+            )
+            self.assertAlmostEqual(
+                rep["neb_saddle_barrier_ev"],
+                iv_rep["neb_saddle_barrier_ev"],
+                places=4,
+                msg=f"{cid}: NEB barrier mismatch between primary and independent verifier",
+            )
+
+    def test_step2_coherent_abeles_tmm_vs_rouard_airy_4t_stacks(self):
+        """Test 17: Verify Step 2 Coherent 2x2 Abeles TMM vs Recursive Rouard/Airy 4T Stack Optics across all 15 stacks."""
+        live_sum_path = os.path.join(self.repo_root, "outputs", "live_mp_discovery_summary.json")
+        with open(live_sum_path, "r", encoding="utf-8") as f:
+            live_sum = json.load(f)
+
+        tmm_stacks = live_sum.get("coherent_tmm_4t_stacks", [])
+        self.assertEqual(len(tmm_stacks), 15, f"Expected 15 coherent_tmm_4t_stacks, got {len(tmm_stacks)}")
+
+        finalists_by_id = {f["candidate"]["candidate_id"]: f for f in live_sum.get("finalists", [])}
+
+        for st in tmm_stacks:
+            pid = st["pair_id"]
+            self.assertTrue(st["photon_conservation_verified"], f"{pid}: Photon conservation failed")
+            self.assertLessEqual(
+                st["rouard_airy_redundancy_diff_percent"],
+                0.05,
+                f"{pid}: Abeles TMM vs Rouard/Airy discrepancy {st['rouard_airy_redundancy_diff_percent']}% > 0.05%",
+            )
+            self.assertGreater(st["tmm_mean_front_reflectance_percent"], 8.0, f"{pid}: Expected realistic front reflectance > 8%")
+            self.assertGreater(st["tmm_sub_bandgap_transmittance_percent"], 85.0, f"{pid}: Expected sub-bandgap T > 85%")
+            self.assertLess(st["scalar_to_tmm_delta_pce_percent"], 0.0, f"{pid}: Coherent TMM 4T must be lower than scalar idealization")
+
+            top_f = finalists_by_id[st["top_mp_id"]]
+            bot_f = finalists_by_id[st["bottom_mp_id"]]
+
+            iv_tmm = independently_verify_coherent_tmm_4t_stack(
+                eg_ind_1=top_f["electronics"]["hse06_soc_indirect_gap_ev"],
+                eg_dir_1=top_f["electronics"]["hse06_soc_direct_gap_ev"],
+                eps_inf_1=top_f["electronics"]["eps_inf"],
+                thickness_nm_1=top_f["optics"]["film_thickness_nm"],
+                eg_ind_3=bot_f["electronics"]["hse06_soc_indirect_gap_ev"],
+                eg_dir_3=bot_f["electronics"]["hse06_soc_direct_gap_ev"],
+                eps_inf_3=bot_f["electronics"]["eps_inf"],
+                thickness_nm_3=bot_f["electronics"]["film_thickness_nm"] if "film_thickness_nm" in bot_f["electronics"] else bot_f["optics"]["film_thickness_nm"],
+            )
+            diff_total = abs(st["tmm_4t_low_fca_pce_percent"] - iv_tmm["tmm_4t_low_fca_pce_percent"])
+            self.assertLessEqual(
+                diff_total,
+                0.05,
+                f"{pid}: Independent Rouard/Airy verification diff {diff_total:.4f}% > 0.05%",
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
+
 
