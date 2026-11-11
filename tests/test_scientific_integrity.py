@@ -113,6 +113,10 @@ from failsmart_matengine.tools import (
 )
 
 
+import pytest
+
+
+@pytest.mark.regression
 class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
     """Rigorous scientific integrity, zero-trust mathematical verification & physical constraint test suite v4.0."""
 

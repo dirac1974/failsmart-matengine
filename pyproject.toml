@@ -29,6 +29,9 @@ dev = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = [
+    "regression: tests that pin repository outputs, funnel counts, or self-consistency snapshots",
+]
 filterwarnings = [
     "ignore:Issues encountered while parsing CIF.*:UserWarning",
     "ignore:No oxidation states specified on sites.*:UserWarning",

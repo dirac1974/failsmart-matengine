@@ -246,6 +246,57 @@ def evaluate_spring_and_migration_heuristics(
     )
 
 
+def compute_general_abeles_tmm_reflectance_transmittance(
+    n_list: List[np.ndarray],
+    d_list_nm: List[float],
+    wl_nm: np.ndarray,
+) -> Tuple[np.ndarray, np.ndarray]:
+    """General normal-incidence 2x2 Abeles characteristic matrix solver for an N-medium stack.
+
+    Args:
+        n_list: List of complex refractive-index arrays [n_0, n_1, ..., n_M], each of shape (N_wl,).
+                Medium 0 is the semi-infinite incident medium; medium M is the semi-infinite substrate.
+        d_list_nm: Layer thicknesses [0.0, d_1, ..., d_{M-1}, 0.0] in nm.
+        wl_nm: Wavelength array in nm, shape (N_wl,).
+
+    Returns:
+        (reflectance_r, transmittance_t) arrays of shape (N_wl,) in [0, 1].
+    """
+    n_pts = len(wl_nm)
+    m_tot = np.zeros((n_pts, 2, 2), dtype=np.complex128)
+    m_tot[:, 0, 0] = 1.0
+    m_tot[:, 1, 1] = 1.0
+    last_idx = len(n_list) - 1
+
+    for m in range(last_idx):
+        nm_curr = n_list[m]
+        nm_next = n_list[m + 1]
+        r_m = (nm_curr - nm_next) / (nm_curr + nm_next)
+        t_m = (2.0 * nm_curr) / (nm_curr + nm_next)
+
+        i_mat = np.zeros((n_pts, 2, 2), dtype=np.complex128)
+        i_mat[:, 0, 0] = 1.0 / t_m
+        i_mat[:, 0, 1] = r_m / t_m
+        i_mat[:, 1, 0] = r_m / t_m
+        i_mat[:, 1, 1] = 1.0 / t_m
+
+        m_tot = np.matmul(m_tot, i_mat)
+
+        if m + 1 < last_idx and d_list_nm[m + 1] > 0.0:
+            beta = (2.0 * math.pi * n_list[m + 1] * d_list_nm[m + 1]) / wl_nm
+            p_mat = np.zeros((n_pts, 2, 2), dtype=np.complex128)
+            p_mat[:, 0, 0] = np.exp(-1j * beta)
+            p_mat[:, 1, 1] = np.exp(1j * beta)
+            m_tot = np.matmul(m_tot, p_mat)
+
+    r_tot = m_tot[:, 1, 0] / m_tot[:, 0, 0]
+    t_tot = 1.0 / m_tot[:, 0, 0]
+
+    r_tmm = np.abs(r_tot) ** 2
+    t_tmm = (np.real(n_list[-1]) / np.real(n_list[0])) * (np.abs(t_tot) ** 2)
+    return r_tmm, t_tmm
+
+
 def compute_abeles_2x2_tmm_reflectance_transmittance(
     wl_nm: np.ndarray,
     e_ev: np.ndarray,
@@ -279,38 +330,7 @@ def compute_abeles_2x2_tmm_reflectance_transmittance(
     n_list = [n0, n1, n2, n3, n4, n5]
     d_list_nm = [0.0, 98.0, 105.0, float(d_top_nm), 85.0, 0.0]
 
-    # Initialize 2x2 identity matrix at each wavelength: shape (N_wl, 2, 2)
-    n_pts = len(wl_nm)
-    m_tot = np.zeros((n_pts, 2, 2), dtype=np.complex128)
-    m_tot[:, 0, 0] = 1.0
-    m_tot[:, 1, 1] = 1.0
-
-    for m in range(5):
-        nm_curr = n_list[m]
-        nm_next = n_list[m + 1]
-        r_m = (nm_curr - nm_next) / (nm_curr + nm_next)
-        t_m = (2.0 * nm_curr) / (nm_curr + nm_next)
-
-        i_mat = np.zeros((n_pts, 2, 2), dtype=np.complex128)
-        i_mat[:, 0, 0] = 1.0 / t_m
-        i_mat[:, 0, 1] = r_m / t_m
-        i_mat[:, 1, 0] = r_m / t_m
-        i_mat[:, 1, 1] = 1.0 / t_m
-
-        m_tot = np.matmul(m_tot, i_mat)
-
-        if m + 1 <= 4:
-            beta = (2.0 * math.pi * n_list[m + 1] * d_list_nm[m + 1]) / wl_nm
-            p_mat = np.zeros((n_pts, 2, 2), dtype=np.complex128)
-            p_mat[:, 0, 0] = np.exp(-1j * beta)
-            p_mat[:, 1, 1] = np.exp(1j * beta)
-            m_tot = np.matmul(m_tot, p_mat)
-
-    r_tot = m_tot[:, 1, 0] / m_tot[:, 0, 0]
-    t_tot = 1.0 / m_tot[:, 0, 0]
-
-    r_tmm_1 = np.abs(r_tot) ** 2
-    t_tmm_1 = (np.real(n5) / np.real(n0)) * (np.abs(t_tot) ** 2)
+    r_tmm_1, t_tmm_1 = compute_general_abeles_tmm_reflectance_transmittance(n_list, d_list_nm, wl_nm)
     t_ito_front = np.exp(-4.0 * math.pi * k_ito * 105.0 / wl_nm)
 
     return r_tmm_1, t_tmm_1, t_ito_front, alpha1
