@@ -12,10 +12,10 @@
 
 ---
 
-## 1. UI Rendering Post-Mortem (`IMG_1087.png`) & Permanent KaTeX Guardrail
+## 1. UI Rendering Post-Mortem & Permanent KaTeX Guardrail
 
 ### 1.1 Root Cause of the Mobile Rendering Error
-In screenshot [`IMG_1087.png`](file:///home/antigravity/IMG_1087.png), KaTeX threw:
+In an earlier mobile rendering screenshot, KaTeX threw:
 `KaTeX parse error: Undefined control sequence: \cent at position 13: 3.172\text{ \cent/kWh}`.
 Standard KaTeX does not load the legacy TeX `wasysym` macro `\cent`. In addition, unescaped prose currency dollar signs (`$`) in Markdown tables risk opening unintended inline math spans across columns.
 

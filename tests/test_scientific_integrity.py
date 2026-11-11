@@ -1379,6 +1379,41 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
                 f"{pid}: Path 2 Utility LCOE diff > 0.01 c/kWh",
             )
 
+    def test_23_portable_paths_and_single_package_version(self) -> None:
+        """Verify unified package version across metadata/README and repo-relative default paths."""
+        import importlib.metadata
+        import inspect
+        from pathlib import Path
+
+        import failsmart_matengine
+        from failsmart_matengine.inter_team_bus import InterTeamBus
+        from failsmart_matengine.ledger import ContrastiveFailureLedger
+        from failsmart_matengine.mp_live_discovery import run_live_mp_discovery_campaign
+        from failsmart_matengine.orchestrator import run_pilot_campaign
+
+        expected_root = Path(failsmart_matengine.__file__).resolve().parents[1]
+        pkg_version = importlib.metadata.version("failsmart-matengine")
+        self.assertEqual(pkg_version, failsmart_matengine.__version__)
+        readme_text = (expected_root / "README.md").read_text(encoding="utf-8")
+        self.assertIn(f"v{failsmart_matengine.__version__}", readme_text)
+
+        self.assertEqual(
+            Path(inspect.signature(ContrastiveFailureLedger.__init__).parameters["db_path"].default),
+            expected_root / "data" / "failure_memory.db",
+        )
+        self.assertEqual(
+            Path(inspect.signature(InterTeamBus.__init__).parameters["logs_dir"].default),
+            expected_root / "logs",
+        )
+        self.assertEqual(
+            Path(inspect.signature(run_pilot_campaign).parameters["output_dir"].default),
+            expected_root / "outputs",
+        )
+        self.assertEqual(
+            Path(inspect.signature(run_live_mp_discovery_campaign).parameters["output_dir"].default),
+            expected_root / "outputs",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

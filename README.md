@@ -1,4 +1,4 @@
-# FailSmart-MatEngine
+# FailSmart-MatEngine (`v0.8.0`)
 
 **Heuristic pre-screening scaffold and failure ledger for 4-Terminal "Silicon-Sandwich" Tandem Photovoltaics**
 
@@ -270,7 +270,7 @@ We simultaneously evaluate all 4 Techno-Economic Figures of Merit against a sing
 | `mp-861911__mp-22982` | `Sb2OS2 + c-Si + BiCuS2` | `(94, 48, 299, 391 nm)` | 41.97% | **46.02%** (42.75 W/ft², +9.64%) | **48.08%** (44.67 W/ft²) | **3.002 ¢/kWh** | **`37 : 72 : 100`** | 50.05 V (1.15% / 0.44%) |
 | `mp-1227486__mp-22982` | `BiSbS3 + c-Si + BiCuS2` | `(94, 48, 299, 391 nm)` | 41.96% | **46.01%** (42.74 W/ft², +9.64%) | **48.07%** (44.66 W/ft²) | **3.002 ¢/kWh** | **`36 : 72 : 101`** | 50.12 V (0.19% / 0.41%) |
 
-### 8. Phase 11 (`v8.0`): Realistic Synthesis Practicality (`SPS`), Live MP TCO Reactivity, Non-Radiative SRH Physics & 4-Path Commercialization Engine
+### 8. Phase 11 (`v0.8.0`): Realistic Synthesis Practicality (`SPS`), Live MP TCO Reactivity, Non-Radiative SRH Physics & 4-Path Commercialization Engine
 To separate detailed-balance optical ceilings (`ERE = 1.0`) from near-term polycrystalline thin-film manufacturing reality (`ERE = 1e-5` to `5e-3`), Phase 11 (`realistic_commercialization.py` vs. `independent_verifier.py`, full debate in [`docs/REALISTIC_COMMERCIALIZATION_AND_DEBATE_REPORT.md`](docs/REALISTIC_COMMERCIALIZATION_AND_DEBATE_REPORT.md)) evaluates live Materials Project convex-hull stability windows, `pymatgen` `InterfacialReactivity` against `SnO2`/`In2O3`/`TiO2`, non-radiative SRH + antisite/contact voltage deficits, commercial c-Si Drude FCA, and industrial PVD/RTP fab yield (`90.0%` 1-junction vs. `77.4%` 2-junction):
 
 - **Top Synthesis Practicality (`SPS` out of `100`):** **`mp-1227486 BiSbS3` (`94.76/100`)** and **`mp-861911 Sb2OS2` (`94.44/100`)** lead all 8 finalists (`0.00 meV/atom` reaction energy on `TiO2` and `SnO2` vs. exothermic `-13.16` and `-15.35 meV/atom` sulfidation on bare `In2O3`/ITO; zero In/Ga/Ag criticality), followed by `mp-22982 BiCuS2` (`89.54/100`), `AgBi3S5` (`88.96`), `BiInS3` (`83.42`), `Bi3InSe6` (`79.71`), `CuInSnSe4` (`61.66`), and `CuGaSnSe4` (`49.99`).

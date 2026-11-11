@@ -17,6 +17,4 @@ from .independent_verifier import (
     verify_candidate_dossier,
 )
 
-__version__ = "0.1.0"
-
-
+__version__ = "0.8.0"

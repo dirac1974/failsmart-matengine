@@ -88,8 +88,11 @@ def generate_qe_hse06_soc_input(cand_dict: Dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
+_DEFAULT_OUTPUT_DIR = Path(__file__).resolve().parents[1] / "outputs"
+
+
 def run_pilot_campaign(
-    output_dir: str = "/home/antigravity/failsmart-matengine/outputs",
+    output_dir: str | Path = _DEFAULT_OUTPUT_DIR,
     include_ood: bool = True,
 ) -> Dict[str, Any]:
     """Execute Campaign v2.0 with Blinded Specification Redundancy, Stage 2b Gate & SMACT OOD Discovery."""

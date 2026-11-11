@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "failsmart-matengine"
-version = "4.0.0"
-description = "13-Agent Fail-Smart Photovoltaic Materials Discovery Engine with Live MP API, 3D Dynamical Matrix/NEB, Coherent TMM & Blinded Redundancy"
+dynamic = ["version"]
+description = "Heuristic pre-screening scaffold and failure ledger for 4-terminal tandem photovoltaics"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -37,3 +37,7 @@ filterwarnings = [
 
 [tool.setuptools.packages.find]
 include = ["failsmart_matengine*"]
+
+[tool.setuptools.dynamic]
+version = {attr = "failsmart_matengine.__version__"}
+

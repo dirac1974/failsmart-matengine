@@ -12,10 +12,13 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 
 
+_DEFAULT_DB_PATH = Path(__file__).resolve().parents[1] / "data" / "failure_memory.db"
+
+
 class ContrastiveFailureLedger:
     """Persistent SQLite + vector store for positive and negative materials results."""
 
-    def __init__(self, db_path: str = "/home/antigravity/failsmart-matengine/data/failure_memory.db"):
+    def __init__(self, db_path: str | Path = _DEFAULT_DB_PATH):
         self.db_path = Path(db_path)
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._init_schema()

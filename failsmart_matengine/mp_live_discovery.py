@@ -1081,7 +1081,7 @@ def compute_cross_layer_4t_stack_wavelength(
 
 
 def run_live_mp_discovery_campaign(
-    output_dir: str = "/home/antigravity/failsmart-matengine/outputs",
+    output_dir: str | Path = _REPO_ROOT / "outputs",
     max_candidates: int = 100,
     refresh_mp_cache: bool = False,
 ) -> Dict[str, Any]:

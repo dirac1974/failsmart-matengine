@@ -12,10 +12,13 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 
+_DEFAULT_LOGS_DIR = Path(__file__).resolve().parents[1] / "logs"
+
+
 class InterTeamBus:
     """Structured message bus and SHA-256 audit logger for the 13-agent team."""
 
-    def __init__(self, logs_dir: str = "/home/antigravity/failsmart-matengine/logs"):
+    def __init__(self, logs_dir: str | Path = _DEFAULT_LOGS_DIR):
         self.logs_dir = Path(logs_dir)
         self.logs_dir.mkdir(parents=True, exist_ok=True)
         self.comm_log_path = self.logs_dir / "inter_team_communication.jsonl"
