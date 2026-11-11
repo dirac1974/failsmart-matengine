@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FailSmart-MatEngine v8.0 — Realistic Synthesis, SRH Physics &amp; 4-Path Commercialization Dashboard</title>
+<style>
+  :root {
+    --bg: #0b0f19;
+    --panel: #111827;
+    --panel-alt: #1e293b;
+    --border: #334155;
+    --text: #f8fafc;
+    --muted: #94a3b8;
+    --accent: #38bdf8;
+    --emerald: #10b981;
+    --amber: #f59e0b;
+    --rose: #f43f5e;
+    --violet: #a78bfa;
+    --mono: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    padding: 16px;
+    line-height: 1.45;
+  }
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+  .title-group h1 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .badge {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--emerald);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+  }
+  .badge-sky {
+    background: rgba(56, 189, 248, 0.15);
+    color: var(--accent);
+    border: 1px solid rgba(56, 189, 248, 0.4);
+  }
+  .badge-amber {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--amber);
+    border: 1px solid rgba(245, 158, 11, 0.4);
+  }
+  .subtitle {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .kpi-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .kpi-label {
+    font-size: 0.67rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+  }
+  .kpi-value {
+    font-family: var(--mono);
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-top: 4px;
+    color: var(--accent);
+  }
+  .kpi-sub {
+    font-size: 0.68rem;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .tab-btn {
+    background: var(--panel);
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.74rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .tab-btn.active {
+    background: rgba(56, 189, 248, 0.15);
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  .table-wrap {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.73rem;
+  }
+  th, td {
+    padding: 8px 10px;
+    text-align: left;
+    border-bottom: 1px solid rgba(51, 65, 85, 0.6);
+    white-space: nowrap;
+  }
+  th {
+    background: var(--panel-alt);
+    color: var(--muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.65rem;
+    letter-spacing: 0.04em;
+  }
+  tr:hover td {
+    background: rgba(255, 255, 255, 0.02);
+  }
+  .mono { font-family: var(--mono); }
+  .pill-pass {
+    color: var(--emerald);
+    background: rgba(16, 185, 129, 0.12);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 0.66rem;
+  }
+  .pill-warn {
+    color: var(--amber);
+    background: rgba(245, 158, 11, 0.14);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 0.66rem;
+  }
+  .pill-risk {
+    color: var(--rose);
+    background: rgba(244, 63, 94, 0.14);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 0.66rem;
+  }
+  .debate-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 12px;
+    padding: 14px;
+  }
+  .debate-card {
+    background: var(--panel-alt);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    white-space: normal;
+  }
+  .debate-card h3 {
+    font-size: 0.82rem;
+    margin-bottom: 6px;
+    color: var(--accent);
+  }
+  .debate-card p {
+    font-size: 0.74rem;
+    color: var(--text);
+    margin-bottom: 6px;
+    line-height: 1.45;
+  }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div class="title-group">
+      <h1>
+        FailSmart-MatEngine v8.0
+        <span class="badge">22/22 TESTS PASS</span>
+        <span class="badge badge-sky">PHASE 11 REALISTIC SRH, LIVE MP HULL/TCO REACTIVITY &amp; 4-PATH COMMERCIALIZATION</span>
+        <span class="badge badge-amber">KATEX-SAFE AUDITED</span>
+      </h1>
+      <div class="subtitle">
+        Non-Radiative SRH (ERE 10<sup>-5</sup>&ndash;5&times;10<sup>-3</sup>) vs. Radiative Ceilings &bull; Live MP InterfacialReactivity (SnO<sub>2</sub>/In<sub>2</sub>O<sub>3</sub>/TiO<sub>2</sub>) &bull; Path 4 BIPV Glazing &rarr; Path 2 Active Solar Glass Roadmap
+      </div>
+    </div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">Path 2 Realistic Bifacial PCE (20% Alb)</div>
+      <div class="kpi-value" style="color: var(--emerald);">30.61% / 30.58%</div>
+      <div class="kpi-sub">BiSbS<sub>3</sub> / Sb<sub>2</sub>OS<sub>2</sub> Active Glass vs 26.65% Path 0 c-Si</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Path 2 Utility / Rooftop LCOE</div>
+      <div class="kpi-value">4.234 / 6.470 &cent;/kWh</div>
+      <div class="kpi-sub">Beats Path 0 c-Si (4.246 / 6.802 &cent;) &amp; Path 1 3L (5.008 &cent;)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Path 4 BIPV Solar Glazing Margin</div>
+      <div class="kpi-value" style="color: var(--amber);">58.7% Gross Margin</div>
+      <div class="kpi-sub">11.40&ndash;11.62% @ 35% VLT ($76.38/m&sup2; DGU vs $185 ASP)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Top Synthesis Practicality (SPS)</div>
+      <div class="kpi-value" style="color: var(--violet);">94.76 / 94.44</div>
+      <div class="kpi-sub">BiSbS<sub>3</sub> &amp; Sb<sub>2</sub>OS<sub>2</sub> &bull; 0.0 meV/at TiO<sub>2</sub>/SnO<sub>2</sub> Barrier</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('PHASE11B_PATHS', this)">Phase 11B/11C: Realistic SRH vs. Radiative &amp; 4-Path LCOE</button>
+    <button class="tab-btn" onclick="switchTab('PHASE11A_SPS', this)">Phase 11A: Synthesis Practicality (SPS) &amp; TCO Reactivity (8)</button>
+    <button class="tab-btn" onclick="switchTab('DEBATE_GATES', this)">Team Debate Verdict &amp; 4 Kill-Gates</button>
+    <button class="tab-btn" onclick="switchTab('PHASE10_BIFACIAL', this)">Phase 10: Radiative Bifacial Ceiling &amp; String Matching</button>
+    <button class="tab-btn" onclick="switchTab('PHASE9C_LCOE', this)">Phase 9C: Oblique (0&ndash;60&deg;) &amp; Thermal Derating</button>
+    <button class="tab-btn" onclick="switchTab('PHASE9A_LAB', this)">Phase 9A: 10 mmol Lab Recipes &amp; doped Supercells</button>
+  </div>
+
+  <div class="table-wrap" id="table-container"></div>
+
+<script>
+const PHASE11B_PATHS = [
+  { stack: "BiSbS3 + c-Si + BiCuS2", ids: "mp-1227486__mp-22982", rad: "41.96% / 46.01%", mono_tiers: "24.75% | 26.87% | 28.85% (3L: 27.29% | 29.92%)", p2: "30.61% ($65.88/m²)", p2_lcoe: "4.234 / 6.470 ¢", p1: "28.78% ($96.77/m², 5.008 ¢)", p4: "11.40% ($76.38, GM 58.7%)", sha: "68f5acb2" },
+  { stack: "Sb2OS2 + c-Si + Bi3InSe6", ids: "mp-861911__mp-1223998", rad: "42.45% / 46.17%", mono_tiers: "24.67% | 26.85% | 28.90% (3L: 27.14% | 29.94%)", p2: "30.58% ($65.88/m²)", p2_lcoe: "4.237 / 6.474 ¢", p1: "28.30% ($102.99/m², 5.184 ¢)", p4: "11.56% ($76.38, GM 58.7%)", sha: "ed047643" },
+  { stack: "BiSbS3 + c-Si + CuGaSnSe4", ids: "mp-1227486__mp-1224922", rad: "42.01% / 46.08%", mono_tiers: "24.75% | 26.87% | 28.85% (3L: 27.18% | 29.98%)", p2: "30.61% ($65.88/m²)", p2_lcoe: "4.234 / 6.470 ¢", p1: "28.54% ($99.68/m², 5.093 ¢)", p4: "11.40% ($76.38, GM 58.7%)", sha: "44ec4bd4" },
+  { stack: "Sb2OS2 + c-Si + BiCuS2", ids: "mp-861911__mp-22982", rad: "41.97% / 46.02%", mono_tiers: "24.55% | 26.75% | 28.82% (3L: 27.17% | 29.89%)", p2: "30.49% ($65.88/m²)", p2_lcoe: "4.247 / 6.491 ¢", p1: "28.66% ($96.76/m², 5.025 ¢)", p4: "11.62% ($76.38, GM 58.7%)", sha: "03f8aa62" },
+  { stack: "BiSbS3 + c-Si + AgBi3S5", ids: "mp-1227486__mp-23474", rad: "41.96% / 46.01%", mono_tiers: "24.75% | 26.87% | 28.85% (3L: 27.29% | 29.92%)", p2: "30.61% ($65.88/m²)", p2_lcoe: "4.234 / 6.470 ¢", p1: "28.78% ($103.30/m², 5.121 ¢)", p4: "11.40% ($76.38, GM 58.7%)", sha: "4c32e891" },
+  { stack: "BiSbS3 + c-Si + Bi3InSe6", ids: "mp-1227486__mp-1223998", rad: "42.37% / 46.09%", mono_tiers: "24.75% | 26.87% | 28.85% (3L: 27.16% | 29.90%)", p2: "30.61% ($65.88/m²)", p2_lcoe: "4.234 / 6.470 ¢", p1: "28.32% ($103.00/m², 5.180 ¢)", p4: "11.40% ($76.38, GM 58.7%)", sha: "38f90ae5" },
+  { stack: "BiInS3 + c-Si + Bi3InSe6", ids: "mp-1078776__mp-1223998", rad: "42.30% / 46.02%", mono_tiers: "24.21% | 26.40% | 28.42% (3L: 26.68% | 29.47%)", p2: "30.14% ($71.58/m²)", p2_lcoe: "4.376 / 6.646 ¢", p1: "27.84% ($109.62/m², 5.368 ¢)", p4: "9.86% ($82.08, GM 55.6%)", sha: "ab7c35d7" }
+];
+
+const PHASE11A_SPS = [
+  { id: "mp-1227486", f: "BiSbS3", role: "Top Active Glass", sps: "94.76", hull: "2.30 meV (-13.2 @375°C)", win: "0.577 / 0.865 eV", rxn: "0.0 / -13.16 / 0.0", etl: "TiO2 (-0.16 eV) / NiOx", pen: "0.000 / 0.015 V", crit: "None (0.00)", status: "TIER-1 LEAD" },
+  { id: "mp-861911", f: "Sb2OS2", role: "Top Active Glass", sps: "94.44", hull: "1.10 meV (Sb2O3+Sb2S3)", win: "0.492 / 0.738 eV", rxn: "0.0 / -15.35 / 0.0", etl: "SnO2 (-0.04 eV) / NiOx", pen: "0.000 / 0.015 V", crit: "None (0.00)", status: "TIER-1 CO-LEAD" },
+  { id: "mp-22982", f: "BiCuS2", role: "Bottom IR (Gen-3)", sps: "89.54", hull: "0.00 meV (On-Hull)", win: "0.213 / 0.106 eV (Cu!)", rxn: "0.0 / -1.93 / 0.0", etl: "SnO2 (+0.15 eV) / NiOx", pen: "0.000 / 0.045 V", crit: "None (0.00)", status: "BEST BOT (Cu-POOR)" },
+  { id: "mp-23474", f: "AgBi3S5", role: "Bottom IR (Gen-3)", sps: "88.96", hull: "0.00 meV (On-Hull)", win: "0.567 / 0.255 eV", rxn: "0.0 / 0.00 / 0.0", etl: "SnO2 (+0.13 eV) / NiOx", pen: "0.000 / 0.045 V", crit: "Ag (0.061)", status: "AG SURCHARGE" },
+  { id: "mp-1078776", f: "BiInS3", role: "Top Active Glass", sps: "83.42", hull: "3.34 meV", win: "0.732 / 1.098 eV", rxn: "0.0 / 0.00 / 0.0", etl: "TiO2 (-0.37 eV cliff)", pen: "0.116 / 0.015 V", crit: "In (0.130)", status: "IN CRITICALITY" },
+  { id: "mp-1223998", f: "Bi3InSe6", role: "Bottom IR", sps: "79.71", hull: "17.99 meV (Metastable)", win: "0.773 / 1.159 eV", rxn: "0.0 / 0.00 / 0.0", etl: "SnO2 (-0.06 eV) / NiOx", pen: "0.000 / 0.015 V", crit: "In (0.065)", status: "HULL METASTABLE" },
+  { id: "mp-1224129", f: "CuInSnSe4", role: "Bottom IR", sps: "61.66", hull: "5.17 meV", win: "0.275 / 0.203 eV", rxn: "0.0 / -36.49 / 0.0", etl: "SnO2 (+0.20 eV) / NiOx", pen: "0.001 / 0.110 V", crit: "In (0.093)", status: "ANTISITE + ITO RXN" },
+  { id: "mp-1224922", f: "CuGaSnSe4", role: "Bottom IR", sps: "49.99", hull: "3.61 meV", win: "0.285 / 0.223 eV", rxn: "-16.26 / -68.25 / 0.0", etl: "SnO2 (+0.19 eV, TiO2 req)", pen: "0.000 / 0.110 V", crit: "Ga (0.064)", status: "SEVERE TCO RXN" }
+];
+
+const PHASE10_BIFACIAL = [
+  { stack: "Sb2OS2 + c-Si + Bi3InSe6", ids: "mp-861911__mp-1223998", opt_d: "94 / 48 / 260 / 391 nm", mono: "42.45%", bif20: "46.17% (42.89 W/ft², +8.76%)", bif30: "48.06% (44.65 W/ft²)", lcoe20: "3.002 ¢/kWh", strings: "37 : 72 : 120 @ 50.08 V (1.18% / 0.04%)", sha: "af1cc47f" },
+  { stack: "Sb2OS2 + c-Si + CuGaSnSe4", ids: "mp-861911__mp-1224922", opt_d: "94 / 48 / 299 / 391 nm", mono: "42.02%", bif20: "46.09% (42.82 W/ft², +9.69%)", bif30: "48.17% (44.75 W/ft²)", lcoe20: "3.001 ¢/kWh", strings: "37 : 72 : 100 @ 50.05 V (1.15% / 0.02%)", sha: "1c6e461e" },
+  { stack: "BiSbS3 + c-Si + Bi3InSe6", ids: "mp-1227486__mp-1223998", opt_d: "94 / 48 / 299 / 391 nm", mono: "42.37%", bif20: "46.09% (42.82 W/ft², +8.78%)", bif30: "47.98% (44.58 W/ft²)", lcoe20: "3.005 ¢/kWh", strings: "36 : 72 : 120 @ 50.12 V (0.19% / 0.08%)", sha: "2f2f9eab" },
+  { stack: "BiSbS3 + c-Si + CuGaSnSe4", ids: "mp-1227486__mp-1224922", opt_d: "94 / 48 / 299 / 391 nm", mono: "42.01%", bif20: "46.08% (42.81 W/ft², +9.69%)", bif30: "48.16% (44.74 W/ft²)", lcoe20: "3.001 ¢/kWh", strings: "36 : 72 : 100 @ 50.12 V (0.19% / 0.16%)", sha: "79a7eee8" },
+  { stack: "Sb2OS2 + c-Si + BiCuS2", ids: "mp-861911__mp-22982", opt_d: "94 / 48 / 299 / 391 nm", mono: "41.97%", bif20: "46.02% (42.75 W/ft², +9.64%)", bif30: "48.08% (44.67 W/ft²)", lcoe20: "3.002 ¢/kWh", strings: "37 : 72 : 100 @ 50.05 V (1.15% / 0.44%)", sha: "938f5915" },
+  { stack: "BiSbS3 + c-Si + BiCuS2", ids: "mp-1227486__mp-22982", opt_d: "94 / 48 / 299 / 391 nm", mono: "41.96%", bif20: "46.01% (42.74 W/ft², +9.64%)", bif30: "48.07% (44.66 W/ft²)", lcoe20: "3.002 ¢/kWh", strings: "36 : 72 : 101 @ 50.12 V (0.19% / 0.41%)", sha: "879e2d0e" }
+];
+
+const PHASE9C_LCOE = [
+  { stack: "Sb2OS2 + c-Si + Bi3InSe6", ids: "mp-861911__mp-1223998", r_ang: "3.33% / 4.38% / 7.50% (Hemi 4.06%)", pce_ang: "42.44% / 40.48% (0.954)", pce_temp: "39.38% / 36.32% (-0.361%/K)", yr25: "91.93% (0.35%/yr)", lcoe: "3.290 / 3.172 ¢ (-35.74%)", sha: "29b0ea06" },
+  { stack: "BiSbS3 + c-Si + Bi3InSe6", ids: "mp-1227486__mp-1223998", r_ang: "3.22% / 4.40% / 7.56% (Hemi 4.02%)", pce_ang: "42.36% / 40.41% (0.954)", pce_temp: "39.31% / 36.26% (-0.360%/K)", yr25: "91.93% (0.35%/yr)", lcoe: "3.294 / 3.175 ¢ (-35.67%)", sha: "fc53c4ab" },
+  { stack: "Sb2OS2 + c-Si + BiCuS2", ids: "mp-861911__mp-22982", r_ang: "3.33% / 4.38% / 7.50% (Hemi 4.06%)", pce_ang: "41.89% / 39.91% (0.953)", pce_temp: "38.93% / 35.96% (-0.354%/K)", yr25: "91.93% (0.35%/yr)", lcoe: "3.290 / 3.194 ¢ (-35.30%)", sha: "08a125a0" },
+  { stack: "BiSbS3 + c-Si + BiCuS2", ids: "mp-1227486__mp-22982", r_ang: "3.22% / 4.40% / 7.56% (Hemi 4.02%)", pce_ang: "41.81% / 39.84% (0.953)", pce_temp: "38.85% / 35.90% (-0.353%/K)", yr25: "91.93% (0.35%/yr)", lcoe: "3.294 / 3.197 ¢ (-35.23%)", sha: "b180783f" }
+];
+
+const PHASE9A_LAB = [
+  { id: "mp-861911", formula: "Sb2OS2", mfu: "323.65 g/mol", mass10: "3.2365 g", temp: "375 °C (11.0 h)", sc: "2×2×1 (40 sites, L=10.24 Å)", vac: "V_S", fnv: "0.150 / 0.599 eV", sha: "f022f791" },
+  { id: "mp-1227486", formula: "BiSbS3", mfu: "426.94 g/mol", mass10: "4.2694 g", temp: "375 °C (11.0 h)", sc: "3×1×1 (60 sites, L=11.21 Å)", vac: "V_S", fnv: "0.128 / 0.510 eV", sha: "3f8bb62f" },
+  { id: "mp-1078776", formula: "BiInS3", mfu: "419.99 g/mol", mass10: "4.1999 g", temp: "375 °C (11.0 h)", sc: "3×2×2 (120 sites, L=11.71 Å)", vac: "V_S", fnv: "0.113 / 0.453 eV", sha: "7c7d8bb5" },
+  { id: "mp-1223998", formula: "Bi3InSe6", mfu: "1215.52 g/mol", mass10: "12.1552 g", temp: "375 °C (11.0 h)", sc: "1×1×1 (10 sites, L=19.68 Å)", vac: "V_Se", fnv: "0.190 / 0.761 eV", sha: "a3e1be33" },
+  { id: "mp-1224922", formula: "CuGaSnSe4", mfu: "567.82 g/mol", mass10: "5.6782 g", temp: "375 °C (11.0 h)", sc: "2×2×2 (56 sites, L=13.87 Å)", vac: "V_Cu", fnv: "0.116 / 0.462 eV", sha: "2027dcee" },
+  { id: "mp-22982", formula: "BiCuS2", mfu: "336.66 g/mol", mass10: "3.3666 g", temp: "375 °C (11.0 h)", sc: "3×2×1 (96 sites, L=11.75 Å)", vac: "V_Cu", fnv: "0.099 / 0.396 eV", sha: "4e0453cf" },
+  { id: "mp-23474", formula: "AgBi3S5", mfu: "895.13 g/mol", mass10: "8.9513 g", temp: "375 °C (11.0 h)", sc: "3×2×1 (108 sites, L=12.10 Å)", vac: "V_S", fnv: "0.090 / 0.358 eV", sha: "feae1956" },
+  { id: "mp-1224129", formula: "CuInSnSe4", mfu: "612.91 g/mol", mass10: "6.1291 g", temp: "375 °C (11.0 h)", sc: "2×2×2 (56 sites, L=14.19 Å)", vac: "V_Cu", fnv: "0.111 / 0.442 eV", sha: "17d411cb" }
+];
+
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const container = document.getElementById('table-container');
+
+  if (tab === 'PHASE11B_PATHS') {
+    let html = `<table><thead><tr>
+      <th>Candidate Stack</th><th>Radiative Ceiling (Mono / Bif20)</th><th>Realistic 2L Mono (Cons | Base | Mat)</th>
+      <th>Path 2: 2L Active Glass Bif20 (Cost)</th><th>Path 2 LCOE (Util / Roof vs 4.246/6.802¢ Si)</th>
+      <th>Path 1: 3L Bif20 Trap (Cost &amp; LCOE)</th><th>Path 4: BIPV Window (35% VLT)</th><th>Audit</th>
+    </tr></thead><tbody>`;
+    PHASE11B_PATHS.forEach(r => {
+      html += `<tr>
+        <td><strong>${r.stack}</strong><br/><span class="mono" style="color:var(--muted);font-size:0.65rem">${r.ids}</span></td>
+        <td class="mono" style="color:var(--muted)">${r.rad}</td>
+        <td class="mono">${r.mono_tiers}</td>
+        <td class="mono" style="color:var(--emerald);font-weight:700">${r.p2}</td>
+        <td class="mono" style="color:var(--accent);font-weight:700">${r.p2_lcoe}</td>
+        <td class="mono" style="color:var(--rose)">${r.p1}</td>
+        <td class="mono" style="color:var(--amber);font-weight:700">${r.p4}</td>
+        <td><span class="pill-pass">PASS (${r.sha})</span></td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+  } else if (tab === 'PHASE11A_SPS') {
+    let html = `<table><thead><tr>
+      <th>MP ID &amp; Formula</th><th>Role</th><th>SPS (/100)</th><th>MP Hull &amp; 375&deg;C &Delta;G</th>
+      <th>&Delta;&mu; Window (Anion / Cation)</th><th>TCO Rxn SnO<sub>2</sub> / In<sub>2</sub>O<sub>3</sub> / TiO<sub>2</sub> (meV/at)</th>
+      <th>ETL / HTL &amp; CBO</th><th>&Delta;V (Contact / Antisite)</th><th>Criticality</th><th>Verdict</th>
+    </tr></thead><tbody>`;
+    PHASE11A_SPS.forEach(r => {
+      const pillClass = parseFloat(r.sps) >= 89.0 ? 'pill-pass' : (parseFloat(r.sps) >= 75.0 ? 'pill-warn' : 'pill-risk');
+      html += `<tr>
+        <td><strong>${r.f}</strong> <span class="mono" style="color:var(--muted)">(${r.id})</span></td>
+        <td>${r.role}</td>
+        <td class="mono" style="color:var(--emerald);font-weight:700">${r.sps}</td>
+        <td class="mono">${r.hull}</td>
+        <td class="mono">${r.win}</td>
+        <td class="mono" style="color:var(--accent)">${r.rxn}</td>
+        <td class="mono">${r.etl}</td>
+        <td class="mono">${r.pen}</td>
+        <td class="mono">${r.crit}</td>
+        <td><span class="${pillClass}">${r.status}</span></td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+  } else if (tab === 'DEBATE_GATES') {
+    container.innerHTML = `<div class="debate-grid">
+      <div class="debate-card">
+        <h3>1. Why Status-Quo Path 1 (3-Layer Sandwich) Loses Near-Term</h3>
+        <p>At realistic pilot quality (<strong>ERE = 10<sup>-4</sup></strong>) and standard c-Si Drude free-carrier absorption, the 0.75&ndash;0.85 eV Bottom IR cell drops from ~0.52 V radiative V<sub>oc</sub> to <strong>0.23&ndash;0.30 V</strong> (+1.08&ndash;1.22% mono gain). Worse, on bifacial modules (20% albedo), it intercepts 300&ndash;1100 nm rear photons at ~0.28 V instead of letting c-Si harvest them at ~0.72 V, cutting output from <strong>30.61% (Path 2) to 28.78% (Path 1)</strong> while 77.4% two-junction yield inflates cost to $96.8&ndash;$103.3/m&sup2; (5.01&ndash;5.18 &cent;/kWh).</p>
+      </div>
+      <div class="debate-card">
+        <h3>2. Consensus Winner: Path 4 (BIPV Beachhead) &rarr; Path 2 (Active Solar Glass)</h3>
+        <p><strong>Horizon 1 (Path 4 BIPV Glazing):</strong> Coat 299 nm <code>BiSbS3</code> or <code>Sb2OS2</code> onto architectural float glass (35% daylighting, 11.40&ndash;11.62% PCE, $76.38/m&sup2; DGU cost vs $185/m&sup2; solar-control glass ASP = <strong>58.7% gross margin</strong> at 10&ndash;50 MW pilot scale).</p>
+        <p><strong>Horizon 2 (Path 2 Drop-In 4T Cover Glass):</strong> Laminate that exact same coated front glass (&le;150 &deg;C POE) onto unobstructed bifacial TOPCon/SHJ c-Si: <strong>30.61% realistic bifacial PCE</strong> ($65.88/m&sup2;, 90% yield), beating Path 0 c-Si on both utility (<strong>4.234 vs 4.246 &cent;/kWh</strong>) and rooftop LCOE (<strong>6.470 vs 6.802 &cent;/kWh</strong>).</p>
+      </div>
+      <div class="debate-card">
+        <h3>3. Dual-Role 48 nm TiO<sub>2</sub> Barrier Discovery</h3>
+        <p>Live MP DFT <code>InterfacialReactivity</code> reveals bare ITO (<code>In2O3</code>) reacts exothermically at 375 &deg;C with <code>Sb2OS2</code> (<strong>-15.35 meV/atom</strong> &rarr; <code>Sb2O3 + In2S3</code>) and <code>BiSbS3</code> (<strong>-13.16 meV/atom</strong>). Conversely, <strong><code>TiO2</code> and <code>SnO2</code> have 0.00 meV/atom reaction energy</strong>! Thus, the 48 nm ALD/sputtered <code>TiO2</code> layer is simultaneously our broadband anti-reflection impedance matcher (R<sub>front</sub> = 3.22%) and mandatory thermodynamic diffusion barrier.</p>
+      </div>
+      <div class="debate-card">
+        <h3>4. Four Mandatory Phase-1 Hardware Kill-Gates</h3>
+        <p><strong>Gate K1 (TCO Barrier):</strong> Pinhole-free ALD <code>TiO2</code>/<code>SnO2</code> over ITO at 375 &deg;C with zero <code>In2S3</code> by XPS/XRD &amp; R<sub>c</sub> &lt; 0.5 &Omega;&middot;cm&sup2;.</p>
+        <p><strong>Gate K2 (Coupon ERE &amp; Sub-Gap T):</strong> Single-junction coupon ERE &ge; 10<sup>-4</sup> (V<sub>oc</sub> &ge; 1.20 V) and &ge; 83% 700&ndash;1100 nm transmittance.</p>
+        <p><strong>Gate K3 (Picosecond Laser Scribing):</strong> P1/P2/P3 mini-module R<sub>sh</sub> &ge; 1000 &Omega;&middot;cm&sup2; with zero metallic Bi<sup>0</sup>/Sb<sup>0</sup> melt shunts.</p>
+        <p><strong>Gate K4 (IEC 61215 Damp-Heat &amp; Hail):</strong> &lt; 5% relative PCE loss after 1000 h 85 &deg;C / 85% RH damp-heat and 25 mm hail impact.</p>
+      </div>
+    </div>`;
+  } else if (tab === 'PHASE10_BIFACIAL') {
+    let html = `<table><thead><tr>
+      <th>4T Stack</th><th>Opt d (MgF<sub>2</sub>/TiO<sub>2</sub>/Top/Bot)</th><th>Opt Mono PCE</th>
+      <th>Radiative Bifacial 20% Albedo</th><th>Radiative Bifacial 30% Albedo</th><th>Radiative Bif LCOE</th><th>SPICE String Ratio (Top:Si:Bot)</th><th>Audit</th>
+    </tr></thead><tbody>`;
+    PHASE10_BIFACIAL.forEach(r => {
+      html += `<tr>
+        <td><strong>${r.stack}</strong><br/><span class="mono" style="color:var(--muted);font-size:0.65rem">${r.ids}</span></td>
+        <td class="mono">${r.opt_d}</td>
+        <td class="mono">${r.mono}</td>
+        <td class="mono" style="color:var(--emerald);font-weight:700">${r.bif20}</td>
+        <td class="mono" style="color:var(--accent);font-weight:700">${r.bif30}</td>
+        <td class="mono" style="color:var(--amber);font-weight:700">${r.lcoe20}</td>
+        <td class="mono">${r.strings}</td>
+        <td><span class="pill-pass">PASS (${r.sha})</span></td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+  } else if (tab === 'PHASE9C_LCOE') {
+    let html = `<table><thead><tr>
+      <th>4T Stack</th><th>R<sub>front</sub> (0&deg; / 45&deg; / 60&deg;)</th><th>PCE (0&deg; / 60&deg; &amp; IAM<sub>60</sub>)</th>
+      <th>PCE (45&deg;C NOCT / 65&deg;C)</th><th>Yr-25 Retained</th><th>Radiative LCOE (2L / 3L)</th><th>Audit</th>
+    </tr></thead><tbody>`;
+    PHASE9C_LCOE.forEach(r => {
+      html += `<tr>
+        <td><strong>${r.stack}</strong><br/><span class="mono" style="color:var(--muted);font-size:0.65rem">${r.ids}</span></td>
+        <td class="mono">${r.r_ang}</td>
+        <td class="mono" style="color:var(--accent);font-weight:700">${r.pce_ang}</td>
+        <td class="mono">${r.pce_temp}</td>
+        <td class="mono" style="color:var(--emerald)">${r.yr25}</td>
+        <td class="mono" style="color:var(--amber);font-weight:700">${r.lcoe}</td>
+        <td><span class="pill-pass">PASS (${r.sha})</span></td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+  } else {
+    let html = `<table><thead><tr>
+      <th>MP ID</th><th>Formula</th><th>M<sub>FU</sub></th><th>10 mmol Product Mass</th>
+      <th>Furnace Ceiling &amp; Dwell</th><th>Stage 5 doped Supercell</th><th>Vacancy</th><th>FNV (q=&plusmn;1 / q=&plusmn;2)</th><th>Audit</th>
+    </tr></thead><tbody>`;
+    PHASE9A_LAB.forEach(r => {
+      html += `<tr>
+        <td class="mono">${r.id}</td>
+        <td><strong>${r.formula}</strong></td>
+        <td class="mono">${r.mfu}</td>
+        <td class="mono" style="color:var(--emerald);font-weight:700">${r.mass10}</td>
+        <td class="mono">${r.temp}</td>
+        <td class="mono" style="color:var(--accent)">${r.sc}</td>
+        <td class="mono">${r.vac}</td>
+        <td class="mono">${r.fnv}</td>
+        <td><span class="pill-pass">PASS (${r.sha})</span></td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+  }
+}
+
+switchTab('PHASE11B_PATHS', document.querySelector('.tab-btn'));
+</script>
+</body>
+</html>
