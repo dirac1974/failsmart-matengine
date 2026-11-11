@@ -5,6 +5,7 @@ Bridges the Pydantic v2 schemas (`schemas.py`) with the verified computational m
 candidates and arbitrary out-of-distribution (OOD) generative compositions with zero KeyErrors.
 """
 
+import math
 from typing import Any, Dict, List, Optional
 from .kinetics_and_optics import (
     compute_4t_tandem_optics_wavelength_grid,
@@ -291,9 +292,21 @@ def stage4_5_quantum_and_defects(cand: CandidateMaterial) -> ElectronicDefectRep
     eg = m["gap_est_indirect_ev"]
 
     if cand.target_layer == "TOP_ACTIVE_GLASS_185EV":
+        w_lo, w_hi = 1.75, 1.95
         gap_ok = 1.70 <= eg <= 2.00
     else:
+        w_lo, w_hi = 0.70, 0.85
         gap_ok = 0.68 <= eg <= 0.88
+
+    sigma_gap = 0.37
+    win_prob = round(
+        0.5
+        * (
+            math.erf((w_hi - eg) / (sigma_gap * math.sqrt(2.0)))
+            - math.erf((w_lo - eg) / (sigma_gap * math.sqrt(2.0)))
+        ),
+        4,
+    )
 
     mass_ok = max(m["electron_eff_mass_m0"], m["hole_eff_mass_m0"]) <= 0.80 and m["frohlich_alpha"] <= 5.0
     srh_ok = m["deepest_defect_level_from_band_edge_ev"] <= 0.15
@@ -322,6 +335,8 @@ def stage4_5_quantum_and_defects(cand: CandidateMaterial) -> ElectronicDefectRep
         gap_est_nosoc_ev=m["gap_est_nosoc_ev"],
         gap_est_direct_ev=m["gap_est_direct_ev"],
         gap_est_indirect_ev=m["gap_est_indirect_ev"],
+        gap_error_bar_ev=sigma_gap,
+        window_probability=win_prob,
         soc_splitting_ev=m["soc_splitting_ev"],
         electron_eff_mass_m0=m["electron_eff_mass_m0"],
         hole_eff_mass_m0=m["hole_eff_mass_m0"],
@@ -342,6 +357,8 @@ def stage4_5_quantum_and_defects(cand: CandidateMaterial) -> ElectronicDefectRep
             "gap_est_nosoc_ev": base_tag,
             "gap_est_direct_ev": base_tag,
             "gap_est_indirect_ev": base_tag,
+            "gap_error_bar_ev": ProvenanceTag.COMPUTED_HERE,
+            "window_probability": ProvenanceTag.COMPUTED_HERE,
             "soc_splitting_ev": ProvenanceTag.COMPUTED_HERE,
             "electron_eff_mass_m0": base_tag,
             "hole_eff_mass_m0": base_tag,

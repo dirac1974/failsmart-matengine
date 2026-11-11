@@ -174,6 +174,8 @@ class ElectronicDefectReport(_ProvenanceTaggedModel):
         "gap_est_nosoc_ev": ProvenanceTag.HEURISTIC,
         "gap_est_direct_ev": ProvenanceTag.HEURISTIC,
         "gap_est_indirect_ev": ProvenanceTag.HEURISTIC,
+        "gap_error_bar_ev": ProvenanceTag.COMPUTED_HERE,
+        "window_probability": ProvenanceTag.COMPUTED_HERE,
         "soc_splitting_ev": ProvenanceTag.HEURISTIC,
         "electron_eff_mass_m0": ProvenanceTag.HEURISTIC,
         "hole_eff_mass_m0": ProvenanceTag.HEURISTIC,
@@ -191,6 +193,8 @@ class ElectronicDefectReport(_ProvenanceTaggedModel):
     gap_est_nosoc_ev: float
     gap_est_direct_ev: float
     gap_est_indirect_ev: float
+    gap_error_bar_ev: Optional[float] = None
+    window_probability: Optional[float] = None
     soc_splitting_ev: float
     electron_eff_mass_m0: float
     hole_eff_mass_m0: float

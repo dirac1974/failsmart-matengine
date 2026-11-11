@@ -1,0 +1,49 @@
+! FailSmart-MatEngine Auto-Generated Quantum ESPRESSO HSE06+SOC Input Deck (not run)
+! Candidate: mp-1229027 (AlCuSnSe4) | Target: BOTTOM_IR_075EV
+! Space Group: I-4 (#82) | nat = 7
+&CONTROL
+  calculation = 'scf',
+  prefix = 'alcusnse4',
+  outdir = './out/',
+  pseudo_dir = './pseudo_oncv_fr/',
+  tprnfor = .true.,
+  tstress = .true.,
+  etot_conv_thr = 1.0d-6,
+  forc_conv_thr = 1.0d-4,
+/
+&SYSTEM
+  ibrav = 0,
+  nat = 7,
+  ntyp = 4,
+  ecutwfc = 70.0,
+  ecutfock = 140.0,
+  noncolin = .true.,
+  lspinorb = .true.,
+  input_dft = 'hse',
+  nqx1 = 1, nqx2 = 1, nqx3 = 1,
+  x_gamma_extrapolation = .true.,
+/
+&ELECTRONS
+  conv_thr = 1.0d-8,
+  mixing_beta = 0.4,
+  adaptive_thr = .true.,
+/
+ATOMIC_SPECIES
+  Al      26.9815  Al_ONCV_PBE_FR-1.2.upf
+  Cu      63.5460  Cu_ONCV_PBE_FR-1.2.upf
+  Sn     118.7100  Sn_ONCV_PBE_FR-1.2.upf
+  Se      78.9600  Se_ONCV_PBE_FR-1.2.upf
+CELL_PARAMETERS (angstrom)
+      5.16783834      0.00000000     -4.63058073
+     -1.03108942      5.06393204     -4.63058073
+      0.00000000      0.00000000      6.93893587
+ATOMIC_POSITIONS (crystal)
+  Al     0.75000000    0.25000000    0.50000000
+  Cu     0.25000000    0.75000000    0.50000000
+  Sn     0.50000000    0.50000000    0.00000000
+  Se     0.10011900    0.10435200    0.45897300
+  Se     0.64537900    0.64114600    0.54102700
+  Se     0.35885400    0.89988100    0.00423300
+  Se     0.89564800    0.35462100    0.99576700
+K_POINTS automatic
+  3 3 3 0 0 0

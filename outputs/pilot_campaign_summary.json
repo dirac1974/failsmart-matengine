@@ -286,7 +286,9 @@
           "lo_phonon_freq_thz": "ASSUMED",
           "frohlich_alpha": "COMPUTED_HERE",
           "polaron_trapping_mev": "COMPUTED_HERE",
-          "deepest_defect_level_from_band_edge_ev": "ASSUMED"
+          "deepest_defect_level_from_band_edge_ev": "ASSUMED",
+          "gap_error_bar_ev": "COMPUTED_HERE",
+          "window_probability": "COMPUTED_HERE"
         },
         "candidate_id": "CAND-A02",
         "pbe_gap_ev": 1.38,
@@ -307,7 +309,9 @@
         "deepest_defect_level_from_band_edge_ev": 0.08,
         "srh_recombination_safe": true,
         "passed_stage4_and_5": true,
-        "failure_reason": null
+        "failure_reason": null,
+        "gap_error_bar_ev": 0.37,
+        "window_probability": 0.2124
       },
       "optics": {
         "provenance": {
@@ -731,7 +735,9 @@
           "lo_phonon_freq_thz": "ASSUMED",
           "frohlich_alpha": "COMPUTED_HERE",
           "polaron_trapping_mev": "COMPUTED_HERE",
-          "deepest_defect_level_from_band_edge_ev": "ASSUMED"
+          "deepest_defect_level_from_band_edge_ev": "ASSUMED",
+          "gap_error_bar_ev": "COMPUTED_HERE",
+          "window_probability": "COMPUTED_HERE"
         },
         "candidate_id": "CAND-A03",
         "pbe_gap_ev": 1.34,
@@ -752,7 +758,9 @@
         "deepest_defect_level_from_band_edge_ev": 0.09,
         "srh_recombination_safe": true,
         "passed_stage4_and_5": true,
-        "failure_reason": null
+        "failure_reason": null,
+        "gap_error_bar_ev": 0.37,
+        "window_probability": 0.2103
       },
       "optics": {
         "provenance": {
@@ -1173,7 +1181,9 @@
           "lo_phonon_freq_thz": "ASSUMED",
           "frohlich_alpha": "COMPUTED_HERE",
           "polaron_trapping_mev": "COMPUTED_HERE",
-          "deepest_defect_level_from_band_edge_ev": "ASSUMED"
+          "deepest_defect_level_from_band_edge_ev": "ASSUMED",
+          "gap_error_bar_ev": "COMPUTED_HERE",
+          "window_probability": "COMPUTED_HERE"
         },
         "candidate_id": "CAND-A06",
         "pbe_gap_ev": 1.42,
@@ -1194,7 +1204,9 @@
         "deepest_defect_level_from_band_edge_ev": 0.07,
         "srh_recombination_safe": true,
         "passed_stage4_and_5": true,
-        "failure_reason": null
+        "failure_reason": null,
+        "gap_error_bar_ev": 0.37,
+        "window_probability": 0.213
       },
       "optics": {
         "provenance": {
@@ -1620,7 +1632,9 @@
           "lo_phonon_freq_thz": "ASSUMED",
           "frohlich_alpha": "COMPUTED_HERE",
           "polaron_trapping_mev": "COMPUTED_HERE",
-          "deepest_defect_level_from_band_edge_ev": "ASSUMED"
+          "deepest_defect_level_from_band_edge_ev": "ASSUMED",
+          "gap_error_bar_ev": "COMPUTED_HERE",
+          "window_probability": "COMPUTED_HERE"
         },
         "candidate_id": "CAND-B02",
         "pbe_gap_ev": 0.48,
@@ -1641,7 +1655,9 @@
         "deepest_defect_level_from_band_edge_ev": 0.04,
         "srh_recombination_safe": true,
         "passed_stage4_and_5": true,
-        "failure_reason": null
+        "failure_reason": null,
+        "gap_error_bar_ev": 0.37,
+        "window_probability": 0.1603
       },
       "optics": {
         "provenance": {
@@ -2061,7 +2077,9 @@
           "lo_phonon_freq_thz": "ASSUMED",
           "frohlich_alpha": "COMPUTED_HERE",
           "polaron_trapping_mev": "COMPUTED_HERE",
-          "deepest_defect_level_from_band_edge_ev": "ASSUMED"
+          "deepest_defect_level_from_band_edge_ev": "ASSUMED",
+          "gap_error_bar_ev": "COMPUTED_HERE",
+          "window_probability": "COMPUTED_HERE"
         },
         "candidate_id": "CAND-B04",
         "pbe_gap_ev": 0.46,
@@ -2082,7 +2100,9 @@
         "deepest_defect_level_from_band_edge_ev": 0.04,
         "srh_recombination_safe": true,
         "passed_stage4_and_5": true,
-        "failure_reason": null
+        "failure_reason": null,
+        "gap_error_bar_ev": 0.37,
+        "window_probability": 0.1599
       },
       "optics": {
         "provenance": {
@@ -2504,7 +2524,9 @@
           "lo_phonon_freq_thz": "ASSUMED",
           "frohlich_alpha": "COMPUTED_HERE",
           "polaron_trapping_mev": "COMPUTED_HERE",
-          "deepest_defect_level_from_band_edge_ev": "ASSUMED"
+          "deepest_defect_level_from_band_edge_ev": "ASSUMED",
+          "gap_error_bar_ev": "COMPUTED_HERE",
+          "window_probability": "COMPUTED_HERE"
         },
         "candidate_id": "CAND-A01",
         "pbe_gap_ev": 0.92,
@@ -2525,7 +2547,9 @@
         "deepest_defect_level_from_band_edge_ev": 0.06,
         "srh_recombination_safe": true,
         "passed_stage4_and_5": false,
-        "failure_reason": "BANDGAP_OUT_OF_WINDOW: estimated indirect gap = 1.18 eV (direct = 1.52 eV) misses target spectral window"
+        "failure_reason": "BANDGAP_OUT_OF_WINDOW: estimated indirect gap = 1.18 eV (direct = 1.52 eV) misses target spectral window",
+        "gap_error_bar_ev": 0.37,
+        "window_probability": 0.043
       },
       "optics": {
         "provenance": {
@@ -2946,7 +2970,9 @@
           "lo_phonon_freq_thz": "ASSUMED",
           "frohlich_alpha": "COMPUTED_HERE",
           "polaron_trapping_mev": "COMPUTED_HERE",
-          "deepest_defect_level_from_band_edge_ev": "ASSUMED"
+          "deepest_defect_level_from_band_edge_ev": "ASSUMED",
+          "gap_error_bar_ev": "COMPUTED_HERE",
+          "window_probability": "COMPUTED_HERE"
         },
         "candidate_id": "CAND-A02",
         "pbe_gap_ev": 1.38,
@@ -2967,7 +2993,9 @@
         "deepest_defect_level_from_band_edge_ev": 0.08,
         "srh_recombination_safe": true,
         "passed_stage4_and_5": true,
-        "failure_reason": null
+        "failure_reason": null,
+        "gap_error_bar_ev": 0.37,
+        "window_probability": 0.2124
       },
       "optics": {
         "provenance": {
@@ -3391,7 +3419,9 @@
           "lo_phonon_freq_thz": "ASSUMED",
           "frohlich_alpha": "COMPUTED_HERE",
           "polaron_trapping_mev": "COMPUTED_HERE",
-          "deepest_defect_level_from_band_edge_ev": "ASSUMED"
+          "deepest_defect_level_from_band_edge_ev": "ASSUMED",
+          "gap_error_bar_ev": "COMPUTED_HERE",
+          "window_probability": "COMPUTED_HERE"
         },
         "candidate_id": "CAND-A03",
         "pbe_gap_ev": 1.34,
@@ -3412,7 +3442,9 @@
         "deepest_defect_level_from_band_edge_ev": 0.09,
         "srh_recombination_safe": true,
         "passed_stage4_and_5": true,
-        "failure_reason": null
+        "failure_reason": null,
+        "gap_error_bar_ev": 0.37,
+        "window_probability": 0.2103
       },
       "optics": {
         "provenance": {
@@ -3831,7 +3863,9 @@
           "lo_phonon_freq_thz": "ASSUMED",
           "frohlich_alpha": "COMPUTED_HERE",
           "polaron_trapping_mev": "COMPUTED_HERE",
-          "deepest_defect_level_from_band_edge_ev": "ASSUMED"
+          "deepest_defect_level_from_band_edge_ev": "ASSUMED",
+          "gap_error_bar_ev": "COMPUTED_HERE",
+          "window_probability": "COMPUTED_HERE"
         },
         "candidate_id": "CAND-A04",
         "pbe_gap_ev": 2.45,
@@ -3852,7 +3886,9 @@
         "deepest_defect_level_from_band_edge_ev": 0.42,
         "srh_recombination_safe": false,
         "passed_stage4_and_5": false,
-        "failure_reason": "BANDGAP_OUT_OF_WINDOW: estimated indirect gap = 2.94 eV (direct = 3.12 eV) misses target spectral window"
+        "failure_reason": "BANDGAP_OUT_OF_WINDOW: estimated indirect gap = 2.94 eV (direct = 3.12 eV) misses target spectral window",
+        "gap_error_bar_ev": 0.37,
+        "window_probability": 0.0031
       },
       "optics": {
         "provenance": {
@@ -4554,7 +4590,9 @@
           "lo_phonon_freq_thz": "ASSUMED",
           "frohlich_alpha": "COMPUTED_HERE",
           "polaron_trapping_mev": "COMPUTED_HERE",
-          "deepest_defect_level_from_band_edge_ev": "ASSUMED"
+          "deepest_defect_level_from_band_edge_ev": "ASSUMED",
+          "gap_error_bar_ev": "COMPUTED_HERE",
+          "window_probability": "COMPUTED_HERE"
         },
         "candidate_id": "CAND-A06",
         "pbe_gap_ev": 1.42,
@@ -4575,7 +4613,9 @@
         "deepest_defect_level_from_band_edge_ev": 0.07,
         "srh_recombination_safe": true,
         "passed_stage4_and_5": true,
-        "failure_reason": null
+        "failure_reason": null,
+        "gap_error_bar_ev": 0.37,
+        "window_probability": 0.213
       },
       "optics": {
         "provenance": {
@@ -6520,7 +6560,9 @@
           "lo_phonon_freq_thz": "ASSUMED",
           "frohlich_alpha": "COMPUTED_HERE",
           "polaron_trapping_mev": "COMPUTED_HERE",
-          "deepest_defect_level_from_band_edge_ev": "ASSUMED"
+          "deepest_defect_level_from_band_edge_ev": "ASSUMED",
+          "gap_error_bar_ev": "COMPUTED_HERE",
+          "window_probability": "COMPUTED_HERE"
         },
         "candidate_id": "CAND-B02",
         "pbe_gap_ev": 0.48,
@@ -6541,7 +6583,9 @@
         "deepest_defect_level_from_band_edge_ev": 0.04,
         "srh_recombination_safe": true,
         "passed_stage4_and_5": true,
-        "failure_reason": null
+        "failure_reason": null,
+        "gap_error_bar_ev": 0.37,
+        "window_probability": 0.1603
       },
       "optics": {
         "provenance": {
@@ -6962,7 +7006,9 @@
           "lo_phonon_freq_thz": "ASSUMED",
           "frohlich_alpha": "COMPUTED_HERE",
           "polaron_trapping_mev": "COMPUTED_HERE",
-          "deepest_defect_level_from_band_edge_ev": "ASSUMED"
+          "deepest_defect_level_from_band_edge_ev": "ASSUMED",
+          "gap_error_bar_ev": "COMPUTED_HERE",
+          "window_probability": "COMPUTED_HERE"
         },
         "candidate_id": "CAND-B03",
         "pbe_gap_ev": 0.52,
@@ -6983,7 +7029,9 @@
         "deepest_defect_level_from_band_edge_ev": 0.36,
         "srh_recombination_safe": false,
         "passed_stage4_and_5": false,
-        "failure_reason": "DEEP_SRH_DEFECT: I_Se antisite (mid-gap SRH trap) forms deep trap 0.36 eV from band edge (> 0.15 eV non-radiative recombination limit)"
+        "failure_reason": "DEEP_SRH_DEFECT: I_Se antisite (mid-gap SRH trap) forms deep trap 0.36 eV from band edge (> 0.15 eV non-radiative recombination limit)",
+        "gap_error_bar_ev": 0.37,
+        "window_probability": 0.1606
       },
       "optics": {
         "provenance": {
@@ -7403,7 +7451,9 @@
           "lo_phonon_freq_thz": "ASSUMED",
           "frohlich_alpha": "COMPUTED_HERE",
           "polaron_trapping_mev": "COMPUTED_HERE",
-          "deepest_defect_level_from_band_edge_ev": "ASSUMED"
+          "deepest_defect_level_from_band_edge_ev": "ASSUMED",
+          "gap_error_bar_ev": "COMPUTED_HERE",
+          "window_probability": "COMPUTED_HERE"
         },
         "candidate_id": "CAND-B04",
         "pbe_gap_ev": 0.46,
@@ -7424,7 +7474,9 @@
         "deepest_defect_level_from_band_edge_ev": 0.04,
         "srh_recombination_safe": true,
         "passed_stage4_and_5": true,
-        "failure_reason": null
+        "failure_reason": null,
+        "gap_error_bar_ev": 0.37,
+        "window_probability": 0.1599
       },
       "optics": {
         "provenance": {

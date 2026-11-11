@@ -935,11 +935,26 @@ def build_live_mp_candidate_dossier(
         return dossier
 
     # Stage 4 & 5: Heuristic Gap/Polaron/Defect Prescreen & Sequential 4T Optics
+    # T4 calibration: LOOCV gap error bar is sigma_MAE = 0.37 eV (LOOCV MAE = 0.3684 eV; LOOCV RMSE = 0.4362 eV).
+    # Probabilistic window gate: keep candidate if target window [w_lo, w_hi] lies within 1 error bar of eg,
+    # and report window_probability under N(eg, sigma_MAE^2).
     eg = elec_dict["gap_est_indirect_ev"]
+    gap_err_bar = 0.37
     if target_layer == "TOP_ACTIVE_GLASS_185EV":
-        gap_ok = 1.75 <= eg <= 1.95
+        w_lo, w_hi = 1.75, 1.95
     else:
-        gap_ok = 0.70 <= eg <= 0.85
+        w_lo, w_hi = 0.70, 0.85
+
+    gap_ok = (w_lo - gap_err_bar) <= eg <= (w_hi + gap_err_bar)
+    win_prob = round(
+        0.5 * (
+            math.erf((w_hi - eg) / (gap_err_bar * math.sqrt(2.0)))
+            - math.erf((w_lo - eg) / (gap_err_bar * math.sqrt(2.0)))
+        ),
+        4,
+    )
+    elec_dict["gap_error_bar_ev"] = gap_err_bar
+    elec_dict["window_probability"] = win_prob
 
     mass_ok = max(elec_dict["electron_eff_mass_m0"], elec_dict["hole_eff_mass_m0"]) <= 0.80 and elec_dict["frohlich_alpha"] <= 5.0
     srh_ok = elec_dict["deepest_defect_level_from_band_edge_ev"] <= 0.15
@@ -948,8 +963,9 @@ def build_live_mp_candidate_dossier(
     s4_reason = None
     if not gap_ok:
         s4_reason = (
-            f"BANDGAP_OUT_OF_WINDOW: Estimated fundamental gap = {eg:.2f} eV "
-            f"(MP PBE = {rec['dft_pbe_band_gap_ev']:.2f} eV) misses {target_layer} spectral window"
+            f"BANDGAP_OUT_OF_WINDOW: Estimated fundamental gap = {eg:.2f} +/- {gap_err_bar:.2f} eV "
+            f"(MP PBE = {rec['dft_pbe_band_gap_ev']:.2f} eV, P_win = {win_prob:.3f}) misses {target_layer} "
+            f"1-sigma window [{w_lo - gap_err_bar:.2f}, {w_hi + gap_err_bar:.2f}] eV"
         )
     elif not mass_ok:
         s4_reason = f"HEAVY_CARRIER_MASS: max(m_e*, m_h*) = {max(elec_dict['electron_eff_mass_m0'], elec_dict['hole_eff_mass_m0']):.2f} m0 or alpha_F = {elec_dict['frohlich_alpha']:.2f}"
