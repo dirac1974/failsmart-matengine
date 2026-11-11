@@ -37,7 +37,10 @@ from .physics_calculators import (
 from .schemas import (
     AtomisticPhononNEBReport,
     CoherentTMM4TStackReport,
+    ContrastiveClassifierAuditReport,
     GradedARCTechnoEconomicReport,
+    LabSynthesisAndDefectDossier,
+    RealWorldLCOEStressTestReport,
 )
 
 # Exact CODATA 2018 Boltzmann constant (J/K) and THz conversion factor (Section 6.1)
@@ -773,4 +776,516 @@ def evaluate_graded_arc_and_techno_economics_4t_stack(
         techno_economic_redundancy_verified=te_ok,
         sha256_signature=blind_arc["sha256_signature"],
     )
+
+
+def evaluate_phase9a_lab_synthesis_and_defect_supercell(
+    finalist_dossier: Dict[str, Any],
+    defect_deck_dir: str,
+) -> LabSynthesisAndDefectDossier:
+    """Phase 9A: Generate 10.0 mmol Stoichiometric Lab Synthesis Recipe & Stage 5 doped Defect Supercell Deck."""
+    from pathlib import Path
+    from .independent_verifier import independently_verify_phase9a_lab_and_defect_dossier
+
+    cand = finalist_dossier["candidate"]
+    synth = finalist_dossier["synthesis"]
+    elec = finalist_dossier["electronics"]
+
+    cid = str(cand["candidate_id"])
+    formula = str(cand["formula_reduced"])
+    stoich: Dict[str, int] = {str(k): int(v) for k, v in cand["stoichiometry"].items()}
+    struct = CifParser.from_str(cand["cif_content"]).parse_structures(primitive=False)[0]
+
+    # 1. Exact 10.0 mmol (0.010 mol) batch precursor mass balance using IUPAC_ATOMIC_MASSES
+    batch_mol = 0.010
+    fu_molar_mass = sum(cnt * IUPAC_ATOMIC_MASSES[el] for el, cnt in stoich.items())
+    target_mass_g = batch_mol * fu_molar_mass
+
+    reagent_masses: Dict[str, float] = {}
+    volatile_overpressure_masses: Dict[str, float] = {}
+    supplied_elemental_mass_g = 0.0
+
+    volatile_elements = {"S", "Se", "Cl", "Br", "I"}
+    for el, cnt in stoich.items():
+        el_moles = batch_mol * float(cnt)
+        el_mass_g = el_moles * IUPAC_ATOMIC_MASSES[el]
+        reagent_label = f"{el}_stoich_source"
+        reagent_masses[reagent_label] = round(el_mass_g, 6)
+        supplied_elemental_mass_g += el_mass_g
+        if el in volatile_elements:
+            volatile_overpressure_masses[f"{el}_5pct_overpressure"] = round(1.05 * el_mass_g, 6)
+
+    mass_diff_g = abs(supplied_elemental_mass_g - target_mass_g)
+
+    # 2. Stage 5 `doped` Defect Supercell Expansion (N_a, N_b, N_c >= ceil(10.0 / L_i))
+    a_len, b_len, c_len = struct.lattice.abc
+    na = max(1, int(math.ceil(10.0 / a_len)))
+    nb = max(1, int(math.ceil(10.0 / b_len)))
+    nc = max(1, int(math.ceil(10.0 / c_len)))
+    n_super = na * nb * nc * len(struct)
+    min_img_dist = min(na * a_len, nb * b_len, nc * c_len)
+    omega_super = float(struct.volume) * (na * nb * nc)
+    l_eff = omega_super ** (1.0 / 3.0)
+
+    eps_0 = float(elec["eps_static"])
+    madelung_alpha = 2.8373
+    coulomb_ev_ang = 14.399645
+    fnv_q1 = (1.0 * madelung_alpha * coulomb_ev_ang) / (eps_0 * l_eff)
+    fnv_q2 = (4.0 * madelung_alpha * coulomb_ev_ang) / (eps_0 * l_eff)
+
+    dom_vac = str(elec["dominant_vacancy_defect"])
+    vac_el = dom_vac.replace("V_", "").strip()
+
+    # Write Stage 5 `doped` / QE Defect Supercell Input Deck
+    out_dir = Path(defect_deck_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    deck_fname = f"{cid}_{formula}_doped_supercell_{na}x{nb}x{nc}.in"
+    deck_path = out_dir / deck_fname
+
+    super_struct = struct.copy()
+    super_struct.make_supercell([na, nb, nc])
+    # Remove first occurrence of vac_el to create the explicit neutral/charged vacancy supercell
+    removed_idx = 0
+    for idx_s, site in enumerate(super_struct):
+        if site.specie.symbol == vac_el:
+            removed_idx = idx_s
+            break
+    vac_frac = super_struct[removed_idx].frac_coords
+    super_struct.remove_sites([removed_idx])
+
+    lines = [
+        f"! FailSmart-MatEngine v6.0 Stage 5 `doped` Defect Supercell QE Deck ({na}x{nb}x{nc})",
+        f"! Candidate: {cid} ({formula}) | Defect: {dom_vac} removed at frac=({vac_frac[0]:.5f}, {vac_frac[1]:.5f}, {vac_frac[2]:.5f})",
+        f"! Supercell sites (with vacancy): {len(super_struct)} (host={n_super}) | L_min = {min_img_dist:.3f} A",
+        f"! FNV Electrostatic Correction: E_FNV(q=+-1) = {fnv_q1:.4f} eV, E_FNV(q=+-2) = {fnv_q2:.4f} eV",
+        f"! Lab Synthesis Batch (10.0 mmol): Target Mass = {target_mass_g:.4f} g at T = {synth['min_synthesis_temp_c']:.1f} C",
+        "&CONTROL",
+        "  calculation = 'relax',",
+        f"  prefix = '{formula.lower()}_defect_{dom_vac.lower()}',",
+        "  outdir = './out_defect/',",
+        "  pseudo_dir = './pseudo_oncv_fr/',",
+        "  tprnfor = .true.,",
+        "/",
+        "&SYSTEM",
+        "  ibrav = 0,",
+        f"  nat = {len(super_struct)},",
+        f"  ntyp = {len(stoich)},",
+        "  ecutwfc = 65.0,",
+        "  noncolin = .true.,",
+        "  lspinorb = .true.,",
+        "/",
+        "&ELECTRONS",
+        "  conv_thr = 1.0d-7,",
+        "/",
+        "ATOMIC_SPECIES",
+    ]
+    for el in stoich:
+        lines.append(f"  {el:<3s}  {IUPAC_ATOMIC_MASSES[el]:10.4f}  {el}_ONCV_PBE_FR-1.2.upf")
+    lines.append("CELL_PARAMETERS (angstrom)")
+    for vec in super_struct.lattice.matrix:
+        lines.append(f"  {vec[0]:14.8f}  {vec[1]:14.8f}  {vec[2]:14.8f}")
+    lines.append("ATOMIC_POSITIONS (crystal)")
+    for site in super_struct:
+        fx, fy, fz = site.frac_coords % 1.0
+        lines.append(f"  {site.specie.symbol:<3s}  {fx:12.8f}  {fy:12.8f}  {fz:12.8f}")
+    lines.append("K_POINTS gamma")
+    deck_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    blind_9a = independently_verify_phase9a_lab_and_defect_dossier(
+        cif_content=cand["cif_content"],
+        stoichiometry=stoich,
+        eps_static=eps_0,
+    )
+    ok_9a = bool(
+        abs(fu_molar_mass - blind_9a["formula_unit_molar_mass_g_mol"]) <= 1e-4
+        and abs(target_mass_g - blind_9a["target_product_mass_g"]) <= 1e-5
+        and mass_diff_g <= 1e-6
+        and [na, nb, nc] == blind_9a["supercell_dims"]
+        and n_super == blind_9a["supercell_total_sites"]
+        and abs(fnv_q1 - blind_9a["fnv_charge_correction_q1_ev"]) <= 1e-4
+        and abs(fnv_q2 - blind_9a["fnv_charge_correction_q2_ev"]) <= 1e-4
+    )
+    if not ok_9a:
+        raise AssertionError(f"REDUNDANCY_MISMATCH_BLOCK: Phase 9A Lab/Defect mismatch on {cid}")
+
+    t_synth = float(synth["min_synthesis_temp_c"])
+    dwell_hr = round(6.0 + max(0.0, (500.0 - t_synth) / 25.0), 1)
+
+    return LabSynthesisAndDefectDossier(
+        candidate_id=cid,
+        formula_reduced=formula,
+        target_layer=str(cand["target_layer"]),
+        formula_unit_molar_mass_g_mol=round(fu_molar_mass, 4),
+        target_batch_mmol=10.0,
+        target_product_mass_g=round(target_mass_g, 5),
+        reagent_masses_g=reagent_masses,
+        volatile_overpressure_masses_g=volatile_overpressure_masses,
+        elemental_mass_conservation_diff_g=round(mass_diff_g, 8),
+        synthesis_temperature_c=round(t_synth, 1),
+        dwell_time_hours=dwell_hr,
+        supercell_dims=[na, nb, nc],
+        supercell_total_sites=n_super,
+        supercell_min_image_dist_ang=round(min_img_dist, 3),
+        dominant_vacancy_species=dom_vac,
+        fnv_charge_correction_q1_ev=round(fnv_q1, 4),
+        fnv_charge_correction_q2_ev=round(fnv_q2, 4),
+        doped_defect_deck_filename=deck_fname,
+        redundancy_verified=ok_9a,
+        sha256_signature=blind_9a["sha256_signature"],
+    )
+
+
+def evaluate_phase9b_contrastive_classifier_audit(
+    all_dossiers: List[Dict[str, Any]],
+) -> ContrastiveClassifierAuditReport:
+    """Phase 9B: Evaluate Contrastive Failure Classifier Margin Separation across the full 117-candidate MP sweep."""
+    from .independent_verifier import independently_verify_phase9b_contrastive_audit
+
+    pos_vecs: List[np.ndarray] = []
+    neg_vecs: List[np.ndarray] = []
+    raw_records: List[Dict[str, Any]] = []
+
+    for d in all_dossiers:
+        emb = np.array(d["candidate"]["embedding_128d"], dtype=float)
+        norm = float(np.linalg.norm(emb))
+        u = emb / max(1e-12, norm)
+        status = str(d["status"])
+        raw_records.append({"status": status, "embedding_128d": d["candidate"]["embedding_128d"]})
+        if status == "PROMOTED":
+            pos_vecs.append(u)
+        else:
+            neg_vecs.append(u)
+
+    c_pos_raw = np.sum(pos_vecs, axis=0)
+    c_pos = c_pos_raw / max(1e-12, float(np.linalg.norm(c_pos_raw)))
+
+    c_neg_raw = np.sum(neg_vecs, axis=0)
+    c_neg = c_neg_raw / max(1e-12, float(np.linalg.norm(c_neg_raw)))
+
+    pos_margins = [float(np.dot(u, c_pos) - np.dot(u, c_neg)) for u in pos_vecs]
+    neg_margins = [float(np.dot(u, c_pos) - np.dot(u, c_neg)) for u in neg_vecs]
+
+    mean_pos = float(np.mean(pos_margins))
+    mean_neg = float(np.mean(neg_margins))
+    delta_m = mean_pos - mean_neg
+
+    blind_9b = independently_verify_phase9b_contrastive_audit(raw_records)
+    ok_9b = bool(
+        abs(round(mean_pos, 4) - blind_9b["mean_promoted_contrastive_margin"]) <= 1e-4
+        and abs(round(mean_neg, 4) - blind_9b["mean_rejected_contrastive_margin"]) <= 1e-4
+        and abs(round(delta_m, 4) - blind_9b["contrastive_separation_delta"]) <= 1e-4
+        and delta_m > 0.0
+    )
+    if not ok_9b:
+        raise AssertionError("REDUNDANCY_MISMATCH_BLOCK: Phase 9B Contrastive Classifier audit mismatch")
+
+    return ContrastiveClassifierAuditReport(
+        total_evaluated_candidates=len(all_dossiers),
+        promoted_finalist_count=len(pos_vecs),
+        rejected_failure_count=len(neg_vecs),
+        mean_promoted_contrastive_margin=round(mean_pos, 4),
+        mean_rejected_contrastive_margin=round(mean_neg, 4),
+        contrastive_separation_delta=round(delta_m, 4),
+        positive_separation_verified=bool(delta_m > 0.0),
+        redundancy_verified=ok_9b,
+        sha256_signature=blind_9b["sha256_signature"],
+    )
+
+
+def compute_abeles_7medium_oblique_sp_tmm(
+    wl_nm: np.ndarray,
+    e_ev: np.ndarray,
+    eg_ind_1: float,
+    eg_dir_1: float,
+    eps_inf_1: float,
+    d_top_nm: float,
+    theta_deg: float,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Compute unpolarized (0.5*(s + p)) reflectance & transmittance for the 7-medium Graded-ARC stack at angle theta_deg."""
+    wl_um = wl_nm / 1000.0
+    n_pts = len(wl_nm)
+    theta_rad = math.radians(theta_deg)
+    sin_t0 = math.sin(theta_rad)
+
+    n0 = np.full(n_pts, 1.000 + 0.0j, dtype=np.complex128)
+    n1 = (1.377 + 0.0032 / (wl_um**2)).astype(np.complex128)
+    n_ito = np.maximum(1.45, 1.92 - 0.085 * (wl_um**2))
+    k_ito = 0.0018 + 0.0065 * (wl_um**3)
+    n2 = n_ito + 1j * k_ito
+    n_tio2 = 2.380 + 0.0180 / (wl_um**2)
+    k_tio2 = 0.0004 * (wl_um**2)
+    n3 = n_tio2 + 1j * k_tio2
+
+    alpha1 = 1.2e5 * (np.maximum(0.0, e_ev - eg_ind_1) ** 2) + 2.8e7 * np.sqrt(
+        np.maximum(0.0, e_ev - eg_dir_1)
+    )
+    n_act1 = math.sqrt(eps_inf_1) + 0.035 / (wl_um**2)
+    k_act1 = (alpha1 * (wl_nm * 1.0e-9)) / (4.0 * math.pi)
+    n4 = n_act1 + 1j * k_act1
+
+    n_buf = 1.720 + 0.0040 / (wl_um**2)
+    k_buf = 0.0012 * (wl_um**2)
+    n5 = n_buf + 1j * k_buf
+    n6 = np.full(n_pts, 1.520 + 0.0j, dtype=np.complex128)
+
+    n_list = [n0, n1, n2, n3, n4, n5, n6]
+    d_list_nm = [0.0, 94.0, 80.0, 48.0, float(d_top_nm), 82.0, 0.0]
+
+    cos_list = [np.sqrt(1.0 - ((n0 * sin_t0) / nm) ** 2) for nm in n_list]
+
+    def _solve_pol(pol: str) -> Tuple[np.ndarray, np.ndarray]:
+        if pol == "s":
+            eta = [n_list[m] * cos_list[m] for m in range(7)]
+        else:
+            eta = [n_list[m] / cos_list[m] for m in range(7)]
+
+        m_tot = np.zeros((n_pts, 2, 2), dtype=np.complex128)
+        m_tot[:, 0, 0] = 1.0
+        m_tot[:, 1, 1] = 1.0
+
+        for m in range(6):
+            em = eta[m]
+            emp1 = eta[m + 1]
+            r_m = (em - emp1) / (em + emp1)
+            t_m = (2.0 * em) / (em + emp1)
+
+            i_mat = np.zeros((n_pts, 2, 2), dtype=np.complex128)
+            i_mat[:, 0, 0] = 1.0 / t_m
+            i_mat[:, 0, 1] = r_m / t_m
+            i_mat[:, 1, 0] = r_m / t_m
+            i_mat[:, 1, 1] = 1.0 / t_m
+            m_tot = np.matmul(m_tot, i_mat)
+
+            if m + 1 <= 5:
+                dm = d_list_nm[m + 1]
+                beta_m = (2.0 * math.pi * n_list[m + 1] * dm * cos_list[m + 1]) / wl_nm
+                p_mat = np.zeros((n_pts, 2, 2), dtype=np.complex128)
+                p_mat[:, 0, 0] = np.exp(-1j * beta_m)
+                p_mat[:, 1, 1] = np.exp(1j * beta_m)
+                m_tot = np.matmul(m_tot, p_mat)
+
+        r_amp = m_tot[:, 1, 0] / m_tot[:, 0, 0]
+        t_amp = 1.0 / m_tot[:, 0, 0]
+        r_pow = np.abs(r_amp) ** 2
+        t_pow = (np.real(eta[6]) / np.real(eta[0])) * (np.abs(t_amp) ** 2)
+        return r_pow, t_pow
+
+    r_s, t_s = _solve_pol("s")
+    r_p, t_p = _solve_pol("p")
+    r_unpol = 0.5 * (r_s + r_p)
+    t_unpol = 0.5 * (t_s + t_p)
+
+    # Effective path length through ITO (80 nm) and TiO2 (48 nm)
+    path_ito = 80.0 / np.maximum(0.25, np.real(cos_list[2]))
+    path_tio2 = 48.0 / np.maximum(0.25, np.real(cos_list[3]))
+    t_win_front = np.exp(-4.0 * math.pi * (k_ito * path_ito + k_tio2 * path_tio2) / wl_nm)
+
+    return r_unpol, t_unpol, t_win_front, alpha1
+
+
+def evaluate_phase9c_real_world_lcoe_stress_test(
+    top_dossier: Dict[str, Any],
+    bottom_dossier: Dict[str, Any],
+    graded_report: GradedARCTechnoEconomicReport,
+) -> RealWorldLCOEStressTestReport:
+    """Phase 9C: Evaluate Oblique-Incidence (0-60 deg) S/P TMM, Operating Temp (25-65 C) & 25-Year Arrhenius LCOE."""
+    from .independent_verifier import independently_verify_phase9c_oblique_thermal_lcoe
+
+    c_top = top_dossier["candidate"]
+    e_top = top_dossier["electronics"]
+    o_top = top_dossier["optics"]
+    s_top = top_dossier["synthesis"]
+    at_top = top_dossier["atomistic_phonon_neb"]
+
+    c_bot = bottom_dossier["candidate"]
+    e_bot = bottom_dossier["electronics"]
+    o_bot = bottom_dossier["optics"]
+    s_bot = bottom_dossier["synthesis"]
+    at_bot = bottom_dossier["atomistic_phonon_neb"]
+
+    eg_ind_1 = float(e_top["hse06_soc_indirect_gap_ev"])
+    eg_dir_1 = float(e_top["hse06_soc_direct_gap_ev"])
+    eps_inf_1 = float(e_top["eps_inf"])
+    d1_nm = float(o_top["film_thickness_nm"])
+    d1_m = d1_nm * 1.0e-9
+
+    eg_ind_3 = float(e_bot["hse06_soc_indirect_gap_ev"])
+    eg_dir_3 = float(e_bot["hse06_soc_direct_gap_ev"])
+    eps_inf_3 = float(e_bot["eps_inf"])
+    d3_nm = float(o_bot["film_thickness_nm"])
+    d3_m = d3_nm * 1.0e-9
+
+    angles = [0.0, 30.0, 45.0, 60.0]
+    r_by_angle: Dict[float, float] = {}
+    pce_by_angle: Dict[float, float] = {}
+    subcell_0deg: Tuple[float, float, float] = (0.0, 0.0, 0.0)
+
+    mask_above = (_AM15G_E_EV >= eg_ind_1) & (_AM15G_E_EV <= 3.50)
+    flux_above = float(np.trapezoid(_AM15G_PHI_SUN[mask_above], _AM15G_WL_NM[mask_above]))
+
+    d_si_m = 160.0e-6
+    alpha_si = 1.1e5 * (np.maximum(0.0, _AM15G_E_EV - 1.12) ** 2) + 1.5e7 * np.sqrt(np.maximum(0.0, _AM15G_E_EV - 3.40))
+    fabs_si_3l = (16.0 * alpha_si * d_si_m) / (1.0 + 16.0 * alpha_si * d_si_m)
+    t_si_fca_low = np.exp(-0.08 * ((_AM15G_WL_NM / 1200.0) ** 2))
+
+    n3_bot = math.sqrt(eps_inf_3)
+    r_int_23 = 0.20 * (((n3_bot - 1.72) / (n3_bot + 1.72)) ** 2)
+    yab3 = 4.0 * eps_inf_3
+    alpha3 = 1.2e5 * (np.maximum(0.0, _AM15G_E_EV - eg_ind_3) ** 2) + 2.8e7 * np.sqrt(np.maximum(0.0, _AM15G_E_EV - eg_dir_3))
+    fabs3 = (yab3 * alpha3 * d3_m) / (1.0 + yab3 * alpha3 * d3_m)
+    a_arc_3 = (1.0 - r_int_23) * fabs3
+
+    for ang in angles:
+        r_u, t_u, t_win, alpha1 = compute_abeles_7medium_oblique_sp_tmm(
+            wl_nm=_AM15G_WL_NM,
+            e_ev=_AM15G_E_EV,
+            eg_ind_1=eg_ind_1,
+            eg_dir_1=eg_dir_1,
+            eps_inf_1=eps_inf_1,
+            d_top_nm=d1_nm,
+            theta_deg=ang,
+        )
+        mean_r = float(
+            np.trapezoid(r_u[mask_above] * _AM15G_PHI_SUN[mask_above], _AM15G_WL_NM[mask_above])
+            / max(1.0e-12, flux_above)
+            * 100.0
+        )
+        r_by_angle[ang] = round(mean_r, 2)
+
+        yab1 = 4.0 * eps_inf_1
+        fabs1 = (yab1 * alpha1 * d1_m) / (1.0 + yab1 * alpha1 * d1_m)
+        a_arc_1 = (1.0 - r_u) * t_win * fabs1
+        t_stack_1 = t_u * (1.0 - fabs1)
+
+        _, _, _, eta_top = _solve_cell_iv(a_arc_1, _AM15G_PHI_SUN, eg_dir_1, eg_ind_1)
+        phi2 = _AM15G_PHI_SUN * t_stack_1
+        _, _, _, eta_si = _solve_cell_iv(0.98 * fabs_si_3l, phi2, 1.12, 1.12, j0_fixed=1.2e-12)
+        phi3 = phi2 * 0.96 * (1.0 - fabs_si_3l) * t_si_fca_low
+        _, _, _, eta_bot = _solve_cell_iv(a_arc_3, phi3, eg_dir_3, eg_ind_3)
+
+        pce_by_angle[ang] = round(eta_top + eta_si + eta_bot, 2)
+        if ang == 0.0:
+            subcell_0deg = (eta_top, eta_si, eta_bot)
+
+    r_hemi = round(
+        0.35 * r_by_angle[0.0] + 0.35 * r_by_angle[30.0] + 0.20 * r_by_angle[45.0] + 0.10 * r_by_angle[60.0],
+        2,
+    )
+    iam_60 = round(pce_by_angle[60.0] / max(1e-9, pce_by_angle[0.0]), 4)
+
+    # 2. Field Operating Temperature Coefficient (25 C -> 45 C NOCT -> 65 C Desert Peak)
+    eta_top_25, eta_si_25, eta_bot_25 = subcell_0deg
+    gamma_top = -0.00440 / (eg_ind_1 ** 0.65)
+    gamma_si = -0.00440 / (1.12 ** 0.65)
+    gamma_bot = -0.00440 / (eg_ind_3 ** 0.65)
+
+    def _pce_at_temp(tc: float) -> float:
+        dt = tc - 25.0
+        e_t = eta_top_25 * (1.0 + gamma_top * dt)
+        e_s = eta_si_25 * (1.0 + gamma_si * dt)
+        e_b = eta_bot_25 * (1.0 + gamma_bot * dt)
+        return e_t + e_s + e_b
+
+    pce_25c_raw = eta_top_25 + eta_si_25 + eta_bot_25
+    pce_45c_raw = _pce_at_temp(45.0)
+    pce_65c_raw = _pce_at_temp(65.0)
+    beta_rel_pct_k = ((pce_65c_raw - pce_25c_raw) / (40.0 * pce_25c_raw)) * 100.0
+
+    # 3. 25-Year Arrhenius Ion-Migration Reliability & Real-World LCOE (cents/kWh)
+    e_mig_lim = min(float(at_top["neb_saddle_barrier_ev"]), float(at_bot["neb_saddle_barrier_ev"]))
+    kb_t_318 = (KB_J * 318.15) / E_CHARGE
+    r_deg = 0.0035 + 0.0010 * math.exp(-max(0.0, e_mig_lim - 0.65) / kb_t_318)
+    yr25_ret_pct = ((1.0 - r_deg) ** 24) * 100.0
+
+    raw_top = float(s_top["active_layer_cost_usd_m2"])
+    raw_bot = float(s_bot["active_layer_cost_usd_m2"])
+
+    def _compute_lcoe_cents_kwh(
+        pce_25_pct: float,
+        c_mod_usd_m2: float,
+        f_noct: float,
+        deg_rate: float,
+    ) -> float:
+        p_m2 = 10.0 * pce_25_pct
+        capex_m2 = c_mod_usd_m2 + BOS_AREA_COST_USD_M2 + 0.22 * p_m2
+        om_disc = sum(2.50 / ((1.0 + 0.06) ** t) for t in range(1, 26))
+        e_disc = sum(
+            ((p_m2 / 1000.0) * 1800.0 * f_noct * ((1.0 - deg_rate) ** (t - 1))) / ((1.0 + 0.06) ** t)
+            for t in range(1, 26)
+        )
+        return 100.0 * (capex_m2 + om_disc) / max(1e-9, e_disc)
+
+    f_noct_si = 1.0 + gamma_si * 20.0
+    lcoe_si = _compute_lcoe_cents_kwh(22.00, 40.00, f_noct_si, 0.0045)
+
+    # 2-Layer NOCT ratio
+    eta_si_2l_25 = graded_report.graded_2layer_pce_percent - round(eta_top_25, 2)
+    f_noct_2l = (
+        eta_top_25 * (1.0 + gamma_top * 20.0) + eta_si_2l_25 * (1.0 + gamma_si * 20.0)
+    ) / max(1e-9, eta_top_25 + eta_si_2l_25)
+    c_mod_2l = 40.00 + raw_top + SUBCELL_PROCESS_TCO_COST_USD_M2
+    lcoe_2l = _compute_lcoe_cents_kwh(graded_report.graded_2layer_pce_percent, c_mod_2l, f_noct_2l, r_deg)
+
+    # 3-Layer 4T NOCT ratio
+    f_noct_3l = pce_45c_raw / max(1e-9, pce_25c_raw)
+    c_mod_3l = 40.00 + raw_top + raw_bot + 2.0 * SUBCELL_PROCESS_TCO_COST_USD_M2
+    lcoe_3l = _compute_lcoe_cents_kwh(graded_report.graded_4t_low_fca_pce_percent, c_mod_3l, f_noct_3l, r_deg)
+    lcoe_red_pct = ((lcoe_si - lcoe_3l) / lcoe_si) * 100.0
+
+    blind_9c = independently_verify_phase9c_oblique_thermal_lcoe(
+        eg_ind_1=eg_ind_1,
+        eg_dir_1=eg_dir_1,
+        eps_inf_1=eps_inf_1,
+        thickness_nm_1=d1_nm,
+        eg_ind_3=eg_ind_3,
+        eg_dir_3=eg_dir_3,
+        eps_inf_3=eps_inf_3,
+        thickness_nm_3=d3_nm,
+        raw_cost_top_usd_m2=raw_top,
+        raw_cost_bot_usd_m2=raw_bot,
+        limiting_neb_barrier_ev=e_mig_lim,
+    )
+
+    diff_60 = round(abs(pce_by_angle[60.0] - blind_9c["pce_4t_60deg_25c_percent"]), 4)
+    lcoe_ok = bool(
+        diff_60 <= 0.05
+        and abs(round(lcoe_3l, 4) - blind_9c["lcoe_3layer_4t_cents_kwh"]) <= 0.01
+        and abs(round(pce_45c_raw, 2) - blind_9c["pce_4t_noct_45c_percent"]) <= 0.05
+    )
+    if not lcoe_ok:
+        raise AssertionError(
+            f"REDUNDANCY_MISMATCH_BLOCK: Phase 9C Oblique/Thermal/LCOE mismatch on {graded_report.pair_id}: "
+            f"diff_60={diff_60:.4f}%, lcoe_3l={lcoe_3l:.4f} vs {blind_9c['lcoe_3layer_4t_cents_kwh']:.4f}"
+        )
+
+    return RealWorldLCOEStressTestReport(
+        pair_id=graded_report.pair_id,
+        top_mp_id=c_top["candidate_id"],
+        top_formula=c_top["formula_reduced"],
+        bottom_mp_id=c_bot["candidate_id"],
+        bottom_formula=c_bot["formula_reduced"],
+        r_front_0deg_percent=r_by_angle[0.0],
+        r_front_30deg_percent=r_by_angle[30.0],
+        r_front_45deg_percent=r_by_angle[45.0],
+        r_front_60deg_percent=r_by_angle[60.0],
+        r_front_hemispheric_percent=r_hemi,
+        pce_4t_0deg_25c_percent=pce_by_angle[0.0],
+        pce_4t_30deg_25c_percent=pce_by_angle[30.0],
+        pce_4t_45deg_25c_percent=pce_by_angle[45.0],
+        pce_4t_60deg_25c_percent=pce_by_angle[60.0],
+        iam_60deg_ratio=iam_60,
+        pce_4t_noct_45c_percent=round(pce_45c_raw, 2),
+        pce_4t_desert_65c_percent=round(pce_65c_raw, 2),
+        temp_coeff_rel_pct_per_k=round(beta_rel_pct_k, 4),
+        limiting_neb_barrier_ev=round(e_mig_lim, 4),
+        annual_degradation_rate_pct_yr=round(r_deg * 100.0, 4),
+        year25_retained_power_fraction_percent=round(yr25_ret_pct, 2),
+        lcoe_baseline_si_cents_kwh=round(lcoe_si, 4),
+        lcoe_2layer_cents_kwh=round(lcoe_2l, 4),
+        lcoe_3layer_4t_cents_kwh=round(lcoe_3l, 4),
+        lcoe_3layer_vs_si_reduction_percent=round(lcoe_red_pct, 2),
+        rouard_oblique_60deg_diff_percent=diff_60,
+        lcoe_redundancy_verified=lcoe_ok,
+        sha256_signature=blind_9c["sha256_signature"],
+    )
+
 

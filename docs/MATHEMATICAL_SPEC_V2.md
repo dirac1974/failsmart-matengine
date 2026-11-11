@@ -295,4 +295,72 @@ For both 2-Layer ($\eta = \eta_{\text{2L}}, N=2, \Delta C = \Delta C_{\text{2L}}
 5. **Metric 4 — Area-Constrained System Value Index ($\text{SVI}_{\text{BOS}}$, Sofia-NREL Area-BOS Credit):**
    $$\text{SVI}_{\text{BOS}} = \frac{\eta / 22.00}{\left(C_{\text{Si,mod}} + \Delta C + C_{\text{BOS,area}}\right) / \left(C_{\text{Si,mod}} + C_{\text{BOS,area}}\right)} = \frac{140.0 \cdot (\eta / 22.00)}{140.0 + \Delta C}$$
 
+---
+
+## 9. Phase 9 Engineering Extensions: Lab-Ready Synthesis & Defect Supercell Dossiers (9A), Contrastive Failure Classifier (9B), and Real-World Angular / Thermal / 25-Year Arrhenius LCOE Stress-Test (9C) (v6.0)
+
+### 9.1 Phase 9A — Stoichiometric Lab Synthesis Recipes ($\le 500^\circ\text{C}$) & 3D `doped` Defect Supercell Decks
+1. **Exact $10.0\text{ mmol}$ Batch Precursor Mass Balance:**
+   * Given a reduced formula unit $\prod_i E_i^{\nu_i}$ with formula-unit molar mass $M_{\text{FU}} = \sum_i \nu_i M_i\text{ [g/mol]}$, the exact target product mass for a $n_{\text{batch}} = 0.010\text{ mol}$ ($10.0\text{ mmol}$) batch is:
+     $$m_{\text{target,g}} = 0.010 \cdot M_{\text{FU}}$$
+   * Each element $E_i$ is supplied by a designated commercial reagent $R_i$ with molar mass $M(R_i)$ and metal/anion atom count $a_i$ per reagent formula unit, requiring reagent moles $n(R_i) = 0.010 \cdot \frac{\nu_i}{a_i}$ and reagent mass $m(R_i) = n(R_i) \cdot M(R_i)\text{ [g]}$ (with a $+5.0\%$ volatile overpressure margin recorded separately for $\text{S}, \text{Se}, \text{Cl}, \text{Br}, \text{I}$ chalcogen/halide sources).
+   * **Dual-Redundancy Elemental Mass-Conservation Invariant:**
+     Both the primary engine (`atomistic_and_tmm.py`) and the blinded verifier (`independent_verifier.py`) verify that the sum of elemental masses supplied by the stoichiometric reagents equals $m_{\text{target,g}}$ to within $10^{-6}\text{ g}$.
+2. **Stage 5 `doped` Intrinsic Vacancy & Antisite Defect Supercell Generation:**
+   * Given conventional/primitive unit-cell lattice lengths $(a, b, c)$, the supercell expansion integers $(N_a, N_b, N_c)$ are chosen as:
+     $$N_a = \max\!\left(1, \left\lceil \frac{10.0}{a} \right\rceil\right), \quad N_b = \max\!\left(1, \left\lceil \frac{10.0}{b} \right\rceil\right), \quad N_c = \max\!\left(1, \left\lceil \frac{10.0}{c} \right\rceil\right)$$
+     yielding supercell site count $N_{\text{super}} = N_a N_b N_c N_{\text{unit}}$ and minimum periodic image separation $L_{\min} = \min(N_a a, N_b b, N_c c) \ge 10.0\text{ \AA}$.
+   * Isotropic Freysoldt-Neugebauer-Van de Walle (FNV) point-charge electrostatic finite-size correction energy (Madelung constant $\alpha_{\text{M}} = 2.8373$ for cubic-equivalent volume $L_{\text{eff}} = \Omega_{\text{super}}^{1/3}$):
+     $$E_{\text{FNV}}(q) = \frac{q^2 \alpha_{\text{M}} \cdot 14.399645}{\varepsilon_0 \cdot L_{\text{eff}}}\text{ [eV]}$$
+     evaluated at $q = \pm 1, \pm 2$.
+
+### 9.2 Phase 9B — Extended 117-Candidate Live MP Discovery Funnel & Contrastive Failure Classifier Audit
+1. **Full 117-Candidate Live MP Cache Sweep:**
+   * Evaluates all $N_{\text{MP}} = 117$ charge-neutral, RoHS-clean semiconductors in `data/mp_live_candidates_cache.json` across the 5-stage funnel (`117 -> Stage 2 -> Stage 3 -> Gate A -> Stage 4/5 Finalists`).
+2. **Contrastive Failure Memory Classifier Separation Margin ($\Delta S_{\text{contrastive}}$):**
+   * For every candidate with 128-dimensional L2-normalized embedding $\hat{\mathbf{u}}_i$, define the positive centroid $\bar{\mathbf{c}}_{+} = \frac{\sum_{j \in \mathcal{P}} \hat{\mathbf{u}}_j}{\|\sum_{j \in \mathcal{P}} \hat{\mathbf{u}}_j\|_2}$ (over promoted finalists $\mathcal{P}$) and negative failure centroid $\bar{\mathbf{c}}_{-} = \frac{\sum_{k \in \mathcal{N}} \hat{\mathbf{u}}_k}{\|\sum_{k \in \mathcal{N}} \hat{\mathbf{u}}_k\|_2}$ (over rejected failures $\mathcal{N}$).
+   * The Contrastive Failure Margin for candidate $i$ is:
+     $$M_{\text{contrastive}}(i) = \hat{\mathbf{u}}_i \cdot \bar{\mathbf{c}}_{+} - \hat{\mathbf{u}}_i \cdot \bar{\mathbf{c}}_{-}$$
+   * Both primary and blinded engines verify that the mean margin of promoted finalists exceeds the mean margin of rejected candidates ($\bar{M}_{\mathcal{P}} - \bar{M}_{\mathcal{N}} > 0$).
+
+### 9.3 Phase 9C — Oblique-Incidence ($0^\circ\text{–}60^\circ$) S/P-Polarized Coherent TMM, Operating Temperature ($25^\circ\text{C}\text{–}65^\circ\text{C}$), and 25-Year Arrhenius LCOE Stress-Test
+1. **Oblique-Incidence ($\theta_0 \in \{0^\circ, 30^\circ, 45^\circ, 60^\circ\}$) S/P-Polarized 7-Medium Coherent Optics:**
+   * By Snell's Law in layer $m \in \{0, \dots, 6\}$ with complex index $\tilde{n}_m(\lambda)$:
+     $$\cos\theta_m = \sqrt{1.0 - \left(\frac{\tilde{n}_0 \sin\theta_0}{\tilde{n}_m}\right)^2}, \quad \beta_m(\lambda, \theta_0) = \frac{2\pi \tilde{n}_m d_m \cos\theta_m}{\lambda_{\text{nm}}}$$
+   * Polarization-dependent optical admittances ($s$-TE and $p$-TM):
+     $$\eta_m^{(s)} = \tilde{n}_m \cos\theta_m, \quad \eta_m^{(p)} = \frac{\tilde{n}_m}{\cos\theta_m}$$
+   * Fresnel interface reflection and transmission amplitudes for polarization $\sigma \in \{s, p\}$:
+     $$r_{m,m+1}^{(\sigma)} = \frac{\eta_m^{(\sigma)} - \eta_{m+1}^{(\sigma)}}{\eta_m^{(\sigma)} + \eta_{m+1}^{(\sigma)}}, \quad t_{m,m+1}^{(\sigma)} = \frac{2\eta_m^{(\sigma)}}{\eta_m^{(\sigma)} + \eta_{m+1}^{(\sigma)}}$$
+   * Unpolarized reflectance and transmittance into Medium 6:
+     $$R_{\text{ARC},1}(\lambda, \theta_0) = \frac{1}{2}\left(|r_{\text{tot}}^{(s)}|^2 + |r_{\text{tot}}^{(p)}|^2\right)$$
+     $$T_{\text{ARC},1}(\lambda, \theta_0) = \frac{1}{2}\left(\frac{\text{Re}(\eta_6^{(s)})}{\text{Re}(\eta_0^{(s)})}|t_{\text{tot}}^{(s)}|^2 + \frac{\text{Re}(\eta_6^{(p)})}{\text{Re}(\eta_0^{(p)})}|t_{\text{tot}}^{(p)}|^2\right)$$
+   * **Method A (`atomistic_and_tmm.py`):** $2\times 2$ Abeles matrix multiplication for $s$ and $p$ polarizations on the wavelength grid (`np.trapezoid`).
+   * **Method B (`independent_verifier.py`):** Recursive Rouard / Airy backward amplitude addition for $s$ and $p$ polarizations on the photon-energy grid (`scipy.integrate.simpson`).
+   * **Angular Modifier $\text{IAM}(\theta_0)$:** Evaluated at $\theta_0 = 0^\circ, 30^\circ, 45^\circ, 60^\circ$, plus hemisphere-weighted daily effective reflectance $\bar{R}_{\text{hemi}} = 0.35 R(0^\circ) + 0.35 R(30^\circ) + 0.20 R(45^\circ) + 0.10 R(60^\circ)$.
+
+2. **Field Operating Temperature Coefficient ($T_{\text{cell}} = 25^\circ\text{C} \rightarrow 45^\circ\text{C} \rightarrow 65^\circ\text{C}$):**
+   * For a subcell with band gap $E_g\text{ [eV]}$ and $25^\circ\text{C}$ ($298.15\text{ K}$) efficiency $\eta(25^\circ\text{C})$, the relative temperature coefficient $\gamma_{\text{rel}}(E_g)\text{ [K}^{-1}\text{]}$ follows the thermodynamic open-circuit voltage drift:
+     $$\gamma_{\text{rel}}(E_g) = -\frac{0.00440}{E_g^{0.65}}\text{ [K}^{-1}\text{]}$$
+     *(giving $-0.409\%/\text{K}$ for $1.12\text{ eV}$ c-Si, $-0.301\%/\text{K}$ for $1.79\text{ eV}$ Top Active Glass, and $-0.461\%/\text{K}$ for $0.93\text{ eV}$ Bottom IR Scavenger).*
+   * Subcell efficiency at temperature $T_{\text{C}} \in \{45^\circ\text{C}, 65^\circ\text{C}\}$ ($\Delta T = T_{\text{C}} - 25.0$):
+     $$\eta_{\text{sub}}(T_{\text{C}}) = \eta_{\text{sub}}(25^\circ\text{C}) \cdot \left(1.0 + \gamma_{\text{rel}}(E_g)\cdot \Delta T\right)$$
+   * Total 4T stack efficiency at $45^\circ\text{C}$ (NOCT) and $65^\circ\text{C}$ (desert peak) is $\eta_{\text{4T}}(T_{\text{C}}) = \eta_{\text{top}}(T_{\text{C}}) + \eta_{\text{Si}}(T_{\text{C}}) + \eta_{\text{bot}}(T_{\text{C}})$, with effective stack temperature coefficient:
+     $$\beta_{\text{4T,rel}} = \frac{\eta_{\text{4T}}(65^\circ\text{C}) - \eta_{\text{4T}}(25^\circ\text{C})}{40.0 \cdot \eta_{\text{4T}}(25^\circ\text{C})} \times 100\text{ [\%/K]}$$
+
+3. **25-Year Arrhenius Ion-Migration Reliability & Real-World LCOE ($\$/\text{kWh}$ and $\text{cents/kWh}$):**
+   * Given the 11-image NEB migration barrier $E_{\text{mig}}^{\text{NEB}}\text{ [eV]}$ of the limiting subcell (`min(E_mig_top, E_mig_bot)`), the annual kinetic + environmental degradation rate $r_{\text{deg}}\text{ [yr}^{-1}\text{]}$ at field temperature $T_{\text{field}} = 318.15\text{ K}$ ($45^\circ\text{C}$) is:
+     $$r_{\text{deg}} = 0.0035 + 0.0010 \cdot \exp\!\left(-\frac{E_{\text{mig}}^{\text{NEB}} - 0.65}{k_{\text{B}} T_{\text{field}}}\right)$$
+     *(For immobile lattices with $E_{\text{mig}}^{\text{NEB}} \ge 0.99\text{ eV}$, the exponential ionic drift term vanishes to $< 10^{-8}\text{ yr}^{-1}$, locking degradation at the $0.35\%/\text{yr}$ glass-encapsulated baseline and retaining $91.60\%$ of initial power at Year 25).*
+   * **25-Year Discounted LCOE ($r_{\text{disc}} = 6.0\%$, Solar Resource $Y_0 = 1800\text{ kWh/kW}_{\text{p}}\text{/yr} = 1.80\text{ kWh/W}_{\text{p}}\text{/yr}$, Inverter/Electronics BOS $C_{\text{BOS,power}} = \$0.22/\text{W}_{\text{p}}$, O&M $C_{\text{OM}} = \$2.50/\text{m}^2/\text{yr}$):**
+     * Initial installed CAPEX ($\$/\text{m}^2$) for a stack with module cost $C_{\text{mod}}\text{ [\$/m}^2\text{]}$ and nameplate power $P_{\text{m2}} = 10 \cdot \eta(25^\circ\text{C})\text{ [W}_{\text{p}}\text{/m}^2\text{]}$:
+       $$\text{CAPEX}_{\text{m2}} = C_{\text{mod}} + C_{\text{BOS,area}} + C_{\text{BOS,power}} \cdot P_{\text{m2}}$$
+     * Discounted 25-year energy yield per $\text{m}^2$ (accounting for NOCT $45^\circ\text{C}$ thermal derating $f_{\text{NOCT}} = \eta(45^\circ\text{C})/\eta(25^\circ\text{C})$ and annual degradation $r_{\text{deg}}$):
+       $$E_{\text{disc,25yr}} = \sum_{t=1}^{25} \frac{(P_{\text{m2}} / 1000.0) \cdot 1800.0 \cdot f_{\text{NOCT}} \cdot (1.0 - r_{\text{deg}})^{t-1}}{(1.0 + 0.06)^t}\text{ [kWh/m}^2\text{]}$$
+     * Discounted 25-year O&M cost per $\text{m}^2$:
+       $$\text{OM}_{\text{disc,25yr}} = \sum_{t=1}^{25} \frac{2.50}{(1.0 + 0.06)^t}\text{ [\$/m}^2\text{]}$$
+     * Levelized Cost of Energy (in $\text{cents/kWh}$):
+       $$\text{LCOE}_{\text{cents/kWh}} = 100.0 \times \frac{\text{CAPEX}_{\text{m2}} + \text{OM}_{\text{disc,25yr}}}{E_{\text{disc,25yr}}}$$
+     *(Compared directly against standalone $22.0\%$ single-junction c-Si baseline $\text{LCOE}_{\text{Si,ref}}$ under identical $45^\circ\text{C}$ NOCT and $0.45\%/\text{yr}$ c-Si degradation).*
+
+
 

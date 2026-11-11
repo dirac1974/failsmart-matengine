@@ -250,3 +250,73 @@ class GradedARCTechnoEconomicReport(BaseModel):
     sha256_signature: str
 
 
+class LabSynthesisAndDefectDossier(BaseModel):
+    """Phase 9A: Lab-Ready 10.0 mmol Synthesis Recipe & Stage 5 doped Defect Supercell Dossier (v6.0)."""
+    candidate_id: str
+    formula_reduced: str
+    target_layer: str
+    formula_unit_molar_mass_g_mol: float
+    target_batch_mmol: float
+    target_product_mass_g: float
+    reagent_masses_g: Dict[str, float]
+    volatile_overpressure_masses_g: Dict[str, float]
+    elemental_mass_conservation_diff_g: float
+    synthesis_temperature_c: float
+    dwell_time_hours: float
+    supercell_dims: List[int]
+    supercell_total_sites: int
+    supercell_min_image_dist_ang: float
+    dominant_vacancy_species: str
+    fnv_charge_correction_q1_ev: float
+    fnv_charge_correction_q2_ev: float
+    doped_defect_deck_filename: str
+    redundancy_verified: bool
+    sha256_signature: str
+
+
+class ContrastiveClassifierAuditReport(BaseModel):
+    """Phase 9B: Extended 117-Candidate MP Sweep & Contrastive Failure Classifier Margin Audit (v6.0)."""
+    total_evaluated_candidates: int
+    promoted_finalist_count: int
+    rejected_failure_count: int
+    mean_promoted_contrastive_margin: float
+    mean_rejected_contrastive_margin: float
+    contrastive_separation_delta: float
+    positive_separation_verified: bool
+    redundancy_verified: bool
+    sha256_signature: str
+
+
+class RealWorldLCOEStressTestReport(BaseModel):
+    """Phase 9C: Oblique-Incidence (0-60 deg) S/P TMM, Operating Temp (25-65 C) & 25-Year Arrhenius LCOE Dossier (v6.0)."""
+    pair_id: str
+    top_mp_id: str
+    top_formula: str
+    bottom_mp_id: str
+    bottom_formula: str
+    r_front_0deg_percent: float
+    r_front_30deg_percent: float
+    r_front_45deg_percent: float
+    r_front_60deg_percent: float
+    r_front_hemispheric_percent: float
+    pce_4t_0deg_25c_percent: float
+    pce_4t_30deg_25c_percent: float
+    pce_4t_45deg_25c_percent: float
+    pce_4t_60deg_25c_percent: float
+    iam_60deg_ratio: float
+    pce_4t_noct_45c_percent: float
+    pce_4t_desert_65c_percent: float
+    temp_coeff_rel_pct_per_k: float
+    limiting_neb_barrier_ev: float
+    annual_degradation_rate_pct_yr: float
+    year25_retained_power_fraction_percent: float
+    lcoe_baseline_si_cents_kwh: float
+    lcoe_2layer_cents_kwh: float
+    lcoe_3layer_4t_cents_kwh: float
+    lcoe_3layer_vs_si_reduction_percent: float
+    rouard_oblique_60deg_diff_percent: float
+    lcoe_redundancy_verified: bool
+    sha256_signature: str
+
+
+

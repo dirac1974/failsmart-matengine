@@ -1,6 +1,7 @@
 {
   "version": "4.0.0",
   "v5_graded_arc_and_techno_economics_enabled": true,
+  "v6_phase9_lab_contrastive_lcoe_enabled": true,
   "data_provenance": {
     "materials_project_live_api": true,
     "negative_synthesis_datasets": {
@@ -57,7 +58,10 @@
     },
     "atomistic_dynamical_matrix_and_neb": true,
     "coherent_abeles_tmm_vs_rouard_airy": true,
-    "graded_arc_tio2_and_techno_economic_fom": true
+    "graded_arc_tio2_and_techno_economic_fom": true,
+    "phase9a_lab_synthesis_and_doped_supercells": true,
+    "phase9b_extended_117_mp_and_contrastive_audit": true,
+    "phase9c_oblique_thermal_arrhenius_lcoe": true
   },
   "funnel_counts": {
     "stage1_live_mp_ingested": 100,
@@ -467,6 +471,38 @@
         "dynamically_and_kinetically_stable": true,
         "redundancy_verified": true,
         "sha256_signature": "66e28432a7519ec8a45a83a2eb7ba9f45c1dfc164c671b69f47e8e69ef32eeb3"
+      },
+      "lab_synthesis_and_defect_dossier": {
+        "candidate_id": "mp-22982",
+        "formula_reduced": "BiCuS2",
+        "target_layer": "BOTTOM_IR_075EV",
+        "formula_unit_molar_mass_g_mol": 336.6564,
+        "target_batch_mmol": 10.0,
+        "target_product_mass_g": 3.36656,
+        "reagent_masses_g": {
+          "Bi_stoich_source": 2.089804,
+          "Cu_stoich_source": 0.63546,
+          "S_stoich_source": 0.6413
+        },
+        "volatile_overpressure_masses_g": {
+          "S_5pct_overpressure": 0.673365
+        },
+        "elemental_mass_conservation_diff_g": 0.0,
+        "synthesis_temperature_c": 375.0,
+        "dwell_time_hours": 11.0,
+        "supercell_dims": [
+          3,
+          2,
+          1
+        ],
+        "supercell_total_sites": 96,
+        "supercell_min_image_dist_ang": 11.747,
+        "dominant_vacancy_species": "V_Cu (shallow acceptor, ns2-screened)",
+        "fnv_charge_correction_q1_ev": 0.0991,
+        "fnv_charge_correction_q2_ev": 0.3963,
+        "doped_defect_deck_filename": "mp-22982_BiCuS2_doped_supercell_3x2x1.in",
+        "redundancy_verified": true,
+        "sha256_signature": "4e0453cf9cc49ddfa51575c35dcfb54f183892b553131b1946afde526afd2d6b"
       }
     },
     {
@@ -857,6 +893,38 @@
         "dynamically_and_kinetically_stable": true,
         "redundancy_verified": true,
         "sha256_signature": "4fe923441b3a661212f9369883f5511c0b7b3570621bb35a74448f945434cef6"
+      },
+      "lab_synthesis_and_defect_dossier": {
+        "candidate_id": "mp-23474",
+        "formula_reduced": "AgBi3S5",
+        "target_layer": "BOTTOM_IR_075EV",
+        "formula_unit_molar_mass_g_mol": 895.1344,
+        "target_batch_mmol": 10.0,
+        "target_product_mass_g": 8.95134,
+        "reagent_masses_g": {
+          "Ag_stoich_source": 1.078682,
+          "Bi_stoich_source": 6.269412,
+          "S_stoich_source": 1.60325
+        },
+        "volatile_overpressure_masses_g": {
+          "S_5pct_overpressure": 1.683413
+        },
+        "elemental_mass_conservation_diff_g": 0.0,
+        "synthesis_temperature_c": 375.0,
+        "dwell_time_hours": 11.0,
+        "supercell_dims": [
+          3,
+          2,
+          1
+        ],
+        "supercell_total_sites": 108,
+        "supercell_min_image_dist_ang": 12.102,
+        "dominant_vacancy_species": "V_Chalcogen (shallow donor, ns2 antibonding)",
+        "fnv_charge_correction_q1_ev": 0.0896,
+        "fnv_charge_correction_q2_ev": 0.3583,
+        "doped_defect_deck_filename": "mp-23474_AgBi3S5_doped_supercell_3x2x1.in",
+        "redundancy_verified": true,
+        "sha256_signature": "feae19567d298dc087cad7d7115540f04aa3f606d86a1d4559ced3e1e8801b6b"
       }
     },
     {
@@ -1249,6 +1317,38 @@
         "dynamically_and_kinetically_stable": true,
         "redundancy_verified": true,
         "sha256_signature": "a10ec94bcf91d21c7eaed65922de15e2ed32f6b5ab34b101d3937128ad1b6ced"
+      },
+      "lab_synthesis_and_defect_dossier": {
+        "candidate_id": "mp-1227486",
+        "formula_reduced": "BiSbS3",
+        "target_layer": "TOP_ACTIVE_GLASS_185EV",
+        "formula_unit_molar_mass_g_mol": 426.9354,
+        "target_batch_mmol": 10.0,
+        "target_product_mass_g": 4.26935,
+        "reagent_masses_g": {
+          "Bi_stoich_source": 2.089804,
+          "Sb_stoich_source": 1.2176,
+          "S_stoich_source": 0.96195
+        },
+        "volatile_overpressure_masses_g": {
+          "S_5pct_overpressure": 1.010047
+        },
+        "elemental_mass_conservation_diff_g": 0.0,
+        "synthesis_temperature_c": 375.0,
+        "dwell_time_hours": 11.0,
+        "supercell_dims": [
+          3,
+          1,
+          1
+        ],
+        "supercell_total_sites": 60,
+        "supercell_min_image_dist_ang": 11.206,
+        "dominant_vacancy_species": "V_Chalcogen (shallow donor, ns2 antibonding)",
+        "fnv_charge_correction_q1_ev": 0.1275,
+        "fnv_charge_correction_q2_ev": 0.51,
+        "doped_defect_deck_filename": "mp-1227486_BiSbS3_doped_supercell_3x1x1.in",
+        "redundancy_verified": true,
+        "sha256_signature": "3f8bb62f664f2f7b6367139019f4ee890818cf072042e7ffd55f25d20a637938"
       }
     },
     {
@@ -1649,6 +1749,39 @@
         "dynamically_and_kinetically_stable": true,
         "redundancy_verified": true,
         "sha256_signature": "89c71681771f483b56189028916caebabfa5f1a6b0c88607581ea7d55766a1be"
+      },
+      "lab_synthesis_and_defect_dossier": {
+        "candidate_id": "mp-1224922",
+        "formula_reduced": "CuGaSnSe4",
+        "target_layer": "BOTTOM_IR_075EV",
+        "formula_unit_molar_mass_g_mol": 567.819,
+        "target_batch_mmol": 10.0,
+        "target_product_mass_g": 5.67819,
+        "reagent_masses_g": {
+          "Cu_stoich_source": 0.63546,
+          "Ga_stoich_source": 0.69723,
+          "Sn_stoich_source": 1.1871,
+          "Se_stoich_source": 3.1584
+        },
+        "volatile_overpressure_masses_g": {
+          "Se_5pct_overpressure": 3.31632
+        },
+        "elemental_mass_conservation_diff_g": 0.0,
+        "synthesis_temperature_c": 375.0,
+        "dwell_time_hours": 11.0,
+        "supercell_dims": [
+          2,
+          2,
+          2
+        ],
+        "supercell_total_sites": 56,
+        "supercell_min_image_dist_ang": 13.871,
+        "dominant_vacancy_species": "V_Cu (shallow acceptor, ns2-screened)",
+        "fnv_charge_correction_q1_ev": 0.1155,
+        "fnv_charge_correction_q2_ev": 0.462,
+        "doped_defect_deck_filename": "mp-1224922_CuGaSnSe4_doped_supercell_2x2x2.in",
+        "redundancy_verified": true,
+        "sha256_signature": "2027dcee226b92265dc0ef0743bdace471467e92d4970bfc6fe6d42981edd624"
       }
     },
     {
@@ -2049,6 +2182,39 @@
         "dynamically_and_kinetically_stable": true,
         "redundancy_verified": true,
         "sha256_signature": "c5e56b04e365aff7ed54335fa6e2da3c9fd003e5d2b96657fdb45e4ebb142fc5"
+      },
+      "lab_synthesis_and_defect_dossier": {
+        "candidate_id": "mp-1224129",
+        "formula_reduced": "CuInSnSe4",
+        "target_layer": "BOTTOM_IR_075EV",
+        "formula_unit_molar_mass_g_mol": 612.914,
+        "target_batch_mmol": 10.0,
+        "target_product_mass_g": 6.12914,
+        "reagent_masses_g": {
+          "Cu_stoich_source": 0.63546,
+          "In_stoich_source": 1.14818,
+          "Sn_stoich_source": 1.1871,
+          "Se_stoich_source": 3.1584
+        },
+        "volatile_overpressure_masses_g": {
+          "Se_5pct_overpressure": 3.31632
+        },
+        "elemental_mass_conservation_diff_g": 0.0,
+        "synthesis_temperature_c": 375.0,
+        "dwell_time_hours": 11.0,
+        "supercell_dims": [
+          2,
+          2,
+          2
+        ],
+        "supercell_total_sites": 56,
+        "supercell_min_image_dist_ang": 14.194,
+        "dominant_vacancy_species": "V_Cu (shallow acceptor, ns2-screened)",
+        "fnv_charge_correction_q1_ev": 0.1105,
+        "fnv_charge_correction_q2_ev": 0.442,
+        "doped_defect_deck_filename": "mp-1224129_CuInSnSe4_doped_supercell_2x2x2.in",
+        "redundancy_verified": true,
+        "sha256_signature": "17d411cb8bb1b06faf05d5977921be96f29e3b219b8b3b320cb1a88f97694a46"
       }
     },
     {
@@ -2437,6 +2603,38 @@
         "dynamically_and_kinetically_stable": true,
         "redundancy_verified": true,
         "sha256_signature": "25cdb7d416a5fb6dfcad119a2778fbdaadd55f10b3cf4be6b9e52cb8a9da132e"
+      },
+      "lab_synthesis_and_defect_dossier": {
+        "candidate_id": "mp-861911",
+        "formula_reduced": "Sb2OS2",
+        "target_layer": "TOP_ACTIVE_GLASS_185EV",
+        "formula_unit_molar_mass_g_mol": 323.6494,
+        "target_batch_mmol": 10.0,
+        "target_product_mass_g": 3.23649,
+        "reagent_masses_g": {
+          "Sb_stoich_source": 2.4352,
+          "O_stoich_source": 0.159994,
+          "S_stoich_source": 0.6413
+        },
+        "volatile_overpressure_masses_g": {
+          "S_5pct_overpressure": 0.673365
+        },
+        "elemental_mass_conservation_diff_g": 0.0,
+        "synthesis_temperature_c": 375.0,
+        "dwell_time_hours": 11.0,
+        "supercell_dims": [
+          2,
+          2,
+          1
+        ],
+        "supercell_total_sites": 40,
+        "supercell_min_image_dist_ang": 10.238,
+        "dominant_vacancy_species": "V_Chalcogen (shallow donor, ns2 antibonding)",
+        "fnv_charge_correction_q1_ev": 0.1497,
+        "fnv_charge_correction_q2_ev": 0.5987,
+        "doped_defect_deck_filename": "mp-861911_Sb2OS2_doped_supercell_2x2x1.in",
+        "redundancy_verified": true,
+        "sha256_signature": "f022f79105efd50c0aa7dbec22e9073b47eeee56bd231e34356908d636a38a52"
       }
     },
     {
@@ -2829,6 +3027,38 @@
         "dynamically_and_kinetically_stable": true,
         "redundancy_verified": true,
         "sha256_signature": "6c07d52f2ca54f5444d25b5af7f196d1ef2b1ad465e9677a5e1fea1d3a09f5a4"
+      },
+      "lab_synthesis_and_defect_dossier": {
+        "candidate_id": "mp-1078776",
+        "formula_reduced": "BiInS3",
+        "target_layer": "TOP_ACTIVE_GLASS_185EV",
+        "formula_unit_molar_mass_g_mol": 419.9934,
+        "target_batch_mmol": 10.0,
+        "target_product_mass_g": 4.19993,
+        "reagent_masses_g": {
+          "Bi_stoich_source": 2.089804,
+          "In_stoich_source": 1.14818,
+          "S_stoich_source": 0.96195
+        },
+        "volatile_overpressure_masses_g": {
+          "S_5pct_overpressure": 1.010047
+        },
+        "elemental_mass_conservation_diff_g": 0.0,
+        "synthesis_temperature_c": 375.0,
+        "dwell_time_hours": 11.0,
+        "supercell_dims": [
+          3,
+          2,
+          2
+        ],
+        "supercell_total_sites": 120,
+        "supercell_min_image_dist_ang": 11.712,
+        "dominant_vacancy_species": "V_Chalcogen (shallow donor, ns2 antibonding)",
+        "fnv_charge_correction_q1_ev": 0.1132,
+        "fnv_charge_correction_q2_ev": 0.4526,
+        "doped_defect_deck_filename": "mp-1078776_BiInS3_doped_supercell_3x2x2.in",
+        "redundancy_verified": true,
+        "sha256_signature": "7c7d8bb58c8a3da6b08a61045f972d12a667d5f040cc8fc64f7f98c8ae4181e0"
       }
     },
     {
@@ -3222,6 +3452,38 @@
         "dynamically_and_kinetically_stable": true,
         "redundancy_verified": true,
         "sha256_signature": "19cfc642b2062a8e2c84d35530349cbde30554e6f7e5f3c0034bd75d17a2169b"
+      },
+      "lab_synthesis_and_defect_dossier": {
+        "candidate_id": "mp-1223998",
+        "formula_reduced": "Bi3InSe6",
+        "target_layer": "BOTTOM_IR_075EV",
+        "formula_unit_molar_mass_g_mol": 1215.5192,
+        "target_batch_mmol": 10.0,
+        "target_product_mass_g": 12.15519,
+        "reagent_masses_g": {
+          "Bi_stoich_source": 6.269412,
+          "In_stoich_source": 1.14818,
+          "Se_stoich_source": 4.7376
+        },
+        "volatile_overpressure_masses_g": {
+          "Se_5pct_overpressure": 4.97448
+        },
+        "elemental_mass_conservation_diff_g": 0.0,
+        "synthesis_temperature_c": 375.0,
+        "dwell_time_hours": 11.0,
+        "supercell_dims": [
+          1,
+          1,
+          1
+        ],
+        "supercell_total_sites": 10,
+        "supercell_min_image_dist_ang": 19.676,
+        "dominant_vacancy_species": "V_Chalcogen (shallow donor, ns2 antibonding)",
+        "fnv_charge_correction_q1_ev": 0.1902,
+        "fnv_charge_correction_q2_ev": 0.7608,
+        "doped_defect_deck_filename": "mp-1223998_Bi3InSe6_doped_supercell_1x1x1.in",
+        "redundancy_verified": true,
+        "sha256_signature": "a3e1be33d8b6d8057bdcbf052c9957beec60fb8302f23813b62ade57e1584898"
       }
     }
   ],
@@ -3379,6 +3641,277 @@
       "sha256_signature": "19cfc642b2062a8e2c84d35530349cbde30554e6f7e5f3c0034bd75d17a2169b"
     }
   ],
+  "lab_synthesis_and_defect_dossiers": [
+    {
+      "candidate_id": "mp-22982",
+      "formula_reduced": "BiCuS2",
+      "target_layer": "BOTTOM_IR_075EV",
+      "formula_unit_molar_mass_g_mol": 336.6564,
+      "target_batch_mmol": 10.0,
+      "target_product_mass_g": 3.36656,
+      "reagent_masses_g": {
+        "Bi_stoich_source": 2.089804,
+        "Cu_stoich_source": 0.63546,
+        "S_stoich_source": 0.6413
+      },
+      "volatile_overpressure_masses_g": {
+        "S_5pct_overpressure": 0.673365
+      },
+      "elemental_mass_conservation_diff_g": 0.0,
+      "synthesis_temperature_c": 375.0,
+      "dwell_time_hours": 11.0,
+      "supercell_dims": [
+        3,
+        2,
+        1
+      ],
+      "supercell_total_sites": 96,
+      "supercell_min_image_dist_ang": 11.747,
+      "dominant_vacancy_species": "V_Cu (shallow acceptor, ns2-screened)",
+      "fnv_charge_correction_q1_ev": 0.0991,
+      "fnv_charge_correction_q2_ev": 0.3963,
+      "doped_defect_deck_filename": "mp-22982_BiCuS2_doped_supercell_3x2x1.in",
+      "redundancy_verified": true,
+      "sha256_signature": "4e0453cf9cc49ddfa51575c35dcfb54f183892b553131b1946afde526afd2d6b"
+    },
+    {
+      "candidate_id": "mp-23474",
+      "formula_reduced": "AgBi3S5",
+      "target_layer": "BOTTOM_IR_075EV",
+      "formula_unit_molar_mass_g_mol": 895.1344,
+      "target_batch_mmol": 10.0,
+      "target_product_mass_g": 8.95134,
+      "reagent_masses_g": {
+        "Ag_stoich_source": 1.078682,
+        "Bi_stoich_source": 6.269412,
+        "S_stoich_source": 1.60325
+      },
+      "volatile_overpressure_masses_g": {
+        "S_5pct_overpressure": 1.683413
+      },
+      "elemental_mass_conservation_diff_g": 0.0,
+      "synthesis_temperature_c": 375.0,
+      "dwell_time_hours": 11.0,
+      "supercell_dims": [
+        3,
+        2,
+        1
+      ],
+      "supercell_total_sites": 108,
+      "supercell_min_image_dist_ang": 12.102,
+      "dominant_vacancy_species": "V_Chalcogen (shallow donor, ns2 antibonding)",
+      "fnv_charge_correction_q1_ev": 0.0896,
+      "fnv_charge_correction_q2_ev": 0.3583,
+      "doped_defect_deck_filename": "mp-23474_AgBi3S5_doped_supercell_3x2x1.in",
+      "redundancy_verified": true,
+      "sha256_signature": "feae19567d298dc087cad7d7115540f04aa3f606d86a1d4559ced3e1e8801b6b"
+    },
+    {
+      "candidate_id": "mp-1227486",
+      "formula_reduced": "BiSbS3",
+      "target_layer": "TOP_ACTIVE_GLASS_185EV",
+      "formula_unit_molar_mass_g_mol": 426.9354,
+      "target_batch_mmol": 10.0,
+      "target_product_mass_g": 4.26935,
+      "reagent_masses_g": {
+        "Bi_stoich_source": 2.089804,
+        "Sb_stoich_source": 1.2176,
+        "S_stoich_source": 0.96195
+      },
+      "volatile_overpressure_masses_g": {
+        "S_5pct_overpressure": 1.010047
+      },
+      "elemental_mass_conservation_diff_g": 0.0,
+      "synthesis_temperature_c": 375.0,
+      "dwell_time_hours": 11.0,
+      "supercell_dims": [
+        3,
+        1,
+        1
+      ],
+      "supercell_total_sites": 60,
+      "supercell_min_image_dist_ang": 11.206,
+      "dominant_vacancy_species": "V_Chalcogen (shallow donor, ns2 antibonding)",
+      "fnv_charge_correction_q1_ev": 0.1275,
+      "fnv_charge_correction_q2_ev": 0.51,
+      "doped_defect_deck_filename": "mp-1227486_BiSbS3_doped_supercell_3x1x1.in",
+      "redundancy_verified": true,
+      "sha256_signature": "3f8bb62f664f2f7b6367139019f4ee890818cf072042e7ffd55f25d20a637938"
+    },
+    {
+      "candidate_id": "mp-1224922",
+      "formula_reduced": "CuGaSnSe4",
+      "target_layer": "BOTTOM_IR_075EV",
+      "formula_unit_molar_mass_g_mol": 567.819,
+      "target_batch_mmol": 10.0,
+      "target_product_mass_g": 5.67819,
+      "reagent_masses_g": {
+        "Cu_stoich_source": 0.63546,
+        "Ga_stoich_source": 0.69723,
+        "Sn_stoich_source": 1.1871,
+        "Se_stoich_source": 3.1584
+      },
+      "volatile_overpressure_masses_g": {
+        "Se_5pct_overpressure": 3.31632
+      },
+      "elemental_mass_conservation_diff_g": 0.0,
+      "synthesis_temperature_c": 375.0,
+      "dwell_time_hours": 11.0,
+      "supercell_dims": [
+        2,
+        2,
+        2
+      ],
+      "supercell_total_sites": 56,
+      "supercell_min_image_dist_ang": 13.871,
+      "dominant_vacancy_species": "V_Cu (shallow acceptor, ns2-screened)",
+      "fnv_charge_correction_q1_ev": 0.1155,
+      "fnv_charge_correction_q2_ev": 0.462,
+      "doped_defect_deck_filename": "mp-1224922_CuGaSnSe4_doped_supercell_2x2x2.in",
+      "redundancy_verified": true,
+      "sha256_signature": "2027dcee226b92265dc0ef0743bdace471467e92d4970bfc6fe6d42981edd624"
+    },
+    {
+      "candidate_id": "mp-1224129",
+      "formula_reduced": "CuInSnSe4",
+      "target_layer": "BOTTOM_IR_075EV",
+      "formula_unit_molar_mass_g_mol": 612.914,
+      "target_batch_mmol": 10.0,
+      "target_product_mass_g": 6.12914,
+      "reagent_masses_g": {
+        "Cu_stoich_source": 0.63546,
+        "In_stoich_source": 1.14818,
+        "Sn_stoich_source": 1.1871,
+        "Se_stoich_source": 3.1584
+      },
+      "volatile_overpressure_masses_g": {
+        "Se_5pct_overpressure": 3.31632
+      },
+      "elemental_mass_conservation_diff_g": 0.0,
+      "synthesis_temperature_c": 375.0,
+      "dwell_time_hours": 11.0,
+      "supercell_dims": [
+        2,
+        2,
+        2
+      ],
+      "supercell_total_sites": 56,
+      "supercell_min_image_dist_ang": 14.194,
+      "dominant_vacancy_species": "V_Cu (shallow acceptor, ns2-screened)",
+      "fnv_charge_correction_q1_ev": 0.1105,
+      "fnv_charge_correction_q2_ev": 0.442,
+      "doped_defect_deck_filename": "mp-1224129_CuInSnSe4_doped_supercell_2x2x2.in",
+      "redundancy_verified": true,
+      "sha256_signature": "17d411cb8bb1b06faf05d5977921be96f29e3b219b8b3b320cb1a88f97694a46"
+    },
+    {
+      "candidate_id": "mp-861911",
+      "formula_reduced": "Sb2OS2",
+      "target_layer": "TOP_ACTIVE_GLASS_185EV",
+      "formula_unit_molar_mass_g_mol": 323.6494,
+      "target_batch_mmol": 10.0,
+      "target_product_mass_g": 3.23649,
+      "reagent_masses_g": {
+        "Sb_stoich_source": 2.4352,
+        "O_stoich_source": 0.159994,
+        "S_stoich_source": 0.6413
+      },
+      "volatile_overpressure_masses_g": {
+        "S_5pct_overpressure": 0.673365
+      },
+      "elemental_mass_conservation_diff_g": 0.0,
+      "synthesis_temperature_c": 375.0,
+      "dwell_time_hours": 11.0,
+      "supercell_dims": [
+        2,
+        2,
+        1
+      ],
+      "supercell_total_sites": 40,
+      "supercell_min_image_dist_ang": 10.238,
+      "dominant_vacancy_species": "V_Chalcogen (shallow donor, ns2 antibonding)",
+      "fnv_charge_correction_q1_ev": 0.1497,
+      "fnv_charge_correction_q2_ev": 0.5987,
+      "doped_defect_deck_filename": "mp-861911_Sb2OS2_doped_supercell_2x2x1.in",
+      "redundancy_verified": true,
+      "sha256_signature": "f022f79105efd50c0aa7dbec22e9073b47eeee56bd231e34356908d636a38a52"
+    },
+    {
+      "candidate_id": "mp-1078776",
+      "formula_reduced": "BiInS3",
+      "target_layer": "TOP_ACTIVE_GLASS_185EV",
+      "formula_unit_molar_mass_g_mol": 419.9934,
+      "target_batch_mmol": 10.0,
+      "target_product_mass_g": 4.19993,
+      "reagent_masses_g": {
+        "Bi_stoich_source": 2.089804,
+        "In_stoich_source": 1.14818,
+        "S_stoich_source": 0.96195
+      },
+      "volatile_overpressure_masses_g": {
+        "S_5pct_overpressure": 1.010047
+      },
+      "elemental_mass_conservation_diff_g": 0.0,
+      "synthesis_temperature_c": 375.0,
+      "dwell_time_hours": 11.0,
+      "supercell_dims": [
+        3,
+        2,
+        2
+      ],
+      "supercell_total_sites": 120,
+      "supercell_min_image_dist_ang": 11.712,
+      "dominant_vacancy_species": "V_Chalcogen (shallow donor, ns2 antibonding)",
+      "fnv_charge_correction_q1_ev": 0.1132,
+      "fnv_charge_correction_q2_ev": 0.4526,
+      "doped_defect_deck_filename": "mp-1078776_BiInS3_doped_supercell_3x2x2.in",
+      "redundancy_verified": true,
+      "sha256_signature": "7c7d8bb58c8a3da6b08a61045f972d12a667d5f040cc8fc64f7f98c8ae4181e0"
+    },
+    {
+      "candidate_id": "mp-1223998",
+      "formula_reduced": "Bi3InSe6",
+      "target_layer": "BOTTOM_IR_075EV",
+      "formula_unit_molar_mass_g_mol": 1215.5192,
+      "target_batch_mmol": 10.0,
+      "target_product_mass_g": 12.15519,
+      "reagent_masses_g": {
+        "Bi_stoich_source": 6.269412,
+        "In_stoich_source": 1.14818,
+        "Se_stoich_source": 4.7376
+      },
+      "volatile_overpressure_masses_g": {
+        "Se_5pct_overpressure": 4.97448
+      },
+      "elemental_mass_conservation_diff_g": 0.0,
+      "synthesis_temperature_c": 375.0,
+      "dwell_time_hours": 11.0,
+      "supercell_dims": [
+        1,
+        1,
+        1
+      ],
+      "supercell_total_sites": 10,
+      "supercell_min_image_dist_ang": 19.676,
+      "dominant_vacancy_species": "V_Chalcogen (shallow donor, ns2 antibonding)",
+      "fnv_charge_correction_q1_ev": 0.1902,
+      "fnv_charge_correction_q2_ev": 0.7608,
+      "doped_defect_deck_filename": "mp-1223998_Bi3InSe6_doped_supercell_1x1x1.in",
+      "redundancy_verified": true,
+      "sha256_signature": "a3e1be33d8b6d8057bdcbf052c9957beec60fb8302f23813b62ade57e1584898"
+    }
+  ],
+  "contrastive_classifier_audit": {
+    "total_evaluated_candidates": 117,
+    "promoted_finalist_count": 8,
+    "rejected_failure_count": 109,
+    "mean_promoted_contrastive_margin": 0.085,
+    "mean_rejected_contrastive_margin": -0.0755,
+    "contrastive_separation_delta": 0.1605,
+    "positive_separation_verified": true,
+    "redundancy_verified": true,
+    "sha256_signature": "b9647b275f381e0dbd797f0adfa3435bd68febef8b7acc950506486944d737ed"
+  },
   "cross_layer_4t_tandem_pairs": [
     {
       "pair_id": "mp-861911__mp-1223998",
@@ -4808,6 +5341,458 @@
       "rouard_airy_redundancy_diff_percent": 0.0,
       "techno_economic_redundancy_verified": true,
       "sha256_signature": "d7bd7d8e6516a2972fe23d5356b186cabffc6046fdb2b4a8d6707200b0b847a4"
+    }
+  ],
+  "real_world_lcoe_stress_test_stacks": [
+    {
+      "pair_id": "mp-861911__mp-1223998",
+      "top_mp_id": "mp-861911",
+      "top_formula": "Sb2OS2",
+      "bottom_mp_id": "mp-1223998",
+      "bottom_formula": "Bi3InSe6",
+      "r_front_0deg_percent": 3.33,
+      "r_front_30deg_percent": 3.63,
+      "r_front_45deg_percent": 4.38,
+      "r_front_60deg_percent": 7.5,
+      "r_front_hemispheric_percent": 4.06,
+      "pce_4t_0deg_25c_percent": 42.44,
+      "pce_4t_30deg_25c_percent": 42.37,
+      "pce_4t_45deg_25c_percent": 42.01,
+      "pce_4t_60deg_25c_percent": 40.48,
+      "iam_60deg_ratio": 0.9538,
+      "pce_4t_noct_45c_percent": 39.38,
+      "pce_4t_desert_65c_percent": 36.32,
+      "temp_coeff_rel_pct_per_k": -0.3607,
+      "limiting_neb_barrier_ev": 0.9903,
+      "annual_degradation_rate_pct_yr": 0.35,
+      "year25_retained_power_fraction_percent": 91.93,
+      "lcoe_baseline_si_cents_kwh": 4.9362,
+      "lcoe_2layer_cents_kwh": 3.2897,
+      "lcoe_3layer_4t_cents_kwh": 3.1719,
+      "lcoe_3layer_vs_si_reduction_percent": 35.74,
+      "rouard_oblique_60deg_diff_percent": 0.01,
+      "lcoe_redundancy_verified": true,
+      "sha256_signature": "29b0ea06477cd1361788c9d57050c8c9f28113a021647bfdf541ac8f2b445478"
+    },
+    {
+      "pair_id": "mp-1227486__mp-1223998",
+      "top_mp_id": "mp-1227486",
+      "top_formula": "BiSbS3",
+      "bottom_mp_id": "mp-1223998",
+      "bottom_formula": "Bi3InSe6",
+      "r_front_0deg_percent": 3.22,
+      "r_front_30deg_percent": 3.58,
+      "r_front_45deg_percent": 4.4,
+      "r_front_60deg_percent": 7.56,
+      "r_front_hemispheric_percent": 4.02,
+      "pce_4t_0deg_25c_percent": 42.36,
+      "pce_4t_30deg_25c_percent": 42.28,
+      "pce_4t_45deg_25c_percent": 41.93,
+      "pce_4t_60deg_25c_percent": 40.41,
+      "iam_60deg_ratio": 0.954,
+      "pce_4t_noct_45c_percent": 39.31,
+      "pce_4t_desert_65c_percent": 36.26,
+      "temp_coeff_rel_pct_per_k": -0.3599,
+      "limiting_neb_barrier_ev": 0.9903,
+      "annual_degradation_rate_pct_yr": 0.35,
+      "year25_retained_power_fraction_percent": 91.93,
+      "lcoe_baseline_si_cents_kwh": 4.9362,
+      "lcoe_2layer_cents_kwh": 3.2938,
+      "lcoe_3layer_4t_cents_kwh": 3.1754,
+      "lcoe_3layer_vs_si_reduction_percent": 35.67,
+      "rouard_oblique_60deg_diff_percent": 0.0,
+      "lcoe_redundancy_verified": true,
+      "sha256_signature": "fc53c4abf35f553f4222572bbcf0de4a6228d7a4bc741864fa518e96b0a5d20a"
+    },
+    {
+      "pair_id": "mp-1078776__mp-1223998",
+      "top_mp_id": "mp-1078776",
+      "top_formula": "BiInS3",
+      "bottom_mp_id": "mp-1223998",
+      "bottom_formula": "Bi3InSe6",
+      "r_front_0deg_percent": 2.42,
+      "r_front_30deg_percent": 2.81,
+      "r_front_45deg_percent": 3.69,
+      "r_front_60deg_percent": 6.89,
+      "r_front_hemispheric_percent": 3.26,
+      "pce_4t_0deg_25c_percent": 42.16,
+      "pce_4t_30deg_25c_percent": 42.08,
+      "pce_4t_45deg_25c_percent": 41.74,
+      "pce_4t_60deg_25c_percent": 40.26,
+      "iam_60deg_ratio": 0.9549,
+      "pce_4t_noct_45c_percent": 39.13,
+      "pce_4t_desert_65c_percent": 36.1,
+      "temp_coeff_rel_pct_per_k": -0.359,
+      "limiting_neb_barrier_ev": 0.9903,
+      "annual_degradation_rate_pct_yr": 0.35,
+      "year25_retained_power_fraction_percent": 91.93,
+      "lcoe_baseline_si_cents_kwh": 4.9362,
+      "lcoe_2layer_cents_kwh": 3.3111,
+      "lcoe_3layer_4t_cents_kwh": 3.1877,
+      "lcoe_3layer_vs_si_reduction_percent": 35.42,
+      "rouard_oblique_60deg_diff_percent": 0.0,
+      "lcoe_redundancy_verified": true,
+      "sha256_signature": "87f9d2756532b7f002379985a1c14520b71c3b7c37ca568c96151b41418dec9d"
+    },
+    {
+      "pair_id": "mp-861911__mp-1224922",
+      "top_mp_id": "mp-861911",
+      "top_formula": "Sb2OS2",
+      "bottom_mp_id": "mp-1224922",
+      "bottom_formula": "CuGaSnSe4",
+      "r_front_0deg_percent": 3.33,
+      "r_front_30deg_percent": 3.63,
+      "r_front_45deg_percent": 4.38,
+      "r_front_60deg_percent": 7.5,
+      "r_front_hemispheric_percent": 4.06,
+      "pce_4t_0deg_25c_percent": 41.94,
+      "pce_4t_30deg_25c_percent": 41.85,
+      "pce_4t_45deg_25c_percent": 41.49,
+      "pce_4t_60deg_25c_percent": 39.95,
+      "iam_60deg_ratio": 0.9526,
+      "pce_4t_noct_45c_percent": 38.97,
+      "pce_4t_desert_65c_percent": 36.0,
+      "temp_coeff_rel_pct_per_k": -0.3543,
+      "limiting_neb_barrier_ev": 1.058,
+      "annual_degradation_rate_pct_yr": 0.35,
+      "year25_retained_power_fraction_percent": 91.93,
+      "lcoe_baseline_si_cents_kwh": 4.9362,
+      "lcoe_2layer_cents_kwh": 3.2897,
+      "lcoe_3layer_4t_cents_kwh": 3.1924,
+      "lcoe_3layer_vs_si_reduction_percent": 35.33,
+      "rouard_oblique_60deg_diff_percent": 0.01,
+      "lcoe_redundancy_verified": true,
+      "sha256_signature": "94dabef8a9c781e5d6b613eff52476d2e13a2dc11b6454c2ce6e61e302f9ed77"
+    },
+    {
+      "pair_id": "mp-861911__mp-22982",
+      "top_mp_id": "mp-861911",
+      "top_formula": "Sb2OS2",
+      "bottom_mp_id": "mp-22982",
+      "bottom_formula": "BiCuS2",
+      "r_front_0deg_percent": 3.33,
+      "r_front_30deg_percent": 3.63,
+      "r_front_45deg_percent": 4.38,
+      "r_front_60deg_percent": 7.5,
+      "r_front_hemispheric_percent": 4.06,
+      "pce_4t_0deg_25c_percent": 41.89,
+      "pce_4t_30deg_25c_percent": 41.81,
+      "pce_4t_45deg_25c_percent": 41.44,
+      "pce_4t_60deg_25c_percent": 39.91,
+      "iam_60deg_ratio": 0.9527,
+      "pce_4t_noct_45c_percent": 38.93,
+      "pce_4t_desert_65c_percent": 35.96,
+      "temp_coeff_rel_pct_per_k": -0.3541,
+      "limiting_neb_barrier_ev": 1.058,
+      "annual_degradation_rate_pct_yr": 0.35,
+      "year25_retained_power_fraction_percent": 91.93,
+      "lcoe_baseline_si_cents_kwh": 4.9362,
+      "lcoe_2layer_cents_kwh": 3.2897,
+      "lcoe_3layer_4t_cents_kwh": 3.1936,
+      "lcoe_3layer_vs_si_reduction_percent": 35.3,
+      "rouard_oblique_60deg_diff_percent": 0.01,
+      "lcoe_redundancy_verified": true,
+      "sha256_signature": "08a125a010ae5bc9d54d72c3ed7f5a930e61e92e6c832b9abd55ade97524388b"
+    },
+    {
+      "pair_id": "mp-1227486__mp-1224922",
+      "top_mp_id": "mp-1227486",
+      "top_formula": "BiSbS3",
+      "bottom_mp_id": "mp-1224922",
+      "bottom_formula": "CuGaSnSe4",
+      "r_front_0deg_percent": 3.22,
+      "r_front_30deg_percent": 3.58,
+      "r_front_45deg_percent": 4.4,
+      "r_front_60deg_percent": 7.56,
+      "r_front_hemispheric_percent": 4.02,
+      "pce_4t_0deg_25c_percent": 41.86,
+      "pce_4t_30deg_25c_percent": 41.77,
+      "pce_4t_45deg_25c_percent": 41.41,
+      "pce_4t_60deg_25c_percent": 39.89,
+      "iam_60deg_ratio": 0.9529,
+      "pce_4t_noct_45c_percent": 38.9,
+      "pce_4t_desert_65c_percent": 35.94,
+      "temp_coeff_rel_pct_per_k": -0.3535,
+      "limiting_neb_barrier_ev": 0.9976,
+      "annual_degradation_rate_pct_yr": 0.35,
+      "year25_retained_power_fraction_percent": 91.93,
+      "lcoe_baseline_si_cents_kwh": 4.9362,
+      "lcoe_2layer_cents_kwh": 3.2938,
+      "lcoe_3layer_4t_cents_kwh": 3.1959,
+      "lcoe_3layer_vs_si_reduction_percent": 35.25,
+      "rouard_oblique_60deg_diff_percent": 0.01,
+      "lcoe_redundancy_verified": true,
+      "sha256_signature": "012d56c88bc25df3520c64bbf392efd45a97ad50fe6a94754e3262786eb66667"
+    },
+    {
+      "pair_id": "mp-861911__mp-23474",
+      "top_mp_id": "mp-861911",
+      "top_formula": "Sb2OS2",
+      "bottom_mp_id": "mp-23474",
+      "bottom_formula": "AgBi3S5",
+      "r_front_0deg_percent": 3.33,
+      "r_front_30deg_percent": 3.63,
+      "r_front_45deg_percent": 4.38,
+      "r_front_60deg_percent": 7.5,
+      "r_front_hemispheric_percent": 4.06,
+      "pce_4t_0deg_25c_percent": 41.89,
+      "pce_4t_30deg_25c_percent": 41.81,
+      "pce_4t_45deg_25c_percent": 41.44,
+      "pce_4t_60deg_25c_percent": 39.91,
+      "iam_60deg_ratio": 0.9527,
+      "pce_4t_noct_45c_percent": 38.93,
+      "pce_4t_desert_65c_percent": 35.96,
+      "temp_coeff_rel_pct_per_k": -0.3541,
+      "limiting_neb_barrier_ev": 1.058,
+      "annual_degradation_rate_pct_yr": 0.35,
+      "year25_retained_power_fraction_percent": 91.93,
+      "lcoe_baseline_si_cents_kwh": 4.9362,
+      "lcoe_2layer_cents_kwh": 3.2897,
+      "lcoe_3layer_4t_cents_kwh": 3.1963,
+      "lcoe_3layer_vs_si_reduction_percent": 35.25,
+      "rouard_oblique_60deg_diff_percent": 0.01,
+      "lcoe_redundancy_verified": true,
+      "sha256_signature": "dc011c84ef55c6568b3847a9299885a43e8b85204eadf399680ccd0ae98da8c8"
+    },
+    {
+      "pair_id": "mp-1227486__mp-22982",
+      "top_mp_id": "mp-1227486",
+      "top_formula": "BiSbS3",
+      "bottom_mp_id": "mp-22982",
+      "bottom_formula": "BiCuS2",
+      "r_front_0deg_percent": 3.22,
+      "r_front_30deg_percent": 3.58,
+      "r_front_45deg_percent": 4.4,
+      "r_front_60deg_percent": 7.56,
+      "r_front_hemispheric_percent": 4.02,
+      "pce_4t_0deg_25c_percent": 41.81,
+      "pce_4t_30deg_25c_percent": 41.72,
+      "pce_4t_45deg_25c_percent": 41.36,
+      "pce_4t_60deg_25c_percent": 39.84,
+      "iam_60deg_ratio": 0.9529,
+      "pce_4t_noct_45c_percent": 38.85,
+      "pce_4t_desert_65c_percent": 35.9,
+      "temp_coeff_rel_pct_per_k": -0.3533,
+      "limiting_neb_barrier_ev": 0.9976,
+      "annual_degradation_rate_pct_yr": 0.35,
+      "year25_retained_power_fraction_percent": 91.93,
+      "lcoe_baseline_si_cents_kwh": 4.9362,
+      "lcoe_2layer_cents_kwh": 3.2938,
+      "lcoe_3layer_4t_cents_kwh": 3.1972,
+      "lcoe_3layer_vs_si_reduction_percent": 35.23,
+      "rouard_oblique_60deg_diff_percent": 0.0,
+      "lcoe_redundancy_verified": true,
+      "sha256_signature": "b180783f5a5775d192e27bf89fbad061c75f2f2306b24bb542498b0869c20a3b"
+    },
+    {
+      "pair_id": "mp-1227486__mp-23474",
+      "top_mp_id": "mp-1227486",
+      "top_formula": "BiSbS3",
+      "bottom_mp_id": "mp-23474",
+      "bottom_formula": "AgBi3S5",
+      "r_front_0deg_percent": 3.22,
+      "r_front_30deg_percent": 3.58,
+      "r_front_45deg_percent": 4.4,
+      "r_front_60deg_percent": 7.56,
+      "r_front_hemispheric_percent": 4.02,
+      "pce_4t_0deg_25c_percent": 41.81,
+      "pce_4t_30deg_25c_percent": 41.72,
+      "pce_4t_45deg_25c_percent": 41.36,
+      "pce_4t_60deg_25c_percent": 39.84,
+      "iam_60deg_ratio": 0.9529,
+      "pce_4t_noct_45c_percent": 38.85,
+      "pce_4t_desert_65c_percent": 35.9,
+      "temp_coeff_rel_pct_per_k": -0.3533,
+      "limiting_neb_barrier_ev": 0.9976,
+      "annual_degradation_rate_pct_yr": 0.35,
+      "year25_retained_power_fraction_percent": 91.93,
+      "lcoe_baseline_si_cents_kwh": 4.9362,
+      "lcoe_2layer_cents_kwh": 3.2938,
+      "lcoe_3layer_4t_cents_kwh": 3.1999,
+      "lcoe_3layer_vs_si_reduction_percent": 35.17,
+      "rouard_oblique_60deg_diff_percent": 0.0,
+      "lcoe_redundancy_verified": true,
+      "sha256_signature": "2733978a20f73522e0872021b3027229c48813339bbf0bf6d43156533affd900"
+    },
+    {
+      "pair_id": "mp-861911__mp-1224129",
+      "top_mp_id": "mp-861911",
+      "top_formula": "Sb2OS2",
+      "bottom_mp_id": "mp-1224129",
+      "bottom_formula": "CuInSnSe4",
+      "r_front_0deg_percent": 3.33,
+      "r_front_30deg_percent": 3.63,
+      "r_front_45deg_percent": 4.38,
+      "r_front_60deg_percent": 7.5,
+      "r_front_hemispheric_percent": 4.06,
+      "pce_4t_0deg_25c_percent": 41.65,
+      "pce_4t_30deg_25c_percent": 41.56,
+      "pce_4t_45deg_25c_percent": 41.21,
+      "pce_4t_60deg_25c_percent": 39.7,
+      "iam_60deg_ratio": 0.9532,
+      "pce_4t_noct_45c_percent": 38.68,
+      "pce_4t_desert_65c_percent": 35.72,
+      "temp_coeff_rel_pct_per_k": -0.3561,
+      "limiting_neb_barrier_ev": 1.058,
+      "annual_degradation_rate_pct_yr": 0.35,
+      "year25_retained_power_fraction_percent": 91.93,
+      "lcoe_baseline_si_cents_kwh": 4.9362,
+      "lcoe_2layer_cents_kwh": 3.2897,
+      "lcoe_3layer_4t_cents_kwh": 3.2101,
+      "lcoe_3layer_vs_si_reduction_percent": 34.97,
+      "rouard_oblique_60deg_diff_percent": 0.01,
+      "lcoe_redundancy_verified": true,
+      "sha256_signature": "e09f8f453e735293512d7d4f11a5764012d0a633699858f2a13bd14723ee8ebb"
+    },
+    {
+      "pair_id": "mp-1078776__mp-1224922",
+      "top_mp_id": "mp-1078776",
+      "top_formula": "BiInS3",
+      "bottom_mp_id": "mp-1224922",
+      "bottom_formula": "CuGaSnSe4",
+      "r_front_0deg_percent": 2.42,
+      "r_front_30deg_percent": 2.81,
+      "r_front_45deg_percent": 3.69,
+      "r_front_60deg_percent": 6.89,
+      "r_front_hemispheric_percent": 3.26,
+      "pce_4t_0deg_25c_percent": 41.62,
+      "pce_4t_30deg_25c_percent": 41.53,
+      "pce_4t_45deg_25c_percent": 41.18,
+      "pce_4t_60deg_25c_percent": 39.69,
+      "iam_60deg_ratio": 0.9536,
+      "pce_4t_noct_45c_percent": 38.69,
+      "pce_4t_desert_65c_percent": 35.76,
+      "temp_coeff_rel_pct_per_k": -0.3524,
+      "limiting_neb_barrier_ev": 1.1202,
+      "annual_degradation_rate_pct_yr": 0.35,
+      "year25_retained_power_fraction_percent": 91.93,
+      "lcoe_baseline_si_cents_kwh": 4.9362,
+      "lcoe_2layer_cents_kwh": 3.3111,
+      "lcoe_3layer_4t_cents_kwh": 3.2104,
+      "lcoe_3layer_vs_si_reduction_percent": 34.96,
+      "rouard_oblique_60deg_diff_percent": 0.0,
+      "lcoe_redundancy_verified": true,
+      "sha256_signature": "80a6f5b96f2daae08c3ded909e3f8f7b31f1e809800ae96ecbceb8f6d90e5850"
+    },
+    {
+      "pair_id": "mp-1078776__mp-22982",
+      "top_mp_id": "mp-1078776",
+      "top_formula": "BiInS3",
+      "bottom_mp_id": "mp-22982",
+      "bottom_formula": "BiCuS2",
+      "r_front_0deg_percent": 2.42,
+      "r_front_30deg_percent": 2.81,
+      "r_front_45deg_percent": 3.69,
+      "r_front_60deg_percent": 6.89,
+      "r_front_hemispheric_percent": 3.26,
+      "pce_4t_0deg_25c_percent": 41.58,
+      "pce_4t_30deg_25c_percent": 41.48,
+      "pce_4t_45deg_25c_percent": 41.13,
+      "pce_4t_60deg_25c_percent": 39.65,
+      "iam_60deg_ratio": 0.9536,
+      "pce_4t_noct_45c_percent": 38.65,
+      "pce_4t_desert_65c_percent": 35.72,
+      "temp_coeff_rel_pct_per_k": -0.3522,
+      "limiting_neb_barrier_ev": 1.1202,
+      "annual_degradation_rate_pct_yr": 0.35,
+      "year25_retained_power_fraction_percent": 91.93,
+      "lcoe_baseline_si_cents_kwh": 4.9362,
+      "lcoe_2layer_cents_kwh": 3.3111,
+      "lcoe_3layer_4t_cents_kwh": 3.2112,
+      "lcoe_3layer_vs_si_reduction_percent": 34.95,
+      "rouard_oblique_60deg_diff_percent": 0.01,
+      "lcoe_redundancy_verified": true,
+      "sha256_signature": "7231a9c0fc9917a56f93729833111ca4c20ac7e396b3830e092519d91d4a82e9"
+    },
+    {
+      "pair_id": "mp-1078776__mp-23474",
+      "top_mp_id": "mp-1078776",
+      "top_formula": "BiInS3",
+      "bottom_mp_id": "mp-23474",
+      "bottom_formula": "AgBi3S5",
+      "r_front_0deg_percent": 2.42,
+      "r_front_30deg_percent": 2.81,
+      "r_front_45deg_percent": 3.69,
+      "r_front_60deg_percent": 6.89,
+      "r_front_hemispheric_percent": 3.26,
+      "pce_4t_0deg_25c_percent": 41.58,
+      "pce_4t_30deg_25c_percent": 41.48,
+      "pce_4t_45deg_25c_percent": 41.13,
+      "pce_4t_60deg_25c_percent": 39.65,
+      "iam_60deg_ratio": 0.9536,
+      "pce_4t_noct_45c_percent": 38.65,
+      "pce_4t_desert_65c_percent": 35.72,
+      "temp_coeff_rel_pct_per_k": -0.3522,
+      "limiting_neb_barrier_ev": 1.12,
+      "annual_degradation_rate_pct_yr": 0.35,
+      "year25_retained_power_fraction_percent": 91.93,
+      "lcoe_baseline_si_cents_kwh": 4.9362,
+      "lcoe_2layer_cents_kwh": 3.3111,
+      "lcoe_3layer_4t_cents_kwh": 3.2139,
+      "lcoe_3layer_vs_si_reduction_percent": 34.89,
+      "rouard_oblique_60deg_diff_percent": 0.01,
+      "lcoe_redundancy_verified": true,
+      "sha256_signature": "4ac5a585d9899b554dcc32e9edfa5b37a409cf24b8e6d483f2aa7cb82513af63"
+    },
+    {
+      "pair_id": "mp-1227486__mp-1224129",
+      "top_mp_id": "mp-1227486",
+      "top_formula": "BiSbS3",
+      "bottom_mp_id": "mp-1224129",
+      "bottom_formula": "CuInSnSe4",
+      "r_front_0deg_percent": 3.22,
+      "r_front_30deg_percent": 3.58,
+      "r_front_45deg_percent": 4.4,
+      "r_front_60deg_percent": 7.56,
+      "r_front_hemispheric_percent": 4.02,
+      "pce_4t_0deg_25c_percent": 41.56,
+      "pce_4t_30deg_25c_percent": 41.48,
+      "pce_4t_45deg_25c_percent": 41.13,
+      "pce_4t_60deg_25c_percent": 39.63,
+      "iam_60deg_ratio": 0.9536,
+      "pce_4t_noct_45c_percent": 38.61,
+      "pce_4t_desert_65c_percent": 35.65,
+      "temp_coeff_rel_pct_per_k": -0.3553,
+      "limiting_neb_barrier_ev": 0.9976,
+      "annual_degradation_rate_pct_yr": 0.35,
+      "year25_retained_power_fraction_percent": 91.93,
+      "lcoe_baseline_si_cents_kwh": 4.9362,
+      "lcoe_2layer_cents_kwh": 3.2938,
+      "lcoe_3layer_4t_cents_kwh": 3.2142,
+      "lcoe_3layer_vs_si_reduction_percent": 34.88,
+      "rouard_oblique_60deg_diff_percent": 0.0,
+      "lcoe_redundancy_verified": true,
+      "sha256_signature": "c9d5eabc6229d21053a4f8146ce0c70c40f8dfe349773b760a7dc9316d974b94"
+    },
+    {
+      "pair_id": "mp-1078776__mp-1224129",
+      "top_mp_id": "mp-1078776",
+      "top_formula": "BiInS3",
+      "bottom_mp_id": "mp-1224129",
+      "bottom_formula": "CuInSnSe4",
+      "r_front_0deg_percent": 2.42,
+      "r_front_30deg_percent": 2.81,
+      "r_front_45deg_percent": 3.69,
+      "r_front_60deg_percent": 6.89,
+      "r_front_hemispheric_percent": 3.26,
+      "pce_4t_0deg_25c_percent": 41.33,
+      "pce_4t_30deg_25c_percent": 41.24,
+      "pce_4t_45deg_25c_percent": 40.9,
+      "pce_4t_60deg_25c_percent": 39.45,
+      "iam_60deg_ratio": 0.9545,
+      "pce_4t_noct_45c_percent": 38.4,
+      "pce_4t_desert_65c_percent": 35.47,
+      "temp_coeff_rel_pct_per_k": -0.3543,
+      "limiting_neb_barrier_ev": 1.1202,
+      "annual_degradation_rate_pct_yr": 0.35,
+      "year25_retained_power_fraction_percent": 91.93,
+      "lcoe_baseline_si_cents_kwh": 4.9362,
+      "lcoe_2layer_cents_kwh": 3.3111,
+      "lcoe_3layer_4t_cents_kwh": 3.2284,
+      "lcoe_3layer_vs_si_reduction_percent": 34.6,
+      "rouard_oblique_60deg_diff_percent": 0.0,
+      "lcoe_redundancy_verified": true,
+      "sha256_signature": "fedf9af4b21016d763732934e7b5336401f10cc08f35a37e2975ebbabc51428e"
     }
   ],
   "all_mp_records": [
@@ -12356,6 +13341,38 @@
         "dynamically_and_kinetically_stable": true,
         "redundancy_verified": true,
         "sha256_signature": "66e28432a7519ec8a45a83a2eb7ba9f45c1dfc164c671b69f47e8e69ef32eeb3"
+      },
+      "lab_synthesis_and_defect_dossier": {
+        "candidate_id": "mp-22982",
+        "formula_reduced": "BiCuS2",
+        "target_layer": "BOTTOM_IR_075EV",
+        "formula_unit_molar_mass_g_mol": 336.6564,
+        "target_batch_mmol": 10.0,
+        "target_product_mass_g": 3.36656,
+        "reagent_masses_g": {
+          "Bi_stoich_source": 2.089804,
+          "Cu_stoich_source": 0.63546,
+          "S_stoich_source": 0.6413
+        },
+        "volatile_overpressure_masses_g": {
+          "S_5pct_overpressure": 0.673365
+        },
+        "elemental_mass_conservation_diff_g": 0.0,
+        "synthesis_temperature_c": 375.0,
+        "dwell_time_hours": 11.0,
+        "supercell_dims": [
+          3,
+          2,
+          1
+        ],
+        "supercell_total_sites": 96,
+        "supercell_min_image_dist_ang": 11.747,
+        "dominant_vacancy_species": "V_Cu (shallow acceptor, ns2-screened)",
+        "fnv_charge_correction_q1_ev": 0.0991,
+        "fnv_charge_correction_q2_ev": 0.3963,
+        "doped_defect_deck_filename": "mp-22982_BiCuS2_doped_supercell_3x2x1.in",
+        "redundancy_verified": true,
+        "sha256_signature": "4e0453cf9cc49ddfa51575c35dcfb54f183892b553131b1946afde526afd2d6b"
       }
     },
     {
@@ -13589,6 +14606,38 @@
         "dynamically_and_kinetically_stable": true,
         "redundancy_verified": true,
         "sha256_signature": "4fe923441b3a661212f9369883f5511c0b7b3570621bb35a74448f945434cef6"
+      },
+      "lab_synthesis_and_defect_dossier": {
+        "candidate_id": "mp-23474",
+        "formula_reduced": "AgBi3S5",
+        "target_layer": "BOTTOM_IR_075EV",
+        "formula_unit_molar_mass_g_mol": 895.1344,
+        "target_batch_mmol": 10.0,
+        "target_product_mass_g": 8.95134,
+        "reagent_masses_g": {
+          "Ag_stoich_source": 1.078682,
+          "Bi_stoich_source": 6.269412,
+          "S_stoich_source": 1.60325
+        },
+        "volatile_overpressure_masses_g": {
+          "S_5pct_overpressure": 1.683413
+        },
+        "elemental_mass_conservation_diff_g": 0.0,
+        "synthesis_temperature_c": 375.0,
+        "dwell_time_hours": 11.0,
+        "supercell_dims": [
+          3,
+          2,
+          1
+        ],
+        "supercell_total_sites": 108,
+        "supercell_min_image_dist_ang": 12.102,
+        "dominant_vacancy_species": "V_Chalcogen (shallow donor, ns2 antibonding)",
+        "fnv_charge_correction_q1_ev": 0.0896,
+        "fnv_charge_correction_q2_ev": 0.3583,
+        "doped_defect_deck_filename": "mp-23474_AgBi3S5_doped_supercell_3x2x1.in",
+        "redundancy_verified": true,
+        "sha256_signature": "feae19567d298dc087cad7d7115540f04aa3f606d86a1d4559ced3e1e8801b6b"
       }
     },
     {
@@ -21820,6 +22869,38 @@
         "dynamically_and_kinetically_stable": true,
         "redundancy_verified": true,
         "sha256_signature": "a10ec94bcf91d21c7eaed65922de15e2ed32f6b5ab34b101d3937128ad1b6ced"
+      },
+      "lab_synthesis_and_defect_dossier": {
+        "candidate_id": "mp-1227486",
+        "formula_reduced": "BiSbS3",
+        "target_layer": "TOP_ACTIVE_GLASS_185EV",
+        "formula_unit_molar_mass_g_mol": 426.9354,
+        "target_batch_mmol": 10.0,
+        "target_product_mass_g": 4.26935,
+        "reagent_masses_g": {
+          "Bi_stoich_source": 2.089804,
+          "Sb_stoich_source": 1.2176,
+          "S_stoich_source": 0.96195
+        },
+        "volatile_overpressure_masses_g": {
+          "S_5pct_overpressure": 1.010047
+        },
+        "elemental_mass_conservation_diff_g": 0.0,
+        "synthesis_temperature_c": 375.0,
+        "dwell_time_hours": 11.0,
+        "supercell_dims": [
+          3,
+          1,
+          1
+        ],
+        "supercell_total_sites": 60,
+        "supercell_min_image_dist_ang": 11.206,
+        "dominant_vacancy_species": "V_Chalcogen (shallow donor, ns2 antibonding)",
+        "fnv_charge_correction_q1_ev": 0.1275,
+        "fnv_charge_correction_q2_ev": 0.51,
+        "doped_defect_deck_filename": "mp-1227486_BiSbS3_doped_supercell_3x1x1.in",
+        "redundancy_verified": true,
+        "sha256_signature": "3f8bb62f664f2f7b6367139019f4ee890818cf072042e7ffd55f25d20a637938"
       }
     },
     {
@@ -23727,6 +24808,39 @@
         "dynamically_and_kinetically_stable": true,
         "redundancy_verified": true,
         "sha256_signature": "89c71681771f483b56189028916caebabfa5f1a6b0c88607581ea7d55766a1be"
+      },
+      "lab_synthesis_and_defect_dossier": {
+        "candidate_id": "mp-1224922",
+        "formula_reduced": "CuGaSnSe4",
+        "target_layer": "BOTTOM_IR_075EV",
+        "formula_unit_molar_mass_g_mol": 567.819,
+        "target_batch_mmol": 10.0,
+        "target_product_mass_g": 5.67819,
+        "reagent_masses_g": {
+          "Cu_stoich_source": 0.63546,
+          "Ga_stoich_source": 0.69723,
+          "Sn_stoich_source": 1.1871,
+          "Se_stoich_source": 3.1584
+        },
+        "volatile_overpressure_masses_g": {
+          "Se_5pct_overpressure": 3.31632
+        },
+        "elemental_mass_conservation_diff_g": 0.0,
+        "synthesis_temperature_c": 375.0,
+        "dwell_time_hours": 11.0,
+        "supercell_dims": [
+          2,
+          2,
+          2
+        ],
+        "supercell_total_sites": 56,
+        "supercell_min_image_dist_ang": 13.871,
+        "dominant_vacancy_species": "V_Cu (shallow acceptor, ns2-screened)",
+        "fnv_charge_correction_q1_ev": 0.1155,
+        "fnv_charge_correction_q2_ev": 0.462,
+        "doped_defect_deck_filename": "mp-1224922_CuGaSnSe4_doped_supercell_2x2x2.in",
+        "redundancy_verified": true,
+        "sha256_signature": "2027dcee226b92265dc0ef0743bdace471467e92d4970bfc6fe6d42981edd624"
       }
     },
     {
@@ -26012,6 +27126,39 @@
         "dynamically_and_kinetically_stable": true,
         "redundancy_verified": true,
         "sha256_signature": "c5e56b04e365aff7ed54335fa6e2da3c9fd003e5d2b96657fdb45e4ebb142fc5"
+      },
+      "lab_synthesis_and_defect_dossier": {
+        "candidate_id": "mp-1224129",
+        "formula_reduced": "CuInSnSe4",
+        "target_layer": "BOTTOM_IR_075EV",
+        "formula_unit_molar_mass_g_mol": 612.914,
+        "target_batch_mmol": 10.0,
+        "target_product_mass_g": 6.12914,
+        "reagent_masses_g": {
+          "Cu_stoich_source": 0.63546,
+          "In_stoich_source": 1.14818,
+          "Sn_stoich_source": 1.1871,
+          "Se_stoich_source": 3.1584
+        },
+        "volatile_overpressure_masses_g": {
+          "Se_5pct_overpressure": 3.31632
+        },
+        "elemental_mass_conservation_diff_g": 0.0,
+        "synthesis_temperature_c": 375.0,
+        "dwell_time_hours": 11.0,
+        "supercell_dims": [
+          2,
+          2,
+          2
+        ],
+        "supercell_total_sites": 56,
+        "supercell_min_image_dist_ang": 14.194,
+        "dominant_vacancy_species": "V_Cu (shallow acceptor, ns2-screened)",
+        "fnv_charge_correction_q1_ev": 0.1105,
+        "fnv_charge_correction_q2_ev": 0.442,
+        "doped_defect_deck_filename": "mp-1224129_CuInSnSe4_doped_supercell_2x2x2.in",
+        "redundancy_verified": true,
+        "sha256_signature": "17d411cb8bb1b06faf05d5977921be96f29e3b219b8b3b320cb1a88f97694a46"
       }
     },
     {
@@ -27653,6 +28800,38 @@
         "dynamically_and_kinetically_stable": true,
         "redundancy_verified": true,
         "sha256_signature": "25cdb7d416a5fb6dfcad119a2778fbdaadd55f10b3cf4be6b9e52cb8a9da132e"
+      },
+      "lab_synthesis_and_defect_dossier": {
+        "candidate_id": "mp-861911",
+        "formula_reduced": "Sb2OS2",
+        "target_layer": "TOP_ACTIVE_GLASS_185EV",
+        "formula_unit_molar_mass_g_mol": 323.6494,
+        "target_batch_mmol": 10.0,
+        "target_product_mass_g": 3.23649,
+        "reagent_masses_g": {
+          "Sb_stoich_source": 2.4352,
+          "O_stoich_source": 0.159994,
+          "S_stoich_source": 0.6413
+        },
+        "volatile_overpressure_masses_g": {
+          "S_5pct_overpressure": 0.673365
+        },
+        "elemental_mass_conservation_diff_g": 0.0,
+        "synthesis_temperature_c": 375.0,
+        "dwell_time_hours": 11.0,
+        "supercell_dims": [
+          2,
+          2,
+          1
+        ],
+        "supercell_total_sites": 40,
+        "supercell_min_image_dist_ang": 10.238,
+        "dominant_vacancy_species": "V_Chalcogen (shallow donor, ns2 antibonding)",
+        "fnv_charge_correction_q1_ev": 0.1497,
+        "fnv_charge_correction_q2_ev": 0.5987,
+        "doped_defect_deck_filename": "mp-861911_Sb2OS2_doped_supercell_2x2x1.in",
+        "redundancy_verified": true,
+        "sha256_signature": "f022f79105efd50c0aa7dbec22e9073b47eeee56bd231e34356908d636a38a52"
       }
     },
     {
@@ -34388,6 +35567,38 @@
         "dynamically_and_kinetically_stable": true,
         "redundancy_verified": true,
         "sha256_signature": "6c07d52f2ca54f5444d25b5af7f196d1ef2b1ad465e9677a5e1fea1d3a09f5a4"
+      },
+      "lab_synthesis_and_defect_dossier": {
+        "candidate_id": "mp-1078776",
+        "formula_reduced": "BiInS3",
+        "target_layer": "TOP_ACTIVE_GLASS_185EV",
+        "formula_unit_molar_mass_g_mol": 419.9934,
+        "target_batch_mmol": 10.0,
+        "target_product_mass_g": 4.19993,
+        "reagent_masses_g": {
+          "Bi_stoich_source": 2.089804,
+          "In_stoich_source": 1.14818,
+          "S_stoich_source": 0.96195
+        },
+        "volatile_overpressure_masses_g": {
+          "S_5pct_overpressure": 1.010047
+        },
+        "elemental_mass_conservation_diff_g": 0.0,
+        "synthesis_temperature_c": 375.0,
+        "dwell_time_hours": 11.0,
+        "supercell_dims": [
+          3,
+          2,
+          2
+        ],
+        "supercell_total_sites": 120,
+        "supercell_min_image_dist_ang": 11.712,
+        "dominant_vacancy_species": "V_Chalcogen (shallow donor, ns2 antibonding)",
+        "fnv_charge_correction_q1_ev": 0.1132,
+        "fnv_charge_correction_q2_ev": 0.4526,
+        "doped_defect_deck_filename": "mp-1078776_BiInS3_doped_supercell_3x2x2.in",
+        "redundancy_verified": true,
+        "sha256_signature": "7c7d8bb58c8a3da6b08a61045f972d12a667d5f040cc8fc64f7f98c8ae4181e0"
       }
     },
     {
@@ -35897,6 +37108,38 @@
         "dynamically_and_kinetically_stable": true,
         "redundancy_verified": true,
         "sha256_signature": "19cfc642b2062a8e2c84d35530349cbde30554e6f7e5f3c0034bd75d17a2169b"
+      },
+      "lab_synthesis_and_defect_dossier": {
+        "candidate_id": "mp-1223998",
+        "formula_reduced": "Bi3InSe6",
+        "target_layer": "BOTTOM_IR_075EV",
+        "formula_unit_molar_mass_g_mol": 1215.5192,
+        "target_batch_mmol": 10.0,
+        "target_product_mass_g": 12.15519,
+        "reagent_masses_g": {
+          "Bi_stoich_source": 6.269412,
+          "In_stoich_source": 1.14818,
+          "Se_stoich_source": 4.7376
+        },
+        "volatile_overpressure_masses_g": {
+          "Se_5pct_overpressure": 4.97448
+        },
+        "elemental_mass_conservation_diff_g": 0.0,
+        "synthesis_temperature_c": 375.0,
+        "dwell_time_hours": 11.0,
+        "supercell_dims": [
+          1,
+          1,
+          1
+        ],
+        "supercell_total_sites": 10,
+        "supercell_min_image_dist_ang": 19.676,
+        "dominant_vacancy_species": "V_Chalcogen (shallow donor, ns2 antibonding)",
+        "fnv_charge_correction_q1_ev": 0.1902,
+        "fnv_charge_correction_q2_ev": 0.7608,
+        "doped_defect_deck_filename": "mp-1223998_Bi3InSe6_doped_supercell_1x1x1.in",
+        "redundancy_verified": true,
+        "sha256_signature": "a3e1be33d8b6d8057bdcbf052c9957beec60fb8302f23813b62ade57e1584898"
       }
     },
     {

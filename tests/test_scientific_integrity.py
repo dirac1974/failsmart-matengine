@@ -93,6 +93,9 @@ from failsmart_matengine.independent_verifier import (
     independently_verify_atomistic_phonon_and_neb,
     independently_verify_coherent_tmm_4t_stack,
     independently_verify_graded_arc_and_techno_economics,
+    independently_verify_phase9a_lab_and_defect_dossier,
+    independently_verify_phase9b_contrastive_audit,
+    independently_verify_phase9c_oblique_thermal_lcoe,
 )
 from pymatgen.core import Structure
 import subprocess
@@ -1059,9 +1062,96 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
                 f"{pid}: CER_3L mismatch between primary and independent verifier",
             )
 
+    def test_step4_phase9a_9b_9c_lab_contrastive_and_real_world_lcoe(self):
+        """Test 19: Verify Phase 9A (Lab Synthesis & doped Defect Supercells), Phase 9B (117-MP Contrastive Margin), and Phase 9C (Oblique TMM, Thermal & 25-Yr LCOE)."""
+        live_sum_path = os.path.join(self.repo_root, "outputs", "live_mp_discovery_summary.json")
+        with open(live_sum_path, "r", encoding="utf-8") as f:
+            live_sum = json.load(f)
+
+        self.assertTrue(live_sum.get("v6_phase9_lab_contrastive_lcoe_enabled"))
+
+        # 1. Phase 9A: Verify 8 Lab Synthesis & doped Defect Supercell Dossiers + Deck Files
+        lab_dossiers = live_sum.get("lab_synthesis_and_defect_dossiers", [])
+        self.assertEqual(len(lab_dossiers), 8, f"Expected 8 lab_synthesis_and_defect_dossiers, got {len(lab_dossiers)}")
+        defect_dir = os.path.join(self.repo_root, "outputs", "mp_live_doped_supercell_decks")
+        self.assertTrue(os.path.isdir(defect_dir))
+
+        finalists_by_id = {f["candidate"]["candidate_id"]: f for f in live_sum.get("finalists", [])}
+        for ld in lab_dossiers:
+            cid = ld["candidate_id"]
+            self.assertTrue(ld["redundancy_verified"])
+            self.assertLessEqual(ld["elemental_mass_conservation_diff_g"], 1e-6)
+            self.assertGreaterEqual(ld["supercell_min_image_dist_ang"], 10.0)
+            self.assertLessEqual(ld["synthesis_temperature_c"], 500.0)
+            deck_path = os.path.join(defect_dir, ld["doped_defect_deck_filename"])
+            self.assertTrue(os.path.isfile(deck_path), f"Missing doped supercell deck: {deck_path}")
+
+            fin = finalists_by_id[cid]
+            iv_9a = independently_verify_phase9a_lab_and_defect_dossier(
+                cif_content=fin["candidate"]["cif_content"],
+                stoichiometry=fin["candidate"]["stoichiometry"],
+                eps_static=fin["electronics"]["eps_static"],
+            )
+            self.assertAlmostEqual(ld["formula_unit_molar_mass_g_mol"], iv_9a["formula_unit_molar_mass_g_mol"], places=3)
+            self.assertEqual(ld["supercell_dims"], iv_9a["supercell_dims"])
+            self.assertEqual(ld["supercell_total_sites"], iv_9a["supercell_total_sites"])
+            self.assertAlmostEqual(ld["fnv_charge_correction_q1_ev"], iv_9a["fnv_charge_correction_q1_ev"], places=3)
+
+        # 2. Phase 9B: Verify 117-Candidate Extended MP Sweep & Contrastive Failure Classifier Margin
+        ca = live_sum.get("contrastive_classifier_audit", {})
+        self.assertEqual(ca.get("total_evaluated_candidates"), 117)
+        self.assertEqual(ca.get("promoted_finalist_count"), 8)
+        self.assertEqual(ca.get("rejected_failure_count"), 109)
+        self.assertTrue(ca.get("positive_separation_verified"))
+        self.assertTrue(ca.get("redundancy_verified"))
+        self.assertGreater(ca.get("contrastive_separation_delta", 0.0), 0.10)
+
+        # 3. Phase 9C: Verify Oblique (0-60 deg) S/P TMM, Operating Temp (25-65 C) & 25-Year Arrhenius LCOE across 15 Stacks
+        lcoe_stacks = live_sum.get("real_world_lcoe_stress_test_stacks", [])
+        self.assertEqual(len(lcoe_stacks), 15, f"Expected 15 real_world_lcoe_stress_test_stacks, got {len(lcoe_stacks)}")
+        for rw in lcoe_stacks:
+            pid = rw["pair_id"]
+            self.assertTrue(rw["lcoe_redundancy_verified"], f"{pid}: Phase 9C redundancy failed")
+            self.assertGreater(rw["iam_60deg_ratio"], 0.93, f"{pid}: Expected IAM(60 deg) > 0.93")
+            self.assertGreater(rw["year25_retained_power_fraction_percent"], 90.0, f"{pid}: Expected Year 25 retention > 90%")
+            self.assertLess(rw["lcoe_3layer_4t_cents_kwh"], rw["lcoe_2layer_cents_kwh"], f"{pid}: Expected 3L LCOE < 2L LCOE")
+            self.assertLess(rw["lcoe_2layer_cents_kwh"], rw["lcoe_baseline_si_cents_kwh"], f"{pid}: Expected 2L LCOE < Si LCOE")
+            self.assertGreater(rw["lcoe_3layer_vs_si_reduction_percent"], 32.0, f"{pid}: Expected >= 32% LCOE reduction vs Si")
+
+            top_f = finalists_by_id[rw["top_mp_id"]]
+            bot_f = finalists_by_id[rw["bottom_mp_id"]]
+            e_mig_lim = min(
+                top_f["atomistic_phonon_neb"]["neb_saddle_barrier_ev"],
+                bot_f["atomistic_phonon_neb"]["neb_saddle_barrier_ev"],
+            )
+            iv_9c = independently_verify_phase9c_oblique_thermal_lcoe(
+                eg_ind_1=top_f["electronics"]["hse06_soc_indirect_gap_ev"],
+                eg_dir_1=top_f["electronics"]["hse06_soc_direct_gap_ev"],
+                eps_inf_1=top_f["electronics"]["eps_inf"],
+                thickness_nm_1=top_f["optics"]["film_thickness_nm"],
+                eg_ind_3=bot_f["electronics"]["hse06_soc_indirect_gap_ev"],
+                eg_dir_3=bot_f["electronics"]["hse06_soc_direct_gap_ev"],
+                eps_inf_3=bot_f["electronics"]["eps_inf"],
+                thickness_nm_3=bot_f["optics"]["film_thickness_nm"],
+                raw_cost_top_usd_m2=top_f["synthesis"]["active_layer_cost_usd_m2"],
+                raw_cost_bot_usd_m2=bot_f["synthesis"]["active_layer_cost_usd_m2"],
+                limiting_neb_barrier_ev=e_mig_lim,
+            )
+            self.assertLessEqual(
+                abs(rw["pce_4t_60deg_25c_percent"] - iv_9c["pce_4t_60deg_25c_percent"]),
+                0.05,
+                f"{pid}: 60-deg oblique PCE diff > 0.05%",
+            )
+            self.assertLessEqual(
+                abs(rw["lcoe_3layer_4t_cents_kwh"] - iv_9c["lcoe_3layer_4t_cents_kwh"]),
+                0.01,
+                f"{pid}: 3L LCOE diff > 0.01 c/kWh",
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
+
 
 
 

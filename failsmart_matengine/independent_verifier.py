@@ -1222,7 +1222,449 @@ def independently_verify_graded_arc_and_techno_economics(
 
 
 # =============================================================================
-# 11. Top-Level Entrypoint: Candidate Dossier Zero-Trust Verifier
+# 11. Phase 9 Engineering Extensions (9A, 9B, 9C - v6.0)
+# =============================================================================
+
+_BLIND_IUPAC_MASSES: Dict[str, float] = dict(IUPAC_ATOMIC_MASSES)
+
+
+
+def independently_verify_phase9a_lab_and_defect_dossier(
+    cif_content: str,
+    stoichiometry: Dict[str, int],
+    eps_static: float,
+) -> Dict[str, Any]:
+    """Blinded independent verification of Phase 9A 10.0 mmol synthesis mass balance & doped supercell FNV corrections."""
+    formula_unit_molar_mass_g_mol = sum(
+        cnt * _BLIND_IUPAC_MASSES[el] for el, cnt in stoichiometry.items()
+    )
+    target_product_mass_g = 0.010 * formula_unit_molar_mass_g_mol
+
+    struct = CifParser.from_str(cif_content).parse_structures(primitive=False)[0]
+    a, b, c = struct.lattice.abc
+    na = max(1, math.ceil(10.0 / a))
+    nb = max(1, math.ceil(10.0 / b))
+    nc = max(1, math.ceil(10.0 / c))
+    supercell_total_sites = int(na * nb * nc * len(struct))
+    supercell_min_image_dist_ang = min(na * a, nb * b, nc * c)
+    l_eff = (struct.volume * na * nb * nc) ** (1.0 / 3.0)
+
+    fnv_charge_correction_q1_ev = (1.0 * 2.8373 * 14.399645) / (eps_static * l_eff)
+    fnv_charge_correction_q2_ev = (4.0 * 2.8373 * 14.399645) / (eps_static * l_eff)
+
+    res: Dict[str, Any] = {
+        "formula_unit_molar_mass_g_mol": round(float(formula_unit_molar_mass_g_mol), 4),
+        "target_product_mass_g": round(float(target_product_mass_g), 6),
+        "supercell_dims": [int(na), int(nb), int(nc)],
+        "supercell_total_sites": supercell_total_sites,
+        "supercell_min_image_dist_ang": round(float(supercell_min_image_dist_ang), 4),
+        "fnv_charge_correction_q1_ev": round(float(fnv_charge_correction_q1_ev), 4),
+        "fnv_charge_correction_q2_ev": round(float(fnv_charge_correction_q2_ev), 4),
+    }
+
+    sig_payload = {
+        "formula_unit_molar_mass_g_mol": res["formula_unit_molar_mass_g_mol"],
+        "target_product_mass_g": res["target_product_mass_g"],
+        "supercell_dims": res["supercell_dims"],
+        "supercell_total_sites": res["supercell_total_sites"],
+        "supercell_min_image_dist_ang": res["supercell_min_image_dist_ang"],
+        "fnv_charge_correction_q1_ev": res["fnv_charge_correction_q1_ev"],
+        "fnv_charge_correction_q2_ev": res["fnv_charge_correction_q2_ev"],
+    }
+    res["sha256_signature"] = hashlib.sha256(
+        json.dumps(sig_payload, sort_keys=True).encode("utf-8")
+    ).hexdigest()
+
+    return res
+
+
+def independently_verify_phase9b_contrastive_audit(
+    records: List[Dict[str, Any]],
+) -> Dict[str, Any]:
+    """Blinded independent verification of Phase 9B Contrastive Failure Memory Classifier margin."""
+    pos_vecs: List[np.ndarray] = []
+    neg_vecs: List[np.ndarray] = []
+
+    for rec in records:
+        status = rec.get("status", "")
+        emb = np.array(rec.get("embedding_128d", []), dtype=np.float64)
+        norm = float(np.linalg.norm(emb))
+        u_hat = emb / max(1.0e-12, norm)
+        if status == "PROMOTED":
+            pos_vecs.append(u_hat)
+        elif status == "REJECTED":
+            neg_vecs.append(u_hat)
+
+    pos_sum = np.sum(pos_vecs, axis=0)
+    c_pos = pos_sum / max(1.0e-12, float(np.linalg.norm(pos_sum)))
+
+    neg_sum = np.sum(neg_vecs, axis=0)
+    c_neg = neg_sum / max(1.0e-12, float(np.linalg.norm(neg_sum)))
+
+    pos_margins = [float(np.dot(u, c_pos) - np.dot(u, c_neg)) for u in pos_vecs]
+    neg_margins = [float(np.dot(u, c_pos) - np.dot(u, c_neg)) for u in neg_vecs]
+
+    mean_pos = float(np.mean(pos_margins)) if pos_margins else 0.0
+    mean_neg = float(np.mean(neg_margins)) if neg_margins else 0.0
+    delta_sep = mean_pos - mean_neg
+
+    res: Dict[str, Any] = {
+        "mean_promoted_contrastive_margin": round(mean_pos, 4),
+        "mean_rejected_contrastive_margin": round(mean_neg, 4),
+        "contrastive_separation_delta": round(delta_sep, 4),
+    }
+
+    sig_payload = {
+        "mean_promoted_contrastive_margin": res["mean_promoted_contrastive_margin"],
+        "mean_rejected_contrastive_margin": res["mean_rejected_contrastive_margin"],
+        "contrastive_separation_delta": res["contrastive_separation_delta"],
+    }
+    res["sha256_signature"] = hashlib.sha256(
+        json.dumps(sig_payload, sort_keys=True).encode("utf-8")
+    ).hexdigest()
+
+    return res
+
+
+def _compute_rouard_airy_7medium_oblique_sp(
+    e_grid: np.ndarray,
+    eg_ind_1: float,
+    eg_dir_1: float,
+    eps_inf_1: float,
+    d_top_nm: float,
+    theta_deg: float,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Recursive Rouard / Airy backward amplitude addition for s and p polarizations on the 7-medium stack."""
+    wl_nm = HC_Q_NM / e_grid
+    wl_um = wl_nm / 1000.0
+
+    n0 = np.ones_like(wl_nm, dtype=np.complex128)
+    n1 = (1.377 + 0.0032 / (wl_um ** 2)).astype(np.complex128)
+
+    n_ito_real = np.maximum(1.45, 1.92 - 0.085 * (wl_um ** 2))
+    k_ito = 0.0018 + 0.0065 * (wl_um ** 3)
+    n2 = n_ito_real + 1j * k_ito
+
+    n_tio2_real = 2.380 + 0.0180 / (wl_um ** 2)
+    k_tio2 = 0.0004 * (wl_um ** 2)
+    n3 = n_tio2_real + 1j * k_tio2
+
+    alpha1 = 1.2e5 * (np.maximum(0.0, e_grid - eg_ind_1) ** 2) + 2.8e7 * np.sqrt(
+        np.maximum(0.0, e_grid - eg_dir_1)
+    )
+    n_act_real = math.sqrt(eps_inf_1) + 0.035 / (wl_um ** 2)
+    k_act = (alpha1 * (wl_nm * 1.0e-9)) / (4.0 * math.pi)
+    n4 = n_act_real + 1j * k_act
+
+    n_buf_real = 1.720 + 0.0040 / (wl_um ** 2)
+    k_buf = 0.0012 * (wl_um ** 2)
+    n5 = n_buf_real + 1j * k_buf
+
+    n6 = np.full_like(wl_nm, 1.520, dtype=np.complex128)
+
+    n_list = [n0, n1, n2, n3, n4, n5, n6]
+    d_list_nm = [0.0, 94.0, 80.0, 48.0, float(d_top_nm), 82.0, 0.0]
+
+    theta_rad = math.radians(theta_deg)
+    sin_theta0 = math.sin(theta_rad)
+
+    cos_list: List[np.ndarray] = []
+    eta_s_list: List[np.ndarray] = []
+    eta_p_list: List[np.ndarray] = []
+
+    for nm in n_list:
+        cos_m = np.sqrt(1.0 - ((n0 * sin_theta0) / nm) ** 2)
+        cos_list.append(cos_m)
+        eta_s_list.append(nm * cos_m)
+        eta_p_list.append(nm / cos_m)
+
+    # s-polarization backward Rouard / Airy recursion from (5,6) down to (0,1)
+    r_s = (eta_s_list[5] - eta_s_list[6]) / (eta_s_list[5] + eta_s_list[6])
+    t_s = (2.0 * eta_s_list[5]) / (eta_s_list[5] + eta_s_list[6])
+    for m in (4, 3, 2, 1, 0):
+        es_curr = eta_s_list[m]
+        es_next = eta_s_list[m + 1]
+        r_m = (es_curr - es_next) / (es_curr + es_next)
+        t_m = (2.0 * es_curr) / (es_curr + es_next)
+        beta_next = (2.0 * math.pi * n_list[m + 1] * d_list_nm[m + 1] * cos_list[m + 1]) / wl_nm
+        phi_next = np.exp(1j * beta_next)
+        denom = 1.0 + r_m * r_s * (phi_next ** 2)
+        r_s = (r_m + r_s * (phi_next ** 2)) / denom
+        t_s = (t_m * t_s * phi_next) / denom
+
+    # p-polarization backward Rouard / Airy recursion from (5,6) down to (0,1)
+    r_p = (eta_p_list[5] - eta_p_list[6]) / (eta_p_list[5] + eta_p_list[6])
+    t_p = (2.0 * eta_p_list[5]) / (eta_p_list[5] + eta_p_list[6])
+    for m in (4, 3, 2, 1, 0):
+        ep_curr = eta_p_list[m]
+        ep_next = eta_p_list[m + 1]
+        r_m = (ep_curr - ep_next) / (ep_curr + ep_next)
+        t_m = (2.0 * ep_curr) / (ep_curr + ep_next)
+        beta_next = (2.0 * math.pi * n_list[m + 1] * d_list_nm[m + 1] * cos_list[m + 1]) / wl_nm
+        phi_next = np.exp(1j * beta_next)
+        denom = 1.0 + r_m * r_p * (phi_next ** 2)
+        r_p = (r_m + r_p * (phi_next ** 2)) / denom
+        t_p = (t_m * t_p * phi_next) / denom
+
+    r_unpol = 0.5 * ((np.abs(r_s) ** 2) + (np.abs(r_p) ** 2))
+    t_unpol = 0.5 * (
+        (np.real(eta_s_list[6]) / np.real(eta_s_list[0])) * (np.abs(t_s) ** 2)
+        + (np.real(eta_p_list[6]) / np.real(eta_p_list[0])) * (np.abs(t_p) ** 2)
+    )
+
+    cos2_real = np.maximum(0.25, np.real(cos_list[2]))
+    cos3_real = np.maximum(0.25, np.real(cos_list[3]))
+    t_win_front = np.exp(
+        -4.0 * math.pi * ((k_ito * 80.0 / cos2_real) + (k_tio2 * 48.0 / cos3_real)) / wl_nm
+    )
+
+    return r_unpol, t_unpol, t_win_front
+
+
+def independently_verify_phase9c_oblique_thermal_lcoe(
+    eg_ind_1: float,
+    eg_dir_1: float,
+    eps_inf_1: float,
+    thickness_nm_1: float,
+    eg_ind_3: float,
+    eg_dir_3: float,
+    eps_inf_3: float,
+    thickness_nm_3: float,
+    raw_cost_top_usd_m2: float,
+    raw_cost_bot_usd_m2: float,
+    limiting_neb_barrier_ev: float,
+) -> Dict[str, Any]:
+    """Blinded independent verification of Phase 9C oblique-incidence S/P TMM, operating temp, and 25-year Arrhenius LCOE."""
+    wl_nm = LAMBDA_GRID_NM
+    alpha1 = 1.2e5 * (np.maximum(0.0, ENERGY_GRID_EV - eg_ind_1) ** 2) + 2.8e7 * np.sqrt(
+        np.maximum(0.0, ENERGY_GRID_EV - eg_dir_1)
+    )
+    yab1 = 4.0 * eps_inf_1
+    d1_m = thickness_nm_1 * 1.0e-9
+    fabs1 = (yab1 * alpha1 * d1_m) / (1.0 + yab1 * alpha1 * d1_m)
+
+    d_si_m = 160.0e-6
+    alpha_si = 1.1e5 * (np.maximum(0.0, ENERGY_GRID_EV - 1.12) ** 2) + 1.5e7 * np.sqrt(
+        np.maximum(0.0, ENERGY_GRID_EV - 3.40)
+    )
+    fabs_si_2l = (49.0 * alpha_si * d_si_m) / (1.0 + 49.0 * alpha_si * d_si_m)
+    fabs_si_3l = (16.0 * alpha_si * d_si_m) / (1.0 + 16.0 * alpha_si * d_si_m)
+    t_si_fca_low = np.exp(-0.08 * ((wl_nm / 1200.0) ** 2))
+
+    d3_m = thickness_nm_3 * 1.0e-9
+    n3_bot = math.sqrt(eps_inf_3)
+    r_int_23 = 0.20 * (((n3_bot - 1.72) / (n3_bot + 1.72)) ** 2)
+    yab3 = 4.0 * eps_inf_3
+    alpha3 = 1.2e5 * (np.maximum(0.0, ENERGY_GRID_EV - eg_ind_3) ** 2) + 2.8e7 * np.sqrt(
+        np.maximum(0.0, ENERGY_GRID_EV - eg_dir_3)
+    )
+    fabs3 = (yab3 * alpha3 * d3_m) / (1.0 + yab3 * alpha3 * d3_m)
+    a_arc_3 = (1.0 - r_int_23) * fabs3
+
+    mask_above = (ENERGY_GRID_EV >= eg_ind_1) & (ENERGY_GRID_EV <= 3.50)
+    flux_above = float(
+        scipy.integrate.simpson(SOLAR_PHOTON_FLUX_E[mask_above], x=ENERGY_GRID_EV[mask_above])
+    )
+
+    r_front_by_angle: Dict[int, float] = {}
+    pce_4t_by_angle: Dict[int, float] = {}
+    subcells_0deg: Dict[str, float] = {}
+    pce_2l_0deg: float = 0.0
+
+    for theta_deg in (0, 30, 45, 60):
+        r_unpol, t_unpol, t_win_front = _compute_rouard_airy_7medium_oblique_sp(
+            e_grid=ENERGY_GRID_EV,
+            eg_ind_1=eg_ind_1,
+            eg_dir_1=eg_dir_1,
+            eps_inf_1=eps_inf_1,
+            d_top_nm=thickness_nm_1,
+            theta_deg=float(theta_deg),
+        )
+        mean_refl_pct = float(
+            scipy.integrate.simpson(
+                r_unpol[mask_above] * SOLAR_PHOTON_FLUX_E[mask_above],
+                x=ENERGY_GRID_EV[mask_above],
+            )
+            / max(1.0e-12, flux_above)
+            * 100.0
+        )
+        r_front_by_angle[theta_deg] = mean_refl_pct
+
+        a_arc_1 = (1.0 - r_unpol) * t_win_front * fabs1
+        t_stack_arc_1 = t_unpol * (1.0 - fabs1)
+
+        cell1 = _solve_pv_cell_energy_quadrature(
+            absorptance_e=a_arc_1,
+            incident_photon_flux_e=SOLAR_PHOTON_FLUX_E,
+            eg_ind_ev=eg_ind_1,
+            eg_dir_ev=eg_dir_1,
+        )
+        phi2 = SOLAR_PHOTON_FLUX_E * t_stack_arc_1
+        cell_si_3l = _solve_pv_cell_energy_quadrature(
+            absorptance_e=0.98 * fabs_si_3l,
+            incident_photon_flux_e=phi2,
+            eg_ind_ev=1.12,
+            eg_dir_ev=1.12,
+            j0_rad_fixed=1.2e-12,
+        )
+        phi3_low = phi2 * 0.96 * (1.0 - fabs_si_3l) * t_si_fca_low
+        cell3_low = _solve_pv_cell_energy_quadrature(
+            absorptance_e=a_arc_3,
+            incident_photon_flux_e=phi3_low,
+            eg_ind_ev=eg_ind_3,
+            eg_dir_ev=eg_dir_3,
+        )
+
+        pce_4t = cell1["eff"] + cell_si_3l["eff"] + cell3_low["eff"]
+        pce_4t_by_angle[theta_deg] = pce_4t
+
+        if theta_deg == 0:
+            cell_si_2l = _solve_pv_cell_energy_quadrature(
+                absorptance_e=0.98 * fabs_si_2l,
+                incident_photon_flux_e=phi2,
+                eg_ind_ev=1.12,
+                eg_dir_ev=1.12,
+                j0_rad_fixed=1.2e-12,
+            )
+            pce_2l_0deg = cell1["eff"] + cell_si_2l["eff"]
+            subcells_0deg = {
+                "top": cell1["eff"],
+                "si_3l": cell_si_3l["eff"],
+                "si_2l": cell_si_2l["eff"],
+                "bot": cell3_low["eff"],
+            }
+
+    r_hemi = (
+        0.35 * r_front_by_angle[0]
+        + 0.35 * r_front_by_angle[30]
+        + 0.20 * r_front_by_angle[45]
+        + 0.10 * r_front_by_angle[60]
+    )
+    iam_60 = (100.0 - r_front_by_angle[60]) / max(1.0e-9, 100.0 - r_front_by_angle[0])
+
+    # Section 9.3.2: Field Operating Temperature Coefficient (25 C -> 45 C -> 65 C)
+    gamma_top = -0.00440 / (eg_ind_1 ** 0.65)
+    gamma_si = -0.00440 / (1.12 ** 0.65)
+    gamma_bot = -0.00440 / (eg_ind_3 ** 0.65)
+
+    eta_top_25 = subcells_0deg["top"]
+    eta_si3l_25 = subcells_0deg["si_3l"]
+    eta_si2l_25 = subcells_0deg["si_2l"]
+    eta_bot_25 = subcells_0deg["bot"]
+    eta_4t_25 = pce_4t_by_angle[0]
+    eta_2l_25 = pce_2l_0deg
+
+    eta_top_45 = eta_top_25 * (1.0 + gamma_top * 20.0)
+    eta_si3l_45 = eta_si3l_25 * (1.0 + gamma_si * 20.0)
+    eta_si2l_45 = eta_si2l_25 * (1.0 + gamma_si * 20.0)
+    eta_bot_45 = eta_bot_25 * (1.0 + gamma_bot * 20.0)
+    eta_4t_45 = eta_top_45 + eta_si3l_45 + eta_bot_45
+    eta_2l_45 = eta_top_45 + eta_si2l_45
+
+    eta_top_65 = eta_top_25 * (1.0 + gamma_top * 40.0)
+    eta_si3l_65 = eta_si3l_25 * (1.0 + gamma_si * 40.0)
+    eta_bot_65 = eta_bot_25 * (1.0 + gamma_bot * 40.0)
+    eta_4t_65 = eta_top_65 + eta_si3l_65 + eta_bot_65
+
+    beta_4t_rel = ((eta_4t_65 - eta_4t_25) / (40.0 * eta_4t_25)) * 100.0
+
+    # Section 9.3.3: 25-Year Arrhenius Ion-Migration Reliability & Real-World LCOE
+    kb_ev = K_B / Q_E
+    t_field_k = 318.15
+    r_deg = 0.0035 + 0.0010 * math.exp(-(limiting_neb_barrier_ev - 0.65) / (kb_ev * t_field_k))
+    r_deg_pct = r_deg * 100.0
+    year25_retained_pct = ((1.0 - r_deg) ** 25) * 100.0
+
+    r_disc = 0.06
+    c_bos_area = 100.0
+    c_bos_power = 0.22
+    c_om_yr = 2.50
+    y0_kwh_kwp = 1800.0
+
+    om_disc_25yr = sum(c_om_yr / ((1.0 + r_disc) ** t) for t in range(1, 26))
+
+    # Standalone 22.0% c-Si baseline LCOE (0.45%/yr degradation, 45 C NOCT)
+    eta_si_ref_25 = 22.00
+    f_noct_si = 1.0 + gamma_si * 20.0
+    r_deg_si = 0.0045
+    p_m2_si = 10.0 * eta_si_ref_25
+    capex_si = 40.00 + c_bos_area + c_bos_power * p_m2_si
+    e_disc_si = sum(
+        ((p_m2_si / 1000.0) * y0_kwh_kwp * f_noct_si * ((1.0 - r_deg_si) ** (t - 1)))
+        / ((1.0 + r_disc) ** t)
+        for t in range(1, 26)
+    )
+    lcoe_si_cents = 100.0 * (capex_si + om_disc_25yr) / e_disc_si
+
+    # 2-Layer (Top + c-Si) LCOE
+    c_mod_2l = 40.00 + float(raw_cost_top_usd_m2) + 6.50
+    p_m2_2l = 10.0 * round(eta_2l_25, 2)
+    f_noct_2l = eta_2l_45 / max(1.0e-9, eta_2l_25)
+    capex_2l = c_mod_2l + c_bos_area + c_bos_power * p_m2_2l
+    e_disc_2l = sum(
+        ((p_m2_2l / 1000.0) * y0_kwh_kwp * f_noct_2l * ((1.0 - r_deg) ** (t - 1)))
+        / ((1.0 + r_disc) ** t)
+        for t in range(1, 26)
+    )
+    lcoe_2l_cents = 100.0 * (capex_2l + om_disc_25yr) / e_disc_2l
+
+    # 3-Layer 4T (Top + c-Si + Bottom) LCOE
+    c_mod_3l = 40.00 + float(raw_cost_top_usd_m2) + float(raw_cost_bot_usd_m2) + 13.00
+    p_m2_3l = 10.0 * round(eta_4t_25, 2)
+    f_noct_3l = eta_4t_45 / max(1.0e-9, eta_4t_25)
+    capex_3l = c_mod_3l + c_bos_area + c_bos_power * p_m2_3l
+    e_disc_3l = sum(
+        ((p_m2_3l / 1000.0) * y0_kwh_kwp * f_noct_3l * ((1.0 - r_deg) ** (t - 1)))
+        / ((1.0 + r_disc) ** t)
+        for t in range(1, 26)
+    )
+    lcoe_3l_cents = 100.0 * (capex_3l + om_disc_25yr) / e_disc_3l
+
+    lcoe_red_pct = ((lcoe_si_cents - lcoe_3l_cents) / lcoe_si_cents) * 100.0
+
+    res: Dict[str, Any] = {
+        "r_front_0deg_percent": round(r_front_by_angle[0], 2),
+        "r_front_30deg_percent": round(r_front_by_angle[30], 2),
+        "r_front_45deg_percent": round(r_front_by_angle[45], 2),
+        "r_front_60deg_percent": round(r_front_by_angle[60], 2),
+        "r_front_hemispheric_percent": round(r_hemi, 2),
+        "pce_4t_0deg_25c_percent": round(pce_4t_by_angle[0], 2),
+        "pce_4t_30deg_25c_percent": round(pce_4t_by_angle[30], 2),
+        "pce_4t_45deg_25c_percent": round(pce_4t_by_angle[45], 2),
+        "pce_4t_60deg_25c_percent": round(pce_4t_by_angle[60], 2),
+        "iam_60deg_ratio": round(iam_60, 4),
+        "pce_4t_noct_45c_percent": round(eta_4t_45, 2),
+        "pce_4t_desert_65c_percent": round(eta_4t_65, 2),
+        "temp_coeff_rel_pct_per_k": round(beta_4t_rel, 4),
+        "limiting_neb_barrier_ev": round(float(limiting_neb_barrier_ev), 4),
+        "annual_degradation_rate_pct_yr": round(r_deg_pct, 4),
+        "year25_retained_power_fraction_percent": round(year25_retained_pct, 2),
+        "lcoe_baseline_si_cents_kwh": round(lcoe_si_cents, 4),
+        "lcoe_2layer_cents_kwh": round(lcoe_2l_cents, 4),
+        "lcoe_3layer_4t_cents_kwh": round(lcoe_3l_cents, 4),
+        "lcoe_3layer_vs_si_reduction_percent": round(lcoe_red_pct, 2),
+    }
+
+    sig_payload = {
+        "r_front_0deg_percent": res["r_front_0deg_percent"],
+        "r_front_60deg_percent": res["r_front_60deg_percent"],
+        "pce_4t_0deg_25c_percent": res["pce_4t_0deg_25c_percent"],
+        "pce_4t_60deg_25c_percent": res["pce_4t_60deg_25c_percent"],
+        "pce_4t_noct_45c_percent": res["pce_4t_noct_45c_percent"],
+        "lcoe_baseline_si_cents_kwh": res["lcoe_baseline_si_cents_kwh"],
+        "lcoe_2layer_cents_kwh": res["lcoe_2layer_cents_kwh"],
+        "lcoe_3layer_4t_cents_kwh": res["lcoe_3layer_4t_cents_kwh"],
+        "lcoe_3layer_vs_si_reduction_percent": res["lcoe_3layer_vs_si_reduction_percent"],
+    }
+    res["sha256_signature"] = hashlib.sha256(
+        json.dumps(sig_payload, sort_keys=True).encode("utf-8")
+    ).hexdigest()
+
+    return res
+
+
+# =============================================================================
+# 12. Top-Level Entrypoint: Candidate Dossier Zero-Trust Verifier
 # =============================================================================
 
 def verify_candidate_dossier(

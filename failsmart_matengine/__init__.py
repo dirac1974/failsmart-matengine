@@ -9,9 +9,13 @@ from .independent_verifier import (
     independently_verify_cross_layer_4t_pair,
     independently_verify_energy_quadrature_slme,
     independently_verify_graded_arc_and_techno_economics,
+    independently_verify_phase9a_lab_and_defect_dossier,
+    independently_verify_phase9b_contrastive_audit,
+    independently_verify_phase9c_oblique_thermal_lcoe,
     simpson_13,
     verify_candidate_dossier,
 )
 
 __version__ = "0.1.0"
+
 

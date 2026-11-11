@@ -1176,18 +1176,43 @@ def run_live_mp_discovery_campaign(
             full_dossier=dossier,
         )
 
-    # Step 1 (v4.0): 3D Atomistic Harmonic Dynamical Matrix D(q=0) & 11-Image Saddle-Point NEB Migration on all Finalists
+    # Step 1 (v4.0) & Phase 9A (v6.0): 3D Dynamical Matrix D(q=0), 11-Image NEB Migration & Lab/Defect Supercell Dossiers
     from .atomistic_and_tmm import (
         evaluate_3d_atomistic_phonon_and_neb,
         evaluate_coherent_abeles_tmm_4t_stack,
         evaluate_graded_arc_and_techno_economics_4t_stack,
+        evaluate_phase9a_lab_synthesis_and_defect_supercell,
+        evaluate_phase9b_contrastive_classifier_audit,
+        evaluate_phase9c_real_world_lcoe_stress_test,
     )
 
+    defect_deck_dir = out_path / "mp_live_doped_supercell_decks"
+    defect_deck_dir.mkdir(parents=True, exist_ok=True)
+    for old_d in defect_deck_dir.glob("*"):
+        old_d.unlink()
+
     atomistic_reports: List[Dict[str, Any]] = []
+    lab_defect_dossiers: List[Dict[str, Any]] = []
     for fin in finalists:
         at_rep = evaluate_3d_atomistic_phonon_and_neb(fin)
         fin["atomistic_phonon_neb"] = at_rep.model_dump()
         atomistic_reports.append(fin["atomistic_phonon_neb"])
+
+        lab_rep = evaluate_phase9a_lab_synthesis_and_defect_supercell(fin, str(defect_deck_dir))
+        fin["lab_synthesis_and_defect_dossier"] = lab_rep.model_dump()
+        lab_defect_dossiers.append(fin["lab_synthesis_and_defect_dossier"])
+
+    # Phase 9B (v6.0): Extended Full-Cache (117 Candidates) Sweep & Contrastive Failure Classifier Audit
+    full_cache_records = fetch_live_mp_semiconductors(refresh=False, max_candidates=500)
+    extended_117_dossiers: List[Dict[str, Any]] = list(all_dossiers)
+    seen_ids = {d["candidate"]["candidate_id"] for d in all_dossiers}
+    for extra_rec in full_cache_records:
+        if extra_rec["mp_id"] not in seen_ids:
+            ext_dos = build_live_mp_candidate_dossier(extra_rec, neg_priors, ledger)
+            extended_117_dossiers.append(ext_dos)
+            seen_ids.add(extra_rec["mp_id"])
+
+    contrastive_audit = evaluate_phase9b_contrastive_classifier_audit(extended_117_dossiers).model_dump()
 
     # Cross-pair all discovered Track A Top Active Glass finalists with all discovered Track B Bottom IR finalists
     top_finalists = [f for f in finalists if f["candidate"]["target_layer"] == "TOP_ACTIVE_GLASS_185EV"]
@@ -1196,6 +1221,7 @@ def run_live_mp_discovery_campaign(
     cross_pairs: List[Dict[str, Any]] = []
     coherent_tmm_stacks: List[Dict[str, Any]] = []
     graded_arc_te_stacks: List[Dict[str, Any]] = []
+    real_world_lcoe_stacks: List[Dict[str, Any]] = []
     for tf in top_finalists:
         for bf in bot_finalists:
             pair_model = compute_cross_layer_4t_stack_wavelength(tf, bf)
@@ -1210,27 +1236,39 @@ def run_live_mp_discovery_campaign(
             graded_model = evaluate_graded_arc_and_techno_economics_4t_stack(tf, bf, tmm_model)
             graded_arc_te_stacks.append(graded_model.model_dump())
 
+            # Phase 9C (v6.0): Oblique-Incidence (0-60 deg) S/P TMM, Operating Temp (25-65 C) & 25-Year Arrhenius LCOE
+            lcoe_model = evaluate_phase9c_real_world_lcoe_stress_test(tf, bf, graded_model)
+            real_world_lcoe_stacks.append(lcoe_model.model_dump())
+
     cross_pairs.sort(key=lambda x: (-x["tandem_4t_low_fca_total_eff_percent"], x["combined_active_cost_usd_m2"]))
     coherent_tmm_stacks.sort(key=lambda x: (-x["tmm_4t_low_fca_pce_percent"], x["combined_active_cost_usd_m2"]))
     graded_arc_te_stacks.sort(key=lambda x: (-x["graded_4t_low_fca_pce_percent"], x["combined_raw_cost_usd_m2"]))
+    real_world_lcoe_stacks.sort(key=lambda x: (x["lcoe_3layer_4t_cents_kwh"], -x["pce_4t_0deg_25c_percent"]))
 
     summary = {
         "version": "4.0.0",
         "v5_graded_arc_and_techno_economics_enabled": True,
+        "v6_phase9_lab_contrastive_lcoe_enabled": True,
         "data_provenance": {
             "materials_project_live_api": True,
             "negative_synthesis_datasets": neg_priors.get("dataset_provenance", {}),
             "atomistic_dynamical_matrix_and_neb": True,
             "coherent_abeles_tmm_vs_rouard_airy": True,
             "graded_arc_tio2_and_techno_economic_fom": True,
+            "phase9a_lab_synthesis_and_doped_supercells": True,
+            "phase9b_extended_117_mp_and_contrastive_audit": True,
+            "phase9c_oblique_thermal_arrhenius_lcoe": True,
         },
         "funnel_counts": funnel_counts,
         "failure_mode_breakdown": failure_mode_breakdown,
         "finalists": finalists,
         "atomistic_phonon_neb_reports": atomistic_reports,
+        "lab_synthesis_and_defect_dossiers": lab_defect_dossiers,
+        "contrastive_classifier_audit": contrastive_audit,
         "cross_layer_4t_tandem_pairs": cross_pairs,
         "coherent_tmm_4t_stacks": coherent_tmm_stacks,
         "graded_arc_techno_economic_stacks": graded_arc_te_stacks,
+        "real_world_lcoe_stress_test_stacks": real_world_lcoe_stacks,
         "all_mp_records": all_dossiers,
     }
     (out_path / "live_mp_discovery_summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
@@ -1239,37 +1277,29 @@ def run_live_mp_discovery_campaign(
 
 if __name__ == "__main__":
     res = run_live_mp_discovery_campaign()
-    print("Live MP v4.0/v5.0 Funnel Counts:", json.dumps(res["funnel_counts"], indent=2))
-    print("Failure Mode Breakdown:", json.dumps(res["failure_mode_breakdown"], indent=2))
-    print("\n=== Step 1: 3D Dynamical Matrix D(q=0) & 11-Image NEB Ion-Migration Reports (8 Finalists) ===")
-    for ar in res["atomistic_phonon_neb_reports"]:
+    print("Live MP v4.0/v5.0/v6.0 Funnel Counts:", json.dumps(res["funnel_counts"], indent=2))
+    print("Phase 9B Contrastive Audit (117 MP Candidates):", json.dumps(res["contrastive_classifier_audit"], indent=2))
+    print("\n=== Phase 9A: 10.0 mmol Lab Synthesis Recipes & Stage 5 doped Defect Supercells (8 Finalists) ===")
+    for ld in res["lab_synthesis_and_defect_dossiers"]:
         print(
-            f"  * {ar['candidate_id']} ({ar['formula_reduced']}, {ar['dynamical_matrix_dim']}x{ar['dynamical_matrix_dim']} D-matrix): "
-            f"w_opt,min={ar['gamma_min_optical_freq_thz']:.2f} THz, w_LO,max={ar['gamma_max_lo_freq_thz']:.2f} THz, "
-            f"imag={ar['imaginary_mode_count']}, {ar['migrating_species']} hop={ar['shortest_hop_distance_ang']:.2f} A, "
-            f"E_mig^NEB={ar['neb_saddle_barrier_ev']:.3f} eV, D_300K={ar['room_temp_diffusivity_cm2_s']:.2e} cm^2/s "
-            f"[SHA256: {ar['sha256_signature'][:8]}]"
+            f"  * {ld['candidate_id']} ({ld['formula_reduced']}): M_FU={ld['formula_unit_molar_mass_g_mol']:.2f} g/mol, "
+            f"10mmol_product={ld['target_product_mass_g']:.3f} g, T={ld['synthesis_temperature_c']:.0f} C ({ld['dwell_time_hours']:.1f} h), "
+            f"supercell={ld['supercell_dims']} ({ld['supercell_total_sites']} sites, L_min={ld['supercell_min_image_dist_ang']:.2f} A), "
+            f"FNV(q=1/q=2)={ld['fnv_charge_correction_q1_ev']:.3f}/{ld['fnv_charge_correction_q2_ev']:.3f} eV "
+            f"[SHA256: {ld['sha256_signature'][:8]}]"
         )
-    print(f"\n=== Step 2: Single-ARC Coherent 2x2 Abeles TMM vs Rouard/Airy 4T Stacks ({len(res['coherent_tmm_4t_stacks'])} Verified) ===")
-    for ts in res["coherent_tmm_4t_stacks"][:6]:
+    print(f"\n=== Phase 9C: Oblique (0-60 deg) S/P TMM, Operating Temp (25-65 C) & 25-Year Arrhenius LCOE ({len(res['real_world_lcoe_stress_test_stacks'])} Verified) ===")
+    for rw in res["real_world_lcoe_stress_test_stacks"][:8]:
         print(
-            f"  * {ts['pair_id']} ({ts['top_formula']} + c-Si + {ts['bottom_formula']}): "
-            f"R_front={ts['tmm_mean_front_reflectance_percent']:.2f}%, T_sub={ts['tmm_sub_bandgap_transmittance_percent']:.2f}%, "
-            f"2L={ts['tmm_2layer_pce_percent']:.2f}%, 4T(std-Si)={ts['tmm_4t_std_si_pce_percent']:.2f}%, "
-            f"4T(low-FCA)={ts['tmm_4t_low_fca_pce_percent']:.2f}% (delta={ts['scalar_to_tmm_delta_pce_percent']:+.2f}%)"
+            f"  * {rw['pair_id']} ({rw['top_formula']} + c-Si + {rw['bottom_formula']}): "
+            f"R(0/30/45/60 deg)={rw['r_front_0deg_percent']:.2f}%/{rw['r_front_30deg_percent']:.2f}%/{rw['r_front_45deg_percent']:.2f}%/{rw['r_front_60deg_percent']:.2f}% "
+            f"(R_hemi={rw['r_front_hemispheric_percent']:.2f}%), "
+            f"PCE(0/60 deg)={rw['pce_4t_0deg_25c_percent']:.2f}%/{rw['pce_4t_60deg_25c_percent']:.2f}% (IAM_60={rw['iam_60deg_ratio']:.3f}), "
+            f"PCE(45C NOCT / 65C)={rw['pce_4t_noct_45c_percent']:.2f}%/{rw['pce_4t_desert_65c_percent']:.2f}% (beta={rw['temp_coeff_rel_pct_per_k']:.3f}%/K), "
+            f"Yr25_ret={rw['year25_retained_power_fraction_percent']:.2f}%, "
+            f"LCOE(Si/2L/3L)={rw['lcoe_baseline_si_cents_kwh']:.3f}/{rw['lcoe_2layer_cents_kwh']:.3f}/{rw['lcoe_3layer_4t_cents_kwh']:.3f} c/kWh "
+            f"({rw['lcoe_3layer_vs_si_reduction_percent']:+.2f}% vs Si) [SHA256: {rw['sha256_signature'][:8]}]"
         )
-    print(f"\n=== Step 3: 7-Medium Graded-ARC + TiO2 Impedance Matcher & 4-Metric Techno-Economic Suite ({len(res['graded_arc_techno_economic_stacks'])} Verified) ===")
-    for gs in res["graded_arc_techno_economic_stacks"][:8]:
-        print(
-            f"  * {gs['pair_id']} ({gs['top_formula']} + c-Si + {gs['bottom_formula']}): "
-            f"R_front={gs['single_arc_front_reflectance_percent']:.2f}%->{gs['graded_arc_front_reflectance_percent']:.2f}% "
-            f"(dR=-{gs['reflectance_reduction_percent']:.2f}%), T_sub={gs['graded_sub_bandgap_transmittance_percent']:.2f}%, "
-            f"2L={gs['graded_2layer_pce_percent']:.2f}% ({gs['power_density_2l_w_sqft']:.1f} W/ft^2), "
-            f"4T={gs['graded_4t_low_fca_pce_percent']:.2f}% ({gs['power_density_3l_w_sqft']:.1f} W/ft^2, +{gs['single_to_graded_4t_gain_percent']:.2f}%), "
-            f"CER_2L={gs['cer_2l_vs_2x_si']:.3f}, CER_3L={gs['cer_3l_vs_3x_si']:.3f}, "
-            f"MCIW_3L(raw/full)=${gs['mciw_3l_raw_usd_per_dw']:.4f}/${gs['mciw_3l_full_usd_per_dw']:.4f}/dW, "
-            f"CPR_mod(2L/3L)={gs['cpr_mod_2l']:.3f}/{gs['cpr_mod_3l']:.3f}, "
-            f"SVI_BOS(2L/3L)={gs['svi_bos_2l']:.3f}/{gs['svi_bos_3l']:.3f} [SHA256: {gs['sha256_signature'][:8]}]"
-        )
+
 
 

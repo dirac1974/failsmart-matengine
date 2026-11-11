@@ -303,7 +303,27 @@ class RepoConsistencyAuditor:
             assert gs["rouard_airy_redundancy_diff_percent"] <= 0.05
             assert gs["graded_arc_front_reflectance_percent"] <= 4.0
 
-        self.log("   [OK] live_mp_discovery_summary.json verified: 100 -> 91 -> 52 -> 40 -> 8 finalists, 8 D-matrix/NEB reports, 15 Single-ARC & 15 Graded-ARC Techno-Economic stacks.")
+        # v6.0 Phase 9A, 9B, and 9C Checks
+        assert self.live_summary_data.get("v6_phase9_lab_contrastive_lcoe_enabled") is True
+        lab_dossiers = self.live_summary_data.get("lab_synthesis_and_defect_dossiers", [])
+        assert len(lab_dossiers) == 8, f"Expected 8 lab_synthesis_and_defect_dossiers, got {len(lab_dossiers)}"
+        for ld in lab_dossiers:
+            assert ld["redundancy_verified"] is True
+            assert ld["elemental_mass_conservation_diff_g"] <= 1e-6
+            assert ld["supercell_min_image_dist_ang"] >= 10.0
+
+        ca = self.live_summary_data.get("contrastive_classifier_audit", {})
+        assert ca.get("total_evaluated_candidates") == 117
+        assert ca.get("positive_separation_verified") is True
+        assert ca.get("redundancy_verified") is True
+
+        lcoe_stacks = self.live_summary_data.get("real_world_lcoe_stress_test_stacks", [])
+        assert len(lcoe_stacks) == 15, f"Expected 15 real_world_lcoe_stress_test_stacks, got {len(lcoe_stacks)}"
+        for rw in lcoe_stacks:
+            assert rw["lcoe_redundancy_verified"] is True
+            assert rw["lcoe_3layer_vs_si_reduction_percent"] > 32.0
+
+        self.log("   [OK] live_mp_discovery_summary.json verified: 100 -> 91 -> 52 -> 40 -> 8 finalists, 8 D-matrix/NEB & Lab/Defect dossiers, 117-MP Contrastive Audit, 15 Single-ARC, 15 Graded-ARC & 15 Real-World LCOE stacks.")
 
     def audit_negative_synthesis_priors(self) -> None:
         """Audit LBNL 80k solid-state recipes and A-Lab precursor genome negative priors."""

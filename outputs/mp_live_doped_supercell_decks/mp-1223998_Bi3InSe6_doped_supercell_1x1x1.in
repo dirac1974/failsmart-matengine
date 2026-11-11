@@ -1,0 +1,42 @@
+! FailSmart-MatEngine v6.0 Stage 5 `doped` Defect Supercell QE Deck (1x1x1)
+! Candidate: mp-1223998 (Bi3InSe6) | Defect: V_Chalcogen (shallow donor, ns2 antibonding) removed at frac=(0.19997, 0.19997, 0.19997)
+! Supercell sites (with vacancy): 9 (host=10) | L_min = 19.676 A
+! FNV Electrostatic Correction: E_FNV(q=+-1) = 0.1902 eV, E_FNV(q=+-2) = 0.7608 eV
+! Lab Synthesis Batch (10.0 mmol): Target Mass = 12.1552 g at T = 375.0 C
+&CONTROL
+  calculation = 'relax',
+  prefix = 'bi3inse6_defect_v_chalcogen (shallow donor, ns2 antibonding)',
+  outdir = './out_defect/',
+  pseudo_dir = './pseudo_oncv_fr/',
+  tprnfor = .true.,
+/
+&SYSTEM
+  ibrav = 0,
+  nat = 9,
+  ntyp = 3,
+  ecutwfc = 65.0,
+  noncolin = .true.,
+  lspinorb = .true.,
+/
+&ELECTRONS
+  conv_thr = 1.0d-7,
+/
+ATOMIC_SPECIES
+  Bi     208.9804  Bi_ONCV_PBE_FR-1.2.upf
+  In     114.8180  In_ONCV_PBE_FR-1.2.upf
+  Se      78.9600  Se_ONCV_PBE_FR-1.2.upf
+CELL_PARAMETERS (angstrom)
+      4.13331502      0.00000000     19.23678600
+      2.04333912      3.59291779     19.23678600
+      0.00000000      0.00000000     19.67582765
+ATOMIC_POSITIONS (crystal)
+  Bi     0.69999200    0.69999200    0.69999200
+  Bi     0.29955700    0.29955700    0.29955700
+  Bi     0.80173200    0.80173200    0.80173200
+  Se     0.60578600    0.60578600    0.60578600
+  Se     0.10797900    0.10797900    0.10797900
+  Se     0.88875200    0.88875200    0.88875200
+  Se     0.39394800    0.39394800    0.39394800
+  Se     0.99997800    0.99997800    0.99997800
+  Se     0.50230400    0.50230400    0.50230400
+K_POINTS gamma
