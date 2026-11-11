@@ -1077,10 +1077,10 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
         self.assertTrue(live_sum.get("v6_phase9_lab_and_lcoe_enabled"))
         self.assertNotIn("contrastive_classifier_audit", live_sum)
 
-        # 1. Phase 9A: Verify 9 Lab Synthesis & Defect Supercell Dossiers + Deck Files
+        # 1. Phase 9A: Verify 9 Lab Synthesis & Neutral Vacancy Supercell Dossiers + Deck Files
         lab_dossiers = live_sum.get("lab_synthesis_and_defect_dossiers", [])
         self.assertEqual(len(lab_dossiers), 9, f"Expected 9 lab_synthesis_and_defect_dossiers, got {len(lab_dossiers)}")
-        defect_dir = os.path.join(self.repo_root, "outputs", "mp_live_doped_supercell_decks")
+        defect_dir = os.path.join(self.repo_root, "outputs", "mp_live_neutral_vacancy_decks")
         self.assertTrue(os.path.isdir(defect_dir))
 
         finalists_by_id = {f["candidate"]["candidate_id"]: f for f in live_sum.get("finalists", [])}
@@ -1090,8 +1090,8 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
             self.assertLessEqual(ld["elemental_mass_conservation_diff_g"], 1e-6)
             self.assertGreaterEqual(ld["supercell_min_image_dist_ang"], 10.0)
             self.assertLessEqual(ld["synthesis_temperature_c"], 500.0)
-            deck_path = os.path.join(defect_dir, ld["doped_defect_deck_filename"])
-            self.assertTrue(os.path.isfile(deck_path), f"Missing defect supercell deck: {deck_path}")
+            deck_path = os.path.join(defect_dir, ld["neutral_vacancy_deck_filename"])
+            self.assertTrue(os.path.isfile(deck_path), f"Missing neutral vacancy supercell deck: {deck_path}")
 
             fin = finalists_by_id[cid]
             iv_9a = independently_verify_phase9a_lab_and_defect_dossier(
@@ -1102,7 +1102,9 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
             self.assertAlmostEqual(ld["formula_unit_molar_mass_g_mol"], iv_9a["formula_unit_molar_mass_g_mol"], places=3)
             self.assertEqual(ld["supercell_dims"], iv_9a["supercell_dims"])
             self.assertEqual(ld["supercell_total_sites"], iv_9a["supercell_total_sites"])
-            self.assertAlmostEqual(ld["fnv_charge_correction_q1_ev"], iv_9a["fnv_charge_correction_q1_ev"], places=3)
+            self.assertAlmostEqual(
+                ld["point_charge_image_estimate_ev"], iv_9a["point_charge_image_estimate_ev"], places=3
+            )
 
         # 2. Phase 9C: Verify Oblique (0-60 deg) S/P TMM, Operating Temp (25-65 C) & 25-Year Arrhenius LCOE across 20 Stacks
         lcoe_stacks = live_sum.get("real_world_lcoe_stress_test_stacks", [])
@@ -1580,6 +1582,135 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
             )
             self.assertFalse(rep_emig.emig_gate_passed)
             self.assertIsNone(rep_emig.dynamically_stable)
+
+    def test_25_all_generated_qe_decks_valid(self):
+        """T3: Parse every generated QE .in deck and verify removed species, prefix, k-points/noncolin, q-mesh divisibility, and d_perp >= 10 A."""
+        import copy
+        import re
+        import tempfile
+        from collections import Counter
+        from pathlib import Path
+        from pymatgen.io.cif import CifParser
+        from failsmart_matengine.atomistic_and_tmm import evaluate_phase9a_lab_synthesis_and_defect_supercell
+
+        root = Path(self.repo_root)
+        deck_dirs = [
+            root / "outputs" / "qe_hse06_soc_decks",
+            root / "outputs" / "mp_live_qe_decks",
+            root / "outputs" / "mp_live_neutral_vacancy_decks",
+        ]
+        self.assertFalse((root / "outputs" / "mp_live_doped_supercell_decks").exists())
+
+        all_decks = []
+        for ddir in deck_dirs:
+            self.assertTrue(ddir.is_dir(), f"Missing deck directory: {ddir}")
+            decks = sorted(ddir.glob("*.in"))
+            self.assertGreater(len(decks), 0, f"No .in decks in {ddir}")
+            all_decks.extend(decks)
+
+        self.assertEqual(len(all_decks), 23, f"Expected 5 + 9 + 9 = 23 .in decks, got {len(all_decks)}")
+
+        for deck_path in all_decks:
+            txt = deck_path.read_text(encoding="utf-8")
+            lines = txt.splitlines()
+
+            # 1. Prefix matches ^[A-Za-z0-9_]+$
+            m_pref = re.search(r"prefix\s*=\s*'([^']*)'", txt)
+            self.assertIsNotNone(m_pref, f"Missing prefix in {deck_path}")
+            prefix_val = m_pref.group(1)
+            self.assertRegex(prefix_val, r"^[A-Za-z0-9_]+$", f"Invalid prefix '{prefix_val}' in {deck_path}")
+
+            # 2. No deck combines K_POINTS gamma with noncolin = .true.
+            has_noncolin = bool(re.search(r"noncolin\s*=\s*\.true\.", txt, re.IGNORECASE))
+            has_kpoints_gamma = bool(re.search(r"K_POINTS\s+\{?\s*gamma\s*\}?", txt, re.IGNORECASE))
+            self.assertFalse(
+                has_noncolin and has_kpoints_gamma,
+                f"Deck {deck_path} combines noncolin=.true. with K_POINTS gamma",
+            )
+
+            # 3. Hybrid q-mesh divides k-mesh in every direction
+            m_nqx1 = re.search(r"nqx1\s*=\s*(\d+)", txt)
+            m_nqx2 = re.search(r"nqx2\s*=\s*(\d+)", txt)
+            m_nqx3 = re.search(r"nqx3\s*=\s*(\d+)", txt)
+            if m_nqx1 or m_nqx2 or m_nqx3:
+                nqx = (int(m_nqx1.group(1)), int(m_nqx2.group(1)), int(m_nqx3.group(1)))
+                k_idx = next(i for i, ln in enumerate(lines) if ln.strip().startswith("K_POINTS"))
+                k_vals = [int(x) for x in lines[k_idx + 1].split()[:3]]
+                for axis_idx, (kv, qv) in enumerate(zip(k_vals, nqx)):
+                    self.assertGreaterEqual(qv, 1)
+                    self.assertEqual(
+                        kv % qv,
+                        0,
+                        f"{deck_path}: k[{axis_idx}]={kv} not divisible by nqx[{axis_idx}]={qv}",
+                    )
+
+        # 4. Neutral vacancy supercell checks: removed species == labelled species & min perpendicular spacing >= 10.0 A
+        live_sum = json.loads((root / "outputs" / "live_mp_discovery_summary.json").read_text(encoding="utf-8"))
+        fins_by_id = {f["candidate"]["candidate_id"]: f for f in live_sum["finalists"]}
+        lab_by_id = {ld["candidate_id"]: ld for ld in live_sum["lab_synthesis_and_defect_dossiers"]}
+
+        for cid, ld in lab_by_id.items():
+            fin = fins_by_id[cid]
+            deck_path = root / "outputs" / "mp_live_neutral_vacancy_decks" / ld["neutral_vacancy_deck_filename"]
+            txt = deck_path.read_text(encoding="utf-8")
+            lines = txt.splitlines()
+
+            # Parse CELL_PARAMETERS and ATOMIC_POSITIONS directly from the .in deck
+            cell_idx = next(i for i, ln in enumerate(lines) if ln.strip().startswith("CELL_PARAMETERS"))
+            smat = np.array(
+                [[float(x) for x in lines[cell_idx + 1 + r].split()] for r in range(3)],
+                dtype=float,
+            )
+            svol = abs(float(np.linalg.det(smat)))
+            perp_spacings = [
+                svol / float(np.linalg.norm(np.cross(smat[1], smat[2]))),
+                svol / float(np.linalg.norm(np.cross(smat[2], smat[0]))),
+                svol / float(np.linalg.norm(np.cross(smat[0], smat[1]))),
+            ]
+            min_perp = min(perp_spacings)
+            self.assertGreaterEqual(
+                min_perp,
+                10.0,
+                f"{deck_path}: min perpendicular spacing {min_perp:.4f} A < 10.0 A",
+            )
+
+            pos_idx = next(i for i, ln in enumerate(lines) if ln.strip().startswith("ATOMIC_POSITIONS"))
+            k_idx = next(i for i, ln in enumerate(lines) if ln.strip().startswith("K_POINTS"))
+            deck_counts: Counter = Counter()
+            for ln in lines[pos_idx + 1 : k_idx]:
+                parts = ln.split()
+                if len(parts) >= 4:
+                    deck_counts[parts[0]] += 1
+
+            unit_struct = CifParser.from_str(fin["candidate"]["cif_content"]).parse_structures(primitive=False)[0]
+            na, nb, nc = ld["supercell_dims"]
+            mult = na * nb * nc
+            unit_counts = Counter(site.specie.symbol for site in unit_struct)
+            expected_host_counts = {el: cnt * mult for el, cnt in unit_counts.items()}
+
+            diffs = {el: expected_host_counts[el] - deck_counts.get(el, 0) for el in expected_host_counts}
+            removed_els = [el for el, d in diffs.items() if d != 0]
+            self.assertEqual(len(removed_els), 1, f"{deck_path}: expected 1 species count to change, got {diffs}")
+            removed_el = removed_els[0]
+            self.assertEqual(diffs[removed_el], 1, f"{deck_path}: expected 1 atom removed, got {diffs}")
+
+            # Check removed species equals labelled species in header, dossier, and defect label
+            m_hdr = re.search(r"Removed Species:\s*([A-Za-z]+)", txt)
+            self.assertIsNotNone(m_hdr, f"Missing Removed Species header in {deck_path}")
+            self.assertEqual(removed_el, m_hdr.group(1))
+            self.assertEqual(removed_el, ld["dominant_vacancy_element"])
+            self.assertEqual(removed_el, fin["electronics"]["dominant_vacancy_element"])
+            self.assertTrue(
+                ld["dominant_vacancy_species"].startswith(f"V_{removed_el} "),
+                f"Label '{ld['dominant_vacancy_species']}' does not match V_{removed_el}",
+            )
+
+        # 5. Absent species raises ValueError
+        bad_fin = copy.deepcopy(next(iter(fins_by_id.values())))
+        bad_fin["electronics"]["dominant_vacancy_element"] = "Xe"
+        with tempfile.TemporaryDirectory() as td:
+            with self.assertRaises(ValueError):
+                evaluate_phase9a_lab_synthesis_and_defect_supercell(bad_fin, td)
 
 
 if __name__ == "__main__":

@@ -502,20 +502,25 @@ def _estimate_hse06_soc_electronics_from_mp(
     has_lone_pair = any(e in stoich for e in ("Bi", "Sb", "Sn"))
     has_d0_or_fe = any(e in stoich for e in ("Ti", "Zr", "Fe"))
     if has_d0_or_fe and not has_lone_pair:
-        dom_vac = "Ti/Zr/Fe d-shell vacancy trap (deep SRH center)"
+        vac_el = next(e for e in ("Ti", "Zr", "Fe") if e in stoich)
+        dom_vac = f"V_{vac_el} (deep d-shell SRH center)"
         def_ev = 0.24
     elif not has_lone_pair and o_frac >= 0.25:
+        vac_el = "O"
         dom_vac = "V_O (deep donor)"
         def_ev = 0.19
     else:
         if "Cu" in stoich:
+            vac_el = "Cu"
             dom_vac = "V_Cu (shallow acceptor, ns2-screened)"
             def_ev = 0.06
         elif "Cl" in stoich or "Br" in stoich or "I" in stoich:
-            dom_vac = "V_Halide (resonant/shallow donor, ns2 antibonding)"
+            vac_el = next(e for e in ("Cl", "Br", "I") if e in stoich)
+            dom_vac = f"V_{vac_el} (resonant/shallow donor, ns2 antibonding)"
             def_ev = 0.08
         else:
-            dom_vac = "V_Chalcogen (shallow donor, ns2 antibonding)"
+            vac_el = next((e for e in ("S", "Se", "O", "Te") if e in stoich), next(iter(stoich)))
+            dom_vac = f"V_{vac_el} (shallow donor, ns2 antibonding)"
             def_ev = 0.07
 
     return {
@@ -532,6 +537,7 @@ def _estimate_hse06_soc_electronics_from_mp(
         "lo_phonon_freq_thz": w_lo_thz,
         "frohlich_alpha": frohlich_a,
         "polaron_trapping_mev": pol_mev,
+        "dominant_vacancy_element": vac_el,
         "dominant_vacancy_defect": dom_vac,
         "deepest_defect_level_from_band_edge_ev": def_ev,
     }
@@ -1203,7 +1209,7 @@ def run_live_mp_discovery_campaign(
         load_mp_thermo_interface_cache,
     )
 
-    defect_deck_dir = out_path / "mp_live_doped_supercell_decks"
+    defect_deck_dir = out_path / "mp_live_neutral_vacancy_decks"
     defect_deck_dir.mkdir(parents=True, exist_ok=True)
     for old_d in defect_deck_dir.glob("*"):
         old_d.unlink()
@@ -1304,7 +1310,7 @@ def run_live_mp_discovery_campaign(
             "atomistic_dynamical_matrix_and_neb": True,
             "coherent_abeles_tmm_vs_rouard_airy": True,
             "graded_arc_tio2_and_techno_economic_fom": True,
-            "phase9a_lab_synthesis_and_doped_supercells": True,
+            "phase9a_lab_synthesis_and_neutral_vacancy_supercells": True,
             "phase9c_oblique_thermal_arrhenius_lcoe": True,
             "phase10_thickness_opt_bifacial_and_string_matching": True,
             "phase11_live_dft_thermo_interface_and_4path_commercialization": True,

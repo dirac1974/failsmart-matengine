@@ -1,11 +1,11 @@
-! FailSmart-MatEngine v6.0 Stage 5 `doped` Defect Supercell QE Deck (2x2x1)
-! Candidate: mp-1195160 (Al2Bi2Cu2S3Cl8) | Defect: V_Cu (shallow acceptor, ns2-screened) removed at frac=(0.33333, 0.16667, 0.57739)
-! Supercell sites (with vacancy): 135 (host=136) | L_min = 13.220 A
-! FNV Electrostatic Correction: E_FNV(q=+-1) = 0.1079 eV, E_FNV(q=+-2) = 0.4315 eV
+! FailSmart-MatEngine Neutral Vacancy Supercell QE Deck (2x2x1)
+! Candidate: mp-1195160 (Al2Bi2Cu2S3Cl8) | Removed Species: Cu | Label: V_Cu (shallow acceptor, ns2-screened) at frac=(0.33333, 0.16667, 0.75000)
+! Supercell sites (with neutral vacancy): 135 (host=136) | d_perp_min = 11.449 A
+! Point-Charge Image Estimate: E_pc(|q|=1) = 0.1079 eV, E_pc(|q|=2) = 0.4315 eV
 ! Lab Synthesis Batch (10.0 mmol): Target Mass = 9.7883 g at T = 335.0 C
 &CONTROL
   calculation = 'relax',
-  prefix = 'al2bi2cu2s3cl8_defect_v_cu (shallow acceptor, ns2-screened)',
+  prefix = 'al2bi2cu2s3cl8_v_cu',
   outdir = './out_defect/',
   pseudo_dir = './pseudo_oncv_fr/',
   tprnfor = .true.,
@@ -32,6 +32,7 @@ CELL_PARAMETERS (angstrom)
      -6.61010403     11.44903597      0.00000000
       0.00000000      0.00000000     23.42188100
 ATOMIC_POSITIONS (crystal)
+  Al     0.33333333    0.16666667    0.57739500
   Al     0.33333333    0.66666667    0.57739500
   Al     0.83333333    0.16666667    0.57739500
   Al     0.83333333    0.66666667    0.57739500
@@ -47,7 +48,6 @@ ATOMIC_POSITIONS (crystal)
   Al     0.33333333    0.66666667    0.92260500
   Al     0.83333333    0.16666667    0.92260500
   Al     0.83333333    0.66666667    0.92260500
-  Cu     0.33333333    0.16666667    0.75000000
   Cu     0.33333333    0.66666667    0.75000000
   Cu     0.83333333    0.16666667    0.75000000
   Cu     0.83333333    0.66666667    0.75000000
@@ -167,4 +167,5 @@ ATOMIC_POSITIONS (crystal)
   Cl     0.37960250    0.54563500    0.88503000
   Cl     0.87960250    0.04563500    0.88503000
   Cl     0.87960250    0.54563500    0.88503000
-K_POINTS gamma
+K_POINTS automatic
+  1 1 1 0 0 0

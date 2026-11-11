@@ -54,7 +54,7 @@ T0 -> T1 -> T6 -> T3 -> T2 -> T4 -> T5 -> T8 -> [HUMAN GATE] T7 -> T9 -> T10 -> 
 | T0 | Baseline | done | Editable install fixed (`[tool.setuptools.packages.find]`); `pytest -q`: 22 passed; `repo_auditor`: PASS (11 Markdown files, 0 errors) |
 | T1 | Paths and version | done | Repo-relative `Path(__file__).resolve().parents[1]` defaults; unified version `0.8.0`; removed broken `IMG_1087.png` link; verified in fresh `/tmp` clone (`23 passed`, auditor `PASS`) |
 | T2 | Finish relabelling in code and data | todo | README and docs relabelled; code and schema not yet |
-| T3 | Fix deck generators | todo | |
+| T3 | Fix deck generators | done | Explicit vacancy element (`ValueError` if absent), `^[A-Za-z0-9_]+$` prefix, `K_POINTS automatic 1 1 1 0 0 0` with `noncolin`, perpendicular spacing `>= 10 A` (`Bi3InSe6` `1x1x1->3x3x3`, `Sb2OS2` `2x2x1->3x3x1`), commensurate `nqx1..3`, renamed `mp_live_neutral_vacancy_decks` & `point_charge_image_estimate_ev`; `test_25` checks all 23 decks (`25 passed`, auditor `PASS`) |
 | T4 | Calibrate the gap estimate; literature gate | todo | |
 | T5 | External-truth tests | todo | |
 | T6 | Remove gates that cannot fail | done | Removed non-failing gates (`dynamically_stable=None`, `g_above_hull_synth_mev=None`, `mlip_force_std_ev_ang=None`, `tco_rxn/hmix=None`, deleted contrastive audit, enabled LBNL prior gate `IMPURITY_SINK_PRIOR`); funnel `100->91->52->40->8` updated to `100->91->47->40->9`; `test_24` verifies all 13 remaining gates fail; `24 passed`, auditor `PASS` |

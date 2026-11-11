@@ -99,6 +99,7 @@ class ElectronicDefectReport(BaseModel):
     lo_phonon_freq_thz: float
     frohlich_alpha: float
     polaron_trapping_mev: float
+    dominant_vacancy_element: str
     dominant_vacancy_defect: str
     deepest_defect_level_from_band_edge_ev: float
     srh_recombination_safe: bool
@@ -249,7 +250,7 @@ class GradedARCTechnoEconomicReport(BaseModel):
 
 
 class LabSynthesisAndDefectDossier(BaseModel):
-    """Phase 9A: Lab-Ready 10.0 mmol Synthesis Recipe & Stage 5 doped Defect Supercell Dossier (v6.0)."""
+    """Phase 9A: Lab-Ready 10.0 mmol Synthesis Recipe & Neutral Vacancy Supercell Dossier."""
     candidate_id: str
     formula_reduced: str
     target_layer: str
@@ -264,10 +265,11 @@ class LabSynthesisAndDefectDossier(BaseModel):
     supercell_dims: List[int]
     supercell_total_sites: int
     supercell_min_image_dist_ang: float
+    dominant_vacancy_element: str
     dominant_vacancy_species: str
-    fnv_charge_correction_q1_ev: float
-    fnv_charge_correction_q2_ev: float
-    doped_defect_deck_filename: str
+    point_charge_image_estimate_ev: float
+    point_charge_image_estimate_q2_ev: float
+    neutral_vacancy_deck_filename: str
     redundancy_verified: bool
     sha256_signature: str
 

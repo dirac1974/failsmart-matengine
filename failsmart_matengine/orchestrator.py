@@ -1,6 +1,7 @@
 """Multi-Agent State-Machine Campaign Orchestrator v2.0 with Blinded Redundancy & Runnable QE Decks."""
 
 import json
+import re
 from pathlib import Path
 from typing import Any, Dict, List
 from .independent_verifier import verify_candidate_dossier
@@ -34,6 +35,13 @@ def generate_qe_hse06_soc_input(cand_dict: Dict[str, Any]) -> str:
     kx = max(2, min(8, int(round(24.0 / max(a_len, 1.0)))))
     ky = max(2, min(8, int(round(24.0 / max(b_len, 1.0)))))
     kz = max(2, min(8, int(round(24.0 / max(c_len, 1.0)))))
+    nqx1 = 2 if kx % 2 == 0 else 1
+    nqx2 = 2 if ky % 2 == 0 else 1
+    nqx3 = 2 if kz % 2 == 0 else 1
+
+    safe_prefix = re.sub(r"[^A-Za-z0-9_]", "", formula).lower()
+    if not safe_prefix or not re.fullmatch(r"[A-Za-z0-9_]+", safe_prefix):
+        raise ValueError(f"Invalid QE prefix derived from formula '{formula}': '{safe_prefix}'")
 
     lines = [
         "! FailSmart-MatEngine v2.0 Auto-Generated Quantum ESPRESSO HSE06+SOC Input Deck",
@@ -41,7 +49,7 @@ def generate_qe_hse06_soc_input(cand_dict: Dict[str, Any]) -> str:
         f"! Verified Space Group: {cand_dict['space_group_symbol']} (#{cand_dict['space_group_number']}) | nat = {nat}",
         "&CONTROL",
         "  calculation = 'scf',",
-        f"  prefix = '{formula.lower()}',",
+        f"  prefix = '{safe_prefix}',",
         "  outdir = './out/',",
         "  pseudo_dir = './pseudo_oncv_fr/',",
         "  tprnfor = .true.,",
@@ -58,7 +66,7 @@ def generate_qe_hse06_soc_input(cand_dict: Dict[str, Any]) -> str:
         "  noncolin = .true.,",
         "  lspinorb = .true.,",
         "  input_dft = 'hse',",
-        "  nqx1 = 2, nqx2 = 2, nqx3 = 2,",
+        f"  nqx1 = {nqx1}, nqx2 = {nqx2}, nqx3 = {nqx3},",
         "  x_gamma_extrapolation = .true.,",
         "/",
         "&ELECTRONS",

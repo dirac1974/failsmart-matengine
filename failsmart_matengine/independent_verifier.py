@@ -1224,23 +1224,37 @@ def independently_verify_phase9a_lab_and_defect_dossier(
     stoichiometry: Dict[str, int],
     eps_static: float,
 ) -> Dict[str, Any]:
-    """Blinded independent verification of Phase 9A 10.0 mmol synthesis mass balance & doped supercell FNV corrections."""
+    """Independent regression check of Phase 9A 10.0 mmol synthesis mass balance & neutral vacancy supercell point-charge image estimates."""
     formula_unit_molar_mass_g_mol = sum(
         cnt * _BLIND_IUPAC_MASSES[el] for el, cnt in stoichiometry.items()
     )
     target_product_mass_g = 0.010 * formula_unit_molar_mass_g_mol
 
     struct = CifParser.from_str(cif_content).parse_structures(primitive=False)[0]
-    a, b, c = struct.lattice.abc
-    na = max(1, math.ceil(10.0 / a))
-    nb = max(1, math.ceil(10.0 / b))
-    nc = max(1, math.ceil(10.0 / c))
+    mat = np.array(struct.lattice.matrix, dtype=float)
+    vol = abs(float(np.linalg.det(mat)))
+    d_perp_a = vol / float(np.linalg.norm(np.cross(mat[1], mat[2])))
+    d_perp_b = vol / float(np.linalg.norm(np.cross(mat[2], mat[0])))
+    d_perp_c = vol / float(np.linalg.norm(np.cross(mat[0], mat[1])))
+    na = max(1, math.ceil(10.0 / d_perp_a))
+    if na * d_perp_a < 10.0:
+        na += 1
+    nb = max(1, math.ceil(10.0 / d_perp_b))
+    if nb * d_perp_b < 10.0:
+        nb += 1
+    nc = max(1, math.ceil(10.0 / d_perp_c))
+    if nc * d_perp_c < 10.0:
+        nc += 1
+
     supercell_total_sites = int(na * nb * nc * len(struct))
-    supercell_min_image_dist_ang = min(na * a, nb * b, nc * c)
+    supercell_min_image_dist_ang = min(na * d_perp_a, nb * d_perp_b, nc * d_perp_c)
+    assert supercell_min_image_dist_ang >= 10.0, (
+        f"Supercell min perpendicular spacing {supercell_min_image_dist_ang:.4f} < 10.0 A"
+    )
     l_eff = (struct.volume * na * nb * nc) ** (1.0 / 3.0)
 
-    fnv_charge_correction_q1_ev = (1.0 * 2.8373 * 14.399645) / (eps_static * l_eff)
-    fnv_charge_correction_q2_ev = (4.0 * 2.8373 * 14.399645) / (eps_static * l_eff)
+    point_charge_image_estimate_ev = (1.0 * 2.8373 * 14.399645) / (eps_static * l_eff)
+    point_charge_image_estimate_q2_ev = (4.0 * 2.8373 * 14.399645) / (eps_static * l_eff)
 
     res: Dict[str, Any] = {
         "formula_unit_molar_mass_g_mol": round(float(formula_unit_molar_mass_g_mol), 4),
@@ -1248,8 +1262,8 @@ def independently_verify_phase9a_lab_and_defect_dossier(
         "supercell_dims": [int(na), int(nb), int(nc)],
         "supercell_total_sites": supercell_total_sites,
         "supercell_min_image_dist_ang": round(float(supercell_min_image_dist_ang), 4),
-        "fnv_charge_correction_q1_ev": round(float(fnv_charge_correction_q1_ev), 4),
-        "fnv_charge_correction_q2_ev": round(float(fnv_charge_correction_q2_ev), 4),
+        "point_charge_image_estimate_ev": round(float(point_charge_image_estimate_ev), 4),
+        "point_charge_image_estimate_q2_ev": round(float(point_charge_image_estimate_q2_ev), 4),
     }
 
     sig_payload = {
@@ -1258,8 +1272,8 @@ def independently_verify_phase9a_lab_and_defect_dossier(
         "supercell_dims": res["supercell_dims"],
         "supercell_total_sites": res["supercell_total_sites"],
         "supercell_min_image_dist_ang": res["supercell_min_image_dist_ang"],
-        "fnv_charge_correction_q1_ev": res["fnv_charge_correction_q1_ev"],
-        "fnv_charge_correction_q2_ev": res["fnv_charge_correction_q2_ev"],
+        "point_charge_image_estimate_ev": res["point_charge_image_estimate_ev"],
+        "point_charge_image_estimate_q2_ev": res["point_charge_image_estimate_q2_ev"],
     }
     res["sha256_signature"] = hashlib.sha256(
         json.dumps(sig_payload, sort_keys=True).encode("utf-8")

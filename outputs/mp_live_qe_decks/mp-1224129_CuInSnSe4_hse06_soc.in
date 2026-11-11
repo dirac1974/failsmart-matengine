@@ -20,7 +20,7 @@
   noncolin = .true.,
   lspinorb = .true.,
   input_dft = 'hse',
-  nqx1 = 2, nqx2 = 2, nqx3 = 2,
+  nqx1 = 1, nqx2 = 1, nqx3 = 1,
   x_gamma_extrapolation = .true.,
 /
 &ELECTRONS

@@ -770,7 +770,8 @@ def evaluate_phase9a_lab_synthesis_and_defect_supercell(
     finalist_dossier: Dict[str, Any],
     defect_deck_dir: str,
 ) -> LabSynthesisAndDefectDossier:
-    """Phase 9A: Generate 10.0 mmol Stoichiometric Lab Synthesis Recipe & Stage 5 doped Defect Supercell Deck."""
+    """Phase 9A: Generate 10.0 mmol Stoichiometric Lab Synthesis Recipe & Neutral Vacancy Supercell Deck."""
+    import re
     from pathlib import Path
     from .independent_verifier import independently_verify_phase9a_lab_and_defect_dossier
 
@@ -804,51 +805,86 @@ def evaluate_phase9a_lab_synthesis_and_defect_supercell(
 
     mass_diff_g = abs(supplied_elemental_mass_g - target_mass_g)
 
-    # 2. Stage 5 `doped` Defect Supercell Expansion (N_a, N_b, N_c >= ceil(10.0 / L_i))
-    a_len, b_len, c_len = struct.lattice.abc
-    na = max(1, int(math.ceil(10.0 / a_len)))
-    nb = max(1, int(math.ceil(10.0 / b_len)))
-    nc = max(1, int(math.ceil(10.0 / c_len)))
+    # 2. Neutral Vacancy Supercell Expansion using perpendicular lattice-plane spacings >= 10.0 A
+    mat = np.array(struct.lattice.matrix, dtype=float)
+    vol = abs(float(np.linalg.det(mat)))
+    d_perp_a = vol / float(np.linalg.norm(np.cross(mat[1], mat[2])))
+    d_perp_b = vol / float(np.linalg.norm(np.cross(mat[2], mat[0])))
+    d_perp_c = vol / float(np.linalg.norm(np.cross(mat[0], mat[1])))
+    na = max(1, int(math.ceil(10.0 / d_perp_a)))
+    if na * d_perp_a < 10.0:
+        na += 1
+    nb = max(1, int(math.ceil(10.0 / d_perp_b)))
+    if nb * d_perp_b < 10.0:
+        nb += 1
+    nc = max(1, int(math.ceil(10.0 / d_perp_c)))
+    if nc * d_perp_c < 10.0:
+        nc += 1
+
     n_super = na * nb * nc * len(struct)
-    min_img_dist = min(na * a_len, nb * b_len, nc * c_len)
     omega_super = float(struct.volume) * (na * nb * nc)
     l_eff = omega_super ** (1.0 / 3.0)
 
     eps_0 = float(elec["eps_static"])
     madelung_alpha = 2.8373
     coulomb_ev_ang = 14.399645
-    fnv_q1 = (1.0 * madelung_alpha * coulomb_ev_ang) / (eps_0 * l_eff)
-    fnv_q2 = (4.0 * madelung_alpha * coulomb_ev_ang) / (eps_0 * l_eff)
+    pc_q1 = (1.0 * madelung_alpha * coulomb_ev_ang) / (eps_0 * l_eff)
+    pc_q2 = (4.0 * madelung_alpha * coulomb_ev_ang) / (eps_0 * l_eff)
 
     dom_vac = str(elec["dominant_vacancy_defect"])
-    vac_el = dom_vac.replace("V_", "").strip()
+    vac_el = str(elec.get("dominant_vacancy_element") or "").strip()
+    if not vac_el:
+        raise ValueError(f"Missing explicit dominant_vacancy_element on {cid} ({formula}) for label '{dom_vac}'")
 
-    # Write Stage 5 `doped` / QE Defect Supercell Input Deck
+    # Write Stage 5 Neutral Vacancy Supercell QE Input Deck
     out_dir = Path(defect_deck_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-    deck_fname = f"{cid}_{formula}_doped_supercell_{na}x{nb}x{nc}.in"
+    deck_fname = f"{cid}_{formula}_neutral_vacancy_{na}x{nb}x{nc}.in"
     deck_path = out_dir / deck_fname
 
     super_struct = struct.copy()
     super_struct.make_supercell([na, nb, nc])
-    # Remove first occurrence of vac_el to create the explicit neutral/charged vacancy supercell
-    removed_idx = 0
+
+    smat = np.array(super_struct.lattice.matrix, dtype=float)
+    svol = abs(float(np.linalg.det(smat)))
+    s_perp_a = svol / float(np.linalg.norm(np.cross(smat[1], smat[2])))
+    s_perp_b = svol / float(np.linalg.norm(np.cross(smat[2], smat[0])))
+    s_perp_c = svol / float(np.linalg.norm(np.cross(smat[0], smat[1])))
+    min_img_dist = min(s_perp_a, s_perp_b, s_perp_c)
+    assert min_img_dist >= 10.0, (
+        f"Supercell minimum perpendicular spacing {min_img_dist:.4f} A < 10.0 A for {cid} ({formula})"
+    )
+
+    # Remove first occurrence of vac_el to create the explicit neutral vacancy supercell
+    removed_idx = None
     for idx_s, site in enumerate(super_struct):
         if site.specie.symbol == vac_el:
             removed_idx = idx_s
             break
+    if removed_idx is None:
+        raise ValueError(
+            f"Vacancy species '{vac_el}' (label '{dom_vac}') is absent from structure of {cid} ({formula})"
+        )
     vac_frac = super_struct[removed_idx].frac_coords
     super_struct.remove_sites([removed_idx])
 
+    safe_formula = re.sub(r"[^A-Za-z0-9_]", "", formula).lower()
+    safe_el = re.sub(r"[^A-Za-z0-9_]", "", vac_el).lower()
+    deck_prefix = f"{safe_formula}_v_{safe_el}"
+    if not re.fullmatch(r"[A-Za-z0-9_]+", deck_prefix):
+        raise ValueError(f"Invalid QE prefix '{deck_prefix}' for {cid} ({formula})")
+
+    present_species = [el for el in stoich if any(site.specie.symbol == el for site in super_struct)]
+
     lines = [
-        f"! FailSmart-MatEngine v6.0 Stage 5 `doped` Defect Supercell QE Deck ({na}x{nb}x{nc})",
-        f"! Candidate: {cid} ({formula}) | Defect: {dom_vac} removed at frac=({vac_frac[0]:.5f}, {vac_frac[1]:.5f}, {vac_frac[2]:.5f})",
-        f"! Supercell sites (with vacancy): {len(super_struct)} (host={n_super}) | L_min = {min_img_dist:.3f} A",
-        f"! FNV Electrostatic Correction: E_FNV(q=+-1) = {fnv_q1:.4f} eV, E_FNV(q=+-2) = {fnv_q2:.4f} eV",
+        f"! FailSmart-MatEngine Neutral Vacancy Supercell QE Deck ({na}x{nb}x{nc})",
+        f"! Candidate: {cid} ({formula}) | Removed Species: {vac_el} | Label: {dom_vac} at frac=({vac_frac[0]:.5f}, {vac_frac[1]:.5f}, {vac_frac[2]:.5f})",
+        f"! Supercell sites (with neutral vacancy): {len(super_struct)} (host={n_super}) | d_perp_min = {min_img_dist:.3f} A",
+        f"! Point-Charge Image Estimate: E_pc(|q|=1) = {pc_q1:.4f} eV, E_pc(|q|=2) = {pc_q2:.4f} eV",
         f"! Lab Synthesis Batch (10.0 mmol): Target Mass = {target_mass_g:.4f} g at T = {synth['min_synthesis_temp_c']:.1f} C",
         "&CONTROL",
         "  calculation = 'relax',",
-        f"  prefix = '{formula.lower()}_defect_{dom_vac.lower()}',",
+        f"  prefix = '{deck_prefix}',",
         "  outdir = './out_defect/',",
         "  pseudo_dir = './pseudo_oncv_fr/',",
         "  tprnfor = .true.,",
@@ -856,7 +892,7 @@ def evaluate_phase9a_lab_synthesis_and_defect_supercell(
         "&SYSTEM",
         "  ibrav = 0,",
         f"  nat = {len(super_struct)},",
-        f"  ntyp = {len(stoich)},",
+        f"  ntyp = {len(present_species)},",
         "  ecutwfc = 65.0,",
         "  noncolin = .true.,",
         "  lspinorb = .true.,",
@@ -866,7 +902,7 @@ def evaluate_phase9a_lab_synthesis_and_defect_supercell(
         "/",
         "ATOMIC_SPECIES",
     ]
-    for el in stoich:
+    for el in present_species:
         lines.append(f"  {el:<3s}  {IUPAC_ATOMIC_MASSES[el]:10.4f}  {el}_ONCV_PBE_FR-1.2.upf")
     lines.append("CELL_PARAMETERS (angstrom)")
     for vec in super_struct.lattice.matrix:
@@ -875,7 +911,8 @@ def evaluate_phase9a_lab_synthesis_and_defect_supercell(
     for site in super_struct:
         fx, fy, fz = site.frac_coords % 1.0
         lines.append(f"  {site.specie.symbol:<3s}  {fx:12.8f}  {fy:12.8f}  {fz:12.8f}")
-    lines.append("K_POINTS gamma")
+    lines.append("K_POINTS automatic")
+    lines.append("  1 1 1 0 0 0")
     deck_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
     blind_9a = independently_verify_phase9a_lab_and_defect_dossier(
@@ -889,8 +926,9 @@ def evaluate_phase9a_lab_synthesis_and_defect_supercell(
         and mass_diff_g <= 1e-6
         and [na, nb, nc] == blind_9a["supercell_dims"]
         and n_super == blind_9a["supercell_total_sites"]
-        and abs(fnv_q1 - blind_9a["fnv_charge_correction_q1_ev"]) <= 1e-4
-        and abs(fnv_q2 - blind_9a["fnv_charge_correction_q2_ev"]) <= 1e-4
+        and abs(min_img_dist - blind_9a["supercell_min_image_dist_ang"]) <= 1e-3
+        and abs(pc_q1 - blind_9a["point_charge_image_estimate_ev"]) <= 1e-4
+        and abs(pc_q2 - blind_9a["point_charge_image_estimate_q2_ev"]) <= 1e-4
     )
     if not ok_9a:
         raise AssertionError(f"REDUNDANCY_MISMATCH_BLOCK: Phase 9A Lab/Defect mismatch on {cid}")
@@ -913,10 +951,11 @@ def evaluate_phase9a_lab_synthesis_and_defect_supercell(
         supercell_dims=[na, nb, nc],
         supercell_total_sites=n_super,
         supercell_min_image_dist_ang=round(min_img_dist, 3),
+        dominant_vacancy_element=vac_el,
         dominant_vacancy_species=dom_vac,
-        fnv_charge_correction_q1_ev=round(fnv_q1, 4),
-        fnv_charge_correction_q2_ev=round(fnv_q2, 4),
-        doped_defect_deck_filename=deck_fname,
+        point_charge_image_estimate_ev=round(pc_q1, 4),
+        point_charge_image_estimate_q2_ev=round(pc_q2, 4),
+        neutral_vacancy_deck_filename=deck_fname,
         redundancy_verified=ok_9a,
         sha256_signature=blind_9a["sha256_signature"],
     )

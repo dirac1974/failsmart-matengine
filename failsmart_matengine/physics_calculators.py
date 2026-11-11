@@ -1245,8 +1245,28 @@ def compute_electronic_defect_metrics(cand_spec: Dict[str, Any]) -> Dict[str, An
         avg_mass = sum(IUPAC_ATOMIC_MASSES.get(el, 50.0) * cnt for el, cnt in stoich.items()) / total_atoms
         w_lo_thz = round(max(0.85, 1.65 / math.sqrt(avg_mass / 45.0)), 4)
 
-        vac = "V_Cu (shallow acceptor)" if "Cu" in stoich else ("V_Bi (shallow)" if "Bi" in stoich else "V_Ch (shallow)")
+        if "Cu" in stoich:
+            vac_el = "Cu"
+            vac = "V_Cu (shallow acceptor)"
+        elif "Bi" in stoich:
+            vac_el = "Bi"
+            vac = "V_Bi (shallow)"
+        else:
+            vac_el = next((e for e in ("S", "Se", "O", "Cl", "Br", "I") if e in stoich), next(iter(stoich)))
+            vac = f"V_{vac_el} (shallow)"
         def_ev = round(0.05 + 0.10 * o_frac, 2)
+
+    # Resolve explicit element symbol for the defect species
+    if cid in _RAW_ELECTRONIC_DATA:
+        first_tok = vac.split()[0]
+        cand_el = first_tok.replace("V_", "").split("_")[0]
+        if cand_el in stoich:
+            vac_el = cand_el
+        else:
+            vac_el = next(
+                (e for e in ("Cu", "Cl", "Br", "I", "S", "Se", "O", "Sn", "Sb", "Bi", "Ag", "Zn") if e in stoich),
+                next(iter(stoich)),
+            )
 
     # Strict invariant: soc_splitting_ev == round(hse06_nosoc_gap_ev - hse06_soc_direct_gap_ev, 3)
     soc_split = round(hse_nosoc - hse_soc_dir, 3)
@@ -1276,6 +1296,7 @@ def compute_electronic_defect_metrics(cand_spec: Dict[str, Any]) -> Dict[str, An
         "lo_phonon_freq_thz": w_lo_thz,
         "frohlich_alpha": frohlich_a,
         "polaron_trapping_mev": pol_mev,
+        "dominant_vacancy_element": vac_el,
         "dominant_vacancy_defect": vac,
         "deepest_defect_level_from_band_edge_ev": def_ev,
     }

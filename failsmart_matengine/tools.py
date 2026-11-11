@@ -316,6 +316,7 @@ def stage4_5_quantum_and_defects(cand: CandidateMaterial) -> ElectronicDefectRep
         lo_phonon_freq_thz=m["lo_phonon_freq_thz"],
         frohlich_alpha=m["frohlich_alpha"],
         polaron_trapping_mev=m["polaron_trapping_mev"],
+        dominant_vacancy_element=m["dominant_vacancy_element"],
         dominant_vacancy_defect=vac_name,
         deepest_defect_level_from_band_edge_ev=m["deepest_defect_level_from_band_edge_ev"],
         srh_recombination_safe=srh_ok,
