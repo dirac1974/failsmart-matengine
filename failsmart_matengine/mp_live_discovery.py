@@ -427,14 +427,18 @@ def _classify_crystal_family(stoich: Dict[str, int], dim: str, sg_sym: str) -> s
 def _estimate_hse06_soc_electronics_from_mp(
     rec: Dict[str, Any], stoich: Dict[str, int], struct: Structure
 ) -> Dict[str, Any]:
-    """Physics-grounded multi-fidelity PBE -> r2SCAN+SOC -> HSE06+SOC band-gap and polaron solver.
+    """Heuristic closed-form ESTIMATE of an HSE06+SOC-like gap from the Materials Project PBE gap.
+
+    No r2SCAN, HSE06 or spin-orbit calculation is run. The output keys keep their legacy
+    `hse06_*` / `r2scan_*` names for schema compatibility; every value is a heuristic whose
+    error has not been benchmarked (see docs/REMEDIATION_TASKS.md, tasks T2 and T4).
 
     Uses:
     - Live Materials Project `dft_pbe_band_gap_ev` ($E_g^{\\text{PBE}}$) and `dft_is_gap_direct`
     - Live MP DFPT dielectric constants (`dfpt_dielectric`) when available in MP, or Penn-model
       high-frequency screening $\\varepsilon_\\infty$
     - Relativistic $6p/5p$ spin-orbit splitting $\\Delta_{\\text{SOC}}$ weighted by heavy pnictogen/halide/chalcogen content
-    - Dielectric-dependent hybrid exchange opening $\\Delta E_{\\text{HSE}}(\\varepsilon_\\infty) = 0.42 + 2.85 / \\varepsilon_\\infty$
+    - Dielectric-dependent hybrid exchange opening $\\Delta E_{\\text{HSE}}(\\varepsilon_\\infty) = 0.31 + 3.30 / \\max(4.5, \\varepsilon_\\infty)$ (matches the code below)
     """
     total_atoms = max(1, sum(stoich.values()))
     pbe_gap = float(rec["dft_pbe_band_gap_ev"])

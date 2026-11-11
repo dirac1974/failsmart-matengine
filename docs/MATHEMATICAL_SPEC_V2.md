@@ -1,5 +1,8 @@
 # FailSmart-MatEngine v2.0 — Blinded Mathematical & Physical Specification
 
+> [!WARNING]
+> **Read first (independent audit, 2026-11):** the formulas here are what the code evaluates. Several are heuristics named after the first-principles methods they stand in for (HSE06+SOC gap, NEB barrier, dynamical matrix, FNV correction); none has been calibrated against reference data. See [`INDEPENDENT_AUDIT_2026-11.md`](INDEPENDENT_AUDIT_2026-11.md) and [`REMEDIATION_TASKS.md`](REMEDIATION_TASKS.md).
+
 > **FIREWALL MANDATE:** Primary Engineers (`physics_engine_engineer`, `optics_kinetics_engineer`) and the Independent Redundancy Verifier (`redundancy_verifier_alpha`) MUST implement solely from the physical equations, constants, and module contracts in this specification plus `failsmart_matengine/schemas.py`.
 > - Empirical efficiency multipliers (such as `1.28x` or `0.80x`) are **strictly forbidden**.
 > - `failsmart_matengine/independent_verifier.py` MUST NOT import from `physics_calculators.py`, `kinetics_and_optics.py`, or `tools.py`, and MUST NOT read those `.py` files during implementation. AST static analysis in `tests/test_scientific_integrity.py` enforces this zero-coupling firewall.
