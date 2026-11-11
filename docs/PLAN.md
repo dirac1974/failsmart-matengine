@@ -62,7 +62,7 @@ flowchart TD
 
 ### Agent 0: Principal Investigator & Campaign Orchestrator (`pi_orchestrator`)
 * **Scientific Persona:** Senior Computational Materials Director & Systems Architect.
-* **Core Mandate:** Manages campaign state in `LangGraph`, enforces the compute budget cap (\$$1,000$/sweep), balances exploration between the **Top Active Glass ($1.85\text{ eV}$)** and **Bottom IR Scavenger ($0.75\text{ eV}$)** tracks, and maintains the Pareto frontier across efficiency, synthesizability, and $/W cost.
+* **Core Mandate:** Manages campaign state in `LangGraph`, enforces the compute budget cap (\$1,000/sweep), balances exploration between the **Top Active Glass (1.85 eV)** and **Bottom IR Scavenger (0.75 eV)** tracks, and maintains the Pareto frontier across efficiency, synthesizability, and \$/W cost.
 * **Deterministic Tools:** Campaign state ledger, multi-objective Pareto optimizer (`botorch` / `pymoo`), epistemic uncertainty router (triggers DFT when 4-model MLIP force std $\sigma_F > 0.15\text{ eV/\AA}$ on otherwise top-ranked motifs).
 
 ### Agent 1: Solid-State Chemist & Inverse-Design Explorer (`crystal_explorer`)
@@ -198,7 +198,7 @@ We can build and execute this architecture in modular phases right inside this w
 1. **Execute Pilot Sweep v2.0** across 20 candidates (16 benchmark + 4 SMACT OOD compositions) in both target windows:
    * **Track A (Top Active Glass, $1.75\text{–}1.95\text{ eV}$):** $\text{Bi/Sb–Cu/Zn–S/O–Cl/Br}$ oxy-/chalcohalides (validated finalists: `Bi2CuO2SCl`, `Cu2SbS2Cl`, `BiZnOSCl`).
    * **Track B (Bottom IR Scavenger, $0.70\text{–}0.85\text{ eV}$):** $\text{Bi/Sb–Sn/Cu–Se/S–I}$ heavy chalcohalides (validated finalists: `Sn2SbSe2I3`, `Cu2BiSe2I`).
-2. **Launch an Interactive Discovery & Failure-Ledger Dashboard** (HTML artifact) visualizing the screening funnel ($20 \rightarrow 17 \rightarrow 12 \rightarrow 8 \rightarrow 5$), Pareto frontier ($\eta_{\text{4T}}$ vs. synthesis temperature vs. $/m^2$ cost), 3-layer spectral absorption curves, and the live Contrastive Failure Memory Ledger.
+2. **Launch an Interactive Discovery & Failure-Ledger Dashboard** (HTML artifact) visualizing the screening funnel ($20 \rightarrow 17 \rightarrow 12 \rightarrow 8 \rightarrow 5$), Pareto frontier ($\eta_{\text{4T}}$ vs. synthesis temperature vs. \$/m² cost), 3-layer spectral absorption curves, and the live Contrastive Failure Memory Ledger.
 
 ---
 
@@ -235,7 +235,7 @@ To guarantee **zero misstated or unverified results**, the 7-agent Research Divi
 
 ### 7.1 Scope & Funnel Architecture (100 -> 91 -> 52 -> 40 -> 8 Finalists)
 The discovery framework expands to ingest **100 live candidates** directly from the Materials Project API (`MPRester`) targeting the RoHS-compliant mixed-anion chalcohalide/oxychalcogenide space:
-1. **Stage 1 (100 Ingested):** RoHS whitelist filtering ($	ext{Pb, Cd, Hg, Tl, As, Te, P}$ forbidden) + Pauling oxidation neutrality.
+1. **Stage 1 (100 Ingested):** RoHS whitelist filtering ($\text{Pb, Cd, Hg, Tl, As, Te, P}$ forbidden) + Pauling oxidation neutrality.
 2. **Stage 2 (91 Dynamically & Ion-Stable):** 4-member MLIP ensemble relaxation, Born elastic stability ($6$ failures vetoed), and Stage 2b cuprous/halide ion-migration barrier ($3$ superionic failures vetoed with $E_{\text{mig}} < 0.65\text{ eV}$).
 3. **Stage 3 (52 Manufacturable):** Retrosynthesis under $500^\circ\text{C}$ with negative-synthesis priors ($26$ rejected for `OXIDE_IMPURITY_SINK` from refractory oxide reactions, $13$ rejected for `TIER2_COST_EXCEEDED` $> \$0.50/\text{m}^2$).
 4. **Gate A (40 Promoted to DFT):** Adversarial red-team checks ($8$ vetoed for `LOW_DIM_POLARON_RISK` 1D-chains, $4$ vetoed for `ANION_PHASE_SEGREGATION`).
@@ -251,7 +251,7 @@ The discovery framework expands to ingest **100 live candidates** directly from 
 - **Bottom IR Scavenger Finalists (5):** `mp-1223998` (`Bi3InSe6`), `mp-1224922` (`CuGaSnSe4`), `mp-22982` (`BiCuS2`), `mp-23474` (`AgBi3S5`), `mp-1224129` (`CuInSnSe4`).
 - **All 15 Cross-Layer 4T Tandem Stacks Screened:**
   - **Highest Efficiency:** `mp-861911 Sb2OS2 + c-Si + mp-1223998 Bi3InSe6` achieving **42.32%** scalar 4T PCE (**40.00%** Coherent TMM 4T PCE) at $\$0.1664/\text{m}^2$.
-  - **Cost-Optimal Stack:** `mp-861911 Sb2OS2 + c-Si + mp-22982 BiCuS2` achieving **41.75%** scalar 4T PCE (**39.32%** Coherent TMM 4T PCE) at **$0.0394/m^2**.
+  - **Cost-Optimal Stack:** `mp-861911 Sb2OS2 + c-Si + mp-22982 BiCuS2` achieving **41.75%** scalar 4T PCE (**39.32%** Coherent TMM 4T PCE) at **\$0.0394/m^2**.
 
 ---
 
@@ -264,6 +264,9 @@ The discovery framework expands to ingest **100 live candidates** directly from 
 3. **Step 3 — 7-Medium Graded-ARC + $\text{TiO}_2$ Impedance-Matching Stack & 4-Metric Techno-Economic Figure-of-Merit Suite:**
    - Suppresses front reflection from $11.90\%$ down to $2.42\%\text{–}3.33\%$, reaching **42.44% Graded-ARC Coherent 4T PCE** (`mp-861911__mp-1223998`, $\text{CER}_{\text{3L}} = 4.354$, $\text{SVI}_{\text{BOS}} = 1.763$) and **41.89% Graded-ARC Coherent 4T PCE** (`mp-861911__mp-22982`, $\text{CER}_{\text{3L}} = 4.308$, $\text{MCIW}_{\text{raw}} = \$0.0002/\Delta\text{W}_{\text{p}}$).
 4. **Phase 9 (`v6.0`) — Lab Synthesis & `doped` Supercells (9A), 117-MP Contrastive Margin Audit (9B), and Real-World Oblique/Thermal/25-Year LCOE (9C):**
-   - Generates $10.0\text{ mmol}$ lab batch precursor sheets and 8 Stage 5 `doped` defect supercells (`outputs/mp_live_doped_supercell_decks/`), verifies positive contrastive failure classifier margin $\Delta M = +0.1605$ across all `117` cached MP semiconductors, and evaluates $0^\circ\text{–}60^\circ$ S/P oblique TMM, NOCT $45^\circ\text{C}$ / Desert $65^\circ\text{C}$ thermal derating, and 25-year Arrhenius LCOE (**$3.172\text{ \cent/kWh}$**, $-35.74\%$ vs. c-Si).
+   - Generates 10.0 mmol lab batch precursor sheets and 8 Stage 5 `doped` defect supercells (`outputs/mp_live_doped_supercell_decks/`), verifies positive contrastive failure classifier margin $\Delta M = +0.1605$ across all `117` cached MP semiconductors, and evaluates $0^\circ\text{–}60^\circ$ S/P oblique TMM, NOCT 45 °C / Desert 65 °C thermal derating, and 25-year Arrhenius LCOE (**3.172 ¢/kWh**, -35.74% vs. c-Si).
 5. **Phase 10 (`v7.0`) — $2^4=16$ Thickness/ARC Global Optimization (10A), Bifacial Ground-Albedo Harvesting (10B), and SPICE Subcell $J\text{–}V$ String Matching (10C):**
-   - Evaluates 16-point factorial thickness optimization, $20\%$ and $30\%$ diffuse ground-albedo rear IR harvesting (**46.17%** and **48.06%** equivalent PCE on `mp-861911__mp-1223998`, **25-Yr Bifacial LCOE = $3.002\text{ \cent/kWh}$**), and integer series-string voltage matching (`37 : 72 : 120` and `36 : 72 : 120` at $V_{\text{bus}} \approx 50.1\text{ V}$).
+   - Evaluates 16-point factorial thickness optimization, 20% and 30% diffuse ground-albedo rear IR harvesting (**46.17%** and **48.06%** radiative equivalent PCE on `mp-861911__mp-1223998`, **25-Yr Bifacial Radiative LCOE = 3.002 ¢/kWh**), and integer series-string voltage matching (`37 : 72 : 120` and `36 : 72 : 120` at $V_{\text{bus}} \approx 50.1\text{ V}$).
+6. **Phase 11 (`v8.0`) — Realistic Synthesis Practicality (`SPS`), Live MP TCO Reactivity, Non-Radiative SRH Physics & Staged 3-Horizon Commercialization Plan:**
+   - Evaluates live MP convex-hull stability windows and `InterfacialReactivity` (`TiO2` and `SnO2` inert at `0.00 meV/atom` vs. `-13.16` to `-68.25 meV/atom` exothermic sulfidation on bare `In2O3`/ITO), ranking **`BiSbS3` (`SPS = 94.76`)** and **`Sb2OS2` (`SPS = 94.44`)** as Tier-1 scale-up co-leads.
+   - Adopts the consensus 3-Horizon Commercialization Roadmap ([`docs/REALISTIC_COMMERCIALIZATION_AND_DEBATE_REPORT.md`](file:///home/antigravity/failsmart-matengine/docs/REALISTIC_COMMERCIALIZATION_AND_DEBATE_REPORT.md)): **Horizon 1 (Path 4 BIPV Glazing: 11.40%–11.62% at 35% VLT, 58.7% gross margin)** $\rightarrow$ **Horizon 2 (Path 2 2-Layer Active Solar Glass Drop-In on Unobstructed Bifacial c-Si: 30.58%–30.61% realistic bifacial PCE at \$65.88/m², 4.234 ¢/kWh utility & 6.470 ¢/kWh rooftop LCOE)** $\rightarrow$ **Horizon 3 (Gen-3 Specialty 3-Layer Tandems once `ERE >= 5e-3` and low-FCA c-Si are achieved)**, gated by Phase-1 hardware Kill-Gates `K1–K4`.

@@ -1,0 +1,402 @@
+{
+  "mp-22982": {
+    "candidate_id": "mp-22982",
+    "formula_reduced": "BiCuS2",
+    "pymatgen_reduced_formula": "CuBiS2",
+    "chemsys": "Bi-Cu-S",
+    "mp_gga_hull_mev_per_atom": 0.0,
+    "hull_decomposition_phases": [
+      "CuBiS2"
+    ],
+    "chemical_potential_windows": {
+      "Bi": {
+        "delta_mu_min_ev": -0.4336,
+        "delta_mu_max_ev": -0.1148,
+        "window_width_ev": 0.3189
+      },
+      "Cu": {
+        "delta_mu_min_ev": -0.1063,
+        "delta_mu_max_ev": 0.0,
+        "window_width_ev": 0.1063
+      },
+      "S": {
+        "delta_mu_min_ev": -0.9968,
+        "delta_mu_max_ev": -0.7842,
+        "window_width_ev": 0.2126
+      }
+    },
+    "tco_interfacial_reactivity": {
+      "SnO2": {
+        "worst_rxn_energy_ev_per_atom": 0.0,
+        "worst_rxn_energy_mev_per_atom": 0.0,
+        "worst_mixing_fraction": 0.0,
+        "dominant_interface_reaction": "SnO2 -> SnO2"
+      },
+      "In2O3": {
+        "worst_rxn_energy_ev_per_atom": -0.0019,
+        "worst_rxn_energy_mev_per_atom": -1.93,
+        "worst_mixing_fraction": 0.8276,
+        "dominant_interface_reaction": "0.8571 CuBiS2 + 0.1429 In2O3 -> 0.4286 Bi2S2O + 0.07143 Cu7S4 + 0.2857 InCuS2 + 0.07143 Cu"
+      },
+      "TiO2": {
+        "worst_rxn_energy_ev_per_atom": 0.0,
+        "worst_rxn_energy_mev_per_atom": 0.0,
+        "worst_mixing_fraction": 0.0,
+        "dominant_interface_reaction": "TiO2 -> TiO2"
+      }
+    },
+    "hull_facet_count": 4
+  },
+  "mp-23474": {
+    "candidate_id": "mp-23474",
+    "formula_reduced": "AgBi3S5",
+    "pymatgen_reduced_formula": "AgBi3S5",
+    "chemsys": "Ag-Bi-S",
+    "mp_gga_hull_mev_per_atom": 0.0,
+    "hull_decomposition_phases": [
+      "AgBi3S5"
+    ],
+    "chemical_potential_windows": {
+      "Ag": {
+        "delta_mu_min_ev": -0.2554,
+        "delta_mu_max_ev": 0.0,
+        "window_width_ev": 0.2554
+      },
+      "Bi": {
+        "delta_mu_min_ev": -1.2107,
+        "delta_mu_max_ev": -0.3315,
+        "window_width_ev": 0.8792
+      },
+      "S": {
+        "delta_mu_min_ev": -0.8523,
+        "delta_mu_max_ev": -0.285,
+        "window_width_ev": 0.5673
+      }
+    },
+    "tco_interfacial_reactivity": {
+      "SnO2": {
+        "worst_rxn_energy_ev_per_atom": 0.0,
+        "worst_rxn_energy_mev_per_atom": 0.0,
+        "worst_mixing_fraction": 1.0,
+        "dominant_interface_reaction": "AgBi3S5 -> AgBi3S5"
+      },
+      "In2O3": {
+        "worst_rxn_energy_ev_per_atom": 0.0,
+        "worst_rxn_energy_mev_per_atom": 0.0,
+        "worst_mixing_fraction": 0.0,
+        "dominant_interface_reaction": "In2O3 -> In2O3"
+      },
+      "TiO2": {
+        "worst_rxn_energy_ev_per_atom": 0.0,
+        "worst_rxn_energy_mev_per_atom": 0.0,
+        "worst_mixing_fraction": 0.0,
+        "dominant_interface_reaction": "TiO2 -> TiO2"
+      }
+    },
+    "hull_facet_count": 4
+  },
+  "mp-1227486": {
+    "candidate_id": "mp-1227486",
+    "formula_reduced": "BiSbS3",
+    "pymatgen_reduced_formula": "BiSbS3",
+    "chemsys": "Bi-S-Sb",
+    "mp_gga_hull_mev_per_atom": 2.3,
+    "hull_decomposition_phases": [
+      "Bi2S3",
+      "Sb2S3"
+    ],
+    "chemical_potential_windows": {
+      "Bi": {
+        "delta_mu_min_ev": -1.0976,
+        "delta_mu_max_ev": -0.2322,
+        "window_width_ev": 0.8654
+      },
+      "S": {
+        "delta_mu_min_ev": -0.9185,
+        "delta_mu_max_ev": -0.3416,
+        "window_width_ev": 0.5769
+      },
+      "Sb": {
+        "delta_mu_min_ev": -0.8654,
+        "delta_mu_max_ev": 0.0,
+        "window_width_ev": 0.8654
+      }
+    },
+    "tco_interfacial_reactivity": {
+      "SnO2": {
+        "worst_rxn_energy_ev_per_atom": 0.0,
+        "worst_rxn_energy_mev_per_atom": 0.0,
+        "worst_mixing_fraction": 0.0,
+        "dominant_interface_reaction": "SnO2 -> SnO2"
+      },
+      "In2O3": {
+        "worst_rxn_energy_ev_per_atom": -0.0132,
+        "worst_rxn_energy_mev_per_atom": -13.16,
+        "worst_mixing_fraction": 0.6667,
+        "dominant_interface_reaction": "0.3333 In2O3 + 0.6667 BiSbS3 -> 0.1667 In4Bi2S9 + 0.3333 Sb2O3 + 0.1667 Bi2S3"
+      },
+      "TiO2": {
+        "worst_rxn_energy_ev_per_atom": 0.0,
+        "worst_rxn_energy_mev_per_atom": 0.0,
+        "worst_mixing_fraction": 0.0,
+        "dominant_interface_reaction": "TiO2 -> TiO2"
+      }
+    },
+    "hull_facet_count": 2
+  },
+  "mp-1224922": {
+    "candidate_id": "mp-1224922",
+    "formula_reduced": "CuGaSnSe4",
+    "pymatgen_reduced_formula": "GaCuSnSe4",
+    "chemsys": "Cu-Ga-Se-Sn",
+    "mp_gga_hull_mev_per_atom": 3.61,
+    "hull_decomposition_phases": [
+      "GaCuSe2",
+      "SnSe2"
+    ],
+    "chemical_potential_windows": {
+      "Cu": {
+        "delta_mu_min_ev": -0.5155,
+        "delta_mu_max_ev": -0.2921,
+        "window_width_ev": 0.2234
+      },
+      "Ga": {
+        "delta_mu_min_ev": -1.6617,
+        "delta_mu_max_ev": -1.2341,
+        "window_width_ev": 0.4276
+      },
+      "Se": {
+        "delta_mu_min_ev": -0.6242,
+        "delta_mu_max_ev": -0.3391,
+        "window_width_ev": 0.2851
+      },
+      "Sn": {
+        "delta_mu_min_ev": -1.2831,
+        "delta_mu_max_ev": -0.7129,
+        "window_width_ev": 0.5702
+      }
+    },
+    "tco_interfacial_reactivity": {
+      "SnO2": {
+        "worst_rxn_energy_ev_per_atom": -0.0163,
+        "worst_rxn_energy_mev_per_atom": -16.26,
+        "worst_mixing_fraction": 0.7568,
+        "dominant_interface_reaction": "0.5714 GaCuSnSe4 + 0.4286 SnO2 -> 0.1143 Cu5Sn2Se7 + 0.05714 SnSe + 0.7143 SnSe2 + 0.2857 Ga2O3"
+      },
+      "In2O3": {
+        "worst_rxn_energy_ev_per_atom": -0.0683,
+        "worst_rxn_energy_mev_per_atom": -68.25,
+        "worst_mixing_fraction": 0.5455,
+        "dominant_interface_reaction": "0.5385 In2O3 + 0.4615 GaCuSnSe4 -> 0.4615 InCuSe2 + 0.3077 In2Se3 + 0.4615 SnO2 + 0.2308 Ga2O3"
+      },
+      "TiO2": {
+        "worst_rxn_energy_ev_per_atom": -0.0,
+        "worst_rxn_energy_mev_per_atom": -0.0,
+        "worst_mixing_fraction": 1.0,
+        "dominant_interface_reaction": "GaCuSnSe4 -> SnSe2 + GaCuSe2"
+      }
+    },
+    "hull_facet_count": 4
+  },
+  "mp-1224129": {
+    "candidate_id": "mp-1224129",
+    "formula_reduced": "CuInSnSe4",
+    "pymatgen_reduced_formula": "InCuSnSe4",
+    "chemsys": "Cu-In-Se-Sn",
+    "mp_gga_hull_mev_per_atom": 5.17,
+    "hull_decomposition_phases": [
+      "InCuSe2",
+      "SnSe2"
+    ],
+    "chemical_potential_windows": {
+      "Cu": {
+        "delta_mu_min_ev": -0.4952,
+        "delta_mu_max_ev": -0.2921,
+        "window_width_ev": 0.2031
+      },
+      "In": {
+        "delta_mu_min_ev": -1.4807,
+        "delta_mu_max_ev": -1.0683,
+        "window_width_ev": 0.4124
+      },
+      "Se": {
+        "delta_mu_min_ev": -0.6242,
+        "delta_mu_max_ev": -0.3493,
+        "window_width_ev": 0.2749
+      },
+      "Sn": {
+        "delta_mu_min_ev": -1.2628,
+        "delta_mu_max_ev": -0.7129,
+        "window_width_ev": 0.5499
+      }
+    },
+    "tco_interfacial_reactivity": {
+      "SnO2": {
+        "worst_rxn_energy_ev_per_atom": 0.0,
+        "worst_rxn_energy_mev_per_atom": 0.0,
+        "worst_mixing_fraction": 1.0,
+        "dominant_interface_reaction": "InCuSnSe4 -> InCuSe2 + SnSe2"
+      },
+      "In2O3": {
+        "worst_rxn_energy_ev_per_atom": -0.0365,
+        "worst_rxn_energy_mev_per_atom": -36.49,
+        "worst_mixing_fraction": 0.6774,
+        "dominant_interface_reaction": "0.4 In2O3 + 0.6 InCuSnSe4 -> 0.6 InCuSe2 + 0.6 SnO2 + 0.4 In2Se3"
+      },
+      "TiO2": {
+        "worst_rxn_energy_ev_per_atom": -0.0,
+        "worst_rxn_energy_mev_per_atom": -0.0,
+        "worst_mixing_fraction": 1.0,
+        "dominant_interface_reaction": "InCuSnSe4 -> InCuSe2 + SnSe2"
+      }
+    },
+    "hull_facet_count": 4
+  },
+  "mp-861911": {
+    "candidate_id": "mp-861911",
+    "formula_reduced": "Sb2OS2",
+    "pymatgen_reduced_formula": "Sb2S2O",
+    "chemsys": "O-S-Sb",
+    "mp_gga_hull_mev_per_atom": 1.1,
+    "hull_decomposition_phases": [
+      "Sb2O3",
+      "Sb2S3"
+    ],
+    "chemical_potential_windows": {
+      "O": {
+        "delta_mu_min_ev": -2.9196,
+        "delta_mu_max_ev": -2.4279,
+        "window_width_ev": 0.4916
+      },
+      "S": {
+        "delta_mu_min_ev": -0.9185,
+        "delta_mu_max_ev": -0.4269,
+        "window_width_ev": 0.4916
+      },
+      "Sb": {
+        "delta_mu_min_ev": -0.7375,
+        "delta_mu_max_ev": 0.0,
+        "window_width_ev": 0.7375
+      }
+    },
+    "tco_interfacial_reactivity": {
+      "SnO2": {
+        "worst_rxn_energy_ev_per_atom": 0.0,
+        "worst_rxn_energy_mev_per_atom": 0.0,
+        "worst_mixing_fraction": 1.0,
+        "dominant_interface_reaction": "Sb2S2O -> 0.3333 Sb2O3 + 0.6667 Sb2S3"
+      },
+      "In2O3": {
+        "worst_rxn_energy_ev_per_atom": -0.0154,
+        "worst_rxn_energy_mev_per_atom": -15.35,
+        "worst_mixing_fraction": 0.6,
+        "dominant_interface_reaction": "0.4 In2O3 + 0.6 Sb2S2O -> 0.6 Sb2O3 + 0.4 In2S3"
+      },
+      "TiO2": {
+        "worst_rxn_energy_ev_per_atom": 0.0,
+        "worst_rxn_energy_mev_per_atom": 0.0,
+        "worst_mixing_fraction": 0.0,
+        "dominant_interface_reaction": "TiO2 -> TiO2"
+      }
+    },
+    "hull_facet_count": 2
+  },
+  "mp-1078776": {
+    "candidate_id": "mp-1078776",
+    "formula_reduced": "BiInS3",
+    "pymatgen_reduced_formula": "InBiS3",
+    "chemsys": "Bi-In-S",
+    "mp_gga_hull_mev_per_atom": 3.34,
+    "hull_decomposition_phases": [
+      "Bi2S3",
+      "In4Bi2S9"
+    ],
+    "chemical_potential_windows": {
+      "Bi": {
+        "delta_mu_min_ev": -1.0976,
+        "delta_mu_max_ev": 0.0,
+        "window_width_ev": 1.0976
+      },
+      "In": {
+        "delta_mu_min_ev": -1.5775,
+        "delta_mu_max_ev": -0.4799,
+        "window_width_ev": 1.0976
+      },
+      "S": {
+        "delta_mu_min_ev": -1.0733,
+        "delta_mu_max_ev": -0.3416,
+        "window_width_ev": 0.7317
+      }
+    },
+    "tco_interfacial_reactivity": {
+      "SnO2": {
+        "worst_rxn_energy_ev_per_atom": 0.0,
+        "worst_rxn_energy_mev_per_atom": 0.0,
+        "worst_mixing_fraction": 0.0,
+        "dominant_interface_reaction": "SnO2 -> SnO2"
+      },
+      "In2O3": {
+        "worst_rxn_energy_ev_per_atom": -0.0,
+        "worst_rxn_energy_mev_per_atom": -0.0,
+        "worst_mixing_fraction": 1.0,
+        "dominant_interface_reaction": "InBiS3 -> 0.25 In4Bi2S9 + 0.25 Bi2S3"
+      },
+      "TiO2": {
+        "worst_rxn_energy_ev_per_atom": 0.0,
+        "worst_rxn_energy_mev_per_atom": 0.0,
+        "worst_mixing_fraction": 0.0,
+        "dominant_interface_reaction": "TiO2 -> TiO2"
+      }
+    },
+    "hull_facet_count": 2
+  },
+  "mp-1223998": {
+    "candidate_id": "mp-1223998",
+    "formula_reduced": "Bi3InSe6",
+    "pymatgen_reduced_formula": "In(BiSe2)3",
+    "chemsys": "Bi-In-Se",
+    "mp_gga_hull_mev_per_atom": 17.99,
+    "hull_decomposition_phases": [
+      "Bi2Se3",
+      "In2Se3"
+    ],
+    "chemical_potential_windows": {
+      "Bi": {
+        "delta_mu_min_ev": -1.2966,
+        "delta_mu_max_ev": -0.1374,
+        "window_width_ev": 1.1592
+      },
+      "In": {
+        "delta_mu_min_ev": -1.6276,
+        "delta_mu_max_ev": -0.4684,
+        "window_width_ev": 1.1592
+      },
+      "Se": {
+        "delta_mu_min_ev": -1.0241,
+        "delta_mu_max_ev": -0.2513,
+        "window_width_ev": 0.7728
+      }
+    },
+    "tco_interfacial_reactivity": {
+      "SnO2": {
+        "worst_rxn_energy_ev_per_atom": 0.0,
+        "worst_rxn_energy_mev_per_atom": 0.0,
+        "worst_mixing_fraction": 0.0,
+        "dominant_interface_reaction": "SnO2 -> SnO2"
+      },
+      "In2O3": {
+        "worst_rxn_energy_ev_per_atom": 0.0,
+        "worst_rxn_energy_mev_per_atom": 0.0,
+        "worst_mixing_fraction": 1.0,
+        "dominant_interface_reaction": "In(BiSe2)3 -> 1.5 Bi2Se3 + 0.5 In2Se3"
+      },
+      "TiO2": {
+        "worst_rxn_energy_ev_per_atom": 0.0,
+        "worst_rxn_energy_mev_per_atom": 0.0,
+        "worst_mixing_fraction": 0.0,
+        "dominant_interface_reaction": "TiO2 -> TiO2"
+      }
+    },
+    "hull_facet_count": 2
+  }
+}

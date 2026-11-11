@@ -408,3 +408,74 @@ For both 2-Layer ($\eta = \eta_{\text{2L}}, N=2, \Delta C = \Delta C_{\text{2L}}
    * The string voltage mismatch percentage for parallel string connection is:
      $$\Delta V_{\text{mismatch,top}}(\%) = \frac{|N_{\text{top}} V_{\text{mp,top}} - V_{\text{bus,Si}}|}{V_{\text{bus,Si}}} \times 100, \quad \Delta V_{\text{mismatch,bot}}(\%) = \frac{|N_{\text{bot}} V_{\text{mp,bot}} - V_{\text{bus,Si}}|}{V_{\text{bus,Si}}} \times 100$$
 
+---
+
+## 11. Phase 11 (`v8.0`) — Realistic Synthesis Practicality, Contact Band Alignment, Non-Radiative SRH Device Physics & 4-Path Commercialization Techno-Economics
+
+### 11.1 Phase 11A — Live DFT Chemical-Potential Synthesis Window, TCO `InterfacialReactivity`, Contact Band Alignment & Supply-Chain Practicality Score ($N=8$ Finalists)
+1. **Live Materials Project DFT Convex-Hull & `InterfacialReactivity` Inputs (`data/mp_thermo_interface_cache.json`):**
+   * For each finalist with stoichiometry $\{n_Z\}$ ($N_{\text{tot}} = \sum_Z n_Z$), structural dimensionality $D \in \{\text{"3D"}, \text{"Quasi-2D"}, \text{"1D-Chain"}, \text{"0D-Isolated"}\}$, and indirect gap $E_{g,\text{ind}}\text{ [eV]}$:
+     * Live GGA/GGA+U hull distance $E_{\text{hull,GGA}}\text{ [meV/atom]}$.
+     * Limiting anion chemical-potential window width $\Delta\mu_{\text{anion}}\text{ [eV]}$:
+       $$\Delta\mu_{\text{anion}} = \begin{cases} \min(\Delta\mu_{\text{O}}, \Delta\mu_X) & \text{if } \text{O} \in \{n_Z\}, \\ \Delta\mu_X & \text{otherwise}, \end{cases} \quad X \in \{\text{S}, \text{Se}\}$$
+     * Limiting cation chemical-potential window width $\Delta\mu_{\text{cation,min}} = \min_{Z \notin \{\text{O, S, Se}\}} \Delta\mu_Z\text{ [eV]}$.
+     * Worst-case normalized TCO interfacial reaction energies $(\Delta E_{\text{rxn,SnO2}}, \Delta E_{\text{rxn,In2O3}}, \Delta E_{\text{rxn,TiO2}})\text{ [meV/atom]}$ computed via `pymatgen.analysis.interface_reactions.InterfacialReactivity`.
+2. **Lone-Pair-Corrected Mulliken Band Edges ($E_{\text{CBM}}, E_{\text{VBM}}$ vs. Vacuum) & ETL/HTL Offsets:**
+   * Fixed Pearson Mulliken elemental electronegativities $\chi_{M,Z}\text{ [eV]}$:
+     `{"Bi": 4.69, "Sb": 4.85, "In": 3.10, "Ga": 3.20, "Cu": 4.48, "Ag": 4.44, "Sn": 4.30, "O": 7.54, "S": 6.22, "Se": 5.89}`
+   * Geometric-mean electronegativity and $ns^2$ ($\text{Bi}^{3+}/\text{Sb}^{3+}$) s-p antibonding upward valence/conduction band shift $\Delta E_{\text{lp}}$:
+     $$\chi_{\text{comp}} = \exp\!\left(\frac{1}{N_{\text{tot}}} \sum_Z n_Z \ln(\chi_{M,Z})\right), \qquad \Delta E_{\text{lp}} = 1.65 \cdot \frac{n_{\text{Bi}} + n_{\text{Sb}}}{N_{\text{tot}}}$$
+     $$E_{\text{CBM}} = -\chi_{\text{comp}} + \Delta E_{\text{lp}} + 0.5\,E_{g,\text{ind}}, \qquad E_{\text{VBM}} = -\chi_{\text{comp}} + \Delta E_{\text{lp}} - 0.5\,E_{g,\text{ind}}$$
+   * Conduction-band offsets $\Delta E_c = E_{\text{CBM,ETL}} - E_{\text{CBM}}$ against $\text{TiO}_2$ ($-4.20\text{ eV}$) and $\text{SnO}_2$ ($-4.35\text{ eV}$), and valence-band offset against $\text{NiO}_x$ ($-5.30\text{ eV}$):
+     $$\Delta E_{c,\text{TiO2}} = -4.20 - E_{\text{CBM}}, \quad \Delta E_{c,\text{SnO2}} = -4.35 - E_{\text{CBM}}, \quad \Delta E_{v,\text{NiOx}} = E_{\text{VBM}} + 5.30$$
+   * Best ETL (`"TiO2"` if $|\Delta E_{c,\text{TiO2}}| \le |\Delta E_{c,\text{SnO2}}|$ else `"SnO2"`), `best_cbo_ev` $= \Delta E_{c,\text{best}}$, and interfacial contact barrier/cliff voltage penalty:
+     $$\Delta V_{\text{contact}} = \max(0.0,\; -\Delta E_{c,\text{best}} - 0.25) + \max(0.0,\; \Delta E_{c,\text{best}} - 0.20)$$
+3. **Antisite Disorder, Ribbon Orientation & Critical-Mineral Supply Risk:**
+   * Cation-antisite disorder voltage penalty $\Delta V_{\text{antisite}}\text{ [V]}$:
+     $$\Delta V_{\text{antisite}} = \begin{cases} 0.110 & \text{if } |\{n_Z\}| \ge 4 \text{ and } \{\text{Cu}, \text{Sn}\} \subseteq \{n_Z\}, \\ 0.045 & \text{else if } \text{Cu} \in \{n_Z\} \text{ or } \text{Ag} \in \{n_Z\}, \\ 0.015 & \text{otherwise.} \end{cases}$$
+   * Ribbon orientation transport factor $f_{\text{orient}}$: $0.95$ if $D = \text{"3D"}$, $0.88$ if $D = \text{"Quasi-2D"}$ (`[hk1]`-textured), else $0.72$.
+   * Critical-mineral supply risk index $S_{\text{crit}} = (0.65\,n_{\text{In}} + 0.45\,n_{\text{Ga}} + 0.55\,n_{\text{Ag}}) / N_{\text{tot}}$.
+   * **Synthesis & Commercialization Practicality Score ($\text{SPS} \in [0, 100]$):**
+     $$\text{SPS} = \text{clip}\!\Big(92.0 - 0.90\,E_{\text{hull,GGA}} + 10.0\,\min(0.80, \Delta\mu_{\text{anion}}) + 8.0\,\min(0.50, \Delta\mu_{\text{cation,min}}) - 0.25\,|\Delta E_{\text{rxn,In2O3}}| - 0.50\,|\Delta E_{\text{rxn,SnO2}}| - 95.0\,S_{\text{crit}} - 110.0\,\Delta V_{\text{antisite}} - 25.0\,\Delta V_{\text{contact}},\; 0.0,\; 100.0\Big)$$
+
+### 11.2 Phase 11B — Realistic Non-Radiative SRH Device Model vs. Radiative Ceiling & $\pm 0.15\text{ eV}$ Gap Sensitivity ($N=15$ Pairs)
+1. **Realistic Thin-Film Subcell Operating Solver ($T = 300\text{ K}$, $V_{\text{th}} = 0.02585199\text{ V}$):**
+   * Evaluated at Phase 10 optimal thicknesses $(d_{\text{MgF}_2}^*, d_{\text{TiO}_2}^*, d_{\text{top}}^*, d_{\text{bot}}^*)$ across 3 non-radiative External Radiative Efficiency ($\text{ERE}$) maturity tiers:
+     * **Conservative First-Gen Polycrystalline:** $\text{ERE} = 10^{-5}$, $f_{\text{ap,scen}} = 0.90$, $R_s = 3.2\text{ }\Omega\cdot\text{cm}^2$, $\alpha_{\text{def}} = 1.00$.
+     * **Base-Case Engineered Pilot Module:** $\text{ERE} = 10^{-4}$, $f_{\text{ap,scen}} = 0.96$, $R_s = 1.8\text{ }\Omega\cdot\text{cm}^2$, $\alpha_{\text{def}} = 0.65$.
+     * **Mature Industrial Target:** $\text{ERE} = 5\times 10^{-3}$, $f_{\text{ap,scen}} = 0.98$, $R_s = 0.9\text{ }\Omega\cdot\text{cm}^2$, $\alpha_{\text{def}} = 0.35$.
+   * From radiative $(J_{\text{sc,rad},k}, V_{\text{oc,rad},k})$:
+     $$f_{\text{coll},k} = f_{\text{orient},k}\cdot f_{\text{ap,scen}}, \qquad J_{\text{sc,real},k} = J_{\text{sc,rad},k}\cdot f_{\text{coll},k}$$
+     $$\Delta V_{\text{loss},k} = -V_{\text{th}}\ln(\text{ERE}) + \alpha_{\text{def}}\cdot(\Delta V_{\text{antisite},k} + \Delta V_{\text{contact},k})$$
+     $$V_{\text{oc,real},k} = \max\!\left(0.05,\; V_{\text{oc,rad},k} + V_{\text{th}}\ln(f_{\text{coll},k}) - \Delta V_{\text{loss},k}\right)$$
+     $$v_k = \frac{V_{\text{oc,real},k}}{V_{\text{th}}}, \quad \text{FF}_{0,k} = \frac{v_k - \ln(v_k + 0.72)}{v_k + 1.0}$$
+     $$r_{s,k} = \frac{R_s \cdot (J_{\text{sc,real},k} / 1000.0)}{V_{\text{oc,real},k}}, \quad r_{\text{sh},k} = \frac{1200.0 \cdot (J_{\text{sc,real},k} / 1000.0)}{V_{\text{oc,real},k}}$$
+     $$\text{FF}_{\text{real},k} = \text{FF}_{0,k} \cdot \max(0.35,\; 1.0 - 1.1\,r_{s,k}) \cdot \max\!\left(0.35,\; 1.0 - \frac{(v_k + 0.70)\,\text{FF}_{0,k}}{v_k\,r_{\text{sh},k}}\right)$$
+     $$\eta_{\text{real},k} = J_{\text{sc,real},k}\cdot V_{\text{oc,real},k}\cdot \text{FF}_{\text{real},k}$$
+2. **Realistic Commodity Passivated Bifacial TOPCon/SHJ c-Si Subcell Solver:**
+   * Fixed industrial c-Si dark saturation current $J_{0,\text{Si,real}} = 2.8\times 10^{-11}\text{ mA/cm}^2$, cell-to-module aperture/encapsulation factor $f_{\text{ap,Si}} = 0.955$, $R_{s,\text{Si}} = 0.55\text{ }\Omega\cdot\text{cm}^2$, $R_{\text{sh,Si}} = 3500.0\text{ }\Omega\cdot\text{cm}^2$, and **standard commercial c-Si free-carrier absorption** $T_{\text{Si,FCA,std}}(\lambda) = \exp(-0.38\,(\lambda_{\text{nm}} / 1200)^2)$:
+     $$J_{\text{sc,Si,real}} = 0.955\,J_{\text{sc,Si,rad}}, \quad V_{\text{oc,Si,real}} = V_{\text{oc,Si,rad}} + V_{\text{th}}\ln(0.955)$$
+     with $\text{FF}_{\text{Si,real}}$ evaluated identically with $\max(0.50, \dots)$ bounds.
+   * **Path 0 Standalone Commodity Bifacial c-Si Baseline:** Monofacial $\Phi_{\text{Si,mono}} = \Phi_{\text{sun}}$ and $20\%$ ground-albedo bifacial $\Phi_{\text{Si,bif20}} = \Phi_{\text{sun}}\cdot(1.0 + 0.20\times 0.80)$ absorbed with $0.98\,f_{\text{abs,Si,2L}}$.
+3. **Band-Gap Uncertainty Sensitivity ($\delta E_g = \pm 0.15\text{ eV}$):**
+   * Evaluates Base-Case ($\text{ERE} = 10^{-4}$) monofacial 2-Layer and 3-Layer PCE under simultaneous band-gap shifts $\delta E_g \in \{-0.15, +0.15\}\text{ eV}$ applied to $(E_{g,\text{ind},1}, E_{g,\text{dir},1}, E_{g,\text{ind},3}, E_{g,\text{dir},3})$ (with shifted gaps floored at $0.55\text{ eV}$, keeping $E_{g,\text{dir}} \ge E_{g,\text{ind}}$).
+
+### 11.3 Phase 11C — Realistic Industrial Fab CAPEX, Yield & 4-Path Commercialization Economics
+1. **Realistic Thin-Film Subcell Manufacturing Cost ($k \in \{\text{top}, \text{bot}\}$):**
+   * Criticality surcharge $C_{\text{crit},k} = \$4.50/\text{m}^2$ if $\text{In}$ or $\text{Ag} \in \{n_Z\}$, else $\$2.00/\text{m}^2$ if $\text{Ga} \in \{n_Z\}$, else $\$0.00/\text{m}^2$.
+   * Unyielded single-junction deposition cost ($40\%$ PVD utilization $= 2.50\times$ raw cost, $5\text{N}$ target compounding $\$1.20/\text{m}^2$, vacuum PVD/RTP depreciation $\$9.50/\text{m}^2$, TCO + ALD buffer + P1/P2/P3 laser scribing $\$5.80/\text{m}^2$):
+     $$C_{\text{fab,unyielded},k} = 16.50 + 2.50\,C_{\text{raw},k} + C_{\text{crit},k}\text{ [\$/m}^2\text{]}$$
+2. **Head-to-Head 4 Strategic Commercialization Paths (Base-Case $\text{ERE} = 10^{-4}$, $20\%$ Ground Albedo for Utility/Rooftop Paths 0–3):**
+   * Discounted 25-year LCOE ($\text{cents/kWh}$) with $C_{\text{BOS,area}} = \$100.00/\text{m}^2$ (utility) or $\$240.00/\text{m}^2$ (area-constrained rooftop/commercial), power BOS $\$0.22/\text{W}_{\text{p}}$, O&M $\$2.50/\text{m}^2/\text{yr}$, discount rate $6\%$, insolation $1800\text{ kWh/m}^2/\text{yr}$:
+     * **Path 0 (Commodity Bifacial TOPCon/SHJ c-Si):** $C_{\text{mod,0}} = \$42.00/\text{m}^2$, $\eta_0 = \eta_{\text{Si,bif20}}$, $f_{\text{NOCT}} = 0.930$, $r_{\text{deg}} = 0.0045$.
+     * **Path 1 (3-Layer 4T Sandwich on Commodity Bifacial c-Si):** Compound two-junction yield $Y_{\text{3L}} = 0.90 \times 0.86 = 0.774$, 4T 3-subcell wiring/interlayer $\$12.00/\text{m}^2$:
+       $$C_{\text{mod,1}} = 42.00 + \frac{C_{\text{fab,unyielded,top}} + C_{\text{fab,unyielded,bot}}}{0.774} + 12.00$$
+       with $\Phi_{2,\text{Path1}} = \Phi_{\text{sun}} T_{\text{stack},1} + 0.20\cdot 0.78\,\Phi_{\text{sun}}(1 - f_{\text{abs},3})\cdot 0.92$, $\Phi_{3,\text{Path1}} = \Phi_{\text{sun}} T_{\text{stack},1}\cdot 0.96\,(1 - f_{\text{abs,Si,3L}})\,T_{\text{Si,FCA,std}} + 0.20\cdot 0.78\,\Phi_{\text{sun}}$, $f_{\text{NOCT}} = 0.925$, $r_{\text{deg}} = 0.0055$.
+     * **Path 2 (2-Layer 4T Active Solar Glass Superstrate on Unobstructed Bifacial c-Si):** Single thin-film yield $Y_{\text{2L}} = 0.90$, 4T 2-subcell wiring/lamination $\$5.50/\text{m}^2$:
+       $$C_{\text{mod,2}} = 42.00 + \frac{C_{\text{fab,unyielded,top}}}{0.90} + 5.50$$
+       with unobstructed rear bifacial c-Si flux $\Phi_{2,\text{Path2}} = \Phi_{\text{sun}} T_{\text{stack},1} + 0.20\cdot 0.80\,\Phi_{\text{sun}}$, $f_{\text{NOCT}} = 0.930$, $r_{\text{deg}} = 0.0050$.
+     * **Path 3 (2-Terminal Monolithic Top-on-Si, $375^\circ\text{C}$ Direct Deposition):** Yield $Y_{\text{2T}} = 0.84$, saves $\$5.50/\text{m}^2$ wiring and $\$3.50/\text{m}^2$ TCO, but incurs $0.84\times$ SHJ thermal-passivation + spectral current-mismatch derating:
+       $$C_{\text{mod,3}} = 42.00 + \frac{C_{\text{fab,unyielded,top}} - 3.50}{0.84}, \qquad \eta_{\text{Path3}} = 0.84\cdot\eta_{\text{Path2}}, \quad f_{\text{NOCT}} = 0.925, \quad r_{\text{deg}} = 0.0060$$
+     * **Path 4 (Standalone BIPV Semi-Transparent Solar Window Glazing, Top Active Glass Only):** Semi-transparent architectural double-glazed unit ($35\%$ daylighting transmittance, $0.72\times$ Base-Case top-cell PCE $\eta_{\text{Path4}} = 0.72\,\eta_{\text{top,base}}$), all-in DGU cost $C_{\text{mod,4}} = 58.00 + C_{\text{fab,unyielded,top}} / 0.90$, commercial solar-control glazing ASP $\$185.00/\text{m}^2$, pilot gross margin $\text{GM}_{\text{Path4}}(\%) = \frac{185.00 - C_{\text{mod,4}}}{185.00}\times 100$.
+
+

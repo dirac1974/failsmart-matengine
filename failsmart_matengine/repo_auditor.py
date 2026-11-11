@@ -334,7 +334,23 @@ class RepoConsistencyAuditor:
             assert p10["bifacial_30pct_albedo_4t_pce_percent"] > p10["bifacial_20pct_albedo_4t_pce_percent"]
             assert p10["n_cells_si_ref"] == 72
 
-        self.log("   [OK] live_mp_discovery_summary.json verified: 100 -> 91 -> 52 -> 40 -> 8 finalists, 8 D-matrix/NEB & Lab/Defect dossiers, 117-MP Contrastive Audit, 15 Single-ARC, 15 Graded-ARC, 15 Real-World LCOE & 15 Phase 10 Bifacial/String stacks.")
+        # v8.0 Phase 11A, 11B, and 11C Realistic Synthesis & Commercialization Checks
+        assert self.live_summary_data.get("v8_phase11_realistic_commercialization_enabled") is True
+        p11a_list = self.live_summary_data.get("phase11a_synthesis_contact_dossiers", [])
+        assert len(p11a_list) == 8, f"Expected 8 phase11a_synthesis_contact_dossiers, got {len(p11a_list)}"
+        for p11a in p11a_list:
+            assert p11a["redundancy_verified"] is True
+            assert 0.0 <= p11a["synthesis_practicality_score_100"] <= 100.0
+
+        p11b_list = self.live_summary_data.get("phase11b_realistic_commercialization_dossiers", [])
+        assert len(p11b_list) == 15, f"Expected 15 phase11b_realistic_commercialization_dossiers, got {len(p11b_list)}"
+        for p11b in p11b_list:
+            assert p11b["phase11_redundancy_verified"] is True
+            assert p11b["rouard_base_2l_diff_percent"] <= 0.05
+            assert p11b["path2_utility_lcoe_cents_kwh"] < p11b["path1_utility_lcoe_cents_kwh"]
+            assert p11b["path4_gross_margin_percent"] > 40.0
+
+        self.log("   [OK] live_mp_discovery_summary.json verified: 100 -> 91 -> 52 -> 40 -> 8 finalists, v4-v8 D-matrix/NEB, Lab/Defect, Synthesis/Contact, 117-MP Contrastive, TMM, Graded-ARC, LCOE, Bifacial/String & Realistic 4-Path Commercialization.")
 
     def audit_negative_synthesis_priors(self) -> None:
         """Audit LBNL 80k solid-state recipes and A-Lab precursor genome negative priors."""
@@ -627,6 +643,53 @@ class RepoConsistencyAuditor:
 
         self.log("   [OK] docs/PLAN.md contains verified v2.0, v3.0, v4.0, and v5.0 Graded-ARC + Techno-Economics roadmap.")
 
+    def audit_markdown_katex_safety(self) -> None:
+        """Scan all repository Markdown files for undefined KaTeX macros and unescaped currency dollars."""
+        self.log("-> Auditing Markdown KaTeX & currency-dollar safety across repository .md files ...")
+        md_files = [self.readme_path] + sorted((self.root / "docs").glob("*.md"))
+        banned_macros = [r"\cent", r"\celsius", r"\degree", r"\angstrom"]
+
+        for md_path in md_files:
+            assert md_path.exists(), f"Missing markdown file: {md_path}"
+            lines = md_path.read_text(encoding="utf-8").splitlines()
+            in_fence = False
+            for idx, raw_line in enumerate(lines, start=1):
+                stripped = raw_line.strip()
+                if stripped.startswith("```") or stripped.startswith("~~~"):
+                    in_fence = not in_fence
+                    continue
+                if in_fence:
+                    continue
+
+                # Strip inline code spans `...` before inspecting math/dollars
+                no_code = re.sub(r"`[^`]*`", "", raw_line)
+
+                for macro in banned_macros:
+                    assert macro not in no_code, (
+                        f"Banned/undefined KaTeX macro '{macro}' found in {md_path.name}:{idx}: {raw_line}"
+                    )
+
+                # Remove escaped dollars \$ and display math $$ markers
+                cleaned = no_code.replace(r"\$", "")
+                cleaned_single = cleaned.replace("$$", "")
+                single_dollar_count = cleaned_single.count("$")
+                assert single_dollar_count % 2 == 0, (
+                    f"Odd number ({single_dollar_count}) of unescaped '$' on {md_path.name}:{idx} "
+                    f"(likely unescaped currency '$'): {raw_line}"
+                )
+
+                # Inspect inside inline $...$ spans
+                inline_spans = re.findall(r"\$([^$]+)\$", cleaned_single)
+                for span in inline_spans:
+                    assert "**" not in span, (
+                        f"Markdown bold '**' leaked inside inline math '$...$' on {md_path.name}:{idx}: ${span}$"
+                    )
+                    assert "¢" not in span, (
+                        f"Unicode cent '¢' inside inline math '$...$' on {md_path.name}:{idx} (keep ¢/kWh in plain text): ${span}$"
+                    )
+
+        self.log(f"   [OK] All {len(md_files)} Markdown files passed KaTeX macro & currency-dollar safety checks (0 errors).")
+
     # =========================================================================
     # Full Master Audit Runner
     # =========================================================================
@@ -634,7 +697,7 @@ class RepoConsistencyAuditor:
     def run_full_audit(self) -> bool:
         """Run all verification audits and return True if 100% aligned."""
         self.log("=" * 78)
-        self.log("FailSmart-MatEngine Repository Consistency & Documentation Audit (v4.0)")
+        self.log("FailSmart-MatEngine Repository Consistency & Documentation Audit (v8.0)")
         self.log(f"Repository Root: {self.root}")
         self.log("=" * 78)
 
@@ -644,16 +707,17 @@ class RepoConsistencyAuditor:
             self.load_sqlite_db()
             self.audit_qe_decks()
 
-            # v3.0 & v4.0 Checks
+            # v3.0 - v8.0 Checks
             self.load_live_mp_summary_json()
             self.audit_negative_synthesis_priors()
             self.audit_mp_live_qe_decks()
 
-            # Documentation Checks
+            # Documentation & KaTeX Safety Checks
             self.audit_readme_markdown()
             self.audit_memory_and_failure_ledger_markdown()
             self.audit_verification_report_markdown()
             self.audit_plan_markdown()
+            self.audit_markdown_katex_safety()
 
         except AssertionError as e:
             self.log(f"\n[FAIL] VERIFICATION AUDIT FAILED: {e}")
@@ -666,8 +730,8 @@ class RepoConsistencyAuditor:
             return False
 
         self.log("=" * 78)
-        self.log("[PASS] 100% CROSS-REPOSITORY CONSISTENCY & NUMERICAL ALIGNMENT CONFIRMED (v4.0)")
-        self.log("All v2.0 benchmarks, v3.0 live MP discovery, and v4.0 3D D-matrix/NEB & Coherent TMM metrics match.")
+        self.log("[PASS] 100% CROSS-REPOSITORY CONSISTENCY, KATEX SAFETY & NUMERICAL ALIGNMENT CONFIRMED (v8.0)")
+        self.log("All v2.0-v8.0 benchmarks, live MP discovery, synthesis/contact, and realistic 4-path commercialization metrics match.")
         self.log("=" * 78)
         return True
 

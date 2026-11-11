@@ -1966,6 +1966,556 @@ def independently_verify_phase10_bifacial_and_string_dossier(
 
 
 # =============================================================================
+# 11b. Independent Phase 11 (v8.0) Realistic Synthesis, Contact Alignment & 4-Path Commercialization Verifier
+# =============================================================================
+
+_MULLIKEN_CHI_EV: Dict[str, float] = {
+    "Bi": 4.69,
+    "Sb": 4.85,
+    "In": 3.10,
+    "Ga": 3.20,
+    "Cu": 4.48,
+    "Ag": 4.44,
+    "Sn": 4.30,
+    "O": 7.54,
+    "S": 6.22,
+    "Se": 5.89,
+}
+
+_V_TH_P11: float = 0.02585199
+
+
+def independently_verify_phase11a_synthesis_and_contacts(
+    stoichiometry: Dict[str, int],
+    structural_dimensionality: str,
+    eg_ind_ev: float,
+    mp_gga_hull_mev_per_atom: float,
+    anion_chempot_window_ev: float,
+    min_cation_chempot_window_ev: float,
+    rxn_sno2_mev_per_atom: float,
+    rxn_in2o3_mev_per_atom: float,
+    rxn_tio2_mev_per_atom: float,
+) -> Dict[str, Any]:
+    """Blinded independent verification of Phase 11A synthesis window, TCO interfacial
+    reactivity, lone-pair Mulliken band edges, contact alignment, and supply-chain SPS.
+    """
+    _ = rxn_tio2_mev_per_atom  # Recorded in interface audit; SnO2 & In2O3 enter SPS per Section 11.1(3)
+    present_stoich = {el: cnt for el, cnt in stoichiometry.items() if cnt > 0}
+    n_tot = float(max(1, sum(present_stoich.values())))
+
+    chi_comp = math.exp(
+        sum(cnt * math.log(_MULLIKEN_CHI_EV.get(el, 4.50)) for el, cnt in present_stoich.items())
+        / n_tot
+    )
+    delta_e_lp = 1.65 * float(present_stoich.get("Bi", 0) + present_stoich.get("Sb", 0)) / n_tot
+
+    cbm = -chi_comp + delta_e_lp + 0.5 * float(eg_ind_ev)
+    vbm = -chi_comp + delta_e_lp - 0.5 * float(eg_ind_ev)
+
+    cbo_tio2 = -4.20 - cbm
+    cbo_sno2 = -4.35 - cbm
+    vbo_niox = vbm + 5.30
+
+    if abs(cbo_tio2) <= abs(cbo_sno2):
+        best_etl = "TiO2"
+        best_cbo = cbo_tio2
+    else:
+        best_etl = "SnO2"
+        best_cbo = cbo_sno2
+
+    v_contact = max(0.0, -best_cbo - 0.25) + max(0.0, best_cbo - 0.20)
+
+    if len(present_stoich) >= 4 and ("Cu" in present_stoich and "Sn" in present_stoich):
+        v_antisite = 0.110
+    elif "Cu" in present_stoich or "Ag" in present_stoich:
+        v_antisite = 0.045
+    else:
+        v_antisite = 0.015
+
+    if structural_dimensionality == "3D":
+        f_orient = 0.95
+    elif structural_dimensionality == "Quasi-2D":
+        f_orient = 0.88
+    else:
+        f_orient = 0.72
+
+    s_crit = (
+        0.65 * float(present_stoich.get("In", 0))
+        + 0.45 * float(present_stoich.get("Ga", 0))
+        + 0.55 * float(present_stoich.get("Ag", 0))
+    ) / n_tot
+
+    raw_sps = (
+        92.0
+        - 0.90 * float(mp_gga_hull_mev_per_atom)
+        + 10.0 * min(0.80, float(anion_chempot_window_ev))
+        + 8.0 * min(0.50, float(min_cation_chempot_window_ev))
+        - 0.25 * abs(float(rxn_in2o3_mev_per_atom))
+        - 0.50 * abs(float(rxn_sno2_mev_per_atom))
+        - 95.0 * s_crit
+        - 110.0 * v_antisite
+        - 25.0 * v_contact
+    )
+    sps = float(np.clip(raw_sps, 0.0, 100.0))
+
+    res: Dict[str, Any] = {
+        "cbm_vs_vacuum_ev": round(float(cbm), 4),
+        "vbm_vs_vacuum_ev": round(float(vbm), 4),
+        "cbo_vs_tio2_ev": round(float(cbo_tio2), 4),
+        "cbo_vs_sno2_ev": round(float(cbo_sno2), 4),
+        "vbo_vs_niox_ev": round(float(vbo_niox), 4),
+        "recommended_etl_barrier": best_etl,
+        "best_cbo_ev": round(float(best_cbo), 4),
+        "contact_voltage_penalty_v": round(float(v_contact), 4),
+        "antisite_voltage_penalty_v": round(float(v_antisite), 4),
+        "ribbon_orientation_factor": round(float(f_orient), 4),
+        "critical_mineral_index": round(float(s_crit), 4),
+        "has_critical_mineral": bool(any(el in stoichiometry for el in ("In", "Ga", "Ag"))),
+        "synthesis_practicality_score_100": round(float(sps), 2),
+    }
+
+    sig_payload = {k: v for k, v in res.items() if k != "sha256_signature"}
+    res["sha256_signature"] = hashlib.sha256(
+        json.dumps(sig_payload, sort_keys=True).encode("utf-8")
+    ).hexdigest()
+
+    return res
+
+
+def _solve_realistic_thin_film_p11(
+    jsc_rad: float,
+    voc_rad: float,
+    f_orient: float,
+    v_antisite: float,
+    v_contact: float,
+    ere: float,
+    f_ap_scen: float,
+    r_s_ohm_cm2: float,
+    alpha_def: float,
+) -> Dict[str, float]:
+    """Section 11.2(1): Realistic Thin-Film Subcell Operating Solver (T=300 K, V_th=0.02585199 V)."""
+    if jsc_rad <= 1.0e-9:
+        return {"jsc": 0.0, "voc": 0.0, "ff": 0.0, "eff": 0.0}
+
+    f_coll = float(f_orient) * float(f_ap_scen)
+    jsc_real = float(jsc_rad) * f_coll
+    dv_loss = -_V_TH_P11 * math.log(float(ere)) + float(alpha_def) * (
+        float(v_antisite) + float(v_contact)
+    )
+    voc_real = max(0.05, float(voc_rad) + _V_TH_P11 * math.log(f_coll) - dv_loss)
+
+    v_k = voc_real / _V_TH_P11
+    ff_0 = (v_k - math.log(v_k + 0.72)) / (v_k + 1.0)
+    r_s = (float(r_s_ohm_cm2) * (jsc_real / 1000.0)) / voc_real
+    r_sh = (1200.0 * (jsc_real / 1000.0)) / voc_real
+    ff_real = (
+        ff_0
+        * max(0.35, 1.0 - 1.1 * r_s)
+        * max(0.35, 1.0 - ((v_k + 0.70) * ff_0) / (v_k * r_sh))
+    )
+    eta_real = jsc_real * voc_real * ff_real
+    return {"jsc": jsc_real, "voc": voc_real, "ff": ff_real, "eff": eta_real}
+
+
+def _solve_realistic_si_p11(
+    absorptance_si_e: np.ndarray,
+    phi_inc_e: np.ndarray,
+) -> Dict[str, float]:
+    """Section 11.2(2): Realistic Commodity Passivated Bifacial TOPCon/SHJ c-Si Subcell Solver."""
+    rad = _solve_pv_cell_energy_quadrature(
+        absorptance_e=absorptance_si_e,
+        incident_photon_flux_e=phi_inc_e,
+        eg_ind_ev=1.12,
+        eg_dir_ev=1.12,
+        j0_rad_fixed=2.8e-11,
+    )
+    if rad["jsc"] <= 1.0e-9:
+        return {"jsc": 0.0, "voc": 0.0, "ff": 0.0, "eff": 0.0}
+
+    jsc_real = 0.955 * rad["jsc"]
+    voc_real = max(0.05, rad["voc"] + _V_TH_P11 * math.log(0.955))
+    v_si = voc_real / _V_TH_P11
+    ff_0 = (v_si - math.log(v_si + 0.72)) / (v_si + 1.0)
+    r_s = (0.55 * (jsc_real / 1000.0)) / voc_real
+    r_sh = (3500.0 * (jsc_real / 1000.0)) / voc_real
+    ff_real = (
+        ff_0
+        * max(0.50, 1.0 - 1.1 * r_s)
+        * max(0.50, 1.0 - ((v_si + 0.70) * ff_0) / (v_si * r_sh))
+    )
+    eta_real = jsc_real * voc_real * ff_real
+    return {"jsc": jsc_real, "voc": voc_real, "ff": ff_real, "eff": eta_real}
+
+
+def _compute_rouard_airy_top_and_bot_p11(
+    eg_ind_1: float,
+    eg_dir_1: float,
+    eps_inf_1: float,
+    opt_mgf2_nm: float,
+    opt_tio2_nm: float,
+    opt_top_nm: float,
+    eg_ind_3: float,
+    eg_dir_3: float,
+    eps_inf_3: float,
+    opt_bot_nm: float,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Method B Recursive Rouard / Airy 7-medium coherent top stack + bottom IR absorptance on ENERGY_GRID_EV."""
+    wl_nm = LAMBDA_GRID_NM
+    wl_um = wl_nm / 1000.0
+
+    n0 = np.ones_like(wl_nm, dtype=np.complex128)
+    n1 = (1.377 + 0.0032 / (wl_um ** 2)).astype(np.complex128)
+
+    n_ito_real = np.maximum(1.45, 1.92 - 0.085 * (wl_um ** 2))
+    k_ito = 0.0018 + 0.0065 * (wl_um ** 3)
+    n2 = n_ito_real + 1j * k_ito
+
+    n_tio2_real = 2.380 + 0.0180 / (wl_um ** 2)
+    k_tio2 = 0.0004 * (wl_um ** 2)
+    n3 = n_tio2_real + 1j * k_tio2
+
+    alpha1 = 1.2e5 * (np.maximum(0.0, ENERGY_GRID_EV - eg_ind_1) ** 2) + 2.8e7 * np.sqrt(
+        np.maximum(0.0, ENERGY_GRID_EV - eg_dir_1)
+    )
+    n_act_real = math.sqrt(eps_inf_1) + 0.035 / (wl_um ** 2)
+    k_act = (alpha1 * (wl_nm * 1.0e-9)) / (4.0 * math.pi)
+    n4 = n_act_real + 1j * k_act
+
+    n_buf_real = 1.720 + 0.0040 / (wl_um ** 2)
+    k_buf = 0.0012 * (wl_um ** 2)
+    n5 = n_buf_real + 1j * k_buf
+
+    n6 = np.full_like(wl_nm, 1.520, dtype=np.complex128)
+
+    n_list = [n0, n1, n2, n3, n4, n5, n6]
+    d_list_nm = [
+        0.0,
+        float(opt_mgf2_nm),
+        80.0,
+        float(opt_tio2_nm),
+        float(opt_top_nm),
+        82.0,
+        0.0,
+    ]
+
+    r_amp = (n5 - n6) / (n5 + n6)
+    t_amp = (2.0 * n5) / (n5 + n6)
+
+    for m in (4, 3, 2, 1, 0):
+        nm_curr = n_list[m]
+        nm_next = n_list[m + 1]
+        r_m = (nm_curr - nm_next) / (nm_curr + nm_next)
+        t_m = (2.0 * nm_curr) / (nm_curr + nm_next)
+        beta_next = (2.0 * math.pi * nm_next * d_list_nm[m + 1]) / wl_nm
+        phi_next = np.exp(1j * beta_next)
+        denom = 1.0 + r_m * r_amp * (phi_next ** 2)
+        r_amp = (r_m + r_amp * (phi_next ** 2)) / denom
+        t_amp = (t_m * t_amp * phi_next) / denom
+
+    r_arc_1 = np.abs(r_amp) ** 2
+    t_arc_1 = (np.real(n6) / np.real(n0)) * (np.abs(t_amp) ** 2)
+    t_win_front = np.exp(
+        -4.0 * math.pi * (k_ito * 80.0 + k_tio2 * float(opt_tio2_nm)) / wl_nm
+    )
+
+    yab1 = 4.0 * eps_inf_1
+    d1_m = float(opt_top_nm) * 1.0e-9
+    fabs1 = (yab1 * alpha1 * d1_m) / (1.0 + yab1 * alpha1 * d1_m)
+    a_arc_1 = (1.0 - r_arc_1) * t_win_front * fabs1
+    t_stack_1 = t_arc_1 * (1.0 - fabs1)
+
+    n3_bot = math.sqrt(eps_inf_3)
+    r_int_23 = 0.20 * (((n3_bot - 1.72) / (n3_bot + 1.72)) ** 2)
+    yab3 = 4.0 * eps_inf_3
+    d3_m = float(opt_bot_nm) * 1.0e-9
+    alpha3 = 1.2e5 * (np.maximum(0.0, ENERGY_GRID_EV - eg_ind_3) ** 2) + 2.8e7 * np.sqrt(
+        np.maximum(0.0, ENERGY_GRID_EV - eg_dir_3)
+    )
+    fabs3 = (yab3 * alpha3 * d3_m) / (1.0 + yab3 * alpha3 * d3_m)
+    a_arc_3 = (1.0 - r_int_23) * fabs3
+
+    return a_arc_1, t_stack_1, fabs3, a_arc_3
+
+
+def _compute_lcoe_25yr_p11(
+    pce_pct: float,
+    c_mod_usd_m2: float,
+    c_bos_area: float,
+    f_noct: float,
+    r_deg: float,
+) -> float:
+    """Section 11.3(2): Discounted 25-year LCOE in cents/kWh from unrounded pce_pct and c_mod_usd_m2."""
+    r_disc = 0.06
+    p_m2 = 10.0 * float(pce_pct)
+    capex_m2 = float(c_mod_usd_m2) + float(c_bos_area) + 0.22 * p_m2
+    om_disc = sum(2.50 / ((1.0 + r_disc) ** t) for t in range(1, 26))
+    e_disc = sum(
+        ((p_m2 / 1000.0) * 1800.0 * float(f_noct) * ((1.0 - float(r_deg)) ** (t - 1)))
+        / ((1.0 + r_disc) ** t)
+        for t in range(1, 26)
+    )
+    return float(100.0 * (capex_m2 + om_disc) / e_disc)
+
+
+def _crit_surcharge_p11(stoich: Dict[str, int]) -> float:
+    """Section 11.3(1): Critical mineral fab surcharge ($/m^2)."""
+    if stoich.get("In", 0) > 0 or stoich.get("Ag", 0) > 0:
+        return 4.50
+    if stoich.get("Ga", 0) > 0:
+        return 2.00
+    return 0.00
+
+
+def independently_verify_phase11b_realistic_commercialization(
+    eg_ind_1: float,
+    eg_dir_1: float,
+    eps_inf_1: float,
+    opt_mgf2_nm: float,
+    opt_tio2_nm: float,
+    opt_top_nm: float,
+    f_orient_1: float,
+    v_antisite_1: float,
+    v_contact_1: float,
+    raw_cost_top_usd_m2: float,
+    stoich_1: Dict[str, int],
+    eg_ind_3: float,
+    eg_dir_3: float,
+    eps_inf_3: float,
+    opt_bot_nm: float,
+    f_orient_3: float,
+    v_antisite_3: float,
+    v_contact_3: float,
+    raw_cost_bot_usd_m2: float,
+    stoich_3: Dict[str, int],
+) -> Dict[str, Any]:
+    """Blinded independent verification of Phase 11B realistic non-radiative SRH device physics,
+    +/-0.15 eV band-gap sensitivity, and Phase 11C 4-path commercialization techno-economics.
+    """
+    wl_nm = LAMBDA_GRID_NM
+    d_si_m = 160.0e-6
+    alpha_si = 1.1e5 * (np.maximum(0.0, ENERGY_GRID_EV - 1.12) ** 2) + 1.5e7 * np.sqrt(
+        np.maximum(0.0, ENERGY_GRID_EV - 3.40)
+    )
+    fabs_si_2l = (49.0 * alpha_si * d_si_m) / (1.0 + 49.0 * alpha_si * d_si_m)
+    fabs_si_3l = (16.0 * alpha_si * d_si_m) / (1.0 + 16.0 * alpha_si * d_si_m)
+    a_si_2l = 0.98 * fabs_si_2l
+    a_si_3l = 0.98 * fabs_si_3l
+    t_si_fca_std = np.exp(-0.38 * ((wl_nm / 1200.0) ** 2))
+
+    # Path 0: Standalone Commodity Bifacial TOPCon/SHJ c-Si Baseline
+    # Rear unobstructed albedo flux fraction: R_alb (0.20) * f_bif (80%) = 0.16
+    si_0_mono = _solve_realistic_si_p11(a_si_2l, SOLAR_PHOTON_FLUX_E)
+    si_0_bif20 = _solve_realistic_si_p11(
+        a_si_2l, SOLAR_PHOTON_FLUX_E * (1.0 + 0.16)
+    )
+    eta_si_0_mono = si_0_mono["eff"]
+    eta_si_0_bif20 = si_0_bif20["eff"]
+
+    lcoe_p0_util = _compute_lcoe_25yr_p11(eta_si_0_bif20, 42.00, 100.0, 0.930, 0.0045)
+    lcoe_p0_roof = _compute_lcoe_25yr_p11(eta_si_0_bif20, 42.00, 240.0, 0.930, 0.0045)
+
+    # Nominal coherent stack at Phase 10 optimal thicknesses
+    a_arc_1, t_stack_1, fabs3, a_arc_3 = _compute_rouard_airy_top_and_bot_p11(
+        eg_ind_1=eg_ind_1,
+        eg_dir_1=eg_dir_1,
+        eps_inf_1=eps_inf_1,
+        opt_mgf2_nm=opt_mgf2_nm,
+        opt_tio2_nm=opt_tio2_nm,
+        opt_top_nm=opt_top_nm,
+        eg_ind_3=eg_ind_3,
+        eg_dir_3=eg_dir_3,
+        eps_inf_3=eps_inf_3,
+        opt_bot_nm=opt_bot_nm,
+    )
+
+    top_rad = _solve_pv_cell_energy_quadrature(
+        absorptance_e=a_arc_1,
+        incident_photon_flux_e=SOLAR_PHOTON_FLUX_E,
+        eg_ind_ev=eg_ind_1,
+        eg_dir_ev=eg_dir_1,
+    )
+    phi2_mono = SOLAR_PHOTON_FLUX_E * t_stack_1
+    si_2l_mono = _solve_realistic_si_p11(a_si_2l, phi2_mono)
+    si_3l_mono = _solve_realistic_si_p11(a_si_3l, phi2_mono)
+
+    phi3_mono = phi2_mono * 0.96 * (1.0 - fabs_si_3l) * t_si_fca_std
+    bot_mono_rad = _solve_pv_cell_energy_quadrature(
+        absorptance_e=a_arc_3,
+        incident_photon_flux_e=phi3_mono,
+        eg_ind_ev=eg_ind_3,
+        eg_dir_ev=eg_dir_3,
+    )
+
+    # 3 Non-Radiative ERE Maturity Tiers (Monofacial)
+    top_cons = _solve_realistic_thin_film_p11(
+        top_rad["jsc"], top_rad["voc"], f_orient_1, v_antisite_1, v_contact_1, 1.0e-5, 0.90, 3.2, 1.00
+    )
+    bot_cons = _solve_realistic_thin_film_p11(
+        bot_mono_rad["jsc"], bot_mono_rad["voc"], f_orient_3, v_antisite_3, v_contact_3, 1.0e-5, 0.90, 3.2, 1.00
+    )
+    pce_2l_cons = top_cons["eff"] + si_2l_mono["eff"]
+    pce_3l_cons = top_cons["eff"] + si_3l_mono["eff"] + bot_cons["eff"]
+
+    top_base = _solve_realistic_thin_film_p11(
+        top_rad["jsc"], top_rad["voc"], f_orient_1, v_antisite_1, v_contact_1, 1.0e-4, 0.96, 1.8, 0.65
+    )
+    bot_mono_base = _solve_realistic_thin_film_p11(
+        bot_mono_rad["jsc"], bot_mono_rad["voc"], f_orient_3, v_antisite_3, v_contact_3, 1.0e-4, 0.96, 1.8, 0.65
+    )
+    eta_top_base = top_base["eff"]
+    voc_top_base = top_base["voc"]
+    eta_bot_mono_base = bot_mono_base["eff"]
+    voc_bot_mono_base = bot_mono_base["voc"]
+    pce_2l_base = eta_top_base + si_2l_mono["eff"]
+    pce_3l_base = eta_top_base + si_3l_mono["eff"] + eta_bot_mono_base
+
+    top_mat = _solve_realistic_thin_film_p11(
+        top_rad["jsc"], top_rad["voc"], f_orient_1, v_antisite_1, v_contact_1, 5.0e-3, 0.98, 0.9, 0.35
+    )
+    bot_mat = _solve_realistic_thin_film_p11(
+        bot_mono_rad["jsc"], bot_mono_rad["voc"], f_orient_3, v_antisite_3, v_contact_3, 5.0e-3, 0.98, 0.9, 0.35
+    )
+    pce_2l_mat = top_mat["eff"] + si_2l_mono["eff"]
+    pce_3l_mat = top_mat["eff"] + si_3l_mono["eff"] + bot_mat["eff"]
+
+    # Section 11.2(3): Band-Gap Uncertainty Sensitivity (+/- 0.15 eV, Base-Case Monofacial)
+    sens_2l: List[float] = []
+    sens_3l: List[float] = []
+    for delta_eg in (-0.15, 0.15):
+        s_eg_ind_1 = max(0.55, float(eg_ind_1) + delta_eg)
+        s_eg_dir_1 = max(s_eg_ind_1, float(eg_dir_1) + delta_eg)
+        s_eg_ind_3 = max(0.55, float(eg_ind_3) + delta_eg)
+        s_eg_dir_3 = max(s_eg_ind_3, float(eg_dir_3) + delta_eg)
+
+        s_a1, s_t1, _, s_a3 = _compute_rouard_airy_top_and_bot_p11(
+            eg_ind_1=s_eg_ind_1,
+            eg_dir_1=s_eg_dir_1,
+            eps_inf_1=eps_inf_1,
+            opt_mgf2_nm=opt_mgf2_nm,
+            opt_tio2_nm=opt_tio2_nm,
+            opt_top_nm=opt_top_nm,
+            eg_ind_3=s_eg_ind_3,
+            eg_dir_3=s_eg_dir_3,
+            eps_inf_3=eps_inf_3,
+            opt_bot_nm=opt_bot_nm,
+        )
+        s_top_rad = _solve_pv_cell_energy_quadrature(
+            absorptance_e=s_a1,
+            incident_photon_flux_e=SOLAR_PHOTON_FLUX_E,
+            eg_ind_ev=s_eg_ind_1,
+            eg_dir_ev=s_eg_dir_1,
+        )
+        s_phi2 = SOLAR_PHOTON_FLUX_E * s_t1
+        s_si_2l = _solve_realistic_si_p11(a_si_2l, s_phi2)
+        s_si_3l = _solve_realistic_si_p11(a_si_3l, s_phi2)
+        s_phi3 = s_phi2 * 0.96 * (1.0 - fabs_si_3l) * t_si_fca_std
+        s_bot_rad = _solve_pv_cell_energy_quadrature(
+            absorptance_e=s_a3,
+            incident_photon_flux_e=s_phi3,
+            eg_ind_ev=s_eg_ind_3,
+            eg_dir_ev=s_eg_dir_3,
+        )
+
+        s_top_base = _solve_realistic_thin_film_p11(
+            s_top_rad["jsc"], s_top_rad["voc"], f_orient_1, v_antisite_1, v_contact_1, 1.0e-4, 0.96, 1.8, 0.65
+        )
+        s_bot_base = _solve_realistic_thin_film_p11(
+            s_bot_rad["jsc"], s_bot_rad["voc"], f_orient_3, v_antisite_3, v_contact_3, 1.0e-4, 0.96, 1.8, 0.65
+        )
+        sens_2l.append(s_top_base["eff"] + s_si_2l["eff"])
+        sens_3l.append(s_top_base["eff"] + s_si_3l["eff"] + s_bot_base["eff"])
+
+    # Section 11.3: Fab CAPEX, Yield & 4-Path Commercialization Economics
+    c_fab_top = 16.50 + 2.50 * float(raw_cost_top_usd_m2) + _crit_surcharge_p11(stoich_1)
+    c_fab_bot = 16.50 + 2.50 * float(raw_cost_bot_usd_m2) + _crit_surcharge_p11(stoich_3)
+
+    # Path 1: 3-Layer 4T Sandwich on Commodity Bifacial c-Si (20% ground albedo)
+    c_mod_1 = 42.00 + ((c_fab_top + c_fab_bot) / 0.774) + 12.00
+    phi2_p1 = phi2_mono + 0.20 * 0.78 * SOLAR_PHOTON_FLUX_E * (1.0 - fabs3) * 0.92
+    phi3_p1 = phi3_mono + 0.20 * 0.78 * SOLAR_PHOTON_FLUX_E
+    si_p1 = _solve_realistic_si_p11(a_si_3l, phi2_p1)
+    bot_p1_rad = _solve_pv_cell_energy_quadrature(
+        absorptance_e=a_arc_3,
+        incident_photon_flux_e=phi3_p1,
+        eg_ind_ev=eg_ind_3,
+        eg_dir_ev=eg_dir_3,
+    )
+    bot_p1_base = _solve_realistic_thin_film_p11(
+        bot_p1_rad["jsc"], bot_p1_rad["voc"], f_orient_3, v_antisite_3, v_contact_3, 1.0e-4, 0.96, 1.8, 0.65
+    )
+    eta_p1_bif20 = eta_top_base + si_p1["eff"] + bot_p1_base["eff"]
+    lcoe_p1_util = _compute_lcoe_25yr_p11(eta_p1_bif20, c_mod_1, 100.0, 0.925, 0.0055)
+    lcoe_p1_roof = _compute_lcoe_25yr_p11(eta_p1_bif20, c_mod_1, 240.0, 0.925, 0.0055)
+
+    # Path 2: 2-Layer 4T Active Solar Glass Superstrate on Unobstructed Bifacial c-Si (20% ground albedo)
+    c_mod_2 = 42.00 + (c_fab_top / 0.90) + 5.50
+    phi2_p2 = phi2_mono + 0.16 * SOLAR_PHOTON_FLUX_E
+    si_p2 = _solve_realistic_si_p11(a_si_2l, phi2_p2)
+    eta_p2_bif20 = eta_top_base + si_p2["eff"]
+    lcoe_p2_util = _compute_lcoe_25yr_p11(eta_p2_bif20, c_mod_2, 100.0, 0.930, 0.0050)
+    lcoe_p2_roof = _compute_lcoe_25yr_p11(eta_p2_bif20, c_mod_2, 240.0, 0.930, 0.0050)
+
+    # Path 3: 2-Terminal Monolithic Top-on-Si (375 C Direct Deposition)
+    c_mod_3 = 42.00 + ((c_fab_top - 3.50) / 0.84)
+    eta_p3_bif20 = 0.84 * eta_p2_bif20
+    lcoe_p3_util = _compute_lcoe_25yr_p11(eta_p3_bif20, c_mod_3, 100.0, 0.925, 0.0060)
+
+    # Path 4: Standalone BIPV Semi-Transparent Solar Window Glazing
+    eta_p4_bipv = 0.72 * eta_top_base
+    c_mod_4 = 58.00 + (c_fab_top / 0.90)
+    gm_p4_pct = ((185.00 - c_mod_4) / 185.00) * 100.0
+
+    rec_path = (
+        "PATH2_2L_ACTIVE_GLASS_PLUS_PATH4_BIPV"
+        if (lcoe_p2_util < lcoe_p1_util and gm_p4_pct > 40.0)
+        else "PATH1_3L_4T_SANDWICH"
+    )
+
+    res: Dict[str, Any] = {
+        "path0_si_mono_pce_percent": round(float(eta_si_0_mono), 2),
+        "path0_si_bif20_pce_percent": round(float(eta_si_0_bif20), 2),
+        "path0_utility_lcoe_cents_kwh": round(float(lcoe_p0_util), 3),
+        "path0_rooftop_lcoe_cents_kwh": round(float(lcoe_p0_roof), 3),
+        "conservative_2l_mono_pce_percent": round(float(pce_2l_cons), 2),
+        "conservative_3l_mono_pce_percent": round(float(pce_3l_cons), 2),
+        "base_top_pce_percent": round(float(eta_top_base), 2),
+        "base_top_voc_v": round(float(voc_top_base), 4),
+        "base_bot_mono_pce_percent": round(float(eta_bot_mono_base), 2),
+        "base_bot_mono_voc_v": round(float(voc_bot_mono_base), 4),
+        "base_2l_mono_pce_percent": round(float(pce_2l_base), 2),
+        "base_3l_mono_pce_percent": round(float(pce_3l_base), 2),
+        "mature_2l_mono_pce_percent": round(float(pce_2l_mat), 2),
+        "mature_3l_mono_pce_percent": round(float(pce_3l_mat), 2),
+        "gap_sens_2l_mono_low_percent": round(float(min(sens_2l)), 2),
+        "gap_sens_2l_mono_high_percent": round(float(max(sens_2l)), 2),
+        "gap_sens_3l_mono_low_percent": round(float(min(sens_3l)), 2),
+        "gap_sens_3l_mono_high_percent": round(float(max(sens_3l)), 2),
+        "path1_3l_bif20_pce_percent": round(float(eta_p1_bif20), 2),
+        "path1_module_cost_usd_m2": round(float(c_mod_1), 2),
+        "path1_utility_lcoe_cents_kwh": round(float(lcoe_p1_util), 3),
+        "path1_rooftop_lcoe_cents_kwh": round(float(lcoe_p1_roof), 3),
+        "path2_2l_bif20_pce_percent": round(float(eta_p2_bif20), 2),
+        "path2_module_cost_usd_m2": round(float(c_mod_2), 2),
+        "path2_utility_lcoe_cents_kwh": round(float(lcoe_p2_util), 3),
+        "path2_rooftop_lcoe_cents_kwh": round(float(lcoe_p2_roof), 3),
+        "path3_2t_bif20_pce_percent": round(float(eta_p3_bif20), 2),
+        "path3_module_cost_usd_m2": round(float(c_mod_3), 2),
+        "path3_utility_lcoe_cents_kwh": round(float(lcoe_p3_util), 3),
+        "path4_bipv_window_pce_percent": round(float(eta_p4_bipv), 2),
+        "path4_dgu_cost_usd_m2": round(float(c_mod_4), 2),
+        "path4_gross_margin_percent": round(float(gm_p4_pct), 2),
+        "recommended_commercial_path": rec_path,
+    }
+
+    sig_payload = {k: v for k, v in res.items() if k != "sha256_signature"}
+    res["sha256_signature"] = hashlib.sha256(
+        json.dumps(sig_payload, sort_keys=True).encode("utf-8")
+    ).hexdigest()
+
+    return res
+
+
+# =============================================================================
 # 12. Top-Level Entrypoint: Candidate Dossier Zero-Trust Verifier
 # =============================================================================
 

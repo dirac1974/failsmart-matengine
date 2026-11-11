@@ -97,6 +97,8 @@ from failsmart_matengine.independent_verifier import (
     independently_verify_phase9b_contrastive_audit,
     independently_verify_phase9c_oblique_thermal_lcoe,
     independently_verify_phase10_bifacial_and_string_dossier,
+    independently_verify_phase11a_synthesis_and_contacts,
+    independently_verify_phase11b_realistic_commercialization,
 )
 from pymatgen.core import Structure
 import subprocess
@@ -146,6 +148,9 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
             "tools",
             "mp_live_discovery",
             "atomistic_and_tmm",
+            "phase9_lab_and_lcoe",
+            "phase10_bifacial_and_string",
+            "realistic_commercialization",
         }
         for node in ast.walk(iv_tree):
             if isinstance(node, ast.Import):
@@ -1216,6 +1221,163 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
             )
             self.assertEqual(p10["n_cells_top_matched"], iv_10["n_cells_top_matched"])
             self.assertEqual(p10["n_cells_bot_matched"], iv_10["n_cells_bot_matched"])
+
+    def test_markdown_katex_safety_no_undefined_macros(self):
+        """Test 21: Scan all .md files in repo for undefined KaTeX macros (\\cent, \\celsius, \\degree, \\angstrom) and unescaped currency dollars."""
+        import re
+
+        md_paths = [os.path.join(self.repo_root, "README.md")] + sorted(
+            glob.glob(os.path.join(self.repo_root, "docs", "*.md"))
+        )
+        banned_macros = [r"\cent", r"\celsius", r"\degree", r"\angstrom"]
+
+        for md_path in md_paths:
+            self.assertTrue(os.path.isfile(md_path), f"Missing markdown file: {md_path}")
+            with open(md_path, "r", encoding="utf-8") as f:
+                lines = f.read().splitlines()
+
+            in_fence = False
+            for line_no, raw_line in enumerate(lines, start=1):
+                stripped = raw_line.strip()
+                if stripped.startswith("```") or stripped.startswith("~~~"):
+                    in_fence = not in_fence
+                    continue
+                if in_fence:
+                    continue
+
+                no_code = re.sub(r"`[^`]*`", "", raw_line)
+                for macro in banned_macros:
+                    self.assertNotIn(
+                        macro,
+                        no_code,
+                        f"Undefined KaTeX macro '{macro}' found in {os.path.basename(md_path)}:{line_no}",
+                    )
+
+                cleaned_single = no_code.replace(r"\$", "").replace("$$", "")
+                single_dollars = cleaned_single.count("$")
+                self.assertEqual(
+                    single_dollars % 2,
+                    0,
+                    f"Odd unescaped '$' count ({single_dollars}) in {os.path.basename(md_path)}:{line_no}: {raw_line}",
+                )
+                for span in re.findall(r"\$([^$]+)\$", cleaned_single):
+                    self.assertNotIn(
+                        "**",
+                        span,
+                        f"Markdown '**' inside inline math in {os.path.basename(md_path)}:{line_no}",
+                    )
+                    self.assertNotIn(
+                        "¢",
+                        span,
+                        f"Unicode '¢' inside inline math in {os.path.basename(md_path)}:{line_no}",
+                    )
+
+    def test_step6_phase11_realistic_synthesis_and_commercialization_audit(self):
+        """Test 22: Verify Phase 11A (Live MP Hull Windows, TCO Reactivity & SPS across 8 Finalists) and Phase 11B/11C (Non-Radiative SRH & 4-Path Commercialization across 15 Stacks)."""
+        live_sum_path = os.path.join(self.repo_root, "outputs", "live_mp_discovery_summary.json")
+        with open(live_sum_path, "r", encoding="utf-8") as f:
+            live_sum = json.load(f)
+
+        self.assertTrue(live_sum.get("v8_phase11_realistic_commercialization_enabled"))
+
+        p11a_list = live_sum.get("phase11a_synthesis_contact_dossiers", [])
+        self.assertEqual(len(p11a_list), 8, f"Expected 8 phase11a_synthesis_contact_dossiers, got {len(p11a_list)}")
+        finalists_by_id = {f["candidate"]["candidate_id"]: f for f in live_sum.get("finalists", [])}
+
+        p11a_by_id = {}
+        for p11a in p11a_list:
+            cid = p11a["candidate_id"]
+            p11a_by_id[cid] = p11a
+            self.assertTrue(p11a["redundancy_verified"], f"{cid}: Phase 11A redundancy check failed")
+            self.assertGreaterEqual(p11a["synthesis_practicality_score_100"], 0.0)
+            self.assertLessEqual(p11a["synthesis_practicality_score_100"], 100.0)
+            self.assertAlmostEqual(p11a["rxn_tio2_mev_per_atom"], 0.0, places=2)
+
+            fin = finalists_by_id[cid]
+            iv_11a = independently_verify_phase11a_synthesis_and_contacts(
+                stoichiometry=fin["candidate"]["stoichiometry"],
+                structural_dimensionality=fin["candidate"]["structural_dimensionality"],
+                eg_ind_ev=fin["electronics"]["hse06_soc_indirect_gap_ev"],
+                mp_gga_hull_mev_per_atom=p11a["mp_gga_hull_mev_per_atom"],
+                anion_chempot_window_ev=p11a["anion_chempot_window_ev"],
+                min_cation_chempot_window_ev=p11a["min_cation_chempot_window_ev"],
+                rxn_sno2_mev_per_atom=p11a["rxn_sno2_mev_per_atom"],
+                rxn_in2o3_mev_per_atom=p11a["rxn_in2o3_mev_per_atom"],
+                rxn_tio2_mev_per_atom=p11a["rxn_tio2_mev_per_atom"],
+            )
+            self.assertAlmostEqual(
+                p11a["synthesis_practicality_score_100"],
+                iv_11a["synthesis_practicality_score_100"],
+                places=2,
+            )
+            self.assertEqual(p11a["recommended_etl_barrier"], iv_11a["recommended_etl_barrier"])
+
+        # Top synthesis practicality candidates must be BiSbS3 (mp-1227486) and Sb2OS2 (mp-861911) > 94.0
+        self.assertGreater(p11a_by_id["mp-1227486"]["synthesis_practicality_score_100"], 94.0)
+        self.assertGreater(p11a_by_id["mp-861911"]["synthesis_practicality_score_100"], 94.0)
+
+        p11b_list = live_sum.get("phase11b_realistic_commercialization_dossiers", [])
+        self.assertEqual(len(p11b_list), 15, f"Expected 15 phase11b_realistic_commercialization_dossiers, got {len(p11b_list)}")
+        p10_by_id = {p["pair_id"]: p for p in live_sum.get("phase10_bifacial_and_string_dossiers", [])}
+
+        for p11b in p11b_list:
+            pid = p11b["pair_id"]
+            self.assertTrue(p11b["phase11_redundancy_verified"], f"{pid}: Phase 11B redundancy check failed")
+            self.assertLessEqual(p11b["rouard_base_2l_diff_percent"], 0.05)
+            self.assertLess(
+                p11b["base_3l_mono_pce_percent"],
+                p11b["radiative_3l_mono_pce_percent"],
+                f"{pid}: Realistic SRH PCE must be strictly below radiative ceiling",
+            )
+            self.assertGreater(
+                p11b["path2_2l_bif20_pce_percent"],
+                p11b["path1_3l_bif20_pce_percent"],
+                f"{pid}: Path 2 unobstructed bifacial 2L must exceed Path 1 rear-cannibalized 3L at Base-Case ERE=1e-4",
+            )
+            self.assertLess(
+                p11b["path2_utility_lcoe_cents_kwh"],
+                p11b["path1_utility_lcoe_cents_kwh"],
+            )
+            self.assertGreater(p11b["path4_gross_margin_percent"], 50.0)
+
+            top_f = finalists_by_id[p11b["top_mp_id"]]
+            bot_f = finalists_by_id[p11b["bottom_mp_id"]]
+            p10 = p10_by_id[pid]
+            t11a = p11a_by_id[p11b["top_mp_id"]]
+            b11a = p11a_by_id[p11b["bottom_mp_id"]]
+
+            iv_11b = independently_verify_phase11b_realistic_commercialization(
+                eg_ind_1=top_f["electronics"]["hse06_soc_indirect_gap_ev"],
+                eg_dir_1=top_f["electronics"]["hse06_soc_direct_gap_ev"],
+                eps_inf_1=top_f["electronics"]["eps_inf"],
+                opt_mgf2_nm=p10["opt_mgf2_nm"],
+                opt_tio2_nm=p10["opt_tio2_nm"],
+                opt_top_nm=p10["opt_top_nm"],
+                f_orient_1=t11a["ribbon_orientation_factor"],
+                v_antisite_1=t11a["antisite_voltage_penalty_v"],
+                v_contact_1=t11a["contact_voltage_penalty_v"],
+                raw_cost_top_usd_m2=top_f["synthesis"]["active_layer_cost_usd_m2"],
+                stoich_1=top_f["candidate"]["stoichiometry"],
+                eg_ind_3=bot_f["electronics"]["hse06_soc_indirect_gap_ev"],
+                eg_dir_3=bot_f["electronics"]["hse06_soc_direct_gap_ev"],
+                eps_inf_3=bot_f["electronics"]["eps_inf"],
+                opt_bot_nm=p10["opt_bot_nm"],
+                f_orient_3=b11a["ribbon_orientation_factor"],
+                v_antisite_3=b11a["antisite_voltage_penalty_v"],
+                v_contact_3=b11a["contact_voltage_penalty_v"],
+                raw_cost_bot_usd_m2=bot_f["synthesis"]["active_layer_cost_usd_m2"],
+                stoich_3=bot_f["candidate"]["stoichiometry"],
+            )
+            self.assertLessEqual(
+                abs(p11b["path2_2l_bif20_pce_percent"] - iv_11b["path2_2l_bif20_pce_percent"]),
+                0.05,
+                f"{pid}: Path 2 Bifacial PCE diff > 0.05%",
+            )
+            self.assertLessEqual(
+                abs(p11b["path2_utility_lcoe_cents_kwh"] - iv_11b["path2_utility_lcoe_cents_kwh"]),
+                0.01,
+                f"{pid}: Path 2 Utility LCOE diff > 0.01 c/kWh",
+            )
 
 
 if __name__ == "__main__":

@@ -1186,14 +1186,23 @@ def run_live_mp_discovery_campaign(
         evaluate_phase9c_real_world_lcoe_stress_test,
         evaluate_phase10_bifacial_and_string_dossier,
     )
+    from .realistic_commercialization import (
+        evaluate_phase11a_synthesis_and_contacts,
+        evaluate_phase11b_realistic_commercialization,
+        load_mp_thermo_interface_cache,
+    )
 
     defect_deck_dir = out_path / "mp_live_doped_supercell_decks"
     defect_deck_dir.mkdir(parents=True, exist_ok=True)
     for old_d in defect_deck_dir.glob("*"):
         old_d.unlink()
 
+    thermo_interface_cache = load_mp_thermo_interface_cache()
+
     atomistic_reports: List[Dict[str, Any]] = []
     lab_defect_dossiers: List[Dict[str, Any]] = []
+    phase11a_models: Dict[str, Any] = {}
+    phase11a_dossiers: List[Dict[str, Any]] = []
     for fin in finalists:
         at_rep = evaluate_3d_atomistic_phonon_and_neb(fin)
         fin["atomistic_phonon_neb"] = at_rep.model_dump()
@@ -1202,6 +1211,13 @@ def run_live_mp_discovery_campaign(
         lab_rep = evaluate_phase9a_lab_synthesis_and_defect_supercell(fin, str(defect_deck_dir))
         fin["lab_synthesis_and_defect_dossier"] = lab_rep.model_dump()
         lab_defect_dossiers.append(fin["lab_synthesis_and_defect_dossier"])
+
+        p11a_rep = evaluate_phase11a_synthesis_and_contacts(fin, thermo_interface_cache)
+        phase11a_models[fin["candidate"]["candidate_id"]] = p11a_rep
+        fin["phase11a_synthesis_contact_dossier"] = p11a_rep.model_dump()
+        phase11a_dossiers.append(fin["phase11a_synthesis_contact_dossier"])
+
+    phase11a_dossiers.sort(key=lambda x: (-x["synthesis_practicality_score_100"], x["mp_gga_hull_mev_per_atom"]))
 
     # Phase 9B (v6.0): Extended Full-Cache (117 Candidates) Sweep & Contrastive Failure Classifier Audit
     full_cache_records = fetch_live_mp_semiconductors(refresh=False, max_candidates=500)
@@ -1224,6 +1240,7 @@ def run_live_mp_discovery_campaign(
     graded_arc_te_stacks: List[Dict[str, Any]] = []
     real_world_lcoe_stacks: List[Dict[str, Any]] = []
     phase10_bifacial_string_stacks: List[Dict[str, Any]] = []
+    phase11b_realistic_comm_stacks: List[Dict[str, Any]] = []
     for tf in top_finalists:
         for bf in bot_finalists:
             pair_model = compute_cross_layer_4t_stack_wavelength(tf, bf)
@@ -1246,6 +1263,16 @@ def run_live_mp_discovery_campaign(
             p10_model = evaluate_phase10_bifacial_and_string_dossier(tf, bf, graded_model.pair_id)
             phase10_bifacial_string_stacks.append(p10_model.model_dump())
 
+            # Phase 11B/11C (v8.0): Realistic Non-Radiative SRH Device Physics & 4-Path Commercialization Techno-Economics
+            p11b_model = evaluate_phase11b_realistic_commercialization(
+                top_dossier=tf,
+                bottom_dossier=bf,
+                top_11a=phase11a_models[tf["candidate"]["candidate_id"]],
+                bot_11a=phase11a_models[bf["candidate"]["candidate_id"]],
+                p10_report=p10_model,
+            )
+            phase11b_realistic_comm_stacks.append(p11b_model.model_dump())
+
     cross_pairs.sort(key=lambda x: (-x["tandem_4t_low_fca_total_eff_percent"], x["combined_active_cost_usd_m2"]))
     coherent_tmm_stacks.sort(key=lambda x: (-x["tmm_4t_low_fca_pce_percent"], x["combined_active_cost_usd_m2"]))
     graded_arc_te_stacks.sort(key=lambda x: (-x["graded_4t_low_fca_pce_percent"], x["combined_raw_cost_usd_m2"]))
@@ -1253,12 +1280,16 @@ def run_live_mp_discovery_campaign(
     phase10_bifacial_string_stacks.sort(
         key=lambda x: (-x["bifacial_20pct_albedo_4t_pce_percent"], x["bifacial_20pct_lcoe_cents_kwh"])
     )
+    phase11b_realistic_comm_stacks.sort(
+        key=lambda x: (x["path2_utility_lcoe_cents_kwh"], -x["path2_2l_bif20_pce_percent"], x["path1_utility_lcoe_cents_kwh"])
+    )
 
     summary = {
         "version": "4.0.0",
         "v5_graded_arc_and_techno_economics_enabled": True,
         "v6_phase9_lab_contrastive_lcoe_enabled": True,
         "v7_phase10_bifacial_and_string_enabled": True,
+        "v8_phase11_realistic_commercialization_enabled": True,
         "data_provenance": {
             "materials_project_live_api": True,
             "negative_synthesis_datasets": neg_priors.get("dataset_provenance", {}),
@@ -1269,18 +1300,21 @@ def run_live_mp_discovery_campaign(
             "phase9b_extended_117_mp_and_contrastive_audit": True,
             "phase9c_oblique_thermal_arrhenius_lcoe": True,
             "phase10_thickness_opt_bifacial_and_string_matching": True,
+            "phase11_live_dft_thermo_interface_and_4path_commercialization": True,
         },
         "funnel_counts": funnel_counts,
         "failure_mode_breakdown": failure_mode_breakdown,
         "finalists": finalists,
         "atomistic_phonon_neb_reports": atomistic_reports,
         "lab_synthesis_and_defect_dossiers": lab_defect_dossiers,
+        "phase11a_synthesis_contact_dossiers": phase11a_dossiers,
         "contrastive_classifier_audit": contrastive_audit,
         "cross_layer_4t_tandem_pairs": cross_pairs,
         "coherent_tmm_4t_stacks": coherent_tmm_stacks,
         "graded_arc_techno_economic_stacks": graded_arc_te_stacks,
         "real_world_lcoe_stress_test_stacks": real_world_lcoe_stacks,
         "phase10_bifacial_and_string_dossiers": phase10_bifacial_string_stacks,
+        "phase11b_realistic_commercialization_dossiers": phase11b_realistic_comm_stacks,
         "all_mp_records": all_dossiers,
     }
     (out_path / "live_mp_discovery_summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
@@ -1289,19 +1323,27 @@ def run_live_mp_discovery_campaign(
 
 if __name__ == "__main__":
     res = run_live_mp_discovery_campaign()
-    print("Live MP v4.0/v5.0/v6.0/v7.0 Funnel Counts:", json.dumps(res["funnel_counts"], indent=2))
-    print("Phase 9B Contrastive Audit (117 MP Candidates):", json.dumps(res["contrastive_classifier_audit"], indent=2))
-    print(f"\n=== Phase 10: 2D Thickness/ARC Optimization, Bifacial Albedo & String Matching ({len(res['phase10_bifacial_and_string_dossiers'])} Verified) ===")
-    for p10 in res["phase10_bifacial_and_string_dossiers"][:8]:
+    print("Live MP v4.0-v8.0 Funnel Counts:", json.dumps(res["funnel_counts"], indent=2))
+    print("\n=== Phase 11A: Synthesis Practicality & Contact Alignment Ranking (8 Finalists) ===")
+    for p11a in res["phase11a_synthesis_contact_dossiers"]:
         print(
-            f"  * {p10['pair_id']} ({p10['top_formula']} + c-Si + {p10['bottom_formula']}): "
-            f"Opt_d=(MgF2={p10['opt_mgf2_nm']:.0f}, TiO2={p10['opt_tio2_nm']:.0f}, Top={p10['opt_top_nm']:.0f}, Bot={p10['opt_bot_nm']:.0f} nm), "
-            f"PCE(Mono/Bif20/Bif30)={p10['opt_monofacial_4t_pce_percent']:.2f}%/{p10['bifacial_20pct_albedo_4t_pce_percent']:.2f}%/{p10['bifacial_30pct_albedo_4t_pce_percent']:.2f}% "
-            f"({p10['bifacial_20pct_power_w_sqft']:.2f}/{p10['bifacial_30pct_power_w_sqft']:.2f} W/ft^2, Gain20=+{p10['bifacial_20pct_gain_percent']:.2f}%), "
-            f"LCOE_Bif20={p10['bifacial_20pct_lcoe_cents_kwh']:.3f} c/kWh, "
-            f"Strings(Top:Si:Bot)={p10['n_cells_top_matched']}:{p10['n_cells_si_ref']}:{p10['n_cells_bot_matched']} "
-            f"@ V_bus={p10['v_bus_si_v']:.2f} V (mismatch={p10['top_string_mismatch_percent']:.2f}%/{p10['bot_string_mismatch_percent']:.2f}%) "
-            f"[SHA256: {p10['sha256_signature'][:8]}]"
+            f"  * {p11a['candidate_id']} ({p11a['formula_reduced']}, {p11a['target_layer']}): "
+            f"SPS={p11a['synthesis_practicality_score_100']:.2f}/100, "
+            f"Hull={p11a['mp_gga_hull_mev_per_atom']:.2f} meV, dMu_an={p11a['anion_chempot_window_ev']:.3f} eV, "
+            f"Rxn(In2O3/SnO2)={p11a['rxn_in2o3_mev_per_atom']:.1f}/{p11a['rxn_sno2_mev_per_atom']:.1f} meV/at, "
+            f"ETL={p11a['recommended_etl_barrier']}({p11a['best_cbo_ev']:+.2f} eV)"
+        )
+    print(f"\n=== Phase 11B/11C: Realistic Non-Radiative vs. Radiative & 4-Path Commercialization ({len(res['phase11b_realistic_commercialization_dossiers'])} Verified) ===")
+    for p11b in res["phase11b_realistic_commercialization_dossiers"][:6]:
+        print(
+            f"  * {p11b['pair_id']} ({p11b['top_formula']} + c-Si + {p11b['bottom_formula']}): "
+            f"Rad(Mono/Bif20)={p11b['radiative_3l_mono_pce_percent']:.2f}%/{p11b['radiative_3l_bif20_pce_percent']:.2f}% -> "
+            f"Real_Mono(Cons/Base/Mat 2L|3L)={p11b['conservative_2l_mono_pce_percent']:.2f}%|{p11b['conservative_3l_mono_pce_percent']:.2f}% / "
+            f"{p11b['base_2l_mono_pce_percent']:.2f}%|{p11b['base_3l_mono_pce_percent']:.2f}% / "
+            f"{p11b['mature_2l_mono_pce_percent']:.2f}%|{p11b['mature_3l_mono_pce_percent']:.2f}% | "
+            f"Path2(2L_Bif20)={p11b['path2_2l_bif20_pce_percent']:.2f}% (${p11b['path2_module_cost_usd_m2']:.1f}/m2, {p11b['path2_utility_lcoe_cents_kwh']:.3f} c/kWh) vs "
+            f"Path1(3L_Bif20)={p11b['path1_3l_bif20_pce_percent']:.2f}% (${p11b['path1_module_cost_usd_m2']:.1f}/m2, {p11b['path1_utility_lcoe_cents_kwh']:.3f} c/kWh) | "
+            f"Path4(BIPV)={p11b['path4_bipv_window_pce_percent']:.2f}% (GM={p11b['path4_gross_margin_percent']:.1f}%)"
         )
 
 

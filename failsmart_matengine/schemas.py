@@ -361,5 +361,79 @@ class Phase10BifacialLossAndStringDossier(BaseModel):
     sha256_signature: str
 
 
+class Phase11ASynthesisContactDossier(BaseModel):
+    """Phase 11A: Live DFT Synthesis Window, TCO InterfacialReactivity, Contact Alignment & Practicality Dossier (v8.0)."""
+    candidate_id: str
+    formula_reduced: str
+    target_layer: str
+    structural_dimensionality: str
+    mp_gga_hull_mev_per_atom: float
+    hull_decomposition_phases: List[str]
+    anion_chempot_window_ev: float
+    min_cation_chempot_window_ev: float
+    rxn_sno2_mev_per_atom: float
+    rxn_in2o3_mev_per_atom: float
+    rxn_tio2_mev_per_atom: float
+    dominant_in2o3_reaction: str
+    cbm_vs_vacuum_ev: float
+    vbm_vs_vacuum_ev: float
+    cbo_vs_tio2_ev: float
+    cbo_vs_sno2_ev: float
+    vbo_vs_niox_ev: float
+    recommended_etl_barrier: str
+    best_cbo_ev: float
+    contact_voltage_penalty_v: float
+    antisite_voltage_penalty_v: float
+    ribbon_orientation_factor: float
+    critical_mineral_index: float
+    has_critical_mineral: bool
+    synthesis_practicality_score_100: float
+    redundancy_verified: bool
+    sha256_signature: str
 
 
+class Phase11BRealisticCommercializationDossier(BaseModel):
+    """Phase 11B/11C: Realistic Non-Radiative SRH Device Physics & 4-Path Commercialization Techno-Economics (v8.0)."""
+    pair_id: str
+    top_mp_id: str
+    top_formula: str
+    bottom_mp_id: str
+    bottom_formula: str
+    radiative_3l_mono_pce_percent: float
+    radiative_3l_bif20_pce_percent: float
+    path0_si_mono_pce_percent: float
+    path0_si_bif20_pce_percent: float
+    path0_utility_lcoe_cents_kwh: float
+    path0_rooftop_lcoe_cents_kwh: float
+    conservative_2l_mono_pce_percent: float
+    conservative_3l_mono_pce_percent: float
+    base_top_pce_percent: float
+    base_top_voc_v: float
+    base_bot_mono_pce_percent: float
+    base_bot_mono_voc_v: float
+    base_2l_mono_pce_percent: float
+    base_3l_mono_pce_percent: float
+    mature_2l_mono_pce_percent: float
+    mature_3l_mono_pce_percent: float
+    gap_sens_2l_mono_low_percent: float
+    gap_sens_2l_mono_high_percent: float
+    gap_sens_3l_mono_low_percent: float
+    gap_sens_3l_mono_high_percent: float
+    path1_3l_bif20_pce_percent: float
+    path1_module_cost_usd_m2: float
+    path1_utility_lcoe_cents_kwh: float
+    path1_rooftop_lcoe_cents_kwh: float
+    path2_2l_bif20_pce_percent: float
+    path2_module_cost_usd_m2: float
+    path2_utility_lcoe_cents_kwh: float
+    path2_rooftop_lcoe_cents_kwh: float
+    path3_2t_bif20_pce_percent: float
+    path3_module_cost_usd_m2: float
+    path3_utility_lcoe_cents_kwh: float
+    path4_bipv_window_pce_percent: float
+    path4_dgu_cost_usd_m2: float
+    path4_gross_margin_percent: float
+    recommended_commercial_path: str
+    rouard_base_2l_diff_percent: float
+    phase11_redundancy_verified: bool
+    sha256_signature: str

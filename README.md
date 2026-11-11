@@ -92,7 +92,7 @@ failsmart-matengine/
 
 ## Compute, Time & API Cost Guide
 
-### 1. Database & API Key Costs: **$0 (100% Free)**
+### 1. Database & API Key Costs: **\$0 (100% Free)**
 * **The Materials Project (`MP_API_KEY`):** Completely **free** at [next-gen.materialsproject.org/api](https://next-gen.materialsproject.org/api) (requires only a free GitHub, Google, or ORCID login; no credit card or subscription).
 * **Alexandria, OQMD, COD & LBNL 80k Solid-State Impurity Dataset:** 100% open-access and free to download.
 * **Offline Built-In Mode:** `failsmart-matengine` ships with an embedded reference hull, LBNL impurity-sink, and Pourbaix equilibrium library so Stages 1–3 and Gate A run out-of-the-box with **zero API keys required**.
@@ -101,9 +101,9 @@ failsmart-matengine/
 
 | Execution Tier | Stages Covered | Hardware Needed | Wall-Clock Time | Est. Compute Cost |
 | :--- | :--- | :--- | :--- | :--- |
-| **Tier 0: Fast Local Pre-Screen (Included Here)** | Stages 1–3 + Gate A + Analytical Stage 4/5 Surrogates | 2-core CPU / 8 GB RAM (runs in this VM or any laptop) | **< 5 seconds** (for 16–100 candidates) | **$0** |
-| **Tier 1: Full Generative + MLIP Sweep (10,000 Crystals)** | `MatterGen` + 4x `MACE-OMat24` + `phonopy` + `rxn_network` | 1x Consumer GPU (RTX 3090/4090, 24 GB VRAM) | **4–6 hours** | **$0 local** (~$36 cloud spot) |
-| **Tier 2: Full Quantum ESPRESSO (`HSE06+SOC`) + `doped` Supercells** | Stage 4 (`HSE06+SOC` on 20 candidates) + Stage 5 (`doped` defects on 4–6 finalists) | 4x–8x A100 (80 GB) Cloud Burst | **18–36 hours** | **~$320–$900** on-demand (or ~$180 on spot GPUs) |
+| **Tier 0: Fast Local Pre-Screen (Included Here)** | Stages 1–3 + Gate A + Analytical Stage 4/5 Surrogates | 2-core CPU / 8 GB RAM (runs in this VM or any laptop) | **< 5 seconds** (for 16–100 candidates) | **\$0** |
+| **Tier 1: Full Generative + MLIP Sweep (10,000 Crystals)** | `MatterGen` + 4x `MACE-OMat24` + `phonopy` + `rxn_network` | 1x Consumer GPU (RTX 3090/4090, 24 GB VRAM) | **4–6 hours** | **\$0 local** (~\$36 cloud spot) |
+| **Tier 2: Full Quantum ESPRESSO (`HSE06+SOC`) + `doped` Supercells** | Stage 4 (`HSE06+SOC` on 20 candidates) + Stage 5 (`doped` defects on 4–6 finalists) | 4x–8x A100 (80 GB) Cloud Burst | **18–36 hours** | **~\$320–\$900** on-demand (or ~\$180 on spot GPUs) |
 
 ---
 
@@ -121,11 +121,11 @@ Running `python3 -m failsmart_matengine.orchestrator` executes the v2.0 discover
 
 | Candidate ID | Formula | Target Layer | Space Group | $N_{\text{sites}}$ | $T_{\text{synth}}$ ($^\circ\text{C}$) | Active Layer Cost ($\$/\text{m}^2$) | $\Delta E_{\text{hull}}$ (meV) | $\omega_{\min}$ (THz) | $E_{\text{mig}}$ (eV) | $E_g^{\text{HSE06+SOC}}$ (Ind / Dir) | Single-Layer SLME (%) | SQ Limit (%) | 2-Layer Si $\eta$ (%) | 4T Std Si FCA $\eta$ (%) | **3-Layer 4T Tandem $\eta$ (%)** | Redundancy SHA-256 Verification Hash |
 | :--- | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| `CAND-A02` | `Bi2CuO2SCl` | Top Active Glass | `I4/mmm` (#139) | 28 | 365.0 | $0.0195 | 14.5 | 1.18 | 0.88 | 1.82 / 1.86 eV | 24.43% | 26.78% | 38.29% | 40.43% | **41.66%** | `1df52efdd58d0e055ac198a8332ce11a8b0d61dc8c760738c93cf33ff0afc763` |
-| `CAND-A03` | `Cu2SbS2Cl` | Top Active Glass | `Pnma` (#62) | 24 | 320.0 | $0.0129 | 21.0 | 1.05 | 0.74 | 1.79 / 1.83 eV | 25.08% | 27.32% | 38.41% | 40.54% | **41.77%** | `badee394a07f1aef7074748fa8673dae56c245f2a7b46aeef2ec09c66bb83df6` |
-| `CAND-A06` | `BiZnOSCl` | Top Active Glass | `P4/nmm` (#129) | 10 | 380.0 | $0.0148 | 18.2 | 1.29 | 0.98 | 1.85 / 1.89 eV | 23.81% | 26.11% | 38.18% | 40.31% | **41.55%** | `161eb8f206f732cdd034ca55584620c623da5d2130b28da5414d99d8aeb311b1` |
-| `CAND-B02` | `Sn2SbSe2I3` | Bottom IR Scavenger | `Cmcm` (#63) | 32 | 295.0 | $0.0865 | 12.6 | 0.88 | 0.75 | 0.75 / 0.78 eV | 23.48% | 25.00% | 38.26% | 40.51% | **41.83%** | `0e7d2cff9087e81f64923a3627923828046e0899fcf3f854cd24fb9d43913f52` |
-| `CAND-B04` | `Cu2BiSe2I` | Bottom IR Scavenger | `Pnma` (#62) | 24 | 345.0 | $0.0509 | 11.2 | 1.09 | 0.71 | 0.74 / 0.76 eV | 23.59% | 24.79% | 38.26% | 40.64% | **42.08%** | `f8c3fe9aabede259ea5158ff04fdf38b65ade2b6656f194a79cade99337623c2` |
+| `CAND-A02` | `Bi2CuO2SCl` | Top Active Glass | `I4/mmm` (#139) | 28 | 365.0 | \$0.0195 | 14.5 | 1.18 | 0.88 | 1.82 / 1.86 eV | 24.43% | 26.78% | 38.29% | 40.43% | **41.66%** | `1df52efdd58d0e055ac198a8332ce11a8b0d61dc8c760738c93cf33ff0afc763` |
+| `CAND-A03` | `Cu2SbS2Cl` | Top Active Glass | `Pnma` (#62) | 24 | 320.0 | \$0.0129 | 21.0 | 1.05 | 0.74 | 1.79 / 1.83 eV | 25.08% | 27.32% | 38.41% | 40.54% | **41.77%** | `badee394a07f1aef7074748fa8673dae56c245f2a7b46aeef2ec09c66bb83df6` |
+| `CAND-A06` | `BiZnOSCl` | Top Active Glass | `P4/nmm` (#129) | 10 | 380.0 | \$0.0148 | 18.2 | 1.29 | 0.98 | 1.85 / 1.89 eV | 23.81% | 26.11% | 38.18% | 40.31% | **41.55%** | `161eb8f206f732cdd034ca55584620c623da5d2130b28da5414d99d8aeb311b1` |
+| `CAND-B02` | `Sn2SbSe2I3` | Bottom IR Scavenger | `Cmcm` (#63) | 32 | 295.0 | \$0.0865 | 12.6 | 0.88 | 0.75 | 0.75 / 0.78 eV | 23.48% | 25.00% | 38.26% | 40.51% | **41.83%** | `0e7d2cff9087e81f64923a3627923828046e0899fcf3f854cd24fb9d43913f52` |
+| `CAND-B04` | `Cu2BiSe2I` | Bottom IR Scavenger | `Pnma` (#62) | 24 | 345.0 | \$0.0509 | 11.2 | 1.09 | 0.71 | 0.74 / 0.76 eV | 23.59% | 24.79% | 38.26% | 40.64% | **42.08%** | `f8c3fe9aabede259ea5158ff04fdf38b65ade2b6656f194a79cade99337623c2` |
 
 ---
 
@@ -151,14 +151,14 @@ All 8 finalists have turnkey Quantum ESPRESSO `HSE06+SOC` input decks and CIF fi
 
 | Candidate ID | Formula | Target Layer | Space Group | $N_{\text{sites}}$ | $T_{\text{synth}}$ ($^\circ\text{C}$) | Active Layer Cost ($\/\text{m}^2$) | $\Delta E_{\text{hull}}$ (meV) | $\omega_{\min}$ (THz) | $E_{\text{mig}}$ (eV) | $E_g^{\text{HSE06+SOC}}$ (Ind / Dir) | Single-Layer SLME (%) | SQ Limit (%) | 2-Layer Si $\eta$ (%) | 4T Std Si FCA $\eta$ (%) | **3-Layer 4T Tandem $\eta$ (%)** | Redundancy SHA-256 Verification Hash |
 | :--- | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| `mp-861911` | `Sb2OS2` | Top Active Glass | `C2/m` (#12) | 10 | 375.0 | $0.0157 | 7.07 | 1.40 | 1.18 | 1.76 / 1.80 eV | 25.66% | 27.93% | 38.43% | 40.55% | **41.78%** | `a09dbb1c343327cd5cbb5fe25b0409ec548a0f06b6168ca7feb5d47fc3ae68d1` |
-| `mp-1227486` | `BiSbS3` | Top Active Glass | `Pnma` (#62) | 20 | 375.0 | $0.0182 | 2.30 | 1.20 | 1.18 | 1.79 / 1.83 eV | 25.10% | 27.32% | 38.36% | 40.48% | **41.70%** | `d8f6b425fa2066a5062437ab9edb68a127d62b3ca1821a2645bbf4f07a9076cb` |
-| `mp-1078776` | `BiInS3` | Top Active Glass | `P2_1/m` (#11) | 10 | 375.0 | $0.2681 | 15.08 | 1.11 | 1.18 | 1.90 / 1.94 eV | 22.87% | 25.00% | 37.89% | 40.00% | **41.23%** | `efd0e571e1da58bcc47487420264fbc3faad1689ffc3bd7e6a5edd8f817ec9f3` |
-| `mp-1223998` | `Bi3InSe6` | Bottom IR Scavenger | `R3m` (#160) | 10 | 375.0 | $0.1507 | 17.99 | 1.33 | 1.18 | 0.75 / 0.76 eV | 24.11% | 25.00% | 38.26% | 40.72% | **42.19%** | `0dae9392716774ac808f7d90ab583018289674f56443c20fd9ccbb69f01202d5` |
-| `mp-1224922` | `CuGaSnSe4` | Bottom IR Scavenger | `I-4` (#82) | 7 | 375.0 | $0.1251 | 3.61 | 1.28 | 0.98 | 0.85 / 0.86 eV | 26.50% | 27.20% | 38.26% | 40.53% | **41.66%** | `94e846fe365a26c374eab9715c63f9678401f11dbe6c757cc4f6608bd2464e5c` |
-| `mp-22982` | `BiCuS2` | Bottom IR Scavenger | `Pnma` (#62) | 16 | 375.0 | $0.0237 | 0.00 | 1.27 | 0.95 | 0.85 / 0.89 eV | 26.35% | 27.20% | 38.26% | 40.50% | **41.61%** | `4572d1324fa4eeafde04a92ab39f889912192afae5214cd9c08a90f83dce9303` |
-| `mp-23474` | `AgBi3S5` | Bottom IR Scavenger | `C2/m` (#12) | 18 | 375.0 | $0.2558 | 0.00 | 1.18 | 0.98 | 0.85 / 0.89 eV | 26.35% | 27.20% | 38.26% | 40.50% | **41.61%** | `28fffc7cc0a9332db420e8769ac9fb9a11b27285bc604d3ee1bd2f9732ceaa72` |
-| `mp-1224129` | `CuInSnSe4` | Bottom IR Scavenger | `I-4` (#82) | 7 | 375.0 | $0.2664 | 5.17 | 1.21 | 0.98 | 0.78 / 0.82 eV | 23.71% | 25.60% | 38.26% | 40.29% | **41.39%** | `e9f128da15956ed2693b7ddd9cf262a07696ca573313e2164f6491cf979d5d01` |
+| `mp-861911` | `Sb2OS2` | Top Active Glass | `C2/m` (#12) | 10 | 375.0 | \$0.0157 | 7.07 | 1.40 | 1.18 | 1.76 / 1.80 eV | 25.66% | 27.93% | 38.43% | 40.55% | **41.78%** | `a09dbb1c343327cd5cbb5fe25b0409ec548a0f06b6168ca7feb5d47fc3ae68d1` |
+| `mp-1227486` | `BiSbS3` | Top Active Glass | `Pnma` (#62) | 20 | 375.0 | \$0.0182 | 2.30 | 1.20 | 1.18 | 1.79 / 1.83 eV | 25.10% | 27.32% | 38.36% | 40.48% | **41.70%** | `d8f6b425fa2066a5062437ab9edb68a127d62b3ca1821a2645bbf4f07a9076cb` |
+| `mp-1078776` | `BiInS3` | Top Active Glass | `P2_1/m` (#11) | 10 | 375.0 | \$0.2681 | 15.08 | 1.11 | 1.18 | 1.90 / 1.94 eV | 22.87% | 25.00% | 37.89% | 40.00% | **41.23%** | `efd0e571e1da58bcc47487420264fbc3faad1689ffc3bd7e6a5edd8f817ec9f3` |
+| `mp-1223998` | `Bi3InSe6` | Bottom IR Scavenger | `R3m` (#160) | 10 | 375.0 | \$0.1507 | 17.99 | 1.33 | 1.18 | 0.75 / 0.76 eV | 24.11% | 25.00% | 38.26% | 40.72% | **42.19%** | `0dae9392716774ac808f7d90ab583018289674f56443c20fd9ccbb69f01202d5` |
+| `mp-1224922` | `CuGaSnSe4` | Bottom IR Scavenger | `I-4` (#82) | 7 | 375.0 | \$0.1251 | 3.61 | 1.28 | 0.98 | 0.85 / 0.86 eV | 26.50% | 27.20% | 38.26% | 40.53% | **41.66%** | `94e846fe365a26c374eab9715c63f9678401f11dbe6c757cc4f6608bd2464e5c` |
+| `mp-22982` | `BiCuS2` | Bottom IR Scavenger | `Pnma` (#62) | 16 | 375.0 | \$0.0237 | 0.00 | 1.27 | 0.95 | 0.85 / 0.89 eV | 26.35% | 27.20% | 38.26% | 40.50% | **41.61%** | `4572d1324fa4eeafde04a92ab39f889912192afae5214cd9c08a90f83dce9303` |
+| `mp-23474` | `AgBi3S5` | Bottom IR Scavenger | `C2/m` (#12) | 18 | 375.0 | \$0.2558 | 0.00 | 1.18 | 0.98 | 0.85 / 0.89 eV | 26.35% | 27.20% | 38.26% | 40.50% | **41.61%** | `28fffc7cc0a9332db420e8769ac9fb9a11b27285bc604d3ee1bd2f9732ceaa72` |
+| `mp-1224129` | `CuInSnSe4` | Bottom IR Scavenger | `I-4` (#82) | 7 | 375.0 | \$0.2664 | 5.17 | 1.21 | 0.98 | 0.78 / 0.82 eV | 23.71% | 25.60% | 38.26% | 40.29% | **41.39%** | `e9f128da15956ed2693b7ddd9cf262a07696ca573313e2164f6491cf979d5d01` |
 
 ### Top Cross-Layer 4-Terminal Tandem Stacks (15 Pairs Screened)
 
@@ -166,21 +166,21 @@ The 3 Top Active Glass and 5 Bottom IR Scavenger finalists yield `15` mechanical
 
 | Pair ID | Top MP Cell | Bottom MP Cell | Top $E_g$ (Ind/Dir) | Bottom $E_g$ (Ind/Dir) | Top PCE (%) | Middle c-Si PCE (%) | Bottom IR PCE (%) | Combined Cost ($\/\text{m}^2$) | **4T Tandem Total PCE (%)** |
 | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| `mp-861911__mp-1223998` | `mp-861911` (Sb2OS2) | `mp-1223998` (Bi3InSe6) | 1.76 / 1.80 eV | 0.75 / 0.76 eV | 25.66% | 11.84% | 4.82% | $0.1664 | **42.32%** |
-| `mp-1227486__mp-1223998` | `mp-1227486` (BiSbS3) | `mp-1223998` (Bi3InSe6) | 1.79 / 1.83 eV | 0.75 / 0.76 eV | 25.10% | 12.32% | 4.82% | $0.1689 | **42.25%** |
-| `mp-861911__mp-1224922` | `mp-861911` (Sb2OS2) | `mp-1224922` (CuGaSnSe4) | 1.76 / 1.80 eV | 0.85 / 0.86 eV | 25.66% | 11.84% | 4.30% | $0.1408 | **41.79%** |
-| `mp-1078776__mp-1223998` | `mp-1078776` (BiInS3) | `mp-1223998` (Bi3InSe6) | 1.90 / 1.94 eV | 0.75 / 0.76 eV | 22.87% | 14.07% | 4.84% | $0.4188 | **41.78%** |
-| `mp-861911__mp-22982` | `mp-861911` (Sb2OS2) | `mp-22982` (BiCuS2) | 1.76 / 1.80 eV | 0.85 / 0.89 eV | 25.66% | 11.84% | 4.25% | $0.0394 | **41.75%** |
-| `mp-861911__mp-23474` | `mp-861911` (Sb2OS2) | `mp-23474` (AgBi3S5) | 1.76 / 1.80 eV | 0.85 / 0.89 eV | 25.66% | 11.84% | 4.25% | $0.2715 | **41.75%** |
-| `mp-1227486__mp-1224922` | `mp-1227486` (BiSbS3) | `mp-1224922` (CuGaSnSe4) | 1.79 / 1.83 eV | 0.85 / 0.86 eV | 25.10% | 12.32% | 4.30% | $0.1433 | **41.72%** |
-| `mp-1227486__mp-22982` | `mp-1227486` (BiSbS3) | `mp-22982` (BiCuS2) | 1.79 / 1.83 eV | 0.85 / 0.89 eV | 25.10% | 12.32% | 4.25% | $0.0419 | **41.67%** |
-| `mp-1227486__mp-23474` | `mp-1227486` (BiSbS3) | `mp-23474` (AgBi3S5) | 1.79 / 1.83 eV | 0.85 / 0.89 eV | 25.10% | 12.32% | 4.25% | $0.2740 | **41.67%** |
-| `mp-861911__mp-1224129` | `mp-861911` (Sb2OS2) | `mp-1224129` (CuInSnSe4) | 1.76 / 1.80 eV | 0.78 / 0.82 eV | 25.66% | 11.84% | 4.03% | $0.2821 | **41.53%** |
-| `mp-1227486__mp-1224129` | `mp-1227486` (BiSbS3) | `mp-1224129` (CuInSnSe4) | 1.79 / 1.83 eV | 0.78 / 0.82 eV | 25.10% | 12.32% | 4.03% | $0.2846 | **41.45%** |
-| `mp-1078776__mp-1224922` | `mp-1078776` (BiInS3) | `mp-1224922` (CuGaSnSe4) | 1.90 / 1.94 eV | 0.85 / 0.86 eV | 22.87% | 14.07% | 4.31% | $0.3932 | **41.25%** |
-| `mp-1078776__mp-22982` | `mp-1078776` (BiInS3) | `mp-22982` (BiCuS2) | 1.90 / 1.94 eV | 0.85 / 0.89 eV | 22.87% | 14.07% | 4.26% | $0.2918 | **41.20%** |
-| `mp-1078776__mp-23474` | `mp-1078776` (BiInS3) | `mp-23474` (AgBi3S5) | 1.90 / 1.94 eV | 0.85 / 0.89 eV | 22.87% | 14.07% | 4.26% | $0.5239 | **41.20%** |
-| `mp-1078776__mp-1224129` | `mp-1078776` (BiInS3) | `mp-1224129` (CuInSnSe4) | 1.90 / 1.94 eV | 0.78 / 0.82 eV | 22.87% | 14.07% | 4.04% | $0.5345 | **40.98%** |
+| `mp-861911__mp-1223998` | `mp-861911` (Sb2OS2) | `mp-1223998` (Bi3InSe6) | 1.76 / 1.80 eV | 0.75 / 0.76 eV | 25.66% | 11.84% | 4.82% | \$0.1664 | **42.32%** |
+| `mp-1227486__mp-1223998` | `mp-1227486` (BiSbS3) | `mp-1223998` (Bi3InSe6) | 1.79 / 1.83 eV | 0.75 / 0.76 eV | 25.10% | 12.32% | 4.82% | \$0.1689 | **42.25%** |
+| `mp-861911__mp-1224922` | `mp-861911` (Sb2OS2) | `mp-1224922` (CuGaSnSe4) | 1.76 / 1.80 eV | 0.85 / 0.86 eV | 25.66% | 11.84% | 4.30% | \$0.1408 | **41.79%** |
+| `mp-1078776__mp-1223998` | `mp-1078776` (BiInS3) | `mp-1223998` (Bi3InSe6) | 1.90 / 1.94 eV | 0.75 / 0.76 eV | 22.87% | 14.07% | 4.84% | \$0.4188 | **41.78%** |
+| `mp-861911__mp-22982` | `mp-861911` (Sb2OS2) | `mp-22982` (BiCuS2) | 1.76 / 1.80 eV | 0.85 / 0.89 eV | 25.66% | 11.84% | 4.25% | \$0.0394 | **41.75%** |
+| `mp-861911__mp-23474` | `mp-861911` (Sb2OS2) | `mp-23474` (AgBi3S5) | 1.76 / 1.80 eV | 0.85 / 0.89 eV | 25.66% | 11.84% | 4.25% | \$0.2715 | **41.75%** |
+| `mp-1227486__mp-1224922` | `mp-1227486` (BiSbS3) | `mp-1224922` (CuGaSnSe4) | 1.79 / 1.83 eV | 0.85 / 0.86 eV | 25.10% | 12.32% | 4.30% | \$0.1433 | **41.72%** |
+| `mp-1227486__mp-22982` | `mp-1227486` (BiSbS3) | `mp-22982` (BiCuS2) | 1.79 / 1.83 eV | 0.85 / 0.89 eV | 25.10% | 12.32% | 4.25% | \$0.0419 | **41.67%** |
+| `mp-1227486__mp-23474` | `mp-1227486` (BiSbS3) | `mp-23474` (AgBi3S5) | 1.79 / 1.83 eV | 0.85 / 0.89 eV | 25.10% | 12.32% | 4.25% | \$0.2740 | **41.67%** |
+| `mp-861911__mp-1224129` | `mp-861911` (Sb2OS2) | `mp-1224129` (CuInSnSe4) | 1.76 / 1.80 eV | 0.78 / 0.82 eV | 25.66% | 11.84% | 4.03% | \$0.2821 | **41.53%** |
+| `mp-1227486__mp-1224129` | `mp-1227486` (BiSbS3) | `mp-1224129` (CuInSnSe4) | 1.79 / 1.83 eV | 0.78 / 0.82 eV | 25.10% | 12.32% | 4.03% | \$0.2846 | **41.45%** |
+| `mp-1078776__mp-1224922` | `mp-1078776` (BiInS3) | `mp-1224922` (CuGaSnSe4) | 1.90 / 1.94 eV | 0.85 / 0.86 eV | 22.87% | 14.07% | 4.31% | \$0.3932 | **41.25%** |
+| `mp-1078776__mp-22982` | `mp-1078776` (BiInS3) | `mp-22982` (BiCuS2) | 1.90 / 1.94 eV | 0.85 / 0.89 eV | 22.87% | 14.07% | 4.26% | \$0.2918 | **41.20%** |
+| `mp-1078776__mp-23474` | `mp-1078776` (BiInS3) | `mp-23474` (AgBi3S5) | 1.90 / 1.94 eV | 0.85 / 0.89 eV | 22.87% | 14.07% | 4.26% | \$0.5239 | **41.20%** |
+| `mp-1078776__mp-1224129` | `mp-1078776` (BiInS3) | `mp-1224129` (CuInSnSe4) | 1.90 / 1.94 eV | 0.78 / 0.82 eV | 22.87% | 14.07% | 4.04% | \$0.5345 | **40.98%** |
 
 *Key Efficiency / Cost Pareto Highlights:*
 * **World-Record Efficiency Pair (Scalar Idealization):** `mp-861911 Sb2OS2 + c-Si + mp-1223998 Bi3InSe6` achieves **42.32%** 4T PCE ($25.66\%$ top $+ 11.84\%$ middle $+ 4.82\%$ bottom IR) at $\$0.1664/\text{m}^2$.
@@ -239,18 +239,28 @@ We simultaneously evaluate all 4 Techno-Economic Figures of Merit against a sing
 ### 6. Phase 9 (`v6.0`): 10 mmol Lab Synthesis & `doped` Supercells (9A), 117-MP Contrastive Margin Audit (9B), and Oblique/Thermal/25-Year LCOE Stress-Test (9C)
 - **Phase 9A (10.0 mmol Stoichiometric Lab Batch & Stage 5 `doped` Defect Supercell Decks):** Generates exact elemental mass-balanced precursor recipes (`elemental_mass_conservation_diff_g == 0.0 g`), $5\%$ sulfur/selenium volatile overpressure ampoule charges, and runnable Stage 5 `doped` / Quantum ESPRESSO defect supercell decks (`outputs/mp_live_doped_supercell_decks/`, $L_{\min} \ge 10.0\text{ \AA}$, Freysoldt-Neugebauer-Van de Walle electrostatic corrections $E_{\text{FNV}}(q=\pm 1) \in [0.090, 0.190]\text{ eV}$).
 - **Phase 9B (Extended 117-Candidate Live MP Contrastive Failure Classifier Audit):** Sweeps all `117` RoHS-clean semiconductors in `data/mp_live_candidates_cache.json`, confirming positive separation $\Delta M = +0.1605$ between promoted finalists ($\bar{M}_{\mathcal{P}} = +0.0850$) and rejected failures ($\bar{M}_{\mathcal{N}} = -0.0755$).
-- **Phase 9C (Oblique $0^\circ\text{–}60^\circ$ S/P Coherent TMM, Operating Temp $25^\circ\text{C}\text{–}65^\circ\text{C}$ & 25-Year Arrhenius LCOE):** Evaluates unpolarized $\frac{1}{2}(|r_s|^2+|r_p|^2)$ oblique optics ($\text{IAM}_{60^\circ} = 0.954$), NOCT ($45^\circ\text{C}$) and desert peak ($65^\circ\text{C}$) thermal derating ($\beta_{\text{4T}} = -0.361\%/\text{K}$ vs. $-0.409\%/\text{K}$ c-Si), and 25-year discounted LCOE (**$3.172\text{ \cent/kWh}$**, a **$-35.74\%$ reduction** vs. $4.936\text{ \cent/kWh}$ standalone c-Si).
+- **Phase 9C (Oblique $0^\circ\text{–}60^\circ$ S/P Coherent TMM, Operating Temp $25^\circ\text{C}\text{–}65^\circ\text{C}$ & 25-Year Arrhenius LCOE):** Evaluates unpolarized $\frac{1}{2}(|r_s|^2+|r_p|^2)$ oblique optics ($\text{IAM}_{60^\circ} = 0.954$), NOCT ($45^\circ\text{C}$) and desert peak ($65^\circ\text{C}$) thermal derating ($\beta_{\text{4T}} = -0.361\%/\text{K}$ vs. $-0.409\%/\text{K}$ c-Si), and 25-year discounted LCOE (**3.172 ¢/kWh**, a **-35.74% reduction** vs. 4.936 ¢/kWh standalone c-Si).
 
 ### 7. Phase 10 (`v7.0`): $2^4=16$ Thickness/ARC Global Coherent Optimization (10A), Bifacial Ground-Albedo Harvesting (10B), and SPICE Subcell $J\text{–}V$ String Voltage Matching (10C)
 
-| Pair ID | Stack (`Top + c-Si + Bot`) | Opt Thicknesses `(MgF2, TiO2, Top, Bot)` | Opt Mono 4T PCE | **Bifacial 20% Albedo PCE ($\text{W/ft}^2$)** | **Bifacial 30% Albedo PCE ($\text{W/ft}^2$)** | **25-Yr Bifacial LCOE (20% Alb)** | Matched String Ratio ($N_{\text{top}} : N_{\text{Si}} : N_{\text{bot}}$) | Bus Voltage $V_{\text{bus,Si}}$ (Mismatch Top / Bot) |
+| Pair ID | Stack (`Top + c-Si + Bot`) | Opt Thicknesses `(MgF2, TiO2, Top, Bot)` | Opt Mono 4T PCE | **Bifacial 20% Albedo PCE (W/ft²)** | **Bifacial 30% Albedo PCE (W/ft²)** | **25-Yr Bifacial LCOE (20% Alb)** | Matched String Ratio ($N_{\text{top}} : N_{\text{Si}} : N_{\text{bot}}$) | Bus Voltage $V_{\text{bus,Si}}$ (Mismatch Top / Bot) |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| `mp-861911__mp-1223998` | `Sb2OS2 + c-Si + Bi3InSe6` | `(94, 48, 260, 391 nm)` | 42.45% | **46.17%** ($42.89\text{ W/ft}^2$, $+8.76\%$) | **48.06%** ($44.65\text{ W/ft}^2$) | **$3.002\text{ \cent/kWh}$** | **`37 : 72 : 120`** | $50.08\text{ V}$ ($1.18\% / 0.04\%$) |
-| `mp-861911__mp-1224922` | `Sb2OS2 + c-Si + CuGaSnSe4` | `(94, 48, 299, 391 nm)` | 42.02% | **46.09%** ($42.82\text{ W/ft}^2$, $+9.69\%$) | **48.17%** ($44.75\text{ W/ft}^2$) | **$3.001\text{ \cent/kWh}$** | **`37 : 72 : 100`** | $50.05\text{ V}$ ($1.15\% / 0.02\%$) |
-| `mp-1227486__mp-1223998` | `BiSbS3 + c-Si + Bi3InSe6` | `(94, 48, 299, 391 nm)` | 42.37% | **46.09%** ($42.82\text{ W/ft}^2$, $+8.78\%$) | **47.98%** ($44.58\text{ W/ft}^2$) | **$3.005\text{ \cent/kWh}$** | **`36 : 72 : 120`** | $50.12\text{ V}$ ($0.19\% / 0.08\%$) |
-| `mp-1227486__mp-1224922` | `BiSbS3 + c-Si + CuGaSnSe4` | `(94, 48, 299, 391 nm)` | 42.01% | **46.08%** ($42.81\text{ W/ft}^2$, $+9.69\%$) | **48.16%** ($44.74\text{ W/ft}^2$) | **$3.001\text{ \cent/kWh}$** | **`36 : 72 : 100`** | $50.12\text{ V}$ ($0.19\% / 0.16\%$) |
-| `mp-861911__mp-22982` | `Sb2OS2 + c-Si + BiCuS2` | `(94, 48, 299, 391 nm)` | 41.97% | **46.02%** ($42.75\text{ W/ft}^2$, $+9.64\%$) | **48.08%** ($44.67\text{ W/ft}^2$) | **$3.002\text{ \cent/kWh}$** | **`37 : 72 : 100`** | $50.05\text{ V}$ ($1.15\% / 0.44\%$) |
-| `mp-1227486__mp-22982` | `BiSbS3 + c-Si + BiCuS2` | `(94, 48, 299, 391 nm)` | 41.96% | **46.01%** ($42.74\text{ W/ft}^2$, $+9.64\%$) | **48.07%** ($44.66\text{ W/ft}^2$) | **$3.002\text{ \cent/kWh}$** | **`36 : 72 : 101`** | $50.12\text{ V}$ ($0.19\% / 0.41\%$) |
+| `mp-861911__mp-1223998` | `Sb2OS2 + c-Si + Bi3InSe6` | `(94, 48, 260, 391 nm)` | 42.45% | **46.17%** (42.89 W/ft², +8.76%) | **48.06%** (44.65 W/ft²) | **3.002 ¢/kWh** | **`37 : 72 : 120`** | 50.08 V (1.18% / 0.04%) |
+| `mp-861911__mp-1224922` | `Sb2OS2 + c-Si + CuGaSnSe4` | `(94, 48, 299, 391 nm)` | 42.02% | **46.09%** (42.82 W/ft², +9.69%) | **48.17%** (44.75 W/ft²) | **3.001 ¢/kWh** | **`37 : 72 : 100`** | 50.05 V (1.15% / 0.02%) |
+| `mp-1227486__mp-1223998` | `BiSbS3 + c-Si + Bi3InSe6` | `(94, 48, 299, 391 nm)` | 42.37% | **46.09%** (42.82 W/ft², +8.78%) | **47.98%** (44.58 W/ft²) | **3.005 ¢/kWh** | **`36 : 72 : 120`** | 50.12 V (0.19% / 0.08%) |
+| `mp-1227486__mp-1224922` | `BiSbS3 + c-Si + CuGaSnSe4` | `(94, 48, 299, 391 nm)` | 42.01% | **46.08%** (42.81 W/ft², +9.69%) | **48.16%** (44.74 W/ft²) | **3.001 ¢/kWh** | **`36 : 72 : 100`** | 50.12 V (0.19% / 0.16%) |
+| `mp-861911__mp-22982` | `Sb2OS2 + c-Si + BiCuS2` | `(94, 48, 299, 391 nm)` | 41.97% | **46.02%** (42.75 W/ft², +9.64%) | **48.08%** (44.67 W/ft²) | **3.002 ¢/kWh** | **`37 : 72 : 100`** | 50.05 V (1.15% / 0.44%) |
+| `mp-1227486__mp-22982` | `BiSbS3 + c-Si + BiCuS2` | `(94, 48, 299, 391 nm)` | 41.96% | **46.01%** (42.74 W/ft², +9.64%) | **48.07%** (44.66 W/ft²) | **3.002 ¢/kWh** | **`36 : 72 : 101`** | 50.12 V (0.19% / 0.41%) |
+
+### 8. Phase 11 (`v8.0`): Realistic Synthesis Practicality (`SPS`), Live MP TCO Reactivity, Non-Radiative SRH Physics & 4-Path Commercialization Engine
+To separate detailed-balance optical ceilings (`ERE = 1.0`) from near-term polycrystalline thin-film manufacturing reality (`ERE = 1e-5` to `5e-3`), Phase 11 (`realistic_commercialization.py` vs. `independent_verifier.py`, full debate in [`docs/REALISTIC_COMMERCIALIZATION_AND_DEBATE_REPORT.md`](file:///home/antigravity/failsmart-matengine/docs/REALISTIC_COMMERCIALIZATION_AND_DEBATE_REPORT.md)) evaluates live Materials Project convex-hull stability windows, `pymatgen` `InterfacialReactivity` against `SnO2`/`In2O3`/`TiO2`, non-radiative SRH + antisite/contact voltage deficits, commercial c-Si Drude FCA, and industrial PVD/RTP fab yield (`90.0%` 1-junction vs. `77.4%` 2-junction):
+
+- **Top Synthesis Practicality (`SPS` out of `100`):** **`mp-1227486 BiSbS3` (`94.76/100`)** and **`mp-861911 Sb2OS2` (`94.44/100`)** lead all 8 finalists (`0.00 meV/atom` reaction energy on `TiO2` and `SnO2` vs. exothermic `-13.16` and `-15.35 meV/atom` sulfidation on bare `In2O3`/ITO; zero In/Ga/Ag criticality), followed by `mp-22982 BiCuS2` (`89.54/100`), `AgBi3S5` (`88.96`), `BiInS3` (`83.42`), `Bi3InSe6` (`79.71`), `CuInSnSe4` (`61.66`), and `CuGaSnSe4` (`49.99`).
+- **4-Path Commercialization Verdict (Base-Case Pilot `ERE = 1e-4`, 20% Albedo):**
+  - **Path 0 (Commodity Bifacial TOPCon/SHJ c-Si):** **26.65%** bifacial (`22.94%` mono) at **\$42.00/m²** (`4.246 ¢/kWh` utility / `6.802 ¢/kWh` rooftop LCOE).
+  - **Path 1 (3-Layer 4T Sandwich):** Drops to **28.30%–28.78%** bifacial because the `0.75–0.85 eV` rear cell (`V_oc,real = 0.23–0.30 V`) cannibalizes `300–1100 nm` rear albedo photons from `0.72 V` silicon while `77.4%` compound yield inflates cost to **\$96.76–\$109.62/m²** (`5.008–5.368 ¢/kWh` utility LCOE — deferred to Gen-3 `ERE >= 5e-3`).
+  - **Path 2 (2-Layer 4T Active Solar Glass Drop-In on Unobstructed Bifacial c-Si — GW Tandem Winner):** **30.61%** (`BiSbS3`) / **30.58%** (`Sb2OS2`) bifacial PCE (`26.87%` mono Base-Case; `28.85%–28.90%` mono Mature) at **\$65.88/m²** (`90.0%` yield), beating Path 0 c-Si on both **utility LCOE (`4.234 ¢/kWh`)** and **rooftop LCOE (`6.470 ¢/kWh`, `-4.9%`)**.
+  - **Path 4 (Standalone BIPV Semi-Transparent Solar Window Glazing — Immediate Pilot Beachhead):** **11.40%–11.62%** PCE at `35%` daylighting transmittance (**\$76.38/m²** DGU cost vs. **\$185.00/m²** architectural solar-control glass ASP = **58.7% gross margin**).
 
 ---
 
@@ -261,17 +271,17 @@ We simultaneously evaluate all 4 Techno-Economic Figures of Merit against a sing
 python3 -m failsmart_matengine.orchestrator
 ```
 
-### Run the Live Materials Project Discovery + 3D Phonon/NEB, Graded-ARC TMM, LCOE & Bifacial/String Engine
+### Run the Live Materials Project Discovery + 3D Phonon/NEB, Graded-ARC TMM, LCOE, Bifacial/String & Realistic Commercialization Engine
 ```bash
 python3 -m failsmart_matengine.mp_live_discovery
 ```
 
-### Run the Comprehensive Automated Scientific Test Suite (20/20 Tests Passing, expanded from 18/18)
+### Run the Comprehensive Automated Scientific Test Suite (22/22 Tests Passing, expanded from 18/18 and 20/20)
 ```bash
 pytest -v
 ```
 
-### Run the Repository Release Auditor
+### Run the Repository Release & KaTeX Safety Auditor
 ```bash
 python3 -m failsmart_matengine.repo_auditor
 ```
