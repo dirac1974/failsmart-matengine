@@ -1,0 +1,1720 @@
+{
+  "generated_from": "outputs/live_mp_discovery_summary.json",
+  "summary_sha256": "772b89be54cf94888648c08787bae2702f4f65c23638b6cbf93e739e3524a900",
+  "rules": {
+    "prior_strength_recipes": 4.0,
+    "impurity_flag_lower_bound": 0.5,
+    "critical_elements": [
+      "In",
+      "Ga",
+      "Ge",
+      "Te",
+      "Ag"
+    ],
+    "hull_on_mev": 1.0,
+    "hull_near_mev": 25.0,
+    "large_cell_sites": 24,
+    "glass_limit_c": 500.0
+  },
+  "tiers": [
+    "T0_NOT_EVALUATED",
+    "T1_HEURISTIC",
+    "T2_ANALOGY",
+    "T3_DATABASE_DFT_OR_ML_POTENTIAL",
+    "T4_COMPUTED_HERE",
+    "T5_MEASURED"
+  ],
+  "class_counts": {
+    "CALCULATE_FIRST": 2,
+    "CALCULATE_NEXT": 6,
+    "PARK": 22
+  },
+  "scorecards": [
+    {
+      "candidate_id": "mp-1195160",
+      "formula_reduced": "Al2Bi2Cu2S3Cl8",
+      "target_layer": "TOP_ACTIVE_GLASS_185EV",
+      "queue_class": "CALCULATE_FIRST",
+      "queue_reason": "synthesised phase, no critical elements, on or near the hull",
+      "nsites": 34,
+      "effective": {
+        "tier": "T1_HEURISTIC",
+        "gap_ev": 2.17,
+        "gap_sigma_ev": 0.44,
+        "window_probability": 0.1386,
+        "best_analog_efficiency_percent": null,
+        "lowest_analog_theoretical_limit_percent": 24.0,
+        "flags": [
+          "ANALOG_DEEP_ANION_VACANCY",
+          "GAP_IS_AN_ESTIMATE"
+        ]
+      },
+      "cost": {
+        "tier": "T4_COMPUTED_HERE",
+        "active_layer_cost_usd_m2": 0.0128,
+        "critical_elements": [],
+        "flags": []
+      },
+      "stable": {
+        "tier": "T3_DATABASE_DFT_OR_ML_POTENTIAL",
+        "e_above_hull_mev": 6.02,
+        "hull_band": "near",
+        "flags": []
+      },
+      "synthesizable": {
+        "tier": "T5_MEASURED",
+        "experimentally_known_phase": true,
+        "recipes_in_system": 0,
+        "estimated_impurity_rate": 0.3903,
+        "estimate_basis": "related systems only",
+        "interval_90": [
+          0.0919,
+          0.7424
+        ],
+        "likely_impurity_phases": [],
+        "evidence_grade": "none",
+        "flags": []
+      },
+      "analog_family": "PNICTOGEN_CHALCOHALIDE",
+      "analog_records": [
+        "DF05"
+      ]
+    },
+    {
+      "candidate_id": "mp-540644",
+      "formula_reduced": "Sn4SI6",
+      "target_layer": "TOP_ACTIVE_GLASS_185EV",
+      "queue_class": "CALCULATE_FIRST",
+      "queue_reason": "synthesised phase, no critical elements, on or near the hull",
+      "nsites": 22,
+      "effective": {
+        "tier": "T1_HEURISTIC",
+        "gap_ev": 1.51,
+        "gap_sigma_ev": 0.44,
+        "window_probability": 0.1341,
+        "best_analog_efficiency_percent": null,
+        "lowest_analog_theoretical_limit_percent": null,
+        "flags": [
+          "GAP_IS_AN_ESTIMATE"
+        ]
+      },
+      "cost": {
+        "tier": "T4_COMPUTED_HERE",
+        "active_layer_cost_usd_m2": 0.0779,
+        "critical_elements": [],
+        "flags": []
+      },
+      "stable": {
+        "tier": "T3_DATABASE_DFT_OR_ML_POTENTIAL",
+        "e_above_hull_mev": 0.56,
+        "hull_band": "on",
+        "flags": []
+      },
+      "synthesizable": {
+        "tier": "T5_MEASURED",
+        "experimentally_known_phase": true,
+        "recipes_in_system": 0,
+        "estimated_impurity_rate": 0.3029,
+        "estimate_basis": "related systems only",
+        "interval_90": [
+          0.0473,
+          0.6539
+        ],
+        "likely_impurity_phases": [],
+        "evidence_grade": "none",
+        "flags": []
+      },
+      "analog_family": null,
+      "analog_records": []
+    },
+    {
+      "candidate_id": "mp-1228961",
+      "formula_reduced": "AlCuSnS4",
+      "target_layer": "TOP_ACTIVE_GLASS_185EV",
+      "queue_class": "CALCULATE_NEXT",
+      "queue_reason": "never synthesised, but no critical elements, near the hull and a small cell",
+      "nsites": 14,
+      "effective": {
+        "tier": "T1_HEURISTIC",
+        "gap_ev": 1.78,
+        "gap_sigma_ev": 0.44,
+        "window_probability": 0.1776,
+        "best_analog_efficiency_percent": null,
+        "lowest_analog_theoretical_limit_percent": null,
+        "flags": [
+          "GAP_IS_AN_ESTIMATE"
+        ]
+      },
+      "cost": {
+        "tier": "T4_COMPUTED_HERE",
+        "active_layer_cost_usd_m2": 0.0184,
+        "critical_elements": [],
+        "flags": []
+      },
+      "stable": {
+        "tier": "T3_DATABASE_DFT_OR_ML_POTENTIAL",
+        "e_above_hull_mev": 0.0,
+        "hull_band": "on",
+        "flags": []
+      },
+      "synthesizable": {
+        "tier": "T0_NOT_EVALUATED",
+        "experimentally_known_phase": false,
+        "recipes_in_system": 0,
+        "estimated_impurity_rate": 0.4945,
+        "estimate_basis": "related systems only",
+        "interval_90": [
+          0.1612,
+          0.8306
+        ],
+        "likely_impurity_phases": [],
+        "evidence_grade": "none",
+        "flags": [
+          "NEVER_SYNTHESISED"
+        ]
+      },
+      "analog_family": null,
+      "analog_records": []
+    },
+    {
+      "candidate_id": "mp-1227486",
+      "formula_reduced": "BiSbS3",
+      "target_layer": "TOP_ACTIVE_GLASS_185EV",
+      "queue_class": "CALCULATE_NEXT",
+      "queue_reason": "never synthesised, but no critical elements, near the hull and a small cell",
+      "nsites": 20,
+      "effective": {
+        "tier": "T1_HEURISTIC",
+        "gap_ev": 1.96,
+        "gap_sigma_ev": 0.44,
+        "window_probability": 0.1743,
+        "best_analog_efficiency_percent": 10.7,
+        "lowest_analog_theoretical_limit_percent": 16.0,
+        "flags": [
+          "ANALOG_COMPOSITION_INHOMOGENEITY",
+          "ANALOG_DEEP_ANION_VACANCY",
+          "ANALOG_DEEP_DEFECTS_AND_INTERFACES",
+          "GAP_IS_AN_ESTIMATE"
+        ]
+      },
+      "cost": {
+        "tier": "T4_COMPUTED_HERE",
+        "active_layer_cost_usd_m2": 0.0182,
+        "critical_elements": [],
+        "flags": []
+      },
+      "stable": {
+        "tier": "T3_DATABASE_DFT_OR_ML_POTENTIAL",
+        "e_above_hull_mev": 2.3,
+        "hull_band": "near",
+        "flags": []
+      },
+      "synthesizable": {
+        "tier": "T0_NOT_EVALUATED",
+        "experimentally_known_phase": false,
+        "recipes_in_system": 0,
+        "estimated_impurity_rate": 0.2955,
+        "estimate_basis": "related systems only",
+        "interval_90": [
+          0.0441,
+          0.6457
+        ],
+        "likely_impurity_phases": [],
+        "evidence_grade": "none",
+        "flags": [
+          "NEVER_SYNTHESISED"
+        ]
+      },
+      "analog_family": "PNICTOGEN_CHALCOGENIDE",
+      "analog_records": [
+        "DF01",
+        "DF02",
+        "DF03",
+        "DF04"
+      ]
+    },
+    {
+      "candidate_id": "mp-1218912",
+      "formula_reduced": "SnSSe",
+      "target_layer": "TOP_ACTIVE_GLASS_185EV",
+      "queue_class": "CALCULATE_NEXT",
+      "queue_reason": "never synthesised, but no critical elements, near the hull and a small cell",
+      "nsites": 3,
+      "effective": {
+        "tier": "T1_HEURISTIC",
+        "gap_ev": 1.67,
+        "gap_sigma_ev": 0.44,
+        "window_probability": 0.1656,
+        "best_analog_efficiency_percent": null,
+        "lowest_analog_theoretical_limit_percent": null,
+        "flags": [
+          "GAP_IS_AN_ESTIMATE"
+        ]
+      },
+      "cost": {
+        "tier": "T4_COMPUTED_HERE",
+        "active_layer_cost_usd_m2": 0.0351,
+        "critical_elements": [],
+        "flags": []
+      },
+      "stable": {
+        "tier": "T3_DATABASE_DFT_OR_ML_POTENTIAL",
+        "e_above_hull_mev": 14.59,
+        "hull_band": "near",
+        "flags": []
+      },
+      "synthesizable": {
+        "tier": "T2_ANALOGY",
+        "experimentally_known_phase": false,
+        "recipes_in_system": 9,
+        "estimated_impurity_rate": 0.2508,
+        "estimate_basis": "own recipes shrunk toward related systems",
+        "interval_90": [
+          0.089,
+          0.4543
+        ],
+        "likely_impurity_phases": [
+          "Se",
+          "SnO",
+          "SO3"
+        ],
+        "evidence_grade": "moderate",
+        "flags": [
+          "REPORTED_ROUTES_ABOVE_GLASS_LIMIT",
+          "NEVER_SYNTHESISED"
+        ]
+      },
+      "analog_family": null,
+      "analog_records": []
+    },
+    {
+      "candidate_id": "mp-861911",
+      "formula_reduced": "Sb2OS2",
+      "target_layer": "TOP_ACTIVE_GLASS_185EV",
+      "queue_class": "CALCULATE_NEXT",
+      "queue_reason": "never synthesised, but no critical elements, near the hull and a small cell",
+      "nsites": 10,
+      "effective": {
+        "tier": "T1_HEURISTIC",
+        "gap_ev": 2.13,
+        "gap_sigma_ev": 0.44,
+        "window_probability": 0.1473,
+        "best_analog_efficiency_percent": 10.7,
+        "lowest_analog_theoretical_limit_percent": 16.0,
+        "flags": [
+          "ANALOG_COMPOSITION_INHOMOGENEITY",
+          "ANALOG_DEEP_ANION_VACANCY",
+          "ANALOG_DEEP_DEFECTS_AND_INTERFACES",
+          "GAP_IS_AN_ESTIMATE"
+        ]
+      },
+      "cost": {
+        "tier": "T4_COMPUTED_HERE",
+        "active_layer_cost_usd_m2": 0.0157,
+        "critical_elements": [],
+        "flags": []
+      },
+      "stable": {
+        "tier": "T3_DATABASE_DFT_OR_ML_POTENTIAL",
+        "e_above_hull_mev": 7.07,
+        "hull_band": "near",
+        "flags": []
+      },
+      "synthesizable": {
+        "tier": "T0_NOT_EVALUATED",
+        "experimentally_known_phase": false,
+        "recipes_in_system": 0,
+        "estimated_impurity_rate": 0.3289,
+        "estimate_basis": "related systems only",
+        "interval_90": [
+          0.0592,
+          0.6818
+        ],
+        "likely_impurity_phases": [],
+        "evidence_grade": "none",
+        "flags": [
+          "NEVER_SYNTHESISED"
+        ]
+      },
+      "analog_family": "PNICTOGEN_CHALCOGENIDE",
+      "analog_records": [
+        "DF01",
+        "DF02",
+        "DF03",
+        "DF04"
+      ]
+    },
+    {
+      "candidate_id": "mp-1225738",
+      "formula_reduced": "Bi5CuS8",
+      "target_layer": "BOTTOM_IR_075EV",
+      "queue_class": "CALCULATE_NEXT",
+      "queue_reason": "never synthesised, but no critical elements, near the hull and a small cell",
+      "nsites": 14,
+      "effective": {
+        "tier": "T1_HEURISTIC",
+        "gap_ev": 0.66,
+        "gap_sigma_ev": 0.44,
+        "window_probability": 0.1308,
+        "best_analog_efficiency_percent": 3.0,
+        "lowest_analog_theoretical_limit_percent": null,
+        "flags": [
+          "ANALOG_DEEP_DEFECTS_AND_INTERFACES",
+          "ANALOG_THERMAL_DECOMPOSITION",
+          "ANALOG_UNRESOLVED_LOW_CURRENT",
+          "GAP_IS_AN_ESTIMATE"
+        ]
+      },
+      "cost": {
+        "tier": "T4_COMPUTED_HERE",
+        "active_layer_cost_usd_m2": 0.0258,
+        "critical_elements": [],
+        "flags": []
+      },
+      "stable": {
+        "tier": "T3_DATABASE_DFT_OR_ML_POTENTIAL",
+        "e_above_hull_mev": 6.68,
+        "hull_band": "near",
+        "flags": [
+          "ANALOG_THERMAL_DECOMPOSITION"
+        ]
+      },
+      "synthesizable": {
+        "tier": "T2_ANALOGY",
+        "experimentally_known_phase": false,
+        "recipes_in_system": 3,
+        "estimated_impurity_rate": 0.4921,
+        "estimate_basis": "own recipes shrunk toward related systems",
+        "interval_90": [
+          0.2186,
+          0.7679
+        ],
+        "likely_impurity_phases": [
+          "Bi2S3",
+          "Cu2S",
+          "Cu4Bi7S12",
+          "Cu6Bi4S9"
+        ],
+        "evidence_grade": "weak",
+        "flags": [
+          "NEVER_SYNTHESISED"
+        ]
+      },
+      "analog_family": "COINAGE_PNICTOGEN_CHALCOGENIDE",
+      "analog_records": [
+        "DF06",
+        "DF07",
+        "DF08",
+        "DF09"
+      ]
+    },
+    {
+      "candidate_id": "mp-1218960",
+      "formula_reduced": "Sn2SSe",
+      "target_layer": "TOP_ACTIVE_GLASS_185EV",
+      "queue_class": "CALCULATE_NEXT",
+      "queue_reason": "never synthesised, but no critical elements, near the hull and a small cell",
+      "nsites": 8,
+      "effective": {
+        "tier": "T1_HEURISTIC",
+        "gap_ev": 1.36,
+        "gap_sigma_ev": 0.44,
+        "window_probability": 0.0977,
+        "best_analog_efficiency_percent": null,
+        "lowest_analog_theoretical_limit_percent": null,
+        "flags": [
+          "GAP_IS_AN_ESTIMATE"
+        ]
+      },
+      "cost": {
+        "tier": "T4_COMPUTED_HERE",
+        "active_layer_cost_usd_m2": 0.038,
+        "critical_elements": [],
+        "flags": []
+      },
+      "stable": {
+        "tier": "T3_DATABASE_DFT_OR_ML_POTENTIAL",
+        "e_above_hull_mev": 4.86,
+        "hull_band": "near",
+        "flags": []
+      },
+      "synthesizable": {
+        "tier": "T2_ANALOGY",
+        "experimentally_known_phase": false,
+        "recipes_in_system": 9,
+        "estimated_impurity_rate": 0.2508,
+        "estimate_basis": "own recipes shrunk toward related systems",
+        "interval_90": [
+          0.089,
+          0.4543
+        ],
+        "likely_impurity_phases": [
+          "Se",
+          "SnO",
+          "SO3"
+        ],
+        "evidence_grade": "moderate",
+        "flags": [
+          "REPORTED_ROUTES_ABOVE_GLASS_LIMIT",
+          "NEVER_SYNTHESISED"
+        ]
+      },
+      "analog_family": null,
+      "analog_records": []
+    },
+    {
+      "candidate_id": "mp-1228963",
+      "formula_reduced": "AgAlSnSe4",
+      "target_layer": "TOP_ACTIVE_GLASS_185EV",
+      "queue_class": "PARK",
+      "queue_reason": "critical elements Ag",
+      "nsites": 7,
+      "effective": {
+        "tier": "T1_HEURISTIC",
+        "gap_ev": 1.84,
+        "gap_sigma_ev": 0.44,
+        "window_probability": 0.1797,
+        "best_analog_efficiency_percent": null,
+        "lowest_analog_theoretical_limit_percent": null,
+        "flags": [
+          "GAP_IS_AN_ESTIMATE"
+        ]
+      },
+      "cost": {
+        "tier": "T4_COMPUTED_HERE",
+        "active_layer_cost_usd_m2": 0.3093,
+        "critical_elements": [
+          "Ag"
+        ],
+        "flags": [
+          "CRITICAL_ELEMENTS"
+        ]
+      },
+      "stable": {
+        "tier": "T3_DATABASE_DFT_OR_ML_POTENTIAL",
+        "e_above_hull_mev": 0.0,
+        "hull_band": "on",
+        "flags": []
+      },
+      "synthesizable": {
+        "tier": "T0_NOT_EVALUATED",
+        "experimentally_known_phase": false,
+        "recipes_in_system": 0,
+        "estimated_impurity_rate": 0.1889,
+        "estimate_basis": "related systems only",
+        "interval_90": [
+          0.0103,
+          0.5115
+        ],
+        "likely_impurity_phases": [],
+        "evidence_grade": "none",
+        "flags": [
+          "NEVER_SYNTHESISED"
+        ]
+      },
+      "analog_family": null,
+      "analog_records": []
+    },
+    {
+      "candidate_id": "mp-1212011",
+      "formula_reduced": "InSbSe3",
+      "target_layer": "TOP_ACTIVE_GLASS_185EV",
+      "queue_class": "PARK",
+      "queue_reason": "critical elements In",
+      "nsites": 20,
+      "effective": {
+        "tier": "T1_HEURISTIC",
+        "gap_ev": 1.78,
+        "gap_sigma_ev": 0.44,
+        "window_probability": 0.1776,
+        "best_analog_efficiency_percent": 10.7,
+        "lowest_analog_theoretical_limit_percent": 16.0,
+        "flags": [
+          "ANALOG_COMPOSITION_INHOMOGENEITY",
+          "ANALOG_DEEP_ANION_VACANCY",
+          "ANALOG_DEEP_DEFECTS_AND_INTERFACES",
+          "GAP_IS_AN_ESTIMATE"
+        ]
+      },
+      "cost": {
+        "tier": "T4_COMPUTED_HERE",
+        "active_layer_cost_usd_m2": 0.2502,
+        "critical_elements": [
+          "In"
+        ],
+        "flags": [
+          "CRITICAL_ELEMENTS"
+        ]
+      },
+      "stable": {
+        "tier": "T3_DATABASE_DFT_OR_ML_POTENTIAL",
+        "e_above_hull_mev": 7.18,
+        "hull_band": "near",
+        "flags": []
+      },
+      "synthesizable": {
+        "tier": "T2_ANALOGY",
+        "experimentally_known_phase": false,
+        "recipes_in_system": 1,
+        "estimated_impurity_rate": 0.308,
+        "estimate_basis": "own recipes shrunk toward related systems",
+        "interval_90": [
+          0.063,
+          0.6301
+        ],
+        "likely_impurity_phases": [],
+        "evidence_grade": "weak",
+        "flags": [
+          "REPORTED_ROUTES_ABOVE_GLASS_LIMIT",
+          "NEVER_SYNTHESISED"
+        ]
+      },
+      "analog_family": "PNICTOGEN_CHALCOGENIDE",
+      "analog_records": [
+        "DF01",
+        "DF02",
+        "DF03",
+        "DF04"
+      ]
+    },
+    {
+      "candidate_id": "mp-715212",
+      "formula_reduced": "Bi3In5S12",
+      "target_layer": "TOP_ACTIVE_GLASS_185EV",
+      "queue_class": "PARK",
+      "queue_reason": "critical elements In; large cell and never synthesised",
+      "nsites": 40,
+      "effective": {
+        "tier": "T1_HEURISTIC",
+        "gap_ev": 2.02,
+        "gap_sigma_ev": 0.44,
+        "window_probability": 0.1671,
+        "best_analog_efficiency_percent": 10.7,
+        "lowest_analog_theoretical_limit_percent": 16.0,
+        "flags": [
+          "ANALOG_COMPOSITION_INHOMOGENEITY",
+          "ANALOG_DEEP_ANION_VACANCY",
+          "ANALOG_DEEP_DEFECTS_AND_INTERFACES",
+          "GAP_IS_AN_ESTIMATE"
+        ]
+      },
+      "cost": {
+        "tier": "T4_COMPUTED_HERE",
+        "active_layer_cost_usd_m2": 0.3484,
+        "critical_elements": [
+          "In"
+        ],
+        "flags": [
+          "CRITICAL_ELEMENTS"
+        ]
+      },
+      "stable": {
+        "tier": "T3_DATABASE_DFT_OR_ML_POTENTIAL",
+        "e_above_hull_mev": 18.25,
+        "hull_band": "near",
+        "flags": []
+      },
+      "synthesizable": {
+        "tier": "T2_ANALOGY",
+        "experimentally_known_phase": false,
+        "recipes_in_system": 1,
+        "estimated_impurity_rate": 0.3349,
+        "estimate_basis": "own recipes shrunk toward related systems",
+        "interval_90": [
+          0.0773,
+          0.6591
+        ],
+        "likely_impurity_phases": [],
+        "evidence_grade": "weak",
+        "flags": [
+          "REPORTED_ROUTES_ABOVE_GLASS_LIMIT",
+          "NEVER_SYNTHESISED"
+        ]
+      },
+      "analog_family": "PNICTOGEN_CHALCOGENIDE",
+      "analog_records": [
+        "DF01",
+        "DF02",
+        "DF03",
+        "DF04"
+      ]
+    },
+    {
+      "candidate_id": "mp-1224848",
+      "formula_reduced": "AgGaSnSe4",
+      "target_layer": "TOP_ACTIVE_GLASS_185EV",
+      "queue_class": "PARK",
+      "queue_reason": "critical elements Ag, Ga",
+      "nsites": 7,
+      "effective": {
+        "tier": "T1_HEURISTIC",
+        "gap_ev": 1.62,
+        "gap_sigma_ev": 0.44,
+        "window_probability": 0.1572,
+        "best_analog_efficiency_percent": null,
+        "lowest_analog_theoretical_limit_percent": null,
+        "flags": [
+          "GAP_IS_AN_ESTIMATE"
+        ]
+      },
+      "cost": {
+        "tier": "T4_COMPUTED_HERE",
+        "active_layer_cost_usd_m2": 0.3477,
+        "critical_elements": [
+          "Ag",
+          "Ga"
+        ],
+        "flags": [
+          "CRITICAL_ELEMENTS"
+        ]
+      },
+      "stable": {
+        "tier": "T3_DATABASE_DFT_OR_ML_POTENTIAL",
+        "e_above_hull_mev": 0.0,
+        "hull_band": "on",
+        "flags": []
+      },
+      "synthesizable": {
+        "tier": "T0_NOT_EVALUATED",
+        "experimentally_known_phase": false,
+        "recipes_in_system": 0,
+        "estimated_impurity_rate": 0.1828,
+        "estimate_basis": "related systems only",
+        "interval_90": [
+          0.0091,
+          0.5026
+        ],
+        "likely_impurity_phases": [],
+        "evidence_grade": "none",
+        "flags": [
+          "NEVER_SYNTHESISED"
+        ]
+      },
+      "analog_family": null,
+      "analog_records": []
+    },
+    {
+      "candidate_id": "mp-1224876",
+      "formula_reduced": "AgGaSnSe4",
+      "target_layer": "TOP_ACTIVE_GLASS_185EV",
+      "queue_class": "PARK",
+      "queue_reason": "critical elements Ag, Ga",
+      "nsites": 7,
+      "effective": {
+        "tier": "T1_HEURISTIC",
+        "gap_ev": 1.61,
+        "gap_sigma_ev": 0.44,
+        "window_probability": 0.1553,
+        "best_analog_efficiency_percent": null,
+        "lowest_analog_theoretical_limit_percent": null,
+        "flags": [
+          "GAP_IS_AN_ESTIMATE"
+        ]
+      },
+      "cost": {
+        "tier": "T4_COMPUTED_HERE",
+        "active_layer_cost_usd_m2": 0.3477,
+        "critical_elements": [
+          "Ag",
+          "Ga"
+        ],
+        "flags": [
+          "CRITICAL_ELEMENTS"
+        ]
+      },
+      "stable": {
+        "tier": "T3_DATABASE_DFT_OR_ML_POTENTIAL",
+        "e_above_hull_mev": 1.91,
+        "hull_band": "near",
+        "flags": []
+      },
+      "synthesizable": {
+        "tier": "T0_NOT_EVALUATED",
+        "experimentally_known_phase": false,
+        "recipes_in_system": 0,
+        "estimated_impurity_rate": 0.1828,
+        "estimate_basis": "related systems only",
+        "interval_90": [
+          0.0091,
+          0.5026
+        ],
+        "likely_impurity_phases": [],
+        "evidence_grade": "none",
+        "flags": [
+          "NEVER_SYNTHESISED"
+        ]
+      },
+      "analog_family": null,
+      "analog_records": []
+    },
+    {
+      "candidate_id": "mp-1206068",
+      "formula_reduced": "Bi2InS4Br",
+      "target_layer": "TOP_ACTIVE_GLASS_185EV",
+      "queue_class": "PARK",
+      "queue_reason": "critical elements In",
+      "nsites": 8,
+      "effective": {
+        "tier": "T1_HEURISTIC",
+        "gap_ev": 2.12,
+        "gap_sigma_ev": 0.44,
+        "window_probability": 0.1494,
+        "best_analog_efficiency_percent": null,
+        "lowest_analog_theoretical_limit_percent": 24.0,
+        "flags": [
+          "ANALOG_DEEP_ANION_VACANCY",
+          "GAP_IS_AN_ESTIMATE"
+        ]
+      },
+      "cost": {
+        "tier": "T4_COMPUTED_HERE",
+        "active_layer_cost_usd_m2": 0.1597,
+        "critical_elements": [
+          "In"
+        ],
+        "flags": [
+          "CRITICAL_ELEMENTS"
+        ]
+      },
+      "stable": {
+        "tier": "T3_DATABASE_DFT_OR_ML_POTENTIAL",
+        "e_above_hull_mev": 2.74,
+        "hull_band": "near",
+        "flags": []
+      },
+      "synthesizable": {
+        "tier": "T0_NOT_EVALUATED",
+        "experimentally_known_phase": false,
+        "recipes_in_system": 0,
+        "estimated_impurity_rate": 0.1,
+        "estimate_basis": "related systems only",
+        "interval_90": [
+          0.0005,
+          0.3625
+        ],
+        "likely_impurity_phases": [],
+        "evidence_grade": "none",
+        "flags": [
+          "NEVER_SYNTHESISED"
+        ]
+      },
+      "analog_family": "PNICTOGEN_CHALCOHALIDE",
+      "analog_records": [
+        "DF05"
+      ]
+    },
+    {
+      "candidate_id": "mp-1078776",
+      "formula_reduced": "BiInS3",
+      "target_layer": "TOP_ACTIVE_GLASS_185EV",
+      "queue_class": "PARK",
+      "queue_reason": "critical elements In",
+      "nsites": 10,
+      "effective": {
+        "tier": "T1_HEURISTIC",
+        "gap_ev": 2.12,
+        "gap_sigma_ev": 0.44,
+        "window_probability": 0.1494,
+        "best_analog_efficiency_percent": 10.7,
+        "lowest_analog_theoretical_limit_percent": 16.0,
+        "flags": [
+          "ANALOG_COMPOSITION_INHOMOGENEITY",
+          "ANALOG_DEEP_ANION_VACANCY",
+          "ANALOG_DEEP_DEFECTS_AND_INTERFACES",
+          "GAP_IS_AN_ESTIMATE"
+        ]
+      },
+      "cost": {
+        "tier": "T4_COMPUTED_HERE",
+        "active_layer_cost_usd_m2": 0.2681,
+        "critical_elements": [
+          "In"
+        ],
+        "flags": [
+          "CRITICAL_ELEMENTS"
+        ]
+      },
+      "stable": {
+        "tier": "T3_DATABASE_DFT_OR_ML_POTENTIAL",
+        "e_above_hull_mev": 15.08,
+        "hull_band": "near",
+        "flags": []
+      },
+      "synthesizable": {
+        "tier": "T2_ANALOGY",
+        "experimentally_known_phase": false,
+        "recipes_in_system": 1,
+        "estimated_impurity_rate": 0.3349,
+        "estimate_basis": "own recipes shrunk toward related systems",
+        "interval_90": [
+          0.0773,
+          0.6591
+        ],
+        "likely_impurity_phases": [],
+        "evidence_grade": "weak",
+        "flags": [
+          "REPORTED_ROUTES_ABOVE_GLASS_LIMIT",
+          "NEVER_SYNTHESISED"
+        ]
+      },
+      "analog_family": "PNICTOGEN_CHALCOGENIDE",
+      "analog_records": [
+        "DF01",
+        "DF02",
+        "DF03",
+        "DF04"
+      ]
+    },
+    {
+      "candidate_id": "mp-1226127",
+      "formula_reduced": "Bi2Cu3S4Cl",
+      "target_layer": "TOP_ACTIVE_GLASS_185EV",
+      "queue_class": "PARK",
+      "queue_reason": "large cell and never synthesised",
+      "nsites": 40,
+      "effective": {
+        "tier": "T1_HEURISTIC",
+        "gap_ev": 1.54,
+        "gap_sigma_ev": 0.44,
+        "window_probability": 0.1409,
+        "best_analog_efficiency_percent": null,
+        "lowest_analog_theoretical_limit_percent": 24.0,
+        "flags": [
+          "ANALOG_DEEP_ANION_VACANCY",
+          "GAP_IS_AN_ESTIMATE"
+        ]
+      },
+      "cost": {
+        "tier": "T4_COMPUTED_HERE",
+        "active_layer_cost_usd_m2": 0.017,
+        "critical_elements": [],
+        "flags": []
+      },
+      "stable": {
+        "tier": "T3_DATABASE_DFT_OR_ML_POTENTIAL",
+        "e_above_hull_mev": 4.63,
+        "hull_band": "near",
+        "flags": []
+      },
+      "synthesizable": {
+        "tier": "T0_NOT_EVALUATED",
+        "experimentally_known_phase": false,
+        "recipes_in_system": 0,
+        "estimated_impurity_rate": 0.46,
+        "estimate_basis": "related systems only",
+        "interval_90": [
+          0.1364,
+          0.8033
+        ],
+        "likely_impurity_phases": [],
+        "evidence_grade": "none",
+        "flags": [
+          "NEVER_SYNTHESISED"
+        ]
+      },
+      "analog_family": "PNICTOGEN_CHALCOHALIDE",
+      "analog_records": [
+        "DF05"
+      ]
+    },
+    {
+      "candidate_id": "mp-1223998",
+      "formula_reduced": "Bi3InSe6",
+      "target_layer": "BOTTOM_IR_075EV",
+      "queue_class": "PARK",
+      "queue_reason": "critical elements In",
+      "nsites": 10,
+      "effective": {
+        "tier": "T1_HEURISTIC",
+        "gap_ev": 0.69,
+        "gap_sigma_ev": 0.44,
+        "window_probability": 0.1329,
+        "best_analog_efficiency_percent": 10.7,
+        "lowest_analog_theoretical_limit_percent": 16.0,
+        "flags": [
+          "ANALOG_COMPOSITION_INHOMOGENEITY",
+          "ANALOG_DEEP_ANION_VACANCY",
+          "ANALOG_DEEP_DEFECTS_AND_INTERFACES",
+          "GAP_IS_AN_ESTIMATE"
+        ]
+      },
+      "cost": {
+        "tier": "T4_COMPUTED_HERE",
+        "active_layer_cost_usd_m2": 0.1507,
+        "critical_elements": [
+          "In"
+        ],
+        "flags": [
+          "CRITICAL_ELEMENTS"
+        ]
+      },
+      "stable": {
+        "tier": "T3_DATABASE_DFT_OR_ML_POTENTIAL",
+        "e_above_hull_mev": 17.99,
+        "hull_band": "near",
+        "flags": []
+      },
+      "synthesizable": {
+        "tier": "T2_ANALOGY",
+        "experimentally_known_phase": false,
+        "recipes_in_system": 2,
+        "estimated_impurity_rate": 0.3334,
+        "estimate_basis": "own recipes shrunk toward related systems",
+        "interval_90": [
+          0.0896,
+          0.6344
+        ],
+        "likely_impurity_phases": [
+          "Bi",
+          "BiSe",
+          "Bi2Se3",
+          "In2Se3"
+        ],
+        "evidence_grade": "weak",
+        "flags": [
+          "REPORTED_ROUTES_ABOVE_GLASS_LIMIT",
+          "NEVER_SYNTHESISED"
+        ]
+      },
+      "analog_family": "PNICTOGEN_CHALCOGENIDE",
+      "analog_records": [
+        "DF01",
+        "DF02",
+        "DF03",
+        "DF04"
+      ]
+    },
+    {
+      "candidate_id": "mp-559521",
+      "formula_reduced": "Bi2InS4Cl",
+      "target_layer": "TOP_ACTIVE_GLASS_185EV",
+      "queue_class": "PARK",
+      "queue_reason": "critical elements In",
+      "nsites": 8,
+      "effective": {
+        "tier": "T1_HEURISTIC",
+        "gap_ev": 2.2,
+        "gap_sigma_ev": 0.44,
+        "window_probability": 0.1317,
+        "best_analog_efficiency_percent": null,
+        "lowest_analog_theoretical_limit_percent": 24.0,
+        "flags": [
+          "ANALOG_DEEP_ANION_VACANCY",
+          "GAP_IS_AN_ESTIMATE"
+        ]
+      },
+      "cost": {
+        "tier": "T4_COMPUTED_HERE",
+        "active_layer_cost_usd_m2": 0.1692,
+        "critical_elements": [
+          "In"
+        ],
+        "flags": [
+          "CRITICAL_ELEMENTS"
+        ]
+      },
+      "stable": {
+        "tier": "T3_DATABASE_DFT_OR_ML_POTENTIAL",
+        "e_above_hull_mev": 0.0,
+        "hull_band": "on",
+        "flags": []
+      },
+      "synthesizable": {
+        "tier": "T5_MEASURED",
+        "experimentally_known_phase": true,
+        "recipes_in_system": 0,
+        "estimated_impurity_rate": 0.3667,
+        "estimate_basis": "related systems only",
+        "interval_90": [
+          0.0786,
+          0.7199
+        ],
+        "likely_impurity_phases": [],
+        "evidence_grade": "none",
+        "flags": []
+      },
+      "analog_family": "PNICTOGEN_CHALCOHALIDE",
+      "analog_records": [
+        "DF05"
+      ]
+    },
+    {
+      "candidate_id": "mp-1225964",
+      "formula_reduced": "Bi2Cu3S4Br",
+      "target_layer": "TOP_ACTIVE_GLASS_185EV",
+      "queue_class": "PARK",
+      "queue_reason": "large cell and never synthesised",
+      "nsites": 40,
+      "effective": {
+        "tier": "T1_HEURISTIC",
+        "gap_ev": 1.48,
+        "gap_sigma_ev": 0.44,
+        "window_probability": 0.127,
+        "best_analog_efficiency_percent": null,
+        "lowest_analog_theoretical_limit_percent": 24.0,
+        "flags": [
+          "ANALOG_DEEP_ANION_VACANCY",
+          "GAP_IS_AN_ESTIMATE"
+        ]
+      },
+      "cost": {
+        "tier": "T4_COMPUTED_HERE",
+        "active_layer_cost_usd_m2": 0.0167,
+        "critical_elements": [],
+        "flags": []
+      },
+      "stable": {
+        "tier": "T3_DATABASE_DFT_OR_ML_POTENTIAL",
+        "e_above_hull_mev": 8.11,
+        "hull_band": "near",
+        "flags": []
+      },
+      "synthesizable": {
+        "tier": "T0_NOT_EVALUATED",
+        "experimentally_known_phase": false,
+        "recipes_in_system": 0,
+        "estimated_impurity_rate": 0.4294,
+        "estimate_basis": "related systems only",
+        "interval_90": [
+          0.1159,
+          0.7776
+        ],
+        "likely_impurity_phases": [],
+        "evidence_grade": "none",
+        "flags": [
+          "NEVER_SYNTHESISED"
+        ]
+      },
+      "analog_family": "PNICTOGEN_CHALCOHALIDE",
+      "analog_records": [
+        "DF05"
+      ]
+    },
+    {
+      "candidate_id": "mp-23474",
+      "formula_reduced": "AgBi3S5",
+      "target_layer": "BOTTOM_IR_075EV",
+      "queue_class": "PARK",
+      "queue_reason": "critical elements Ag",
+      "nsites": 18,
+      "effective": {
+        "tier": "T1_HEURISTIC",
+        "gap_ev": 0.97,
+        "gap_sigma_ev": 0.44,
+        "window_probability": 0.1228,
+        "best_analog_efficiency_percent": 3.0,
+        "lowest_analog_theoretical_limit_percent": null,
+        "flags": [
+          "ANALOG_DEEP_DEFECTS_AND_INTERFACES",
+          "ANALOG_THERMAL_DECOMPOSITION",
+          "ANALOG_UNRESOLVED_LOW_CURRENT",
+          "GAP_IS_AN_ESTIMATE"
+        ]
+      },
+      "cost": {
+        "tier": "T4_COMPUTED_HERE",
+        "active_layer_cost_usd_m2": 0.2558,
+        "critical_elements": [
+          "Ag"
+        ],
+        "flags": [
+          "CRITICAL_ELEMENTS"
+        ]
+      },
+      "stable": {
+        "tier": "T3_DATABASE_DFT_OR_ML_POTENTIAL",
+        "e_above_hull_mev": 0.0,
+        "hull_band": "on",
+        "flags": [
+          "ANALOG_THERMAL_DECOMPOSITION"
+        ]
+      },
+      "synthesizable": {
+        "tier": "T5_MEASURED",
+        "experimentally_known_phase": true,
+        "recipes_in_system": 7,
+        "estimated_impurity_rate": 0.3465,
+        "estimate_basis": "own recipes shrunk toward related systems",
+        "interval_90": [
+          0.1447,
+          0.5784
+        ],
+        "likely_impurity_phases": [
+          "Bi2S3"
+        ],
+        "evidence_grade": "moderate",
+        "flags": [
+          "REPORTED_ROUTES_ABOVE_GLASS_LIMIT"
+        ]
+      },
+      "analog_family": "COINAGE_PNICTOGEN_CHALCOGENIDE",
+      "analog_records": [
+        "DF06",
+        "DF07",
+        "DF08",
+        "DF09"
+      ]
+    },
+    {
+      "candidate_id": "mp-1223888",
+      "formula_reduced": "AgInSnSe4",
+      "target_layer": "TOP_ACTIVE_GLASS_185EV",
+      "queue_class": "PARK",
+      "queue_reason": "critical elements Ag, In",
+      "nsites": 7,
+      "effective": {
+        "tier": "T1_HEURISTIC",
+        "gap_ev": 1.46,
+        "gap_sigma_ev": 0.44,
+        "window_probability": 0.1222,
+        "best_analog_efficiency_percent": null,
+        "lowest_analog_theoretical_limit_percent": null,
+        "flags": [
+          "GAP_IS_AN_ESTIMATE"
+        ]
+      },
+      "cost": {
+        "tier": "T4_COMPUTED_HERE",
+        "active_layer_cost_usd_m2": 0.4312,
+        "critical_elements": [
+          "Ag",
+          "In"
+        ],
+        "flags": [
+          "CRITICAL_ELEMENTS"
+        ]
+      },
+      "stable": {
+        "tier": "T3_DATABASE_DFT_OR_ML_POTENTIAL",
+        "e_above_hull_mev": 0.75,
+        "hull_band": "on",
+        "flags": []
+      },
+      "synthesizable": {
+        "tier": "T0_NOT_EVALUATED",
+        "experimentally_known_phase": false,
+        "recipes_in_system": 0,
+        "estimated_impurity_rate": 0.2185,
+        "estimate_basis": "related systems only",
+        "interval_90": [
+          0.0174,
+          0.5522
+        ],
+        "likely_impurity_phases": [],
+        "evidence_grade": "none",
+        "flags": [
+          "NEVER_SYNTHESISED"
+        ]
+      },
+      "analog_family": null,
+      "analog_records": []
+    },
+    {
+      "candidate_id": "mp-1218835",
+      "formula_reduced": "GeSnSe2",
+      "target_layer": "TOP_ACTIVE_GLASS_185EV",
+      "queue_class": "PARK",
+      "queue_reason": "critical elements Ge",
+      "nsites": 8,
+      "effective": {
+        "tier": "T1_HEURISTIC",
+        "gap_ev": 1.46,
+        "gap_sigma_ev": 0.44,
+        "window_probability": 0.1222,
+        "best_analog_efficiency_percent": null,
+        "lowest_analog_theoretical_limit_percent": null,
+        "flags": [
+          "GAP_IS_AN_ESTIMATE"
+        ]
+      },
+      "cost": {
+        "tier": "T4_COMPUTED_HERE",
+        "active_layer_cost_usd_m2": 0.4075,
+        "critical_elements": [
+          "Ge"
+        ],
+        "flags": [
+          "CRITICAL_ELEMENTS"
+        ]
+      },
+      "stable": {
+        "tier": "T3_DATABASE_DFT_OR_ML_POTENTIAL",
+        "e_above_hull_mev": 9.11,
+        "hull_band": "near",
+        "flags": []
+      },
+      "synthesizable": {
+        "tier": "T0_NOT_EVALUATED",
+        "experimentally_known_phase": false,
+        "recipes_in_system": 0,
+        "estimated_impurity_rate": 0.3374,
+        "estimate_basis": "related systems only",
+        "interval_90": [
+          0.0633,
+          0.6906
+        ],
+        "likely_impurity_phases": [],
+        "evidence_grade": "none",
+        "flags": [
+          "NEVER_SYNTHESISED"
+        ]
+      },
+      "analog_family": null,
+      "analog_records": []
+    },
+    {
+      "candidate_id": "mp-1224227",
+      "formula_reduced": "AgCuIn2Sn2S8",
+      "target_layer": "TOP_ACTIVE_GLASS_185EV",
+      "queue_class": "PARK",
+      "queue_reason": "critical elements Ag, In",
+      "nsites": 14,
+      "effective": {
+        "tier": "T1_HEURISTIC",
+        "gap_ev": 1.45,
+        "gap_sigma_ev": 0.44,
+        "window_probability": 0.1198,
+        "best_analog_efficiency_percent": null,
+        "lowest_analog_theoretical_limit_percent": null,
+        "flags": [
+          "GAP_IS_AN_ESTIMATE"
+        ]
+      },
+      "cost": {
+        "tier": "T4_COMPUTED_HERE",
+        "active_layer_cost_usd_m2": 0.4307,
+        "critical_elements": [
+          "Ag",
+          "In"
+        ],
+        "flags": [
+          "CRITICAL_ELEMENTS"
+        ]
+      },
+      "stable": {
+        "tier": "T3_DATABASE_DFT_OR_ML_POTENTIAL",
+        "e_above_hull_mev": 9.46,
+        "hull_band": "near",
+        "flags": []
+      },
+      "synthesizable": {
+        "tier": "T0_NOT_EVALUATED",
+        "experimentally_known_phase": false,
+        "recipes_in_system": 0,
+        "estimated_impurity_rate": 0.3903,
+        "estimate_basis": "related systems only",
+        "interval_90": [
+          0.0919,
+          0.7424
+        ],
+        "likely_impurity_phases": [],
+        "evidence_grade": "none",
+        "flags": [
+          "NEVER_SYNTHESISED"
+        ]
+      },
+      "analog_family": null,
+      "analog_records": []
+    },
+    {
+      "candidate_id": "mp-1224102",
+      "formula_reduced": "CuInSnS4",
+      "target_layer": "TOP_ACTIVE_GLASS_185EV",
+      "queue_class": "PARK",
+      "queue_reason": "critical elements In",
+      "nsites": 14,
+      "effective": {
+        "tier": "T1_HEURISTIC",
+        "gap_ev": 1.44,
+        "gap_sigma_ev": 0.44,
+        "window_probability": 0.1173,
+        "best_analog_efficiency_percent": null,
+        "lowest_analog_theoretical_limit_percent": null,
+        "flags": [
+          "GAP_IS_AN_ESTIMATE"
+        ]
+      },
+      "cost": {
+        "tier": "T4_COMPUTED_HERE",
+        "active_layer_cost_usd_m2": 0.2668,
+        "critical_elements": [
+          "In"
+        ],
+        "flags": [
+          "CRITICAL_ELEMENTS"
+        ]
+      },
+      "stable": {
+        "tier": "T3_DATABASE_DFT_OR_ML_POTENTIAL",
+        "e_above_hull_mev": 1.63,
+        "hull_band": "near",
+        "flags": []
+      },
+      "synthesizable": {
+        "tier": "T2_ANALOGY",
+        "experimentally_known_phase": false,
+        "recipes_in_system": 2,
+        "estimated_impurity_rate": 0.6286,
+        "estimate_basis": "own recipes shrunk toward related systems",
+        "interval_90": [
+          0.3263,
+          0.8865
+        ],
+        "likely_impurity_phases": [],
+        "evidence_grade": "weak",
+        "flags": [
+          "NEVER_SYNTHESISED"
+        ]
+      },
+      "analog_family": null,
+      "analog_records": []
+    },
+    {
+      "candidate_id": "mp-27916",
+      "formula_reduced": "AgBiSe2",
+      "target_layer": "BOTTOM_IR_075EV",
+      "queue_class": "PARK",
+      "queue_reason": "critical elements Ag",
+      "nsites": 12,
+      "effective": {
+        "tier": "T1_HEURISTIC",
+        "gap_ev": 0.51,
+        "gap_sigma_ev": 0.44,
+        "window_probability": 0.1131,
+        "best_analog_efficiency_percent": 3.0,
+        "lowest_analog_theoretical_limit_percent": null,
+        "flags": [
+          "ANALOG_DEEP_DEFECTS_AND_INTERFACES",
+          "ANALOG_THERMAL_DECOMPOSITION",
+          "ANALOG_UNRESOLVED_LOW_CURRENT",
+          "GAP_IS_AN_ESTIMATE"
+        ]
+      },
+      "cost": {
+        "tier": "T4_COMPUTED_HERE",
+        "active_layer_cost_usd_m2": 0.4692,
+        "critical_elements": [
+          "Ag"
+        ],
+        "flags": [
+          "CRITICAL_ELEMENTS"
+        ]
+      },
+      "stable": {
+        "tier": "T3_DATABASE_DFT_OR_ML_POTENTIAL",
+        "e_above_hull_mev": 4.84,
+        "hull_band": "near",
+        "flags": [
+          "ANALOG_THERMAL_DECOMPOSITION"
+        ]
+      },
+      "synthesizable": {
+        "tier": "T5_MEASURED",
+        "experimentally_known_phase": true,
+        "recipes_in_system": 4,
+        "estimated_impurity_rate": 0.4752,
+        "estimate_basis": "own recipes shrunk toward related systems",
+        "interval_90": [
+          0.2182,
+          0.7389
+        ],
+        "likely_impurity_phases": [
+          "Bi2Se3",
+          "Bi4Se3",
+          "AgBiSe2"
+        ],
+        "evidence_grade": "weak",
+        "flags": [
+          "REPORTED_ROUTES_ABOVE_GLASS_LIMIT"
+        ]
+      },
+      "analog_family": "COINAGE_PNICTOGEN_CHALCOGENIDE",
+      "analog_records": [
+        "DF06",
+        "DF07",
+        "DF08",
+        "DF09"
+      ]
+    },
+    {
+      "candidate_id": "mp-1224129",
+      "formula_reduced": "CuInSnSe4",
+      "target_layer": "BOTTOM_IR_075EV",
+      "queue_class": "PARK",
+      "queue_reason": "critical elements In",
+      "nsites": 7,
+      "effective": {
+        "tier": "T1_HEURISTIC",
+        "gap_ev": 1.09,
+        "gap_sigma_ev": 0.44,
+        "window_probability": 0.105,
+        "best_analog_efficiency_percent": null,
+        "lowest_analog_theoretical_limit_percent": null,
+        "flags": [
+          "GAP_IS_AN_ESTIMATE"
+        ]
+      },
+      "cost": {
+        "tier": "T4_COMPUTED_HERE",
+        "active_layer_cost_usd_m2": 0.2664,
+        "critical_elements": [
+          "In"
+        ],
+        "flags": [
+          "CRITICAL_ELEMENTS"
+        ]
+      },
+      "stable": {
+        "tier": "T3_DATABASE_DFT_OR_ML_POTENTIAL",
+        "e_above_hull_mev": 5.17,
+        "hull_band": "near",
+        "flags": []
+      },
+      "synthesizable": {
+        "tier": "T2_ANALOGY",
+        "experimentally_known_phase": false,
+        "recipes_in_system": 1,
+        "estimated_impurity_rate": 0.3852,
+        "estimate_basis": "own recipes shrunk toward related systems",
+        "interval_90": [
+          0.1072,
+          0.7098
+        ],
+        "likely_impurity_phases": [],
+        "evidence_grade": "weak",
+        "flags": [
+          "NEVER_SYNTHESISED"
+        ]
+      },
+      "analog_family": null,
+      "analog_records": []
+    },
+    {
+      "candidate_id": "mp-559071",
+      "formula_reduced": "Ag2Bi2S3Cl2",
+      "target_layer": "TOP_ACTIVE_GLASS_185EV",
+      "queue_class": "PARK",
+      "queue_reason": "critical elements Ag",
+      "nsites": 36,
+      "effective": {
+        "tier": "T1_HEURISTIC",
+        "gap_ev": 2.32,
+        "gap_sigma_ev": 0.44,
+        "window_probability": 0.1026,
+        "best_analog_efficiency_percent": null,
+        "lowest_analog_theoretical_limit_percent": 24.0,
+        "flags": [
+          "ANALOG_DEEP_ANION_VACANCY",
+          "GAP_IS_AN_ESTIMATE"
+        ]
+      },
+      "cost": {
+        "tier": "T4_COMPUTED_HERE",
+        "active_layer_cost_usd_m2": 0.4112,
+        "critical_elements": [
+          "Ag"
+        ],
+        "flags": [
+          "CRITICAL_ELEMENTS"
+        ]
+      },
+      "stable": {
+        "tier": "T3_DATABASE_DFT_OR_ML_POTENTIAL",
+        "e_above_hull_mev": 4.96,
+        "hull_band": "near",
+        "flags": []
+      },
+      "synthesizable": {
+        "tier": "T5_MEASURED",
+        "experimentally_known_phase": true,
+        "recipes_in_system": 1,
+        "estimated_impurity_rate": 0.4405,
+        "estimate_basis": "own recipes shrunk toward related systems",
+        "interval_90": [
+          0.1443,
+          0.7608
+        ],
+        "likely_impurity_phases": [],
+        "evidence_grade": "weak",
+        "flags": []
+      },
+      "analog_family": "PNICTOGEN_CHALCOHALIDE",
+      "analog_records": [
+        "DF05"
+      ]
+    },
+    {
+      "candidate_id": "mp-1224922",
+      "formula_reduced": "CuGaSnSe4",
+      "target_layer": "BOTTOM_IR_075EV",
+      "queue_class": "PARK",
+      "queue_reason": "critical elements Ga",
+      "nsites": 7,
+      "effective": {
+        "tier": "T1_HEURISTIC",
+        "gap_ev": 1.15,
+        "gap_sigma_ev": 0.44,
+        "window_probability": 0.0945,
+        "best_analog_efficiency_percent": null,
+        "lowest_analog_theoretical_limit_percent": null,
+        "flags": [
+          "GAP_IS_AN_ESTIMATE"
+        ]
+      },
+      "cost": {
+        "tier": "T4_COMPUTED_HERE",
+        "active_layer_cost_usd_m2": 0.1251,
+        "critical_elements": [
+          "Ga"
+        ],
+        "flags": [
+          "CRITICAL_ELEMENTS"
+        ]
+      },
+      "stable": {
+        "tier": "T3_DATABASE_DFT_OR_ML_POTENTIAL",
+        "e_above_hull_mev": 3.61,
+        "hull_band": "near",
+        "flags": []
+      },
+      "synthesizable": {
+        "tier": "T0_NOT_EVALUATED",
+        "experimentally_known_phase": false,
+        "recipes_in_system": 0,
+        "estimated_impurity_rate": 0.4721,
+        "estimate_basis": "related systems only",
+        "interval_90": [
+          0.1448,
+          0.8131
+        ],
+        "likely_impurity_phases": [],
+        "evidence_grade": "none",
+        "flags": [
+          "NEVER_SYNTHESISED"
+        ]
+      },
+      "analog_family": null,
+      "analog_records": []
+    },
+    {
+      "candidate_id": "mp-1229165",
+      "formula_reduced": "Ag3Bi7S12",
+      "target_layer": "BOTTOM_IR_075EV",
+      "queue_class": "PARK",
+      "queue_reason": "critical elements Ag",
+      "nsites": 22,
+      "effective": {
+        "tier": "T1_HEURISTIC",
+        "gap_ev": 1.16,
+        "gap_sigma_ev": 0.44,
+        "window_probability": 0.0926,
+        "best_analog_efficiency_percent": 3.0,
+        "lowest_analog_theoretical_limit_percent": null,
+        "flags": [
+          "ANALOG_DEEP_DEFECTS_AND_INTERFACES",
+          "ANALOG_THERMAL_DECOMPOSITION",
+          "ANALOG_UNRESOLVED_LOW_CURRENT",
+          "GAP_IS_AN_ESTIMATE"
+        ]
+      },
+      "cost": {
+        "tier": "T4_COMPUTED_HERE",
+        "active_layer_cost_usd_m2": 0.3101,
+        "critical_elements": [
+          "Ag"
+        ],
+        "flags": [
+          "CRITICAL_ELEMENTS"
+        ]
+      },
+      "stable": {
+        "tier": "T3_DATABASE_DFT_OR_ML_POTENTIAL",
+        "e_above_hull_mev": 9.43,
+        "hull_band": "near",
+        "flags": [
+          "ANALOG_THERMAL_DECOMPOSITION"
+        ]
+      },
+      "synthesizable": {
+        "tier": "T2_ANALOGY",
+        "experimentally_known_phase": false,
+        "recipes_in_system": 7,
+        "estimated_impurity_rate": 0.3465,
+        "estimate_basis": "own recipes shrunk toward related systems",
+        "interval_90": [
+          0.1447,
+          0.5784
+        ],
+        "likely_impurity_phases": [
+          "Bi2S3"
+        ],
+        "evidence_grade": "moderate",
+        "flags": [
+          "REPORTED_ROUTES_ABOVE_GLASS_LIMIT",
+          "NEVER_SYNTHESISED"
+        ]
+      },
+      "analog_family": "COINAGE_PNICTOGEN_CHALCOGENIDE",
+      "analog_records": [
+        "DF06",
+        "DF07",
+        "DF08",
+        "DF09"
+      ]
+    },
+    {
+      "candidate_id": "mp-558368",
+      "formula_reduced": "AgBi2S3Cl",
+      "target_layer": "TOP_ACTIVE_GLASS_185EV",
+      "queue_class": "PARK",
+      "queue_reason": "critical elements Ag",
+      "nsites": 14,
+      "effective": {
+        "tier": "T1_HEURISTIC",
+        "gap_ev": 1.33,
+        "gap_sigma_ev": 0.44,
+        "window_probability": 0.0905,
+        "best_analog_efficiency_percent": null,
+        "lowest_analog_theoretical_limit_percent": 24.0,
+        "flags": [
+          "ANALOG_DEEP_ANION_VACANCY",
+          "GAP_IS_AN_ESTIMATE"
+        ]
+      },
+      "cost": {
+        "tier": "T4_COMPUTED_HERE",
+        "active_layer_cost_usd_m2": 0.2584,
+        "critical_elements": [
+          "Ag"
+        ],
+        "flags": [
+          "CRITICAL_ELEMENTS"
+        ]
+      },
+      "stable": {
+        "tier": "T3_DATABASE_DFT_OR_ML_POTENTIAL",
+        "e_above_hull_mev": 9.77,
+        "hull_band": "near",
+        "flags": []
+      },
+      "synthesizable": {
+        "tier": "T5_MEASURED",
+        "experimentally_known_phase": true,
+        "recipes_in_system": 1,
+        "estimated_impurity_rate": 0.4405,
+        "estimate_basis": "own recipes shrunk toward related systems",
+        "interval_90": [
+          0.1443,
+          0.7608
+        ],
+        "likely_impurity_phases": [],
+        "evidence_grade": "weak",
+        "flags": []
+      },
+      "analog_family": "PNICTOGEN_CHALCOHALIDE",
+      "analog_records": [
+        "DF05"
+      ]
+    }
+  ]
+}

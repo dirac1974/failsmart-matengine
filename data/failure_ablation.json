@@ -1,0 +1,62 @@
+{
+  "method": "leave-one-chemical-system-out; recipe-weighted Brier score and log loss (lower is better)",
+  "min_recipes": 5,
+  "data": "data/negative_synthesis_priors.json",
+  "total_systems": 4292,
+  "total_recipes": 34639,
+  "global_impurity_rate": 0.2928,
+  "class_impurity_rate": {
+    "oxide": 0.2717,
+    "chalcogenide": 0.3629,
+    "other": 0.3886
+  },
+  "class_recipes": {
+    "oxide": 27652,
+    "chalcogenide": 3307,
+    "other": 3680
+  },
+  "systems_scored_with_related_prior": 1214,
+  "provenance": "COMPUTED_HERE on LITERATURE counts",
+  "all": {
+    "systems": 1239,
+    "recipes": 29424,
+    "global": {
+      "brier": 0.02217,
+      "log_loss": 0.55537
+    },
+    "anion_class": {
+      "brier": 0.02205,
+      "log_loss": 0.55463
+    },
+    "related": {
+      "brier": 0.01778,
+      "log_loss": 0.54362
+    },
+    "related_brier_improvement_vs_global_percent": 19.8,
+    "improvement_bootstrap_95_percent": [
+      12.04,
+      27.13
+    ]
+  },
+  "chalcogenide": {
+    "systems": 142,
+    "recipes": 2298,
+    "global": {
+      "brier": 0.03333,
+      "log_loss": 0.57688
+    },
+    "anion_class": {
+      "brier": 0.04381,
+      "log_loss": 0.60036
+    },
+    "related": {
+      "brier": 0.02929,
+      "log_loss": 0.56767
+    },
+    "related_brier_improvement_vs_global_percent": 12.12,
+    "improvement_bootstrap_95_percent": [
+      -12.5,
+      31.34
+    ]
+  }
+}
