@@ -1,5 +1,5 @@
 ! FailSmart-MatEngine Auto-Generated Quantum ESPRESSO HSE06+SOC Input Deck (not run)
-! Candidate: mp-1224102 (CuInSnS4) | Target: BOTTOM_IR_075EV
+! Candidate: mp-1224102 (CuInSnS4) | Target: TOP_ACTIVE_GLASS_185EV
 ! Space Group: Imma (#74) | nat = 14
 &CONTROL
   calculation = 'scf',

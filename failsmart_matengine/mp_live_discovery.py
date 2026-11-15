@@ -46,6 +46,7 @@ from .kinetics_and_optics import (
     compute_antoine_vapor_pressure_pa,
     compute_pourbaix_max_dissolution,
 )
+from .gap_model import WINDOWS as GAP_WINDOWS, best_layer, load_model as load_gap_model, resolve_gap, window_probability, within_one_sigma
 from .ledger import ContrastiveFailureLedger
 from .physics_calculators import (
     ANION_ORDER,
@@ -428,16 +429,15 @@ def _classify_crystal_family(stoich: Dict[str, int], dim: str, sg_sym: str) -> s
 def _estimate_gap_from_mp_pbe(
     rec: Dict[str, Any], stoich: Dict[str, int], struct: Structure
 ) -> Dict[str, Any]:
-    """Heuristic closed-form estimate of band gaps and carrier properties from Materials Project PBE data.
+    """Best-available band gap plus heuristic carrier properties for a Materials Project entry.
 
-    No HSE06, r2SCAN, or spin-orbit DFT calculation is run (not run).
+    The gap comes from `gap_model.resolve_gap`, in this order of preference:
+    a measured optical gap for this exact entry (LITERATURE), a gap computed with the
+    DFT run kit (COMPUTED_HERE), or the calibrated correction to the Materials Project
+    PBE gap (HEURISTIC, coefficients in `data/gap_model.json`). `gap_basis` records which.
 
-    Uses:
-    - Materials Project `dft_pbe_band_gap_ev` (MP_DFT) and `dft_is_gap_direct`
-    - MP DFPT dielectric constants (`dfpt_dielectric`, MP_DFT) when available, or Penn-model
-      high-frequency screening heuristic (HEURISTIC)
-    - Composition-weighted spin-orbit splitting heuristic `soc_splitting_ev` (HEURISTIC)
-    - Inverse-dielectric gap shift heuristic `0.31 + 3.30 / max(4.5, eps_inf)` (HEURISTIC)
+    The pipeline itself runs no first-principles calculation. Effective masses, dielectric
+    constants, LO frequency and defect depth below remain uncalibrated heuristics.
     """
     total_atoms = max(1, sum(stoich.values()))
     pbe_gap = float(rec["dft_pbe_band_gap_ev"])
@@ -465,17 +465,11 @@ def _estimate_gap_from_mp_pbe(
         ionic_polarizability = 2.65 + 0.55 * (bi_frac + sb_sn_frac) + 0.35 * o_frac
         eps_static = round(float(eps_inf * ionic_polarizability), 2)
 
-    # Inverse-dielectric gap shift heuristic (1/eps_inf)
-    delta_gap_shift = 0.31 + (3.30 / max(4.5, eps_inf))
-    gap_nosoc = round(pbe_gap + delta_gap_shift, 2)
-    gap_dir_raw = max(0.45, gap_nosoc - soc_split)
-
-    if is_direct:
-        gap_ind = round(gap_dir_raw, 2)
-        gap_dir = round(gap_ind + 0.01, 2)
-    else:
-        gap_ind = round(gap_dir_raw, 2)
-        gap_dir = round(gap_ind + 0.04, 2)
+    # Best-available fundamental gap: measured > computed with the DFT run kit > calibrated estimate
+    gap_res = resolve_gap(str(rec["mp_id"]), pbe_gap, stoich)
+    gap_ind = round(float(gap_res["gap_ev"]), 2)
+    # Direct gap is not known separately; the small offset is a placeholder (HEURISTIC)
+    gap_dir = round(gap_ind + (0.01 if is_direct else 0.04), 2)
 
     # Re-synchronize gap_nosoc so soc_splitting_ev == round(gap_est_nosoc_ev - gap_est_direct_ev, 3) holds
     gap_nosoc = round(gap_dir + soc_split, 2)
@@ -525,6 +519,10 @@ def _estimate_gap_from_mp_pbe(
             def_ev = 0.07
 
     prov_overrides: Dict[str, ProvenanceTag] = {}
+    if gap_res["basis"] != "HEURISTIC":
+        prov_overrides["gap_est_indirect_ev"] = ProvenanceTag(gap_res["basis"])
+    if gap_res["basis"] == "LITERATURE":
+        prov_overrides["gap_error_bar_ev"] = ProvenanceTag.ASSUMED
     if has_dfpt_diel:
         prov_overrides["eps_inf"] = ProvenanceTag.MP_DFT
         prov_overrides["eps_static"] = ProvenanceTag.MP_DFT
@@ -535,6 +533,10 @@ def _estimate_gap_from_mp_pbe(
         "gap_est_nosoc_ev": gap_nosoc,
         "gap_est_direct_ev": gap_dir,
         "gap_est_indirect_ev": gap_ind,
+        "gap_error_bar_ev": float(gap_res["sigma_ev"]),
+        "gap_basis": str(gap_res["basis"]),
+        "gap_source": str(gap_res["source"]),
+        "gap_heuristic_ev": float(gap_res["gap_heuristic_ev"]),
         "soc_splitting_ev": soc_split,
         "electron_eff_mass_m0": me,
         "hole_eff_mass_m0": mh,
@@ -646,11 +648,8 @@ def build_live_mp_candidate_dossier(
     # Pre-evaluate gap heuristic to assign each MP semiconductor to Track A or Track B
     elec_dict = _estimate_gap_from_mp_pbe(rec, stoich, parsed_struct)
     elec_prov = elec_dict.pop("provenance", {})
-    target_layer = (
-        "TOP_ACTIVE_GLASS_185EV"
-        if elec_dict["gap_est_indirect_ev"] >= 1.25
-        else "BOTTOM_IR_075EV"
-    )
+    # Assign the layer whose target window the gap is more likely to fall in
+    target_layer = best_layer(elec_dict["gap_est_indirect_ev"], elec_dict["gap_error_bar_ev"])
     family = _classify_crystal_family(stoich, dim, sg_sym)
     tier2 = [e for e in els if e in LIVE_TIER2_CONDITIONAL]
     emb = ContrastiveFailureLedger.compute_chemical_embedding(
@@ -935,25 +934,15 @@ def build_live_mp_candidate_dossier(
         return dossier
 
     # Stage 4 & 5: Heuristic Gap/Polaron/Defect Prescreen & Sequential 4T Optics
-    # T4 calibration: LOOCV gap error bar is sigma_MAE = 0.37 eV (LOOCV MAE = 0.3684 eV; LOOCV RMSE = 0.4362 eV).
-    # Probabilistic window gate: keep candidate if target window [w_lo, w_hi] lies within 1 error bar of eg,
-    # and report window_probability under N(eg, sigma_MAE^2).
+    # Window gate: keep the candidate if its target window lies within one error bar of the gap.
+    # The error bar depends on the basis: measured (LITERATURE), computed (COMPUTED_HERE) or the
+    # calibrated estimate's leave-one-out RMSE (HEURISTIC). See gap_model.py.
     eg = elec_dict["gap_est_indirect_ev"]
-    gap_err_bar = 0.37
-    if target_layer == "TOP_ACTIVE_GLASS_185EV":
-        w_lo, w_hi = 1.75, 1.95
-    else:
-        w_lo, w_hi = 0.70, 0.85
-
-    gap_ok = (w_lo - gap_err_bar) <= eg <= (w_hi + gap_err_bar)
-    win_prob = round(
-        0.5 * (
-            math.erf((w_hi - eg) / (gap_err_bar * math.sqrt(2.0)))
-            - math.erf((w_lo - eg) / (gap_err_bar * math.sqrt(2.0)))
-        ),
-        4,
-    )
-    elec_dict["gap_error_bar_ev"] = gap_err_bar
+    gap_err_bar = elec_dict["gap_error_bar_ev"]
+    gap_basis = elec_dict["gap_basis"]
+    w_lo, w_hi = GAP_WINDOWS[target_layer]
+    gap_ok = within_one_sigma(eg, gap_err_bar, target_layer)
+    win_prob = window_probability(eg, gap_err_bar, target_layer)
     elec_dict["window_probability"] = win_prob
 
     mass_ok = max(elec_dict["electron_eff_mass_m0"], elec_dict["hole_eff_mass_m0"]) <= 0.80 and elec_dict["frohlich_alpha"] <= 5.0
@@ -963,8 +952,8 @@ def build_live_mp_candidate_dossier(
     s4_reason = None
     if not gap_ok:
         s4_reason = (
-            f"BANDGAP_OUT_OF_WINDOW: Estimated fundamental gap = {eg:.2f} +/- {gap_err_bar:.2f} eV "
-            f"(MP PBE = {rec['dft_pbe_band_gap_ev']:.2f} eV, P_win = {win_prob:.3f}) misses {target_layer} "
+            f"BANDGAP_OUT_OF_WINDOW: fundamental gap = {eg:.2f} +/- {gap_err_bar:.2f} eV ({gap_basis}; "
+            f"MP PBE = {rec['dft_pbe_band_gap_ev']:.2f} eV, P_win = {win_prob:.3f}) misses {target_layer} "
             f"1-sigma window [{w_lo - gap_err_bar:.2f}, {w_hi + gap_err_bar:.2f}] eV"
         )
     elif not mass_ok:
@@ -993,8 +982,12 @@ def build_live_mp_candidate_dossier(
     opt = OpticalTandemReport(**opt_dict)
     opt_dump = opt.model_dump()
 
-    passed_all_stages = bool(elec.passed_stage4_and_5 and opt.passed_optical_gate)
-    final_reason = elec.failure_reason or opt.failure_reason
+    # The optical thresholds are a deterministic function of the gap. Applying them to an
+    # estimated gap would re-impose a hard window at a point estimate, so they only reject
+    # when the gap is measured (LITERATURE) or computed (COMPUTED_HERE).
+    optical_gate_applied = elec.gap_basis != "HEURISTIC"
+    passed_all_stages = bool(elec.passed_stage4_and_5 and (opt.passed_optical_gate or not optical_gate_applied))
+    final_reason = elec.failure_reason or (opt.failure_reason if optical_gate_applied else None)
 
     dossier = {
         "candidate": cand_dump,
@@ -1007,9 +1000,69 @@ def build_live_mp_candidate_dossier(
         "gate_a": gate_a_dump,
         "electronics": elec_dump,
         "optics": opt_dump,
+        "optical_gate_applied": optical_gate_applied,
     }
     dossier["redundancy_verification"] = verify_candidate_dossier(dossier, raise_on_error=True)
     return dossier
+
+
+DEVICE_MODEL_EXEMPLARS_PER_LAYER = 4
+
+
+def build_ranked_shortlist(
+    finalists: List[Dict[str, Any]],
+    all_dossiers: List[Dict[str, Any]],
+    raw_mp_records: List[Dict[str, Any]],
+) -> Dict[str, Any]:
+    """Shortlist ranked by window probability, plus what the measured gaps ruled out.
+
+    `not_excluded` is every entry that passed all gates. It is a queue for first-principles
+    calculation, not a list of predicted absorbers: with an estimated gap the window
+    probability cannot exceed roughly 0.18.
+    """
+    known = {str(r["mp_id"]): bool(r.get("is_experimentally_known")) for r in raw_mp_records}
+
+    def row(d: Dict[str, Any]) -> Dict[str, Any]:
+        c, e = d["candidate"], d["electronics"]
+        cid = c["candidate_id"]
+        return {
+            "candidate_id": cid,
+            "formula_reduced": c["formula_reduced"],
+            "target_layer": c["target_layer"],
+            "gap_ev": e["gap_est_indirect_ev"],
+            "gap_sigma_ev": e["gap_error_bar_ev"],
+            "gap_basis": e["gap_basis"],
+            "gap_source": e.get("gap_source"),
+            "mp_pbe_gap_ev": e["pbe_gap_ev"],
+            "window_probability": e["window_probability"],
+            "is_experimentally_known": known.get(cid, False),
+            "e_above_hull_mev": d["stability"]["e_above_hull_0k_mev"],
+            "nsites": c["nsites_unit_cell"],
+        }
+
+    not_excluded = [row(d) for d in finalists]
+    # Calculation queue: synthesised phases first, then by window probability, then smaller cells
+    dft_queue = sorted(
+        (r for r in not_excluded if r["gap_basis"] == "HEURISTIC"),
+        key=lambda r: (not r["is_experimentally_known"], -r["window_probability"], r["nsites"]),
+    )
+    excluded_by_known_gap = [
+        {**row(d), "reason": d.get("reason")}
+        for d in all_dossiers
+        if d.get("electronics")
+        and d["electronics"]["gap_basis"] != "HEURISTIC"
+        and d["status"] == "REJECTED"
+        and d.get("stage_reached") == 4
+    ]
+    return {
+        "not_excluded": not_excluded,
+        "dft_queue": [r["candidate_id"] for r in dft_queue],
+        "excluded_by_known_gap": excluded_by_known_gap,
+        "max_window_probability_for_estimated_gap": {
+            layer: window_probability(0.5 * (lo + hi), float(load_gap_model()["sigma_ev"]), layer)
+            for layer, (lo, hi) in GAP_WINDOWS.items()
+        },
+    }
 
 
 def compute_cross_layer_4t_stack_wavelength(
@@ -1414,6 +1467,10 @@ def run_live_mp_discovery_campaign(
     for old_d in defect_deck_dir.glob("*"):
         old_d.unlink()
 
+    # Rank the shortlist by the probability that the gap is in its target window
+    finalists.sort(key=lambda f: (-f["electronics"]["window_probability"], f["candidate"]["candidate_id"]))
+    shortlist = build_ranked_shortlist(finalists, all_dossiers, raw_mp_records)
+
     thermo_interface_cache = load_mp_thermo_interface_cache()
 
     atomistic_reports: List[Dict[str, Any]] = []
@@ -1442,9 +1499,10 @@ def run_live_mp_discovery_campaign(
         )
     )
 
-    # Cross-pair all discovered Track A Top Active Glass finalists with all discovered Track B Bottom IR finalists
-    top_finalists = [f for f in finalists if f["candidate"]["target_layer"] == "TOP_ACTIVE_GLASS_185EV"]
-    bot_finalists = [f for f in finalists if f["candidate"]["target_layer"] == "BOTTOM_IR_075EV"]
+    # Device-model exemplars: the downstream optics and cost models run on the highest
+    # window-probability shortlist entries of each layer only (they add no selection power).
+    top_finalists = [f for f in finalists if f["candidate"]["target_layer"] == "TOP_ACTIVE_GLASS_185EV"][:DEVICE_MODEL_EXEMPLARS_PER_LAYER]
+    bot_finalists = [f for f in finalists if f["candidate"]["target_layer"] == "BOTTOM_IR_075EV"][:DEVICE_MODEL_EXEMPLARS_PER_LAYER]
 
     cross_pairs: List[Dict[str, Any]] = []
     coherent_tmm_stacks: List[Dict[str, Any]] = []
@@ -1521,6 +1579,9 @@ def run_live_mp_discovery_campaign(
         },
         "funnel_counts": funnel_counts,
         "failure_mode_breakdown": failure_mode_breakdown,
+        "gap_model": {k: v for k, v in load_gap_model().items() if k in ("form", "coefficients", "n_benchmark", "leave_one_out", "leave_one_family_out", "sigma_ev", "sigma_basis")},
+        "ranked_shortlist": shortlist,
+        "device_model_exemplars_per_layer": DEVICE_MODEL_EXEMPLARS_PER_LAYER,
         "finalists": finalists,
         "spring_and_migration_reports": atomistic_reports,
         "lab_synthesis_and_defect_dossiers": lab_defect_dossiers,

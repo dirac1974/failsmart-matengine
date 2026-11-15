@@ -1,0 +1,63 @@
+! FailSmart-MatEngine Auto-Generated Quantum ESPRESSO HSE06+SOC Input Deck (not run)
+! Candidate: mp-540644 (Sn4SI6) | Target: TOP_ACTIVE_GLASS_185EV
+! Space Group: C2/m (#12) | nat = 22
+&CONTROL
+  calculation = 'scf',
+  prefix = 'sn4si6',
+  outdir = './out/',
+  pseudo_dir = './pseudo_oncv_fr/',
+  tprnfor = .true.,
+  tstress = .true.,
+  etot_conv_thr = 1.0d-6,
+  forc_conv_thr = 1.0d-4,
+/
+&SYSTEM
+  ibrav = 0,
+  nat = 22,
+  ntyp = 3,
+  ecutwfc = 70.0,
+  ecutfock = 140.0,
+  noncolin = .true.,
+  lspinorb = .true.,
+  input_dft = 'hse',
+  nqx1 = 1, nqx2 = 1, nqx3 = 2,
+  x_gamma_extrapolation = .true.,
+/
+&ELECTRONS
+  conv_thr = 1.0d-8,
+  mixing_beta = 0.4,
+  adaptive_thr = .true.,
+/
+ATOMIC_SPECIES
+  Sn     118.7100  Sn_ONCV_PBE_FR-1.2.upf
+  S       32.0650  S_ONCV_PBE_FR-1.2.upf
+  I      126.9045  I_ONCV_PBE_FR-1.2.upf
+CELL_PARAMETERS (angstrom)
+      7.64788753      0.00000000      0.49430996
+      6.34802211      4.26530175      0.49430996
+      0.00000000      0.00000000     25.76732842
+ATOMIC_POSITIONS (crystal)
+  Sn     0.70467800    0.70467800    0.85643000
+  Sn     0.29532200    0.29532200    0.14357000
+  Sn     0.77857200    0.77857200    0.41687000
+  Sn     0.22142800    0.22142800    0.58313000
+  Sn     0.63286400    0.63286400    0.01672100
+  Sn     0.36713600    0.36713600    0.98327900
+  Sn     0.46446300    0.46446300    0.71633600
+  Sn     0.53553700    0.53553700    0.28366400
+  S      0.22400300    0.22400300    0.05143300
+  S      0.77599700    0.77599700    0.94856700
+  I      0.07101300    0.07101300    0.91912500
+  I      0.92898700    0.92898700    0.08087500
+  I      0.85388600    0.85388600    0.52534200
+  I      0.14611400    0.14611400    0.47465800
+  I      0.82346300    0.82346300    0.68163800
+  I      0.17653700    0.17653700    0.31836200
+  I      0.56556400    0.56556400    0.60238200
+  I      0.43443600    0.43443600    0.39761800
+  I      0.09892300    0.09892300    0.75238100
+  I      0.90107700    0.90107700    0.24761900
+  I      0.35731400    0.35731400    0.83418100
+  I      0.64268600    0.64268600    0.16581900
+K_POINTS automatic
+  3 3 2 0 0 0

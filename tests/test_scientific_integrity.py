@@ -784,23 +784,23 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
         fc = live_sum.get("funnel_counts", {})
         self.assertEqual(fc.get("stage1_live_mp_ingested"), 100)
         self.assertEqual(fc.get("stage2_dynamically_and_ion_stable"), 91)
-        self.assertEqual(fc.get("stage3_manufacturable_lbnl_alab_screened"), 47)
-        self.assertEqual(fc.get("gate_a_promoted_to_dft"), 40)
-        self.assertEqual(fc.get("stage4_5_prescreen_finalists"), 15)
-        self.assertEqual(fc.get("top_active_glass_finalists"), 7)
-        self.assertEqual(fc.get("bottom_ir_scavenger_finalists"), 8)
+        self.assertEqual(fc.get("stage3_manufacturable_lbnl_alab_screened"), 50)
+        self.assertEqual(fc.get("gate_a_promoted_to_dft"), 43)
+        self.assertEqual(fc.get("stage4_5_prescreen_finalists"), 30)
+        self.assertEqual(fc.get("top_active_glass_finalists"), 23)
+        self.assertEqual(fc.get("bottom_ir_scavenger_finalists"), 7)
 
     def test_cross_layer_discovered_mp_4t_tandem_stacks(self):
-        """Test 14: Verify all 56 cross-layer (mp-Top, c-Si, mp-Bottom) 4T stacks match independent_verifier within <= 0.05%."""
+        """Test 14: Verify all 16 cross-layer (mp-Top, c-Si, mp-Bottom) 4T stacks match independent_verifier within <= 0.05%."""
         live_sum_path = os.path.join(self.repo_root, "outputs", "live_mp_discovery_summary.json")
         with open(live_sum_path, "r", encoding="utf-8") as f:
             live_sum = json.load(f)
 
         pairs = live_sum.get("cross_layer_4t_tandem_pairs", [])
-        self.assertEqual(len(pairs), 56, f"Expected 56 cross-layer 4T pairs, got {len(pairs)}")
+        self.assertEqual(len(pairs), 16, f"Expected 16 cross-layer 4T pairs, got {len(pairs)}")
 
         finalists_by_id = {fin["candidate"]["candidate_id"]: fin for fin in live_sum.get("finalists", [])}
-        self.assertEqual(len(finalists_by_id), 15, f"Expected 15 promoted finalists, got {len(finalists_by_id)}")
+        self.assertEqual(len(finalists_by_id), 30, f"Expected 30 promoted finalists, got {len(finalists_by_id)}")
 
         for p in pairs:
             pid = p["pair_id"]
@@ -845,7 +845,7 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
         self.assertTrue(os.path.exists(live_decks_dir), f"Directory {live_decks_dir} does not exist")
 
         deck_files = sorted(glob.glob(os.path.join(live_decks_dir, "*_hse06_soc.in")))  # HSE06+SOC not run
-        self.assertEqual(len(deck_files), 15, f"Expected 15 live MP finalist QE input decks, got {len(deck_files)}")
+        self.assertEqual(len(deck_files), 30, f"Expected 30 live MP finalist QE input decks, got {len(deck_files)}")
 
         for dpath in deck_files:
             cif_path = dpath.replace("_hse06_soc.in", ".cif")  # HSE06+SOC not run
@@ -942,7 +942,7 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
 
         # 2. Verify all 15 finalists' pair-spring Gamma frequency & closed-form migration heuristic reports
         spring_reports = live_sum.get("spring_and_migration_reports", [])
-        self.assertEqual(len(spring_reports), 15, f"Expected 15 spring_and_migration_reports, got {len(spring_reports)}")
+        self.assertEqual(len(spring_reports), 30, f"Expected 30 spring_and_migration_reports, got {len(spring_reports)}")
 
         finalists_by_id = {f["candidate"]["candidate_id"]: f for f in live_sum.get("finalists", [])}
 
@@ -985,13 +985,13 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
             )
 
     def test_step2_coherent_abeles_tmm_vs_rouard_airy_4t_stacks(self):
-        """Test 17: Verify Step 2 Coherent 2x2 Abeles TMM vs Recursive Rouard/Airy 4T Stack Optics across all 56 stacks."""
+        """Test 17: Verify Step 2 Coherent 2x2 Abeles TMM vs Recursive Rouard/Airy 4T Stack Optics across all 16 stacks."""
         live_sum_path = os.path.join(self.repo_root, "outputs", "live_mp_discovery_summary.json")
         with open(live_sum_path, "r", encoding="utf-8") as f:
             live_sum = json.load(f)
 
         tmm_stacks = live_sum.get("coherent_tmm_4t_stacks", [])
-        self.assertEqual(len(tmm_stacks), 56, f"Expected 56 coherent_tmm_4t_stacks, got {len(tmm_stacks)}")
+        self.assertEqual(len(tmm_stacks), 16, f"Expected 16 coherent_tmm_4t_stacks, got {len(tmm_stacks)}")
 
         finalists_by_id = {f["candidate"]["candidate_id"]: f for f in live_sum.get("finalists", [])}
 
@@ -1028,14 +1028,14 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
             )
 
     def test_step3_graded_arc_tio2_and_techno_economic_fom_suite(self):
-        """Test 18: Verify 7-Medium Graded-ARC + TiO2 Impedance Matching & 4-Metric Techno-Economic Suite across all 56 stacks."""
+        """Test 18: Verify 7-Medium Graded-ARC + TiO2 Impedance Matching & 4-Metric Techno-Economic Suite across all 16 stacks."""
         live_sum_path = os.path.join(self.repo_root, "outputs", "live_mp_discovery_summary.json")
         with open(live_sum_path, "r", encoding="utf-8") as f:
             live_sum = json.load(f)
 
         self.assertTrue(live_sum.get("v5_graded_arc_and_techno_economics_enabled"))
         graded_stacks = live_sum.get("graded_arc_techno_economic_stacks", [])
-        self.assertEqual(len(graded_stacks), 56, f"Expected 56 graded_arc_techno_economic_stacks, got {len(graded_stacks)}")
+        self.assertEqual(len(graded_stacks), 16, f"Expected 16 graded_arc_techno_economic_stacks, got {len(graded_stacks)}")
 
         finalists_by_id = {f["candidate"]["candidate_id"]: f for f in live_sum.get("finalists", [])}
 
@@ -1088,7 +1088,7 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
 
         # 1. Phase 9A: Verify 15 Lab Synthesis & Neutral Vacancy Supercell Dossiers + Deck Files
         lab_dossiers = live_sum.get("lab_synthesis_and_defect_dossiers", [])
-        self.assertEqual(len(lab_dossiers), 15, f"Expected 15 lab_synthesis_and_defect_dossiers, got {len(lab_dossiers)}")
+        self.assertEqual(len(lab_dossiers), 30, f"Expected 30 lab_synthesis_and_defect_dossiers, got {len(lab_dossiers)}")
         defect_dir = os.path.join(self.repo_root, "outputs", "mp_live_neutral_vacancy_decks")
         self.assertTrue(os.path.isdir(defect_dir))
 
@@ -1115,9 +1115,9 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
                 ld["point_charge_image_estimate_ev"], iv_9a["point_charge_image_estimate_ev"], places=3
             )
 
-        # 2. Phase 9C: Verify Oblique (0-60 deg) S/P TMM, Operating Temp (25-65 C) & 25-Year Arrhenius LCOE across 56 Stacks
+        # 2. Phase 9C: Verify Oblique (0-60 deg) S/P TMM, Operating Temp (25-65 C) & 25-Year Arrhenius LCOE across 16 Stacks
         lcoe_stacks = live_sum.get("real_world_lcoe_stress_test_stacks", [])
-        self.assertEqual(len(lcoe_stacks), 56, f"Expected 56 real_world_lcoe_stress_test_stacks, got {len(lcoe_stacks)}")
+        self.assertEqual(len(lcoe_stacks), 16, f"Expected 16 real_world_lcoe_stress_test_stacks, got {len(lcoe_stacks)}")
         for rw in lcoe_stacks:
             pid = rw["pair_id"]
             self.assertTrue(rw["lcoe_redundancy_verified"], f"{pid}: Phase 9C redundancy failed")
@@ -1165,7 +1165,7 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
 
         self.assertTrue(live_sum.get("v7_phase10_bifacial_and_string_enabled"))
         p10_stacks = live_sum.get("phase10_bifacial_and_string_dossiers", [])
-        self.assertEqual(len(p10_stacks), 56, f"Expected 56 phase10_bifacial_and_string_dossiers, got {len(p10_stacks)}")
+        self.assertEqual(len(p10_stacks), 16, f"Expected 16 phase10_bifacial_and_string_dossiers, got {len(p10_stacks)}")
 
         finalists_by_id = {f["candidate"]["candidate_id"]: f for f in live_sum.get("finalists", [])}
         graded_by_id = {g["pair_id"]: g for g in live_sum.get("graded_arc_techno_economic_stacks", [])}
@@ -1289,7 +1289,7 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
         self.assertTrue(live_sum.get("v8_phase11_realistic_commercialization_enabled"))
 
         p11a_list = live_sum.get("phase11a_synthesis_contact_dossiers", [])
-        self.assertEqual(len(p11a_list), 15, f"Expected 15 phase11a_synthesis_contact_dossiers, got {len(p11a_list)}")
+        self.assertEqual(len(p11a_list), 30, f"Expected 30 phase11a_synthesis_contact_dossiers, got {len(p11a_list)}")
         finalists_by_id = {f["candidate"]["candidate_id"]: f for f in live_sum.get("finalists", [])}
 
         p11a_by_id = {}
@@ -1327,14 +1327,14 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
             )
             self.assertEqual(p11a["recommended_etl_barrier"], iv_11a["recommended_etl_barrier"])
 
-        self.assertEqual(evaluated_11a_count, 8)
+        self.assertEqual(evaluated_11a_count, 7)
 
         # Top synthesis practicality candidates must be BiSbS3 (mp-1227486) and Sb2OS2 (mp-861911) > 94.0
         self.assertGreater(p11a_by_id["mp-1227486"]["synthesis_practicality_score_100"], 94.0)
         self.assertGreater(p11a_by_id["mp-861911"]["synthesis_practicality_score_100"], 94.0)
 
         p11b_list = live_sum.get("phase11b_realistic_commercialization_dossiers", [])
-        self.assertEqual(len(p11b_list), 15, f"Expected 15 phase11b_realistic_commercialization_dossiers, got {len(p11b_list)}")
+        self.assertEqual(len(p11b_list), 2, f"Expected 2 phase11b_realistic_commercialization_dossiers, got {len(p11b_list)}")
         p10_by_id = {p["pair_id"]: p for p in live_sum.get("phase10_bifacial_and_string_dossiers", [])}
 
         for p11b in p11b_list:
@@ -1576,12 +1576,19 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
             self.assertEqual(d_srh["primary_failure_mode"], "DEEP_SRH_DEFECT")
 
             # 12. Stage 5 optical SLME / sub-gap transmittance gate
-            r_opt = copy.deepcopy(base)
-            r_opt["dft_pbe_band_gap_ev"] = 1.63
-            r_opt["dfpt_dielectric"] = {"eps_inf": 65.0, "eps_static": 80.0}
-            d_opt = build_live_mp_candidate_dossier(r_opt, priors, ledger)
+            # The optical thresholds only reject when the gap is measured or computed.
+            # mp-22982 (CuBiS2) has a measured gap of 1.65 eV in data/gap_benchmark.csv.
+            d_opt = build_live_mp_candidate_dossier(cache_by_id["mp-22982"], priors, ledger)
+            self.assertEqual(d_opt["electronics"]["gap_basis"], "LITERATURE")
+            self.assertTrue(d_opt["optical_gate_applied"])
             self.assertEqual(d_opt["status"], "REJECTED")
             self.assertEqual(d_opt["primary_failure_mode"], "LOW_OPTICAL_EFFICIENCY")
+            # With an estimated gap the same thresholds are reported but must not reject.
+            d_est = build_live_mp_candidate_dossier(cache_by_id["mp-861911"], priors, ledger)
+            self.assertEqual(d_est["electronics"]["gap_basis"], "HEURISTIC")
+            self.assertFalse(d_est["optical_gate_applied"])
+            self.assertFalse(d_est["optics"]["passed_optical_gate"])
+            self.assertEqual(d_est["status"], "PROMOTED")
 
             # 13. Closed-form migration heuristic gate in evaluate_spring_and_migration_heuristics
             st_emig = Structure(
@@ -1629,7 +1636,7 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
             self.assertGreater(len(decks), 0, f"No .in decks in {ddir}")
             all_decks.extend(decks)
 
-        self.assertEqual(len(all_decks), 35, f"Expected 5 + 15 + 15 = 35 .in decks, got {len(all_decks)}")
+        self.assertEqual(len(all_decks), 65, f"Expected 5 + 30 + 30 = 65 .in decks, got {len(all_decks)}")
 
         for deck_path in all_decks:
             txt = deck_path.read_text(encoding="utf-8")
@@ -1804,6 +1811,10 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
             root / "docs" / "INDEPENDENT_AUDIT_2026-11.md",
             root / "docs" / "REMEDIATION_TASKS.md",
             root / "docs" / "GAP_CALIBRATION.md",
+            # Audit, task and lessons documents describe the method names they warn against
+            root / "docs" / "AUDIT_2026-11-15_READINESS.md",
+            root / "docs" / "REMEDIATION_TASKS_PHASE2.md",
+            root / "docs" / "LESSONS_LEARNED.md",
         }
         scan_targets = [root / "README.md", root / "docs", root / "failsmart_matengine", root / "outputs"]
         violations = []
@@ -1881,16 +1892,19 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
 
         # 3. Verify GAP_CALIBRATION.md contains calibration metrics
         doc_txt = doc_path.read_text(encoding="utf-8")
-        for tok in ("0.4522", "-0.5350", "0.3684", "0.4362", "Morales"):
+        for tok in ("0.4522", "-0.5350", "0.3674", "0.4364", "Morales"):
             self.assertIn(tok, doc_txt, f"Expected '{tok}' in docs/GAP_CALIBRATION.md")
 
         # 4. Verify gap_error_bar_ev and window_probability on all live MP finalists
         live_sum = json.loads((root / "outputs" / "live_mp_discovery_summary.json").read_text(encoding="utf-8"))
         for fin in live_sum.get("finalists", []):
             el = fin["electronics"]
-            self.assertAlmostEqual(el["gap_error_bar_ev"], 0.37, places=2)
+            self.assertIn(el["gap_basis"], ("HEURISTIC", "LITERATURE", "COMPUTED_HERE"))
+            if el["gap_basis"] == "HEURISTIC":
+                # sigma is the leave-one-out RMSE in data/gap_model.json
+                self.assertAlmostEqual(el["gap_error_bar_ev"], 0.44, places=2)
+                self.assertLessEqual(el["window_probability"], 0.18)
             self.assertGreater(el["window_probability"], 0.0)
-            self.assertLessEqual(el["window_probability"], 0.25)
 
     def test_28_t8_requirements_tea_and_device_model_remediation(self):
         """T8: Verify requirements_tea.py break-even numbers, double-pass absorptance, maturity cases, and zero promotional strings."""
