@@ -1811,6 +1811,10 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
             root / "docs" / "INDEPENDENT_AUDIT_2026-11.md",
             root / "docs" / "REMEDIATION_TASKS.md",
             root / "docs" / "GAP_CALIBRATION.md",
+            # Audit, task and lessons documents describe the method names they warn against
+            root / "docs" / "AUDIT_2026-11-15_READINESS.md",
+            root / "docs" / "REMEDIATION_TASKS_PHASE2.md",
+            root / "docs" / "LESSONS_LEARNED.md",
         }
         scan_targets = [root / "README.md", root / "docs", root / "failsmart_matengine", root / "outputs"]
         violations = []
