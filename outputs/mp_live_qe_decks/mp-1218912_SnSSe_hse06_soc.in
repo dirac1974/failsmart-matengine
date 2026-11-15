@@ -1,0 +1,44 @@
+! FailSmart-MatEngine Auto-Generated Quantum ESPRESSO HSE06+SOC Input Deck (not run)
+! Candidate: mp-1218912 (SnSSe) | Target: TOP_ACTIVE_GLASS_185EV
+! Space Group: P3m1 (#156) | nat = 3
+&CONTROL
+  calculation = 'scf',
+  prefix = 'snsse',
+  outdir = './out/',
+  pseudo_dir = './pseudo_oncv_fr/',
+  tprnfor = .true.,
+  tstress = .true.,
+  etot_conv_thr = 1.0d-6,
+  forc_conv_thr = 1.0d-4,
+/
+&SYSTEM
+  ibrav = 0,
+  nat = 3,
+  ntyp = 3,
+  ecutwfc = 70.0,
+  ecutfock = 140.0,
+  noncolin = .true.,
+  lspinorb = .true.,
+  input_dft = 'hse',
+  nqx1 = 2, nqx2 = 2, nqx3 = 2,
+  x_gamma_extrapolation = .true.,
+/
+&ELECTRONS
+  conv_thr = 1.0d-8,
+  mixing_beta = 0.4,
+  adaptive_thr = .true.,
+/
+ATOMIC_SPECIES
+  Sn     118.7100  Sn_ONCV_PBE_FR-1.2.upf
+  S       32.0650  S_ONCV_PBE_FR-1.2.upf
+  Se      78.9600  Se_ONCV_PBE_FR-1.2.upf
+CELL_PARAMETERS (angstrom)
+      3.76020271      0.00000000      0.00000000
+     -1.88010129      3.25643111      0.00000000
+      0.00000000      0.00000000      6.36402501
+ATOMIC_POSITIONS (crystal)
+  Sn     0.33333333    0.66666667    0.00764606
+  Se     0.00000000    0.00000000    0.75771040
+  S      0.66666667    0.33333333    0.23464454
+K_POINTS automatic
+  6 6 4 0 0 0

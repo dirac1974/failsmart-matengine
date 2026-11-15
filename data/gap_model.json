@@ -1,0 +1,49 @@
+{
+  "form": "E_g = max(0, E_PBE + c0 + c1 / max(4.5, eps_inf) - c2 * soc_raw)",
+  "coefficients": {
+    "c0": 1.2381,
+    "c1": 0.0,
+    "c2": 2.9331
+  },
+  "n_benchmark": 50,
+  "benchmark_file": "data/gap_benchmark.csv",
+  "in_sample": {
+    "mae_ev": 0.3534,
+    "rmse_ev": 0.4199,
+    "bias_ev": 0.0,
+    "max_abs_ev": 0.9501
+  },
+  "leave_one_out": {
+    "mae_ev": 0.3674,
+    "rmse_ev": 0.4364,
+    "bias_ev": 0.0023,
+    "max_abs_ev": 0.9949
+  },
+  "leave_one_family_out": {
+    "mae_ev": 0.4187,
+    "rmse_ev": 0.4887,
+    "bias_ev": -0.0074,
+    "max_abs_ev": 1.015
+  },
+  "leave_one_out_cu_ag": {
+    "mae_ev": 0.3667,
+    "rmse_ev": 0.4264,
+    "bias_ev": -0.1495,
+    "max_abs_ev": 0.7825
+  },
+  "leave_one_out_no_cu_ag": {
+    "mae_ev": 0.3678,
+    "rmse_ev": 0.4419,
+    "bias_ev": 0.0877,
+    "max_abs_ev": 0.9949
+  },
+  "raw_pbe": {
+    "mae_ev": 0.7555,
+    "rmse_ev": 0.8927,
+    "bias_ev": -0.6471,
+    "max_abs_ev": 1.6878
+  },
+  "sigma_ev": 0.44,
+  "sigma_basis": "leave-one-out RMSE",
+  "provenance": "COMPUTED_HERE (fit) on MP_DFT (PBE gaps) and LITERATURE (measured gaps)"
+}

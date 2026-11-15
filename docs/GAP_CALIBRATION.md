@@ -93,3 +93,55 @@ In `mp_live_discovery.py` (`Stage 4`), the hard window gate (`1.75 <= eg <= 1.95
    $$P_{\text{win}} = \Phi\!\left(\frac{w_{\text{hi}} - \hat{E}_g}{\sigma_{\text{gap}}}\right) - \Phi\!\left(\frac{w_{\text{lo}} - \hat{E}_g}{\sigma_{\text{gap}}}\right)$$
    Under $\sigma_{\text{gap}} = 0.37\text{ eV}$, even a candidate centered in the middle of the $0.20\text{ eV}$ top window ($\hat{E}_g = 1.85\text{ eV}$) has $P_{\text{win}} = 21.4\%$, and a candidate centered in the $0.15\text{ eV}$ bottom window ($\hat{E}_g = 0.775\text{ eV}$) has $P_{\text{win}} = 16.1\%$.
 3. **Impact on Funnel Counts:** Widening the Stage 4 band-gap gate to one error bar ($\pm 0.37\text{ eV}$) increases the number of Stage 4+5 promoted prescreen finalists from **9 to 15** (`7` Top Active Glass: `mp-861911` `Sb2OS2`, `mp-1227486` `BiSbS3`, `mp-1195160` `Al2Bi2Cu2S3Cl8`, `mp-1078776` `BiInS3`, `mp-1228963` `AgAlSnSe4`, `mp-1206068` `Bi2InS4Br`, `mp-715212` `Bi3In5S12`; `8` Bottom IR: `mp-1223998` `Bi3InSe6`, `mp-1224129` `CuInSnSe4`, `mp-1224922` `CuGaSnSe4`, `mp-22982` `BiCuS2`, `mp-23474` `AgBi3S5`, `mp-1229027` `AlCuSnSe4`, `mp-1224102` `CuInSnS4`, `mp-20331` `CuSbSe2`), producing $7 \times 8 = 56$ cross-layer pairs (`100 -> 91 -> 47 -> 40 -> 15`).
+
+---
+
+## 6. Calibrated Model Wired Into the Pipeline (2026-11-15, supersedes Section 5)
+
+Sections 3 to 5 describe the first calibration pass. Three things were wrong with how it was used, and are now fixed in [`gap_model.py`](../failsmart_matengine/gap_model.py):
+
+1. **The pipeline kept using the old formula.** Stage 4 applied the uncalibrated estimate (mean error `0.4522` eV, `-0.5350` eV bias on `Cu`/`Ag` compounds) with the refit's error bar attached. The pipeline now uses the refit itself.
+2. **The error bar was a mean absolute error.** A normal error model needs a standard deviation, so the error bar is now the leave-one-out RMSE.
+3. **Measured gaps were not used.** The literature table was never read by the code. A measured gap for the exact Materials Project entry now overrides the estimate.
+
+### 6.1 Reproducible fit
+
+`python -m failsmart_matengine.gap_model` refits the correction from `data/gap_benchmark.csv` and writes `data/gap_model.json` (`COMPUTED_HERE`). The non-negative fit drives the dielectric coefficient to zero, so the model reduces to a constant shift minus the spin-orbit proxy:
+
+| Quantity | Value |
+| :--- | :--- |
+| Form | `E_g = max(0, E_PBE + c0 + c1 / max(4.5, eps_inf) - c2 * soc_raw)` |
+| Coefficients `(c0, c1, c2)` | `(1.2381, 0.0, 2.9331)` |
+| Benchmark size | `50` |
+| Leave-one-out MAE / RMSE (eV) | `0.3674` / `0.4364` |
+| Leave-one-family-out MAE / RMSE (eV) | `0.4187` / `0.4887` |
+| Raw PBE MAE / RMSE (eV) | `0.7555` / `0.8927` |
+| Error bar used by the pipeline | `0.44` eV (leave-one-out RMSE) |
+
+Five alternative linear models (PBE gap with `Cu`/`Ag`, heavy-element, halide and oxygen terms) were compared by the same cross-validation; none beat this form on leave-one-family-out error. About `0.44` eV is the floor for a correction built on PBE gaps and composition for this chemistry.
+
+### 6.2 Which gap the pipeline uses
+
+`gap_model.resolve_gap` returns the best available value and records it in `gap_basis`:
+
+| Order | `gap_basis` | Source | Error bar (eV) |
+| :---: | :--- | :--- | :--- |
+| 1 | `LITERATURE` | measured optical gap for the same `mp_id` in `data/gap_benchmark.csv` | `0.10` (`ASSUMED`) |
+| 2 | `COMPUTED_HERE` | `data/dft_results.json`, written by the DFT run kit | from the control compounds, else `0.25` (`ASSUMED`) |
+| 3 | `HEURISTIC` | calibrated correction above | `0.44` |
+
+### 6.3 Gate, layer and ranking
+
+- **Layer:** the candidate is assigned to the layer whose window its gap is more likely to be in.
+- **Gate:** keep the candidate if the window lies within one error bar of the gap.
+- **Optical thresholds:** they are a deterministic function of the gap, so they reject only when the gap is measured or computed. Applied to an estimate they would re-impose a hard window at a point value.
+- **Ranking:** the shortlist is ordered by window probability. With an estimated gap that probability cannot exceed `0.18` (top window) or `0.14` (bottom window).
+
+### 6.4 Result on the cached Materials Project records
+
+Funnel `100 -> 91 -> 50 -> 43 -> 30` (previously `100 -> 91 -> 47 -> 40 -> 15`). The Stage 3 and Gate A counts moved because layer assignment changed film thickness and cost for some entries.
+
+- **30 entries are not excluded** (23 top, 7 bottom). Every one has an estimated gap and a window probability between `0.09` and `0.18`. This is a queue for first-principles calculation, not a list of predicted absorbers.
+- **3 entries are excluded by a measured gap:** `mp-22982` `CuBiS2` (`1.65` eV), `mp-20331` `CuSbSe2` (`1.10` eV) and `mp-556094` `AgBiSCl2` (`1.27` eV). The first two were bottom-cell finalists under the old formula.
+- **7 of the 30 are experimentally known phases** and head the calculation queue (`ranked_shortlist.dft_queue` in `outputs/live_mp_discovery_summary.json`).
+- **Device models run on 4 exemplars per layer** (16 pairs), chosen by window probability. They add no selection power.

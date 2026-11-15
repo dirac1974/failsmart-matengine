@@ -176,6 +176,7 @@ class ElectronicDefectReport(_ProvenanceTaggedModel):
         "gap_est_indirect_ev": ProvenanceTag.HEURISTIC,
         "gap_error_bar_ev": ProvenanceTag.COMPUTED_HERE,
         "window_probability": ProvenanceTag.COMPUTED_HERE,
+        "gap_heuristic_ev": ProvenanceTag.HEURISTIC,
         "soc_splitting_ev": ProvenanceTag.HEURISTIC,
         "electron_eff_mass_m0": ProvenanceTag.HEURISTIC,
         "hole_eff_mass_m0": ProvenanceTag.HEURISTIC,
@@ -195,6 +196,10 @@ class ElectronicDefectReport(_ProvenanceTaggedModel):
     gap_est_indirect_ev: float
     gap_error_bar_ev: Optional[float] = None
     window_probability: Optional[float] = None
+    # Which source `gap_est_indirect_ev` came from: LITERATURE, COMPUTED_HERE or HEURISTIC
+    gap_basis: str = "HEURISTIC"
+    gap_source: Optional[str] = None
+    gap_heuristic_ev: Optional[float] = None
     soc_splitting_ev: float
     electron_eff_mass_m0: float
     hole_eff_mass_m0: float

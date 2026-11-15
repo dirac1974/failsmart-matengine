@@ -1,0 +1,49 @@
+! FailSmart-MatEngine Auto-Generated Quantum ESPRESSO HSE06+SOC Input Deck (not run)
+! Candidate: mp-1224876 (AgGaSnSe4) | Target: TOP_ACTIVE_GLASS_185EV
+! Space Group: I-4 (#82) | nat = 7
+&CONTROL
+  calculation = 'scf',
+  prefix = 'aggasnse4',
+  outdir = './out/',
+  pseudo_dir = './pseudo_oncv_fr/',
+  tprnfor = .true.,
+  tstress = .true.,
+  etot_conv_thr = 1.0d-6,
+  forc_conv_thr = 1.0d-4,
+/
+&SYSTEM
+  ibrav = 0,
+  nat = 7,
+  ntyp = 4,
+  ecutwfc = 70.0,
+  ecutfock = 140.0,
+  noncolin = .true.,
+  lspinorb = .true.,
+  input_dft = 'hse',
+  nqx1 = 1, nqx2 = 1, nqx3 = 1,
+  x_gamma_extrapolation = .true.,
+/
+&ELECTRONS
+  conv_thr = 1.0d-8,
+  mixing_beta = 0.4,
+  adaptive_thr = .true.,
+/
+ATOMIC_SPECIES
+  Ag     107.8682  Ag_ONCV_PBE_FR-1.2.upf
+  Ga      69.7230  Ga_ONCV_PBE_FR-1.2.upf
+  Sn     118.7100  Sn_ONCV_PBE_FR-1.2.upf
+  Se      78.9600  Se_ONCV_PBE_FR-1.2.upf
+CELL_PARAMETERS (angstrom)
+      5.43721976      0.00000000     -4.28887069
+     -1.27822578      5.28483657     -4.28887069
+      0.00000000      0.00000000      6.92515491
+ATOMIC_POSITIONS (crystal)
+  Ga     0.75000000    0.25000000    0.50000000
+  Ag     0.25000000    0.75000000    0.50000000
+  Sn     0.50000000    0.50000000    0.00000000
+  Se     0.65991500    0.62585900    0.52290000
+  Se     0.10295900    0.13701500    0.47710000
+  Se     0.37414100    0.89704100    0.03405600
+  Se     0.86298500    0.34008500    0.96594400
+K_POINTS automatic
+  3 3 3 0 0 0
