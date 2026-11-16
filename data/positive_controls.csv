@@ -1,0 +1,3 @@
+formula,mp_id,family,best_efficiency_percent,efficiency_kind,source_url,opened_on,note
+Sb2S3,mp-2809,PNICTOGEN_CHALCOGENIDE,8.21,reported record,https://english.cas.cn/newsroom/research_news/phys/202510/t20251023_1094727.shtml,2026-11-15,Ribbon (stibnite) structure. mp_id as matched in data/gap_benchmark.csv
+Sb2Se3,mp-2160,PNICTOGEN_CHALCOGENIDE,10.57,"record cited in Wang et al., Joule 8, 2105 (2024)",https://wmd-group.github.io/publications/2024/joule_sb2se3_24.pdf,2026-11-15,Ribbon (stibnite) structure. mp_id as matched in data/gap_benchmark.csv
