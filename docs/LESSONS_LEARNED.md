@@ -65,3 +65,51 @@ Format for new entries: a heading `### L<n>. <one-line rule>`, then **What happe
 **What happened:** fourteen hours of agent work produced "13 agents", "debates", "consensus" and "kill-gates", all written as text with no tool calls behind them.
 **Why it mattered:** volume and confident tone substituted for one real calculation.
 **Check that would have caught it:** a claim enters the README only with a link to the code path, data file or job output that produced it.
+
+### L11. A rule must be applied everywhere the decision is made
+
+**What happened:** rule R2 (only strong evidence may exclude a candidate) governed the scorecards, while the funnel that feeds them made 68 of 70 rejections on rules of thumb.
+**Why it mattered:** every ribbon-structure candidate was removed, although the best related cells are ribbon structures.
+**Check that would have caught it:** when a rule is added, search for every place a decision of that kind is made, and add an audit that counts violations (`methodology_checks.gate_audit`).
+
+### L12. Run every screening rule on a material known to work
+
+**What happened:** no gate had ever been tried on Sb2S3 or Sb2Se3. The live query excludes two-element compounds, so none had been through the funnel.
+**Why it mattered:** rules that would reject the family's best members went unnoticed.
+**Check that would have caught it:** a list of positive controls that every rule is run against (`data/positive_controls.csv`).
+
+### L13. Search before saying something is missing
+
+**What happened:** a review stated that the project had no contact-alignment step and no temperature coefficients. Both existed.
+**Why it mattered:** the recommendation was to build something that was already there; the real gap was that neither had been benchmarked.
+**Check that would have caught it:** search the code for the feature under several names before writing "the project lacks".
+
+### L14. Compare an acceptance window with the error of the evidence
+
+**What happened:** the top window was 0.20 eV wide while the best available gap evidence had an error of 0.25 to 0.44 eV.
+**Why it mattered:** no calculation could ever place a candidate inside the window with a probability above about 0.3.
+**Check that would have caught it:** report the probability ceiling next to every window probability (`window_probability_ceiling`).
+
+### L15. Work a refinement through on the real numbers before recommending it
+
+**What happened:** "order the queue by information gain" was recommended. With every probability below one half, that is the same as ordering by probability, which was already done.
+**Why it mattered:** it would have been built and changed nothing.
+**Check that would have caught it:** compute the proposed ordering on the current data and compare it with the existing one.
+
+### L16. Work from the reviewed code, and keep the plan where the worker looks
+
+**What happened:** the task files and agent instructions sat on open pull requests. An agent started from `main`, which had none of them, audited the old code, re-fixed problems that were already fixed and added a feature the rules forbid. `main` then conflicted with the reviewed work in 11 files.
+**Why it mattered:** a night of work went to the wrong base, and the assigned tasks were not started.
+**Check that would have caught it:** before starting, confirm that the branch contains the plan file (`docs/WORK_ORDER.md`); merge reviewed work promptly; never commit to `main` directly.
+
+### L17. Code and outputs change in the same commit
+
+**What happened:** a formula was changed without rerunning the pipeline. Fifteen committed values no longer matched the code, and the auditor still reported full agreement.
+**Why it mattered:** the committed results were wrong, and the check meant to catch it compared documents with documents.
+**Check that would have caught it:** a test that reruns the pipeline and compares the result with the committed outputs (`test_committed_outputs_are_what_the_code_produces`).
+
+### L18. A finding is not a licence to build
+
+**What happened:** an audit noticed that a second veto gate named in the original design did not exist, and implemented it. The gate rejected on heuristics, re-tested conditions already tested, and could not change any outcome.
+**Why it mattered:** it added code that contradicts the evaluation rules and had to be removed.
+**Check that would have caught it:** report findings and ask; implement only what the work order lists.

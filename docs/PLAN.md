@@ -1,5 +1,8 @@
 # FailSmart-MatEngine: Expert Scientific Team & Implementation Plan
 
+> [!IMPORTANT]
+> **This is not the current plan.** The current plan is [`WORK_ORDER.md`](WORK_ORDER.md). This file is the original design target and is kept for history.
+
 > [!WARNING]
 > **Read first (independent audit, 2026-11):** this file is a design target. None of the heavy tools it names (MatterGen, MACE/CHGNet, phonopy, rxn_network, Quantum ESPRESSO, doped, LangGraph — all not run) is invoked by the code; the reported counts and efficiencies come from heuristic stand-ins. See [`INDEPENDENT_AUDIT_2026-11.md`](INDEPENDENT_AUDIT_2026-11.md) and [`REMEDIATION_TASKS.md`](REMEDIATION_TASKS.md).
 

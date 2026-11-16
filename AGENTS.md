@@ -2,12 +2,15 @@
 
 ## Read first, in this order
 
+0. `docs/WORK_ORDER.md`: **the plan.** Where the project stands, the order of work, and the rules. Start here. Never commit to `main`; branch from the latest `main` and open a pull request.
 1. `docs/LESSONS_LEARNED.md`: mistakes this project already made. Do not repeat them.
 2. `docs/AUDIT_2026-11-15_READINESS.md`: current state, what is closed and what is open (gaps G1 to G9).
 3. `docs/REMEDIATION_TASKS_PHASE2.md`: the task list for the open gaps, with acceptance checks.
 4. `tests/test_gap_closure.py`: the acceptance tests. Open gaps are strict expected failures.
 
-Older context: `docs/INDEPENDENT_AUDIT_2026-11.md` and `docs/REMEDIATION_TASKS.md` (phase 1, tasks T0 to T13).
+Later task files, in the order the work order gives: `docs/FAILURE_DATA_PLAN.md` (F1 to F5) and `docs/METHODOLOGY_TASKS_V.md` (V2 to V10). Rules for judging materials: `docs/MATERIAL_EVALUATION_RULES.md`.
+
+Older context: `docs/INDEPENDENT_AUDIT_2026-11.md` and `docs/REMEDIATION_TASKS.md` (phase 1, tasks T0 to T13). `docs/PLAN.md` is the original design target, kept for history; do not work from it.
 
 ## State of the repository
 

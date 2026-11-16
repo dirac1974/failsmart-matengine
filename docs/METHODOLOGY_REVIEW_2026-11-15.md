@@ -210,7 +210,7 @@ The funnel label `stage2_dynamically_and_ion_stable` names a property the stage 
 
 ## 7. Lessons to record
 
-Copy these into `docs/LESSONS_LEARNED.md` (in that file's format) in the first commit of task V2. They are kept here so that this branch does not edit a file the phase-2 work is appending to.
+These were added to `docs/LESSONS_LEARNED.md` as L11 to L15 on 2026-11-16.
 
 - **A rule written for the report was not applied to the code that feeds the report.** R2 governed the scorecards while the funnel rejected 68 of 100 candidates on heuristics. Whenever a rule is added, search for every place a decision of that kind is made, and add an audit that counts violations.
 - **A screening rule was never run on a material known to work.** No gate had been tried on Sb2S3 or Sb2Se3. Keep a list of positive controls and run every rule on it.

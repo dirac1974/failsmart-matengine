@@ -60,6 +60,8 @@ For an engineer or coding agent picking this up cold. Findings are in [`AUDIT_20
 
 ## G2. Generated README results block
 
+> Added 2026-11-16: apply the same approach to `outputs/failsmart_dashboard.html`. Its result tables must be generated from the summary file, with no hard-coded result arrays. Overall sequence and rules: [`WORK_ORDER.md`](WORK_ORDER.md).
+
 **Problem.** README and docs quote the previous run (15 finalists, 56 pairs, 42% figures).
 
 **Change.**

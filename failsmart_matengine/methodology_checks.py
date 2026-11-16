@@ -46,6 +46,9 @@ RULES_V: Dict[str, Any] = {
     # other absorbers.
     "offset_ok_low_ev": 0.0,
     "offset_ok_high_ev": 0.4,
+    # Largest band-edge shift between stable surface terminations of low-dimensional
+    # pnictogen chalcohalides. LITERATURE: Lopez et al., arXiv:2610.10136 (2026).
+    "facet_band_edge_spread_ev": 0.8,
     # Temperature-coefficient term gamma in dVoc/dT; 3 is the textbook silicon value.
     "voc_gamma": 3.0,
     # Voltage deficit (Eg/q - Voc) of the best related cell on record. LITERATURE: Sb2S3 at

@@ -368,7 +368,7 @@ def fetch_live_mp_semiconductors(
         records.append(rec)
 
     cpath.parent.mkdir(parents=True, exist_ok=True)
-    cpath.write_text(json.dumps(records, indent=2))
+    cpath.write_text(json.dumps(records, indent=2), encoding="utf-8")
     return records[:max_candidates]
 
 
@@ -1599,7 +1599,8 @@ def run_live_mp_discovery_campaign(
     return summary
 
 
-if __name__ == "__main__":
+def main() -> int:
+    """Command-line entry point: run the live Materials Project campaign."""
     res = run_live_mp_discovery_campaign()
     print("Live MP v4.0-v8.0 Funnel Counts:", json.dumps(res["funnel_counts"], indent=2))
     print(f"\n=== Phase 11A: Synthesis Practicality & Contact Alignment Ranking ({len(res['phase11a_synthesis_contact_dossiers'])} Finalists) ===")
@@ -1629,6 +1630,8 @@ if __name__ == "__main__":
             f"Dem={p11b['demonstrated_path2_utility_lcoe_cents_kwh']:.3f} / Ceil={p11b['path2_utility_lcoe_cents_kwh']:.3f} c/kWh) | "
             f"BreakEven(Util/Roof/Optics)={p11b['utility_breakeven_top_pce_percent']:.2f}%/{p11b['rooftop_breakeven_top_pce_percent']:.2f}%/{p11b['optics_only_breakeven_top_pce_percent']:.2f}%"
         )
+    return 0
 
 
-
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -57,8 +57,10 @@ import glob
 import json
 import math
 import os
+import re
 import sqlite3
 import sys
+import tempfile
 import unittest
 
 # Ensure repo root is on sys.path so failsmart_matengine imports seamlessly
@@ -544,8 +546,9 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
         st2 = stage2_evaluate_stability(cand)
         self.assertTrue(st2.passed_stage2)
 
-        ledger = ContrastiveFailureLedger()
-        st3 = stage3_evaluate_synthesis_and_speciation(cand, ledger)
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdir:
+            ledger = ContrastiveFailureLedger(db_path=os.path.join(tmpdir, "test_ood.db"))
+            st3 = stage3_evaluate_synthesis_and_speciation(cand, ledger)
         self.assertTrue(st3.passed_stage3)
 
         gate = gate_a_adversarial_audit(cand, st2, st3)
@@ -864,9 +867,9 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
             while i < len(lines):
                 line = lines[i].strip()
                 if "nat" in line and "=" in line:
-                    for part in line.replace(",", " ").split():
-                        if part.startswith("nat="):
-                            nat_in_header = int(part.split("=")[1])
+                    m_nat = re.search(r"\bnat\s*=\s*(\d+)", line)
+                    if m_nat:
+                        nat_in_header = int(m_nat.group(1))
                 if line.startswith("ATOMIC_SPECIES"):
                     i += 1
                     while i < len(lines) and lines[i].strip() and not lines[i].strip().startswith(("CELL_PARAMETERS", "ATOMIC_POSITIONS", "K_POINTS", "&")):
@@ -1809,6 +1812,8 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
         pattern = re.compile(r"hse06|r2scan|neb|fnv|mace|doped|cryptograph|validated", re.IGNORECASE)
         exempt_files = {
             root / "docs" / "INDEPENDENT_AUDIT_2026-11.md",
+            root / "docs" / "SCIENCE_RESEARCH_EXAMINATION_FOR_CLAUDE.md",
+            root / "docs" / "QUESTIONS_FOR_CLAUDE.md",
             root / "docs" / "REMEDIATION_TASKS.md",
             root / "docs" / "GAP_CALIBRATION.md",
             # Audit, task and lessons documents describe the method names they warn against
@@ -1950,6 +1955,8 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
         root = Path(self.repo_root)
         exempt_files = {
             root / "docs" / "INDEPENDENT_AUDIT_2026-11.md",
+            root / "docs" / "SCIENCE_RESEARCH_EXAMINATION_FOR_CLAUDE.md",
+            root / "docs" / "QUESTIONS_FOR_CLAUDE.md",
             root / "docs" / "REMEDIATION_TASKS.md",
         }
         forbidden_regex = re.compile(

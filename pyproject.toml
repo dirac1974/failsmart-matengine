@@ -27,6 +27,11 @@ dev = [
     "pytest>=9.0.0",
 ]
 
+[project.scripts]
+failsmart-audit = "failsmart_matengine.repo_auditor:main"
+failsmart-pilot = "failsmart_matengine.orchestrator:main"
+failsmart-mp-live = "failsmart_matengine.mp_live_discovery:main"
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 markers = [

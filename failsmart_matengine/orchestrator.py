@@ -441,8 +441,8 @@ def run_pilot_campaign(
 
         # Emit Quantum ESPRESSO (pw.x) hybrid+SOC input deck (HSE06+SOC not run) & CIF
         qe_in = generate_qe_hybrid_soc_input(cand_dump)
-        (qe_dir / f"{cand.candidate_id}_{cand.formula_reduced}_hse06_soc.in").write_text(qe_in)  # HSE06+SOC not run
-        (qe_dir / f"{cand.candidate_id}_{cand.formula_reduced}.cif").write_text(cand.cif_content)
+        (qe_dir / f"{cand.candidate_id}_{cand.formula_reduced}_hse06_soc.in").write_text(qe_in, encoding="utf-8")  # HSE06+SOC not run
+        (qe_dir / f"{cand.candidate_id}_{cand.formula_reduced}.cif").write_text(cand.cif_content, encoding="utf-8")
 
         dossier = {
             "candidate": cand_dump,
@@ -497,11 +497,12 @@ def run_pilot_campaign(
         "all_campaign_records": campaign_records,
         "ledger_entries": ledger.fetch_all(),
     }
-    (out_path / "pilot_campaign_summary.json").write_text(json.dumps(summary, indent=2))
+    (out_path / "pilot_campaign_summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
     return summary
 
 
-if __name__ == "__main__":
+def main() -> int:
+    """Command-line entry point: run the pilot campaign."""
     res = run_pilot_campaign()
     print("Funnel Counts:", json.dumps(res["funnel_counts"], indent=2))
     print("\nPromoted Prescreen Finalists:")
@@ -521,3 +522,8 @@ if __name__ == "__main__":
             f"4T(std-Si)={o['tandem_4t_std_si_fca_eff_percent']:.2f}%, 4T(low-FCA)={o['tandem_4t_total_eff_percent']:.2f}%, "
             f"SHA256={v['sha256_digest'][:12]}"
         )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

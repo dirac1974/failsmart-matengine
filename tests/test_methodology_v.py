@@ -336,9 +336,11 @@ def test_v8_band_edge_estimates_are_benchmarked_and_classified_with_their_error(
     from failsmart_matengine.schemas import Phase11ASynthesisContactDossier
 
     assert "contact_alignment_class" in Phase11ASynthesisContactDossier.model_fields
+    assert "contact_flags" in Phase11ASynthesisContactDossier.model_fields
     allowed = {"NOT_EVALUATED", "IN_RANGE", "CLIFF", "BARRIER", "UNRESOLVED"}
     for d in _summary()["phase11a_synthesis_contact_dossiers"]:
         assert d["contact_alignment_class"] in allowed
+        assert set(d["contact_flags"]) <= {"FACET_DEPENDENT_BAND_EDGES"}
         expected = mc.classify_band_offset(d["best_cbo_ev"], None if d["best_cbo_ev"] is None else model["rmse_ev"])
         assert d["contact_alignment_class"] == expected
 

@@ -10,7 +10,7 @@
 
 ## 0. Ground rules (read every time)
 
-1. **Start only after the phase-2 tasks (G1 to G9) and the failure-data tasks (F1 to F5) are merged into the branch you work on.** V2, V6, V7 and V8 edit files those tasks edit.
+1. **Start only after tasks M1 to M5 ([`WORK_ORDER.md`](WORK_ORDER.md)), the phase-2 tasks (G1 to G9) and the failure-data tasks (F1 to F5) are merged into `main`.** V2, V6, V7 and V8 edit files those tasks edit. The work order gives the overall sequence and rules.
 2. **One task per pull request.** Do the tasks in the order of the Status table.
 3. **A task is closed when** its test in `tests/test_methodology_v.py` passes, you delete that test's `@pytest.mark.xfail` line in the same commit, and `pytest -q` passes in full.
 4. **Never edit the body of a test in `tests/test_methodology_v.py`.** If a test seems wrong, stop and tell the owner.
@@ -76,7 +76,7 @@ Everything else becomes a flag.
 
 **Steps.**
 
-1. Copy the five lessons from section 7 of the review into `docs/LESSONS_LEARNED.md`, in that file's format.
+1. Confirm that lessons L11 to L15 are in `docs/LESSONS_LEARNED.md` (they were added on 2026-11-16). Nothing to copy.
 2. In `build_live_mp_candidate_dossier`, directly after `cand_dump = cand.model_dump()`, add `screening_flags: List[str] = []`.
 3. **Stage 2.** Keep computing `born_ok`, `hull_ok`, `ion_ok` and keep storing them in `StabilityReport`. Change:
    - `passed_s2 = bool(hull_ok)`.
@@ -333,7 +333,8 @@ temp_rep = top_cell_temperature_report(eg_ind_1)
 3. Write `scripts/benchmark_band_edges.py`. For each row: get `stoich` from `pymatgen.core.Composition(formula)` as integer counts, then `cbm, _ = estimate_band_edges(stoich, measured_gap_ev)`; error is `(-cbm) - measured_electron_affinity_ev`. Write `data/band_edge_model.json` with `n`, `mae_ev`, `rmse_ev`, `bias_ev`, `max_abs_ev` and a `per_compound` list.
 4. In `schemas.py`, class `Phase11ASynthesisContactDossier`, add `contact_alignment_class: str = "NOT_EVALUATED"`.
 5. In `evaluate_phase11a_synthesis_and_contacts`, set it with `methodology_checks.classify_band_offset(best_cbo, rmse)` where `rmse` is `rmse_ev` read from `data/band_edge_model.json`. In the early-return branch where `best_cbo_ev=None`, leave it `"NOT_EVALUATED"`.
-6. Rerun the funnel.
+6. In the same schema class add `contact_flags: List[str] = []`. In `evaluate_phase11a_synthesis_and_contacts`, when the candidate's `structural_dimensionality` is `"1D-Chain"` or `"Quasi-2D"`, set it to `["FACET_DEPENDENT_BAND_EDGES"]`. Reason: surface terminations of low-dimensional pnictogen chalcohalides shift band edges by up to 0.8 eV (`RULES_V["facet_band_edge_spread_ev"]`, arXiv:2610.10136), more than the acceptable offset range. It is a flag; it changes no score.
+7. Rerun the funnel.
 
 **Expect** many dossiers to read `UNRESOLVED`. If the error is as large as the acceptable range, that is the correct answer.
 
