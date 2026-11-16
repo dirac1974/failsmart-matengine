@@ -76,6 +76,30 @@ Before any dataset influences ranking, an ablation must show it predicts held-ou
 
 A candidate is "new" only after a literature check for that exact phase (existence, measured gap, reported devices). Record the search and its date. Related-material records in `data/device_failure_records.csv` each carry the source and the date it was opened.
 
+### R10. The funnel obeys R2
+
+R2 applies to every place a candidate can be removed, not only to the cards. `GATE_REGISTRY` in [`methodology_checks.py`](../failsmart_matengine/methodology_checks.py) lists every failure mode, its evidence tier and the flag that replaces it when the tier is too weak to reject. `python -m failsmart_matengine.methodology_checks audit` counts violations. A phase that has been synthesised is never rejected as unstable by an estimate.
+
+### R11. Every screening rule is run on materials known to work
+
+`data/positive_controls.csv` lists compounds with a published working cell. A rule that removes one of them on weak evidence is wrong until shown otherwise. Controls are never removed to make a rule pass.
+
+### R12. An acceptance window is compared with the error of the evidence tested against it
+
+Next to a window probability, report its ceiling: the best value any estimate with that error bar could reach (`window_probability_ceiling`). The top-cell window follows from the device model and an assumed top-cell quality; it is the owner's decision, recorded in `data/window_decision.json`.
+
+### R13. No single score, no unsourced multiplier, no bonus for being unexplored
+
+Cards keep four axes. Mitigations such as passivation are sourced records shown on the card, never a factor applied to a number. Few published attempts is not evidence of merit (see R9).
+
+### R14. Calculations are ordered by expected result per unit of compute
+
+Inside a queue class, order by window probability divided by relative cost (`queue_priority`). Compounds with measured gaps are calculated before any candidate, because they set the error bar.
+
+### R15. Look for a published calculation before running one
+
+A published value is tested on the measured benchmark first (R8) and used only if it beats the current estimate with an interval that excludes zero.
+
 ---
 
 ## 5. Thresholds
