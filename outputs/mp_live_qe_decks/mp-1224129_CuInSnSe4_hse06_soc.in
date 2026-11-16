@@ -1,6 +1,6 @@
-! FailSmart-MatEngine v2.0 Auto-Generated Quantum ESPRESSO HSE06+SOC Input Deck
+! FailSmart-MatEngine Auto-Generated Quantum ESPRESSO HSE06+SOC Input Deck (not run)
 ! Candidate: mp-1224129 (CuInSnSe4) | Target: BOTTOM_IR_075EV
-! Verified Space Group: I-4 (#82) | nat = 7
+! Space Group: I-4 (#82) | nat = 7
 &CONTROL
   calculation = 'scf',
   prefix = 'cuinsnse4',
@@ -20,7 +20,7 @@
   noncolin = .true.,
   lspinorb = .true.,
   input_dft = 'hse',
-  nqx1 = 2, nqx2 = 2, nqx3 = 2,
+  nqx1 = 1, nqx2 = 1, nqx3 = 1,
   x_gamma_extrapolation = .true.,
 /
 &ELECTRONS

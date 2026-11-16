@@ -1,6 +1,6 @@
-! FailSmart-MatEngine v2.0 Auto-Generated Quantum ESPRESSO HSE06+SOC Input Deck
+! FailSmart-MatEngine Auto-Generated Quantum ESPRESSO HSE06+SOC Input Deck (not run)
 ! Candidate: mp-1223998 (Bi3InSe6) | Target: BOTTOM_IR_075EV
-! Verified Space Group: R3m (#160) | nat = 10
+! Space Group: R3m (#160) | nat = 10
 &CONTROL
   calculation = 'scf',
   prefix = 'bi3inse6',

@@ -1,0 +1,329 @@
+{
+  "schema_version": "0.8.0",
+  "description": "T4 literature gate on the eight original v3-v8 Materials Project finalists plus mp-1195160 (Al2Bi2Cu2S3Cl8, promoted after T6). Every literature value comes from an opened primary or review source; values not verified in an opened source are stored as null and listed in unresolved_fields.",
+  "finalists": [
+    {
+      "mp_id": "mp-861911",
+      "formula": "Sb2OS2",
+      "mp_space_group_symbol": "C2/m",
+      "mp_space_group_number": 12,
+      "mp_crystal_system": "Monoclinic",
+      "mp_nsites_unit_cell": 10,
+      "mp_pbe_band_gap_ev": 1.212,
+      "mp_energy_above_hull_mev": 7.07,
+      "mp_marked_experimentally_known": false,
+      "icsd_ids": [],
+      "corresponds_to_synthesised_phase": false,
+      "synthesised_phase_description": "No. mp-861911 is a theoretical monoclinic C2/m polymorph (10 atoms/cell, dE_hull = 7.07 meV/atom, no ICSD entries). The experimentally synthesised mineral kermesite (Sb2OS2 / Sb2S2O) crystallizes in triclinic P-1 (20 atoms/cell, mp-28711, ICSD-12120/68346/189831-189835, dE_hull = 1.07 meV/atom) with a bulk fundamental optical band gap of 2.04 eV (nanoribbon indirect 1.59 eV, direct 2.13 eV).",
+      "related_experimental_mp_id": "mp-28711",
+      "related_experimental_phase_gap_ev": 2.04,
+      "measured_optical_gap_ev": null,
+      "reported_pv_device": null,
+      "unresolved_fields": [
+        "measured_optical_gap_ev (mp-861911 C2/m polymorph is un-synthesised; triclinic kermesite mp-28711 has bulk gap 2.04 eV)",
+        "reported_pv_device (no solar cell device found in opened sources for monoclinic C2/m Sb2OS2)"
+      ],
+      "citations": [
+        {
+          "doi": "10.48550/arXiv.2602.08622",
+          "url": "https://arxiv.org/pdf/2602.08622",
+          "note": "Reports bulk kermesite Sb2S2O (triclinic P-1) band gap of 2.04 eV and nanoribbon indirect/direct gaps of 1.59/2.13 eV."
+        },
+        {
+          "doi": null,
+          "url": "https://www.mindat.org/min-2187.html",
+          "note": "Mineralogical crystallography of kermesite (Sb2S2O): triclinic P-1."
+        }
+      ],
+      "provenance": {
+        "mp_pbe_band_gap_ev": "MP_DFT",
+        "mp_energy_above_hull_mev": "MP_DFT",
+        "corresponds_to_synthesised_phase": "LITERATURE",
+        "related_experimental_phase_gap_ev": "LITERATURE",
+        "measured_optical_gap_ev": "LITERATURE",
+        "reported_pv_device": "LITERATURE"
+      }
+    },
+    {
+      "mp_id": "mp-1227486",
+      "formula": "BiSbS3",
+      "mp_space_group_symbol": "Pnma",
+      "mp_space_group_number": 62,
+      "mp_crystal_system": "Orthorhombic",
+      "mp_nsites_unit_cell": 20,
+      "mp_pbe_band_gap_ev": 1.348,
+      "mp_energy_above_hull_mev": 2.3,
+      "mp_marked_experimentally_known": false,
+      "icsd_ids": [],
+      "corresponds_to_synthesised_phase": false,
+      "synthesised_phase_description": "No. mp-1227486 is a theoretical cation-ordered Pnma 1:1 supercell (20 atoms/cell, no ICSD ID). Experimentally, (Bi_x Sb_{1-x})2S3 is synthesised as a disordered orthorhombic Pnma solid solution spanning stibnite Sb2S3 (mp-2809, 1.70 eV) and bismuthinite Bi2S3 (mp-22856, 1.32 eV), rather than a stoichiometric site-ordered BiSbS3 line compound.",
+      "related_experimental_mp_id": "mp-2809 / mp-22856",
+      "related_experimental_phase_gap_ev": null,
+      "measured_optical_gap_ev": null,
+      "reported_pv_device": null,
+      "unresolved_fields": [
+        "measured_optical_gap_ev (ordered mp-1227486 BiSbS3 has no isolated experimental gap measurement in opened sources; end-members are 1.32 eV Bi2S3 and 1.70 eV Sb2S3)",
+        "reported_pv_device (no ordered BiSbS3 PV device record in opened sources)"
+      ],
+      "citations": [
+        {
+          "doi": "10.3390/nano12020198",
+          "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8777826/",
+          "note": "Pnma Sb2S3 experimental band gap 1.70 eV."
+        },
+        {
+          "doi": "10.1007/s40820-022-00822-8",
+          "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8956779/",
+          "note": "Pnma Bi2S3 experimental band gap 1.32 eV."
+        }
+      ],
+      "provenance": {
+        "mp_pbe_band_gap_ev": "MP_DFT",
+        "mp_energy_above_hull_mev": "MP_DFT",
+        "corresponds_to_synthesised_phase": "LITERATURE",
+        "measured_optical_gap_ev": "LITERATURE",
+        "reported_pv_device": "LITERATURE"
+      }
+    },
+    {
+      "mp_id": "mp-1078776",
+      "formula": "BiInS3",
+      "mp_space_group_symbol": "P2_1/m",
+      "mp_space_group_number": 11,
+      "mp_crystal_system": "Monoclinic",
+      "mp_nsites_unit_cell": 10,
+      "mp_pbe_band_gap_ev": 1.396,
+      "mp_energy_above_hull_mev": 15.08,
+      "mp_marked_experimentally_known": false,
+      "icsd_ids": [
+        "icsd-290195"
+      ],
+      "corresponds_to_synthesised_phase": null,
+      "synthesised_phase_description": "Unclear/theoretical in Materials Project (theoretical=True, dE_hull = 15.08 meV/atom, monoclinic P2_1/m, 10 atoms/cell), although linked to ICSD-290195. No primary experimental synthesis or optical measurement of P2_1/m BiInS3 could be verified in an opened source.",
+      "related_experimental_mp_id": null,
+      "related_experimental_phase_gap_ev": null,
+      "measured_optical_gap_ev": null,
+      "reported_pv_device": null,
+      "unresolved_fields": [
+        "corresponds_to_synthesised_phase (linked to ICSD-290195 in MP metadata but flagged theoretical=True; primary crystal structure paper not open-access)",
+        "measured_optical_gap_ev",
+        "reported_pv_device"
+      ],
+      "citations": [],
+      "provenance": {
+        "mp_pbe_band_gap_ev": "MP_DFT",
+        "mp_energy_above_hull_mev": "MP_DFT",
+        "corresponds_to_synthesised_phase": "MP_DFT",
+        "measured_optical_gap_ev": "LITERATURE",
+        "reported_pv_device": "LITERATURE"
+      }
+    },
+    {
+      "mp_id": "mp-1223998",
+      "formula": "Bi3InSe6",
+      "mp_space_group_symbol": "R3m",
+      "mp_space_group_number": 160,
+      "mp_crystal_system": "Trigonal",
+      "mp_nsites_unit_cell": 10,
+      "mp_pbe_band_gap_ev": 0.524,
+      "mp_energy_above_hull_mev": 17.99,
+      "mp_marked_experimentally_known": false,
+      "icsd_ids": [],
+      "corresponds_to_synthesised_phase": false,
+      "synthesised_phase_description": "No. mp-1223998 (In(BiSe2)3 / Bi3InSe6, trigonal R3m, 10 atoms/cell, dE_hull = 17.99 meV/atom) is a theoretical Materials Project substitution structure with no ICSD entry and no experimental report.",
+      "related_experimental_mp_id": null,
+      "related_experimental_phase_gap_ev": null,
+      "measured_optical_gap_ev": null,
+      "reported_pv_device": null,
+      "unresolved_fields": [
+        "measured_optical_gap_ev (theoretical R3m phase, not synthesised)",
+        "reported_pv_device (theoretical R3m phase, no device)"
+      ],
+      "citations": [],
+      "provenance": {
+        "mp_pbe_band_gap_ev": "MP_DFT",
+        "mp_energy_above_hull_mev": "MP_DFT",
+        "corresponds_to_synthesised_phase": "MP_DFT",
+        "measured_optical_gap_ev": "LITERATURE",
+        "reported_pv_device": "LITERATURE"
+      }
+    },
+    {
+      "mp_id": "mp-1224922",
+      "formula": "CuGaSnSe4",
+      "mp_space_group_symbol": "I-4",
+      "mp_space_group_number": 82,
+      "mp_crystal_system": "Tetragonal",
+      "mp_nsites_unit_cell": 7,
+      "mp_pbe_band_gap_ev": 0.417,
+      "mp_energy_above_hull_mev": 3.61,
+      "mp_marked_experimentally_known": false,
+      "icsd_ids": [],
+      "corresponds_to_synthesised_phase": false,
+      "synthesised_phase_description": "No for the ordered defect-chalcopyrite cell mp-1224922 (tetragonal I-4, 7 atoms/cell, theoretical=True, no ICSD entry). While disordered tetragonal CuGaSnSe4 solid solutions exist in literature, no open-access primary optical gap or device record was verified in an opened source.",
+      "related_experimental_mp_id": null,
+      "related_experimental_phase_gap_ev": null,
+      "measured_optical_gap_ev": null,
+      "reported_pv_device": null,
+      "unresolved_fields": [
+        "measured_optical_gap_ev (not verified in an opened primary source)",
+        "reported_pv_device (not verified in an opened primary source)"
+      ],
+      "citations": [],
+      "provenance": {
+        "mp_pbe_band_gap_ev": "MP_DFT",
+        "mp_energy_above_hull_mev": "MP_DFT",
+        "corresponds_to_synthesised_phase": "MP_DFT",
+        "measured_optical_gap_ev": "LITERATURE",
+        "reported_pv_device": "LITERATURE"
+      }
+    },
+    {
+      "mp_id": "mp-22982",
+      "formula": "CuBiS2",
+      "mp_space_group_symbol": "Pnma",
+      "mp_space_group_number": 62,
+      "mp_crystal_system": "Orthorhombic",
+      "mp_nsites_unit_cell": 16,
+      "mp_pbe_band_gap_ev": 0.467,
+      "mp_energy_above_hull_mev": 0.0,
+      "mp_marked_experimentally_known": true,
+      "icsd_ids": [
+        "icsd-85134",
+        "icsd-34936",
+        "icsd-38779",
+        "icsd-171052"
+      ],
+      "corresponds_to_synthesised_phase": true,
+      "synthesised_phase_description": "Yes. Orthorhombic Pnma emplectite (CuBiS2, 16 atoms/cell, ICSD-85134/34936/38779/171052, dE_hull = 0.0 meV/atom). However, its measured optical band gap is 1.50-1.65 eV (1.65 eV thin film in Temple et al., Phys. Chem. Chem. Phys. 2012), nearly double the old heuristic estimate of 0.85 eV, making it completely unsuitable as a 0.70-0.85 eV bottom IR scavenger.",
+      "related_experimental_mp_id": "mp-22982",
+      "related_experimental_phase_gap_ev": 1.65,
+      "measured_optical_gap_ev": 1.65,
+      "reported_pv_device": null,
+      "unresolved_fields": [
+        "reported_pv_device (Temple et al. 2012 evaluates CuBiS2 as a prospective thin-film absorber; no certified PV cell efficiency verified in opened sources)"
+      ],
+      "citations": [
+        {
+          "doi": "10.1039/c2cp40916j",
+          "url": "https://kh.aquaenergyexpo.com/wp-content/uploads/2023/04/Structural-and-Electronic-Properties-of-CuSbS2-and-CuBiS2-Potential-Absorber-Materials-for-Thin-Film-Solar-Cells.pdf",
+          "note": "Temple, Kehoe, Scanlon & Watson (Phys. Chem. Chem. Phys. 2012, 14, 7099): Pnma emplectite CuBiS2 experimental optical absorption onset 1.65 eV (literature range 1.50-1.65 eV); HSE06 fundamental indirect gap 1.58 eV, direct gap 1.69 eV."
+        }
+      ],
+      "provenance": {
+        "mp_pbe_band_gap_ev": "MP_DFT",
+        "mp_energy_above_hull_mev": "MP_DFT",
+        "corresponds_to_synthesised_phase": "LITERATURE",
+        "measured_optical_gap_ev": "LITERATURE",
+        "reported_pv_device": "LITERATURE"
+      }
+    },
+    {
+      "mp_id": "mp-23474",
+      "formula": "AgBi3S5",
+      "mp_space_group_symbol": "C2/m",
+      "mp_space_group_number": 12,
+      "mp_crystal_system": "Monoclinic",
+      "mp_nsites_unit_cell": 18,
+      "mp_pbe_band_gap_ev": 0.526,
+      "mp_energy_above_hull_mev": 0.0,
+      "mp_marked_experimentally_known": true,
+      "icsd_ids": [
+        "icsd-200110",
+        "icsd-171229"
+      ],
+      "corresponds_to_synthesised_phase": true,
+      "synthesised_phase_description": "Yes. Monoclinic C2/m pavonite (AgBi3S5, 18 atoms/cell, ICSD-200110/171229, dE_hull = 0.0 meV/atom), confirmed as a stable equilibrium ternary line compound on the Ag2S-Bi2S3 pseudo-binary phase diagram.",
+      "related_experimental_mp_id": "mp-23474",
+      "related_experimental_phase_gap_ev": null,
+      "measured_optical_gap_ev": null,
+      "reported_pv_device": null,
+      "unresolved_fields": [
+        "measured_optical_gap_ev (not reported in opened open-access full texts)",
+        "reported_pv_device (no AgBi3S5 PV device reported in opened full texts)"
+      ],
+      "citations": [
+        {
+          "doi": "10.3390/mi14122211",
+          "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10746013/",
+          "note": "Confirms AgBi3S5 as a known equilibrium ternary phase along the Ag2S-Bi2S3 tie-line alongside AgBiS2."
+        }
+      ],
+      "provenance": {
+        "mp_pbe_band_gap_ev": "MP_DFT",
+        "mp_energy_above_hull_mev": "MP_DFT",
+        "corresponds_to_synthesised_phase": "LITERATURE",
+        "measured_optical_gap_ev": "LITERATURE",
+        "reported_pv_device": "LITERATURE"
+      }
+    },
+    {
+      "mp_id": "mp-1224129",
+      "formula": "CuInSnSe4",
+      "mp_space_group_symbol": "I-4",
+      "mp_space_group_number": 82,
+      "mp_crystal_system": "Tetragonal",
+      "mp_nsites_unit_cell": 7,
+      "mp_pbe_band_gap_ev": 0.357,
+      "mp_energy_above_hull_mev": 5.17,
+      "mp_marked_experimentally_known": false,
+      "icsd_ids": [],
+      "corresponds_to_synthesised_phase": false,
+      "synthesised_phase_description": "No for the ordered defect-chalcopyrite cell mp-1224129 (tetragonal I-4, 7 atoms/cell, theoretical=True, no ICSD entry). No open-access primary optical gap or device record was verified in an opened source.",
+      "related_experimental_mp_id": null,
+      "related_experimental_phase_gap_ev": null,
+      "measured_optical_gap_ev": null,
+      "reported_pv_device": null,
+      "unresolved_fields": [
+        "measured_optical_gap_ev (not verified in an opened primary source)",
+        "reported_pv_device (not verified in an opened primary source)"
+      ],
+      "citations": [],
+      "provenance": {
+        "mp_pbe_band_gap_ev": "MP_DFT",
+        "mp_energy_above_hull_mev": "MP_DFT",
+        "corresponds_to_synthesised_phase": "MP_DFT",
+        "measured_optical_gap_ev": "LITERATURE",
+        "reported_pv_device": "LITERATURE"
+      }
+    },
+    {
+      "mp_id": "mp-1195160",
+      "formula": "Al2Bi2Cu2S3Cl8",
+      "mp_space_group_symbol": "P6_3/m",
+      "mp_space_group_number": 176,
+      "mp_crystal_system": "Hexagonal",
+      "mp_nsites_unit_cell": 34,
+      "mp_pbe_band_gap_ev": 1.272,
+      "mp_energy_above_hull_mev": 6.02,
+      "mp_marked_experimentally_known": true,
+      "icsd_ids": [
+        "icsd-428727"
+      ],
+      "corresponds_to_synthesised_phase": true,
+      "synthesised_phase_description": "Yes. Hexagonal P6_3/m CuBiSCl2(AlCl3) / Al2Cu2Bi2S3Cl8 (34 atoms/cell, ICSD-428727, dE_hull = 6.03 meV/atom). Listed in Table 1 of Adv. Sci. 2025 (PMC12097054) as an experimentally synthesised quaternary chalcohalide with theoretical PBE band gap 1.27 eV and experimental band gap explicitly marked unmeasured ('-').",
+      "related_experimental_mp_id": "mp-1195160",
+      "related_experimental_phase_gap_ev": null,
+      "measured_optical_gap_ev": null,
+      "reported_pv_device": null,
+      "unresolved_fields": [
+        "measured_optical_gap_ev (Table 1 of DOI 10.1002/advs.202413131 explicitly lists Bandgap (Exp.) as '-' / not measured)",
+        "reported_pv_device (Table 1 of DOI 10.1002/advs.202413131 lists no photovoltaic device)"
+      ],
+      "citations": [
+        {
+          "doi": "10.1002/advs.202413131",
+          "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12097054/",
+          "note": "Adv. Sci. 2025 review of metal chalcohalides, Table 1: CuBiSCl2(AlCl3), P6_3/m, Bandgap (Exp.): -, Bandgap (Theory): 1.27 eV."
+        }
+      ],
+      "provenance": {
+        "mp_pbe_band_gap_ev": "MP_DFT",
+        "mp_energy_above_hull_mev": "MP_DFT",
+        "corresponds_to_synthesised_phase": "LITERATURE",
+        "measured_optical_gap_ev": "LITERATURE",
+        "reported_pv_device": "LITERATURE"
+      }
+    }
+  ]
+}

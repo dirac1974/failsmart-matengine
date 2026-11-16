@@ -1,6 +1,6 @@
-! FailSmart-MatEngine v2.0 Auto-Generated Quantum ESPRESSO HSE06+SOC Input Deck
+! FailSmart-MatEngine Auto-Generated Quantum ESPRESSO HSE06+SOC Input Deck (not run)
 ! Candidate: mp-1078776 (BiInS3) | Target: TOP_ACTIVE_GLASS_185EV
-! Verified Space Group: P2_1/m (#11) | nat = 10
+! Space Group: P2_1/m (#11) | nat = 10
 &CONTROL
   calculation = 'scf',
   prefix = 'biins3',

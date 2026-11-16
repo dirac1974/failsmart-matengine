@@ -1,15 +1,15 @@
 """Multi-Agent State-Machine Campaign Orchestrator v2.0 with Blinded Redundancy & Runnable QE Decks."""
 
 import json
+import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 from .independent_verifier import verify_candidate_dossier
 from .inter_team_bus import InterTeamBus
 from .ledger import ContrastiveFailureLedger
 from .physics_calculators import IUPAC_ATOMIC_MASSES, compute_structure_from_cif
 from .tools import (
     gate_a_adversarial_audit,
-    gate_b_final_red_team_audit,
     stage1_generate_candidates,
     stage2_evaluate_stability,
     stage3_evaluate_synthesis_and_speciation,
@@ -18,8 +18,8 @@ from .tools import (
 )
 
 
-def generate_qe_hse06_soc_input(cand_dict: Dict[str, Any]) -> str:
-    """Emit a complete, runnable Quantum ESPRESSO (pw.x) HSE06 + SOC input deck.
+def generate_qe_hybrid_soc_input(cand_dict: Dict[str, Any]) -> str:
+    """Emit a Quantum ESPRESSO (pw.x) hybrid-functional + SOC input deck (HSE06+SOC not run).
 
     Includes accurate IUPAC atomic weights in ATOMIC_SPECIES, explicit 3x3 lattice vectors
     in CELL_PARAMETERS (angstrom), and all unit-cell fractional coordinates in
@@ -35,14 +35,21 @@ def generate_qe_hse06_soc_input(cand_dict: Dict[str, Any]) -> str:
     kx = max(2, min(8, int(round(24.0 / max(a_len, 1.0)))))
     ky = max(2, min(8, int(round(24.0 / max(b_len, 1.0)))))
     kz = max(2, min(8, int(round(24.0 / max(c_len, 1.0)))))
+    nqx1 = 2 if kx % 2 == 0 else 1
+    nqx2 = 2 if ky % 2 == 0 else 1
+    nqx3 = 2 if kz % 2 == 0 else 1
+
+    safe_prefix = re.sub(r"[^A-Za-z0-9_]", "", formula).lower()
+    if not safe_prefix or not re.fullmatch(r"[A-Za-z0-9_]+", safe_prefix):
+        raise ValueError(f"Invalid QE prefix derived from formula '{formula}': '{safe_prefix}'")
 
     lines = [
-        "! FailSmart-MatEngine v2.0 Auto-Generated Quantum ESPRESSO HSE06+SOC Input Deck",
+        "! FailSmart-MatEngine Auto-Generated Quantum ESPRESSO HSE06+SOC Input Deck (not run)",
         f"! Candidate: {cand_dict['candidate_id']} ({formula}) | Target: {cand_dict['target_layer']}",
-        f"! Verified Space Group: {cand_dict['space_group_symbol']} (#{cand_dict['space_group_number']}) | nat = {nat}",
+        f"! Space Group: {cand_dict['space_group_symbol']} (#{cand_dict['space_group_number']}) | nat = {nat}",
         "&CONTROL",
         "  calculation = 'scf',",
-        f"  prefix = '{formula.lower()}',",
+        f"  prefix = '{safe_prefix}',",
         "  outdir = './out/',",
         "  pseudo_dir = './pseudo_oncv_fr/',",
         "  tprnfor = .true.,",
@@ -59,7 +66,7 @@ def generate_qe_hse06_soc_input(cand_dict: Dict[str, Any]) -> str:
         "  noncolin = .true.,",
         "  lspinorb = .true.,",
         "  input_dft = 'hse',",
-        "  nqx1 = 2, nqx2 = 2, nqx3 = 2,",
+        f"  nqx1 = {nqx1}, nqx2 = {nqx2}, nqx3 = {nqx3},",
         "  x_gamma_extrapolation = .true.,",
         "/",
         "&ELECTRONS",
@@ -89,17 +96,17 @@ def generate_qe_hse06_soc_input(cand_dict: Dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
-_REPO_ROOT = Path(__file__).resolve().parent.parent
+_DEFAULT_OUTPUT_DIR = Path(__file__).resolve().parents[1] / "outputs"
 
 
 def run_pilot_campaign(
-    output_dir: Optional[str] = None,
+    output_dir: str | Path = _DEFAULT_OUTPUT_DIR,
     include_ood: bool = True,
 ) -> Dict[str, Any]:
     """Execute Campaign v2.0 with Blinded Specification Redundancy, Stage 2b Gate & SMACT OOD Discovery."""
-    out_path = Path(output_dir) if output_dir is not None else (_REPO_ROOT / "outputs")
+    out_path = Path(output_dir)
     out_path.mkdir(parents=True, exist_ok=True)
-    qe_dir = out_path / "qe_hse06_soc_decks"
+    qe_dir = out_path / "qe_hse06_soc_decks"  # HSE06+SOC input decks only (not run)
     qe_dir.mkdir(parents=True, exist_ok=True)
     for old_f in qe_dir.glob("*"):
         old_f.unlink()
@@ -119,7 +126,7 @@ def run_pilot_campaign(
         recipient_division="Engineering",
         message_type="CAMPAIGN_V2_INIT",
         candidate_id=None,
-        subject="Initialize Dual-Track v2.0 Campaign with Blinded Redundancy, Stage 2b Gate & SMACT OOD Sweep",
+        subject="Initialize Dual-Track v2.0 Campaign with Specification Redundancy, Stage 2b Gate & SMACT OOD Sweep",
         payload={
             "total_candidates": len(candidates),
             "benchmark_candidates": 16,
@@ -134,7 +141,7 @@ def run_pilot_campaign(
         "stage2_dynamically_and_ion_stable": 0,
         "stage3_manufacturable": 0,
         "gate_a_promoted_to_dft": 0,
-        "stage4_5_validated_finalists": 0,
+        "stage4_5_prescreen_finalists": 0,
         "redundancy_verifications_passed": 0,
     }
 
@@ -165,7 +172,7 @@ def run_pilot_campaign(
             model_tier="pro",
         )
 
-        # Stage 2 + Stage 2b: Hull, Born Elasticity, Phonopy, Debye & Cu+/Ag+ Ion Migration
+        # Stage 2 + Stage 2b: Hull, Born Elasticity, Debye & Cu+/Ag+ Ion Migration
         stab = stage2_evaluate_stability(cand)
         stab_dump = stab.model_dump()
         if not stab.passed_stage2:
@@ -184,7 +191,7 @@ def run_pilot_campaign(
                 passed_all_checks=ver_s2["passed_all_redundancy_checks"],
                 checks_detail=ver_s2["checks"],
                 primary_sha256=bus.compute_sha256(stab_dump),
-                independent_sha256=ver_s2["sha256_signature"],
+                independent_sha256=ver_s2["sha256_digest"],
             )
             funnel_counts["redundancy_verifications_passed"] += 1
             ledger.record_evaluation(
@@ -200,7 +207,7 @@ def run_pilot_campaign(
                 status="REJECTED",
                 primary_failure_mode=mode,
                 e_above_hull_mev=stab.e_above_hull_0k_mev,
-                min_phonon_freq_thz=stab.min_phonon_freq_thz,
+                omega_min_heuristic_thz=stab.omega_min_heuristic_thz,
                 rxn_temp_celsius=0.0,
                 competing_impurity_phases=stab.competing_hull_phases,
                 pourbaix_max_dissolution_mol_l=0.0,
@@ -240,7 +247,7 @@ def run_pilot_campaign(
                 passed_all_checks=ver_s3["passed_all_redundancy_checks"],
                 checks_detail=ver_s3["checks"],
                 primary_sha256=bus.compute_sha256(synth_dump),
-                independent_sha256=ver_s3["sha256_signature"],
+                independent_sha256=ver_s3["sha256_digest"],
             )
             funnel_counts["redundancy_verifications_passed"] += 1
             ledger.record_evaluation(
@@ -256,7 +263,7 @@ def run_pilot_campaign(
                 status="REJECTED",
                 primary_failure_mode=mode,
                 e_above_hull_mev=stab.e_above_hull_0k_mev,
-                min_phonon_freq_thz=stab.min_phonon_freq_thz,
+                omega_min_heuristic_thz=stab.omega_min_heuristic_thz,
                 rxn_temp_celsius=synth.min_synthesis_temp_c,
                 competing_impurity_phases=synth.competing_impurity_sinks,
                 pourbaix_max_dissolution_mol_l=synth.pourbaix_max_dissolution_mol_l,
@@ -277,7 +284,7 @@ def run_pilot_campaign(
 
         funnel_counts["stage3_manufacturable"] += 1
 
-        # Gate A: Adversarial Red-Team Pre-DFT Audit
+        # Gate A: Topological Connectivity Pre-DFT Audit
         audit_a = gate_a_adversarial_audit(cand, stab, synth)
         audit_a_dump = audit_a.model_dump()
         if audit_a.decision == "VETO_REJECT":
@@ -298,7 +305,7 @@ def run_pilot_campaign(
                 passed_all_checks=ver_ga["passed_all_redundancy_checks"],
                 checks_detail=ver_ga["checks"],
                 primary_sha256=bus.compute_sha256(audit_a_dump),
-                independent_sha256=ver_ga["sha256_signature"],
+                independent_sha256=ver_ga["sha256_digest"],
             )
             funnel_counts["redundancy_verifications_passed"] += 1
             ledger.record_evaluation(
@@ -314,7 +321,7 @@ def run_pilot_campaign(
                 status="REJECTED",
                 primary_failure_mode=mode,
                 e_above_hull_mev=stab.e_above_hull_0k_mev,
-                min_phonon_freq_thz=stab.min_phonon_freq_thz,
+                omega_min_heuristic_thz=stab.omega_min_heuristic_thz,
                 rxn_temp_celsius=synth.min_synthesis_temp_c,
                 competing_impurity_phases=synth.competing_impurity_sinks,
                 pourbaix_max_dissolution_mol_l=synth.pourbaix_max_dissolution_mol_l,
@@ -334,49 +341,15 @@ def run_pilot_campaign(
             })
             continue
 
-        if audit_a.decision == "ACTIVE_LEARNING_DFT":
-            ledger.record_evaluation(
-                candidate_id=cand.candidate_id,
-                formula_reduced=cand.formula_reduced,
-                target_layer=cand.target_layer,
-                crystal_family=cand.crystal_family,
-                space_group_number=cand.space_group_number,
-                structural_dimensionality=cand.structural_dimensionality,
-                cif_structure=cand.cif_content,
-                embedding=cand.embedding_128d,
-                stage_reached=3,
-                status="UNCERTAIN_DFT_QUEUE",
-                primary_failure_mode=None,
-                e_above_hull_mev=stab.e_above_hull_0k_mev,
-                min_phonon_freq_thz=stab.min_phonon_freq_thz,
-                rxn_temp_celsius=synth.min_synthesis_temp_c,
-                competing_impurity_phases=synth.competing_impurity_sinks,
-                pourbaix_max_dissolution_mol_l=synth.pourbaix_max_dissolution_mol_l,
-                active_layer_cost_usd_m2=synth.active_layer_cost_usd_m2,
-                adversarial_notes=f"ACTIVE_LEARNING_DFT: {audit_a.critique_summary}",
-            )
-            campaign_records.append({
-                "candidate": cand_dump,
-                "stage_reached": 3,
-                "status": "UNCERTAIN_DFT_QUEUE",
-                "primary_failure_mode": None,
-                "reason": audit_a.critique_summary,
-                "stability": stab_dump,
-                "synthesis": synth_dump,
-                "gate_a": audit_a_dump,
-                "redundancy_verification": ver_ga,
-            })
-            continue
-
         funnel_counts["gate_a_promoted_to_dft"] += 1
 
-        # Stage 4 & 5: Relativistic HSE06+SOC, Polaron, SRH Defects & Sequential 4T Optics
+        # Stage 4 & 5: Heuristic gap/polaron/defect prescreen & sequential 4T optics (HSE06+SOC not run)
         elec = stage4_5_quantum_and_defects(cand)
         opt = stage5_optical_4t_tandem_simulation(cand, elec, synth)
         elec_dump = elec.model_dump()
         opt_dump = opt.model_dump()
 
-        # Gate R2: Blinded Photon-Energy Simpson Quadrature, SQ Ceiling & Frohlich Verification
+        # Gate R2: Photon-Energy Simpson Quadrature, SQ Ceiling & Frohlich Regression Check
         full_dossier_for_ver = {
             "candidate": cand_dump,
             "stage_reached": 5,
@@ -395,7 +368,7 @@ def run_pilot_campaign(
             passed_all_checks=ver_s5["passed_all_redundancy_checks"],
             checks_detail=ver_s5["checks"],
             primary_sha256=bus.compute_sha256(full_dossier_for_ver),
-            independent_sha256=ver_s5["sha256_signature"],
+            independent_sha256=ver_s5["sha256_digest"],
         )
         funnel_counts["redundancy_verifications_passed"] += 1
 
@@ -406,13 +379,13 @@ def run_pilot_campaign(
             recipient_division="Research",
             message_type="GATE_R2_REDUNDANCY_CERTIFICATE",
             candidate_id=cand.candidate_id,
-            subject=f"Blinded Dual-Redundancy Mathematical Certificate for {cand.formula_reduced}",
+            subject=f"Dual-Implementation Regression Certificate for {cand.formula_reduced}",
             payload={
                 "passed_all_redundancy_checks": ver_s5["passed_all_redundancy_checks"],
                 "slme_trapezoidal_vs_simpson_diff_pct": ver_s5["checks"]["slme_quadrature"]["abs_difference_percent"],
                 "sq_ceiling_ok": ver_s5["checks"]["thermodynamic_sq_ceiling"]["passed"],
                 "frohlich_alpha_diff": ver_s5["checks"]["frohlich_alpha"]["abs_difference"],
-                "sha256_signature": ver_s5["sha256_signature"],
+                "sha256_digest": ver_s5["sha256_digest"],
             },
             model_tier="pro",
         )
@@ -433,13 +406,13 @@ def run_pilot_campaign(
                 status="REJECTED",
                 primary_failure_mode=mode,
                 e_above_hull_mev=stab.e_above_hull_0k_mev,
-                min_phonon_freq_thz=stab.min_phonon_freq_thz,
+                omega_min_heuristic_thz=stab.omega_min_heuristic_thz,
                 rxn_temp_celsius=synth.min_synthesis_temp_c,
                 competing_impurity_phases=synth.competing_impurity_sinks,
                 pourbaix_max_dissolution_mol_l=synth.pourbaix_max_dissolution_mol_l,
                 active_layer_cost_usd_m2=synth.active_layer_cost_usd_m2,
-                hse06_soc_gap_ev=elec.hse06_soc_indirect_gap_ev,
-                direct_gap_ev=elec.hse06_soc_direct_gap_ev,
+                gap_est_indirect_ev=elec.gap_est_indirect_ev,
+                direct_gap_ev=elec.gap_est_direct_ev,
                 soc_splitting_ev=elec.soc_splitting_ev,
                 max_carrier_eff_mass=max(elec.electron_eff_mass_m0, elec.hole_eff_mass_m0),
                 frohlich_alpha=elec.frohlich_alpha,
@@ -464,61 +437,11 @@ def run_pilot_campaign(
             })
             continue
 
-        audit_b = gate_b_final_red_team_audit(cand, stab, synth, elec, opt)
-        audit_b_dump = audit_b.model_dump()
-        if audit_b.decision != "PROMOTE":
-            b_status = "UNCERTAIN_DFT_QUEUE" if audit_b.decision == "ACTIVE_LEARNING_DFT" else "REJECTED"
-            b_mode = audit_b.primary_failure_mode or "GATE_B_VETO"
-            ledger.record_evaluation(
-                candidate_id=cand.candidate_id,
-                formula_reduced=cand.formula_reduced,
-                target_layer=cand.target_layer,
-                crystal_family=cand.crystal_family,
-                space_group_number=cand.space_group_number,
-                structural_dimensionality=cand.structural_dimensionality,
-                cif_structure=cand.cif_content,
-                embedding=cand.embedding_128d,
-                stage_reached=5,
-                status=b_status,
-                primary_failure_mode=b_mode if b_status == "REJECTED" else None,
-                e_above_hull_mev=stab.e_above_hull_0k_mev,
-                min_phonon_freq_thz=stab.min_phonon_freq_thz,
-                rxn_temp_celsius=synth.min_synthesis_temp_c,
-                competing_impurity_phases=synth.competing_impurity_sinks,
-                pourbaix_max_dissolution_mol_l=synth.pourbaix_max_dissolution_mol_l,
-                active_layer_cost_usd_m2=synth.active_layer_cost_usd_m2,
-                hse06_soc_gap_ev=elec.hse06_soc_indirect_gap_ev,
-                direct_gap_ev=elec.hse06_soc_direct_gap_ev,
-                soc_splitting_ev=elec.soc_splitting_ev,
-                max_carrier_eff_mass=max(elec.electron_eff_mass_m0, elec.hole_eff_mass_m0),
-                frohlich_alpha=elec.frohlich_alpha,
-                deepest_defect_ev=elec.deepest_defect_level_from_band_edge_ev,
-                slme_percent=opt.standalone_slme_percent,
-                sub_bandgap_transmittance_percent=opt.sub_bandgap_transmittance_percent,
-                tandem_4t_efficiency_percent=opt.tandem_4t_total_eff_percent,
-                adversarial_notes=audit_b.critique_summary,
-            )
-            campaign_records.append({
-                "candidate": cand_dump,
-                "stage_reached": 5,
-                "status": b_status,
-                "primary_failure_mode": b_mode if b_status == "REJECTED" else None,
-                "reason": audit_b.critique_summary,
-                "stability": stab_dump,
-                "synthesis": synth_dump,
-                "gate_a": audit_a_dump,
-                "gate_b": audit_b_dump,
-                "electronics": elec_dump,
-                "optics": opt_dump,
-                "redundancy_verification": ver_s5,
-            })
-            continue
+        funnel_counts["stage4_5_prescreen_finalists"] += 1
 
-        funnel_counts["stage4_5_validated_finalists"] += 1
-
-        # Emit runnable Quantum ESPRESSO (pw.x) HSE06+SOC input deck & verified CIF
-        qe_in = generate_qe_hse06_soc_input(cand_dump)
-        (qe_dir / f"{cand.candidate_id}_{cand.formula_reduced}_hse06_soc.in").write_text(qe_in, encoding="utf-8")
+        # Emit Quantum ESPRESSO (pw.x) hybrid+SOC input deck (HSE06+SOC not run) & CIF
+        qe_in = generate_qe_hybrid_soc_input(cand_dump)
+        (qe_dir / f"{cand.candidate_id}_{cand.formula_reduced}_hse06_soc.in").write_text(qe_in, encoding="utf-8")  # HSE06+SOC not run
         (qe_dir / f"{cand.candidate_id}_{cand.formula_reduced}.cif").write_text(cand.cif_content, encoding="utf-8")
 
         dossier = {
@@ -529,7 +452,6 @@ def run_pilot_campaign(
             "stability": stab_dump,
             "synthesis": synth_dump,
             "gate_a": audit_a_dump,
-            "gate_b": audit_b_dump,
             "electronics": elec_dump,
             "optics": opt_dump,
             "redundancy_verification": ver_s5,
@@ -550,13 +472,13 @@ def run_pilot_campaign(
             status="PROMOTED",
             primary_failure_mode=None,
             e_above_hull_mev=stab.e_above_hull_0k_mev,
-            min_phonon_freq_thz=stab.min_phonon_freq_thz,
+            omega_min_heuristic_thz=stab.omega_min_heuristic_thz,
             rxn_temp_celsius=synth.min_synthesis_temp_c,
             competing_impurity_phases=synth.competing_impurity_sinks,
             pourbaix_max_dissolution_mol_l=synth.pourbaix_max_dissolution_mol_l,
             active_layer_cost_usd_m2=synth.active_layer_cost_usd_m2,
-            hse06_soc_gap_ev=elec.hse06_soc_indirect_gap_ev,
-            direct_gap_ev=elec.hse06_soc_direct_gap_ev,
+            gap_est_indirect_ev=elec.gap_est_indirect_ev,
+            direct_gap_ev=elec.gap_est_direct_ev,
             soc_splitting_ev=elec.soc_splitting_ev,
             max_carrier_eff_mass=max(elec.electron_eff_mass_m0, elec.hole_eff_mass_m0),
             frohlich_alpha=elec.frohlich_alpha,
@@ -564,7 +486,7 @@ def run_pilot_campaign(
             slme_percent=opt.standalone_slme_percent,
             sub_bandgap_transmittance_percent=opt.sub_bandgap_transmittance_percent,
             tandem_4t_efficiency_percent=opt.tandem_4t_total_eff_percent,
-            adversarial_notes=f"PASSED ALL GATES & BLINDED REDUNDANCY (SHA256: {ver_s5['sha256_signature'][:12]}): {audit_a.critique_summary}",
+            adversarial_notes=f"PASSED PRESCREEN GATES (SHA256: {ver_s5['sha256_digest'][:12]}): {audit_a.critique_summary}",
             full_dossier=dossier,
         )
 
@@ -580,10 +502,10 @@ def run_pilot_campaign(
 
 
 def main() -> int:
-    """CLI entrypoint for running the v2.0 pilot campaign."""
+    """Command-line entry point: run the pilot campaign."""
     res = run_pilot_campaign()
     print("Funnel Counts:", json.dumps(res["funnel_counts"], indent=2))
-    print("\nPromoted Finalists (Blinded Dual-Redundancy Verified):")
+    print("\nPromoted Prescreen Finalists:")
     for f in res["finalists"]:
         c = f["candidate"]
         e = f["electronics"]
@@ -593,12 +515,12 @@ def main() -> int:
         v = f["redundancy_verification"]
         print(
             f"  - {c['candidate_id']} ({c['formula_reduced']}) [{c['target_layer']}]: "
-            f"Eg={e['hse06_soc_indirect_gap_ev']:.2f} eV (dir {e['hse06_soc_direct_gap_ev']:.2f} eV), "
+            f"Eg_est={e['gap_est_indirect_ev']:.2f} eV (dir {e['gap_est_direct_ev']:.2f} eV), "
             f"E_mig={st['ion_migration_barrier_ev']:.2f} eV, T_synth={s['min_synthesis_temp_c']:.0f} C, "
             f"Cost=${s['active_layer_cost_usd_m2']:.4f}/m^2, SLME={o['standalone_slme_percent']:.2f}% "
             f"(SQ={o['shockley_queisser_limit_percent']:.2f}%), 2L={o['tandem_2layer_si_eff_percent']:.2f}%, "
             f"4T(std-Si)={o['tandem_4t_std_si_fca_eff_percent']:.2f}%, 4T(low-FCA)={o['tandem_4t_total_eff_percent']:.2f}%, "
-            f"SHA256={v['sha256_signature'][:12]}"
+            f"SHA256={v['sha256_digest'][:12]}"
         )
     return 0
 

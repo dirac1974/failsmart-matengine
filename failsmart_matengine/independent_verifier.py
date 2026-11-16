@@ -290,11 +290,9 @@ def _light_trapping_fabs(
     eps_inf: float,
     thickness_m: float,
 ) -> np.ndarray:
-    """Internal light-trapping absorptance fraction f_abs(E) with Y = 4*n^2."""
-    n_refr = math.sqrt(eps_inf)
-    yab = 4.0 * (n_refr ** 2)
-    term = yab * alpha_e * thickness_m
-    return term / (1.0 + term)
+    """Double-pass Beer-Lambert thin-film absorptance fraction f_abs(E) = 1 - exp(-2*alpha*d)."""
+    _ = eps_inf
+    return 1.0 - np.exp(-2.0 * alpha_e * thickness_m)
 
 
 def _solve_pv_cell_energy_quadrature(
@@ -614,22 +612,22 @@ def independently_verify_cross_layer_4t_pair(
 
 
 # =============================================================================
-# 8. Independent Atomistic Phonon & NEB Solver (Section 6 - v4.0)
+# 8. Independent Pair-Spring Gamma & Ion-Migration Heuristic Checker (Section 6)
 # =============================================================================
 
-def independently_verify_atomistic_phonon_and_neb(
+def independently_verify_spring_and_migration_heuristics(
     cif_text: str,
     stoichiometry: Dict[str, int],
     oxidation_states: Dict[str, int],
 ) -> Dict[str, Any]:
-    """Blinded independent verification of 3D Harmonic Dynamical Matrix D(q=0) & 11-Image NEB.
+    """Independent regression check of pair-spring Gamma frequencies & closed-form migration heuristic.
 
     Per Section 6 of docs/MATHEMATICAL_SPEC_V2.md:
     1. Parse struct = CifParser.from_str(cif_text, occupancy_tolerance=10.0).parse_structures(primitive=False)[0].
-    2. Assemble 3N x 3N Harmonic Force-Constant Hessian Phi over all periodic neighbors 0.50 < r_ij <= 4.25 A.
+    2. Assemble 3N x 3N pair-spring force-constant matrix Phi over all periodic neighbors 0.50 < r_ij <= 4.25 A.
     3. Symmetrize Phi and mass-weight using IUPAC atomic masses.
     4. Diagonalize strictly via scipy.linalg.eigvalsh(D) (sorted ascending) and convert to THz.
-    5. 3D Saddle-Point NEB Migration Solver (Section 6.2).
+    5. Closed-form geometric ion-migration barrier heuristic (Section 6.2).
     """
     struct = CifParser.from_str(cif_text, occupancy_tolerance=10.0).parse_structures(primitive=False)[0]
     n_sites = len(struct)
@@ -678,13 +676,11 @@ def independently_verify_atomistic_phonon_and_neb(
     eigvals = scipy.linalg.eigvalsh(dyn_mat)
     freqs = np.sign(eigvals) * 15.633302 * np.sqrt(np.abs(eigvals))
 
-    asr_dev = round(float(np.max(np.abs(freqs[:3]))), 6)
     opt_freqs = freqs[3:]
     min_opt_thz = round(float(opt_freqs[0]), 4) if len(opt_freqs) > 0 else 0.0
     max_lo_thz = round(float(opt_freqs[-1]), 4) if len(opt_freqs) > 0 else 0.0
-    imag_count = int(np.sum(opt_freqs < -0.05))
 
-    # 3D Saddle-Point NEB Migration Solver (Section 6.2)
+    # Closed-form geometric ion-migration barrier heuristic (Section 6.2)
     if "Cu" in stoichiometry:
         mig_sp = "Cu"
     elif "Ag" in stoichiometry:
@@ -741,42 +737,34 @@ def independently_verify_atomistic_phonon_and_neb(
         + 0.28 * f_oxide
         - 0.22 * f_mobile
     )
-    e_mig_neb = round(float(np.clip(raw_barrier, 0.35, 1.45)), 4)
+    emig_heur = round(float(np.clip(raw_barrier, 0.35, 1.45)), 4)
 
     # Vineyard-Arrhenius 300 K ionic diffusivity (nu_0 = 1e12 s^-1, 1 A^2 = 1e-16 cm^2)
     d_ion_300k = (1.0 / 6.0) * 1.0e12 * ((d_hop ** 2) * 1.0e-16) * math.exp(
-        -(e_mig_neb * Q_E) / (K_B * 300.0)
+        -(emig_heur * Q_E) / (K_B * 300.0)
     )
 
     res: Dict[str, Any] = {
         "nsites_unit_cell": n_sites,
         "dynamical_matrix_dim": dim,
-        "gamma_min_optical_freq_thz": min_opt_thz,
-        "gamma_max_lo_freq_thz": max_lo_thz,
-        "imaginary_mode_count": imag_count,
-        "acoustic_sum_rule_max_dev_thz": asr_dev,
+        "spring_model_gamma_freq_thz": [min_opt_thz, max_lo_thz],
         "migrating_species": mig_sp,
         "shortest_hop_distance_ang": d_hop,
         "bottleneck_clearance_ang": clearance,
-        "neb_saddle_barrier_ev": e_mig_neb,
+        "emig_heuristic_ev": emig_heur,
         "room_temp_diffusivity_cm2_s": float(f"{d_ion_300k:.3e}"),
     }
 
     sig_payload = {
-        "phonon": {
-            "asr_dev": asr_dev,
-            "gamma_min": min_opt_thz,
-            "gamma_max": max_lo_thz,
-            "imag_count": imag_count,
-        },
-        "neb": {
+        "spring_model_gamma_freq_thz": [min_opt_thz, max_lo_thz],
+        "migration_heuristic": {
             "migrating_species": mig_sp,
             "shortest_hop_distance_ang": d_hop,
             "bottleneck_clearance_ang": clearance,
-            "neb_saddle_barrier_ev": e_mig_neb,
+            "emig_heuristic_ev": emig_heur,
         },
     }
-    res["sha256_signature"] = hashlib.sha256(
+    res["sha256_digest"] = hashlib.sha256(
         json.dumps(sig_payload, sort_keys=True).encode("utf-8")
     ).hexdigest()
 
@@ -848,10 +836,9 @@ def independently_verify_coherent_tmm_4t_stack(
     t_tmm_1 = (np.real(n5) / np.real(n0)) * (np.abs(t_amp) ** 2)
     t_ito_front = np.exp(-4.0 * math.pi * k_ito * 105.0 / wl_nm)
 
-    # Top cell absorptance and stack transmittance
-    yab1 = 4.0 * eps_inf_1
+    # Top cell absorptance and stack transmittance (double-pass Beer-Lambert)
     d1_m = thickness_nm_1 * 1.0e-9
-    fabs1 = (yab1 * alpha1 * d1_m) / (1.0 + yab1 * alpha1 * d1_m)
+    fabs1 = 1.0 - np.exp(-2.0 * alpha1 * d1_m)
     a_tmm_1 = (1.0 - r_tmm_1) * t_ito_front * fabs1
     t_stack_tmm_1 = t_tmm_1 * (1.0 - fabs1)
 
@@ -913,13 +900,12 @@ def independently_verify_coherent_tmm_4t_stack(
     phi3_low = phi2_tmm * 0.96 * (1.0 - fabs_si_3l) * t_si_fca_low
     phi3_std = phi2_tmm * 0.96 * (1.0 - fabs_si_3l) * t_si_fca_std
 
-    # Step C — Layer 3: Bottom IR Scavenger
+    # Step C — Layer 3: Bottom IR Scavenger (double-pass Beer-Lambert)
     d3_m = thickness_nm_3 * 1.0e-9
     n3_bot = math.sqrt(eps_inf_3)
     r_int_23 = 0.20 * (((n3_bot - 1.72) / (n3_bot + 1.72)) ** 2)
-    yab3 = 4.0 * eps_inf_3
     alpha3 = 1.2e5 * (np.maximum(0.0, ENERGY_GRID_EV - eg_ind_3) ** 2) + 2.8e7 * np.sqrt(np.maximum(0.0, ENERGY_GRID_EV - eg_dir_3))
-    fabs3 = (yab3 * alpha3 * d3_m) / (1.0 + yab3 * alpha3 * d3_m)
+    fabs3 = 1.0 - np.exp(-2.0 * alpha3 * d3_m)
     a_tmm_3 = (1.0 - r_int_23) * fabs3
 
     cell3_low = _solve_pv_cell_energy_quadrature(
@@ -960,7 +946,7 @@ def independently_verify_coherent_tmm_4t_stack(
         "tmm_bottom_pce_percent": res["tmm_bottom_pce_percent"],
         "tmm_4t_low_fca_pce_percent": res["tmm_4t_low_fca_pce_percent"],
     }
-    res["sha256_signature"] = hashlib.sha256(
+    res["sha256_digest"] = hashlib.sha256(
         json.dumps(sig_payload, sort_keys=True).encode("utf-8")
     ).hexdigest()
 
@@ -1040,10 +1026,9 @@ def independently_verify_graded_arc_and_techno_economics(
     t_arc_1 = (np.real(n6) / np.real(n0)) * (np.abs(t_amp) ** 2)
     t_win_front = np.exp(-4.0 * math.pi * (k_ito * 80.0 + k_tio2 * 48.0) / wl_nm)
 
-    # Top cell absorptance and stack transmittance
-    yab1 = 4.0 * eps_inf_1
+    # Top cell absorptance and stack transmittance (double-pass Beer-Lambert)
     d1_m = thickness_nm_1 * 1.0e-9
-    fabs1 = (yab1 * alpha1 * d1_m) / (1.0 + yab1 * alpha1 * d1_m)
+    fabs1 = 1.0 - np.exp(-2.0 * alpha1 * d1_m)
     a_arc_1 = (1.0 - r_arc_1) * t_win_front * fabs1
     t_stack_arc_1 = t_arc_1 * (1.0 - fabs1)
 
@@ -1105,13 +1090,12 @@ def independently_verify_graded_arc_and_techno_economics(
     phi3_low = phi2_arc * 0.96 * (1.0 - fabs_si_3l) * t_si_fca_low
     phi3_std = phi2_arc * 0.96 * (1.0 - fabs_si_3l) * t_si_fca_std
 
-    # Step C — Layer 3: Bottom IR Scavenger
+    # Step C — Layer 3: Bottom IR Scavenger (double-pass Beer-Lambert)
     d3_m = thickness_nm_3 * 1.0e-9
     n3_bot = math.sqrt(eps_inf_3)
     r_int_23 = 0.20 * (((n3_bot - 1.72) / (n3_bot + 1.72)) ** 2)
-    yab3 = 4.0 * eps_inf_3
     alpha3 = 1.2e5 * (np.maximum(0.0, ENERGY_GRID_EV - eg_ind_3) ** 2) + 2.8e7 * np.sqrt(np.maximum(0.0, ENERGY_GRID_EV - eg_dir_3))
-    fabs3 = (yab3 * alpha3 * d3_m) / (1.0 + yab3 * alpha3 * d3_m)
+    fabs3 = 1.0 - np.exp(-2.0 * alpha3 * d3_m)
     a_arc_3 = (1.0 - r_int_23) * fabs3
 
     cell3_low = _solve_pv_cell_energy_quadrature(
@@ -1214,7 +1198,7 @@ def independently_verify_graded_arc_and_techno_economics(
         "svi_bos_2l": res["svi_bos_2l"],
         "svi_bos_3l": res["svi_bos_3l"],
     }
-    res["sha256_signature"] = hashlib.sha256(
+    res["sha256_digest"] = hashlib.sha256(
         json.dumps(sig_payload, sort_keys=True).encode("utf-8")
     ).hexdigest()
 
@@ -1234,23 +1218,37 @@ def independently_verify_phase9a_lab_and_defect_dossier(
     stoichiometry: Dict[str, int],
     eps_static: float,
 ) -> Dict[str, Any]:
-    """Blinded independent verification of Phase 9A 10.0 mmol synthesis mass balance & doped supercell FNV corrections."""
+    """Independent regression check of Phase 9A 10.0 mmol synthesis mass balance & neutral vacancy supercell point-charge image estimates."""
     formula_unit_molar_mass_g_mol = sum(
         cnt * _BLIND_IUPAC_MASSES[el] for el, cnt in stoichiometry.items()
     )
     target_product_mass_g = 0.010 * formula_unit_molar_mass_g_mol
 
     struct = CifParser.from_str(cif_content).parse_structures(primitive=False)[0]
-    a, b, c = struct.lattice.abc
-    na = max(1, math.ceil(10.0 / a))
-    nb = max(1, math.ceil(10.0 / b))
-    nc = max(1, math.ceil(10.0 / c))
+    mat = np.array(struct.lattice.matrix, dtype=float)
+    vol = abs(float(np.linalg.det(mat)))
+    d_perp_a = vol / float(np.linalg.norm(np.cross(mat[1], mat[2])))
+    d_perp_b = vol / float(np.linalg.norm(np.cross(mat[2], mat[0])))
+    d_perp_c = vol / float(np.linalg.norm(np.cross(mat[0], mat[1])))
+    na = max(1, math.ceil(10.0 / d_perp_a))
+    if na * d_perp_a < 10.0:
+        na += 1
+    nb = max(1, math.ceil(10.0 / d_perp_b))
+    if nb * d_perp_b < 10.0:
+        nb += 1
+    nc = max(1, math.ceil(10.0 / d_perp_c))
+    if nc * d_perp_c < 10.0:
+        nc += 1
+
     supercell_total_sites = int(na * nb * nc * len(struct))
-    supercell_min_image_dist_ang = min(na * a, nb * b, nc * c)
+    supercell_min_image_dist_ang = min(na * d_perp_a, nb * d_perp_b, nc * d_perp_c)
+    assert supercell_min_image_dist_ang >= 10.0, (
+        f"Supercell min perpendicular spacing {supercell_min_image_dist_ang:.4f} < 10.0 A"
+    )
     l_eff = (struct.volume * na * nb * nc) ** (1.0 / 3.0)
 
-    fnv_charge_correction_q1_ev = (1.0 * 2.8373 * 14.399645) / (eps_static * l_eff)
-    fnv_charge_correction_q2_ev = (4.0 * 2.8373 * 14.399645) / (eps_static * l_eff)
+    point_charge_image_estimate_ev = (1.0 * 2.8373 * 14.399645) / (eps_static * l_eff)
+    point_charge_image_estimate_q2_ev = (4.0 * 2.8373 * 14.399645) / (eps_static * l_eff)
 
     res: Dict[str, Any] = {
         "formula_unit_molar_mass_g_mol": round(float(formula_unit_molar_mass_g_mol), 4),
@@ -1258,8 +1256,8 @@ def independently_verify_phase9a_lab_and_defect_dossier(
         "supercell_dims": [int(na), int(nb), int(nc)],
         "supercell_total_sites": supercell_total_sites,
         "supercell_min_image_dist_ang": round(float(supercell_min_image_dist_ang), 4),
-        "fnv_charge_correction_q1_ev": round(float(fnv_charge_correction_q1_ev), 4),
-        "fnv_charge_correction_q2_ev": round(float(fnv_charge_correction_q2_ev), 4),
+        "point_charge_image_estimate_ev": round(float(point_charge_image_estimate_ev), 4),
+        "point_charge_image_estimate_q2_ev": round(float(point_charge_image_estimate_q2_ev), 4),
     }
 
     sig_payload = {
@@ -1268,58 +1266,10 @@ def independently_verify_phase9a_lab_and_defect_dossier(
         "supercell_dims": res["supercell_dims"],
         "supercell_total_sites": res["supercell_total_sites"],
         "supercell_min_image_dist_ang": res["supercell_min_image_dist_ang"],
-        "fnv_charge_correction_q1_ev": res["fnv_charge_correction_q1_ev"],
-        "fnv_charge_correction_q2_ev": res["fnv_charge_correction_q2_ev"],
+        "point_charge_image_estimate_ev": res["point_charge_image_estimate_ev"],
+        "point_charge_image_estimate_q2_ev": res["point_charge_image_estimate_q2_ev"],
     }
-    res["sha256_signature"] = hashlib.sha256(
-        json.dumps(sig_payload, sort_keys=True).encode("utf-8")
-    ).hexdigest()
-
-    return res
-
-
-def independently_verify_phase9b_contrastive_audit(
-    records: List[Dict[str, Any]],
-) -> Dict[str, Any]:
-    """Blinded independent verification of Phase 9B Contrastive Failure Memory Classifier margin."""
-    pos_vecs: List[np.ndarray] = []
-    neg_vecs: List[np.ndarray] = []
-
-    for rec in records:
-        status = rec.get("status", "")
-        emb = np.array(rec.get("embedding_128d", []), dtype=np.float64)
-        norm = float(np.linalg.norm(emb))
-        u_hat = emb / max(1.0e-12, norm)
-        if status == "PROMOTED":
-            pos_vecs.append(u_hat)
-        elif status == "REJECTED":
-            neg_vecs.append(u_hat)
-
-    pos_sum = np.sum(pos_vecs, axis=0)
-    c_pos = pos_sum / max(1.0e-12, float(np.linalg.norm(pos_sum)))
-
-    neg_sum = np.sum(neg_vecs, axis=0)
-    c_neg = neg_sum / max(1.0e-12, float(np.linalg.norm(neg_sum)))
-
-    pos_margins = [float(np.dot(u, c_pos) - np.dot(u, c_neg)) for u in pos_vecs]
-    neg_margins = [float(np.dot(u, c_pos) - np.dot(u, c_neg)) for u in neg_vecs]
-
-    mean_pos = float(np.mean(pos_margins)) if pos_margins else 0.0
-    mean_neg = float(np.mean(neg_margins)) if neg_margins else 0.0
-    delta_sep = mean_pos - mean_neg
-
-    res: Dict[str, Any] = {
-        "mean_promoted_contrastive_margin": round(mean_pos, 4),
-        "mean_rejected_contrastive_margin": round(mean_neg, 4),
-        "contrastive_separation_delta": round(delta_sep, 4),
-    }
-
-    sig_payload = {
-        "mean_promoted_contrastive_margin": res["mean_promoted_contrastive_margin"],
-        "mean_rejected_contrastive_margin": res["mean_rejected_contrastive_margin"],
-        "contrastive_separation_delta": res["contrastive_separation_delta"],
-    }
-    res["sha256_signature"] = hashlib.sha256(
+    res["sha256_digest"] = hashlib.sha256(
         json.dumps(sig_payload, sort_keys=True).encode("utf-8")
     ).hexdigest()
 
@@ -1432,16 +1382,15 @@ def independently_verify_phase9c_oblique_thermal_lcoe(
     thickness_nm_3: float,
     raw_cost_top_usd_m2: float,
     raw_cost_bot_usd_m2: float,
-    limiting_neb_barrier_ev: float,
+    limiting_emig_heuristic_ev: float,
 ) -> Dict[str, Any]:
     """Blinded independent verification of Phase 9C oblique-incidence S/P TMM, operating temp, and 25-year Arrhenius LCOE."""
     wl_nm = LAMBDA_GRID_NM
     alpha1 = 1.2e5 * (np.maximum(0.0, ENERGY_GRID_EV - eg_ind_1) ** 2) + 2.8e7 * np.sqrt(
         np.maximum(0.0, ENERGY_GRID_EV - eg_dir_1)
     )
-    yab1 = 4.0 * eps_inf_1
     d1_m = thickness_nm_1 * 1.0e-9
-    fabs1 = (yab1 * alpha1 * d1_m) / (1.0 + yab1 * alpha1 * d1_m)
+    fabs1 = 1.0 - np.exp(-2.0 * alpha1 * d1_m)
 
     d_si_m = 160.0e-6
     alpha_si = 1.1e5 * (np.maximum(0.0, ENERGY_GRID_EV - 1.12) ** 2) + 1.5e7 * np.sqrt(
@@ -1454,11 +1403,10 @@ def independently_verify_phase9c_oblique_thermal_lcoe(
     d3_m = thickness_nm_3 * 1.0e-9
     n3_bot = math.sqrt(eps_inf_3)
     r_int_23 = 0.20 * (((n3_bot - 1.72) / (n3_bot + 1.72)) ** 2)
-    yab3 = 4.0 * eps_inf_3
     alpha3 = 1.2e5 * (np.maximum(0.0, ENERGY_GRID_EV - eg_ind_3) ** 2) + 2.8e7 * np.sqrt(
         np.maximum(0.0, ENERGY_GRID_EV - eg_dir_3)
     )
-    fabs3 = (yab3 * alpha3 * d3_m) / (1.0 + yab3 * alpha3 * d3_m)
+    fabs3 = 1.0 - np.exp(-2.0 * alpha3 * d3_m)
     a_arc_3 = (1.0 - r_int_23) * fabs3
 
     mask_above = (ENERGY_GRID_EV >= eg_ind_1) & (ENERGY_GRID_EV <= 3.50)
@@ -1571,7 +1519,7 @@ def independently_verify_phase9c_oblique_thermal_lcoe(
     # Section 9.3.3: 25-Year Arrhenius Ion-Migration Reliability & Real-World LCOE
     kb_ev = K_B / Q_E
     t_field_k = 318.15
-    r_deg = 0.0035 + 0.0010 * math.exp(-(limiting_neb_barrier_ev - 0.65) / (kb_ev * t_field_k))
+    r_deg = 0.0035 + 0.0010 * math.exp(-(limiting_emig_heuristic_ev - 0.65) / (kb_ev * t_field_k))
     r_deg_pct = r_deg * 100.0
     year25_retained_pct = ((1.0 - r_deg) ** 25) * 100.0
 
@@ -1636,7 +1584,7 @@ def independently_verify_phase9c_oblique_thermal_lcoe(
         "pce_4t_noct_45c_percent": round(eta_4t_45, 2),
         "pce_4t_desert_65c_percent": round(eta_4t_65, 2),
         "temp_coeff_rel_pct_per_k": round(beta_4t_rel, 4),
-        "limiting_neb_barrier_ev": round(float(limiting_neb_barrier_ev), 4),
+        "limiting_emig_heuristic_ev": round(float(limiting_emig_heuristic_ev), 4),
         "annual_degradation_rate_pct_yr": round(r_deg_pct, 4),
         "year25_retained_power_fraction_percent": round(year25_retained_pct, 2),
         "lcoe_baseline_si_cents_kwh": round(lcoe_si_cents, 4),
@@ -1656,7 +1604,7 @@ def independently_verify_phase9c_oblique_thermal_lcoe(
         "lcoe_3layer_4t_cents_kwh": res["lcoe_3layer_4t_cents_kwh"],
         "lcoe_3layer_vs_si_reduction_percent": res["lcoe_3layer_vs_si_reduction_percent"],
     }
-    res["sha256_signature"] = hashlib.sha256(
+    res["sha256_digest"] = hashlib.sha256(
         json.dumps(sig_payload, sort_keys=True).encode("utf-8")
     ).hexdigest()
 
@@ -1671,6 +1619,42 @@ _SIMP_E_EV: np.ndarray = ENERGY_GRID_EV
 _SIMP_PHI_SUN_E: np.ndarray = SOLAR_PHOTON_FLUX_E
 
 
+def _apply_maturity_operating_point_p10(
+    jsc_rad: float,
+    voc_rad: float,
+    maturity_case: str,
+) -> Tuple[float, float, float, float]:
+    """Compute (jsc, voc, ff, vmp) at the selected maturity case ('demonstrated', 'stretch', 'ceiling')."""
+    v_th = 0.02585199
+    case_params = {
+        "demonstrated": (1.0e-9, 0.73, 0.85, 3.2, 1.00),
+        "stretch": (1.0e-7, None, 0.92, 2.2, 0.80),
+        "ceiling": (1.0e-4, None, 0.96, 1.8, 0.65),
+    }
+    if maturity_case not in case_params:
+        raise ValueError(f"Unknown maturity_case '{maturity_case}'")
+    ere, ff_cap, f_ap, rs_ohm_cm2, alpha_def = case_params[maturity_case]
+    if jsc_rad <= 1e-9:
+        return 0.0, 0.0, 0.0, 0.0
+    f_coll = 0.88 * f_ap
+    jsc_op = jsc_rad * f_coll
+    dv_loss = -v_th * math.log(ere) + alpha_def * 0.030
+    voc_op = max(0.05, voc_rad + v_th * math.log(max(1e-9, f_coll)) - dv_loss)
+    v_norm = voc_op / v_th
+    ff0 = (v_norm - math.log(v_norm + 0.72)) / (v_norm + 1.0)
+    rs_norm = (rs_ohm_cm2 * (jsc_op / 1000.0)) / voc_op
+    rsh_norm = (1200.0 * (jsc_op / 1000.0)) / voc_op
+    ff_op = (
+        ff0
+        * max(0.35, 1.0 - 1.1 * rs_norm)
+        * max(0.35, 1.0 - ((v_norm + 0.70) * ff0) / max(1e-9, v_norm * rsh_norm))
+    )
+    if ff_cap is not None:
+        ff_op = min(ff_op, float(ff_cap))
+    vmp_op = max(0.05, voc_op - v_th * math.log(v_norm + 0.72) - rs_ohm_cm2 * (jsc_op / 1000.0))
+    return jsc_op, voc_op, ff_op, vmp_op
+
+
 def independently_verify_phase10_bifacial_and_string_dossier(
     eg_ind_1: float,
     eg_dir_1: float,
@@ -1682,10 +1666,11 @@ def independently_verify_phase10_bifacial_and_string_dossier(
     thickness_nm_3: float,
     raw_cost_top_usd_m2: float,
     raw_cost_bot_usd_m2: float,
-    limiting_neb_barrier_ev: float,
+    limiting_emig_heuristic_ev: float,
+    maturity_case: str = "demonstrated",
 ) -> Dict[str, Any]:
     """Blinded independent verification of Phase 10A 2D thickness & ARC optimization,
-    Phase 10B bifacial ground-albedo harvesting, and Phase 10C SPICE subcell J-V string matching.
+    Phase 10B bifacial ground-albedo harvesting, and Phase 10C subcell J-V string matching.
     """
     wl_nm = LAMBDA_GRID_NM
     wl_um = wl_nm / 1000.0
@@ -1716,19 +1701,18 @@ def independently_verify_phase10_bifacial_and_string_dossier(
     n6 = np.full_like(wl_nm, 1.520, dtype=np.complex128)
 
     n_list = [n0, n1, n2, n3, n4, n5, n6]
-    yab1 = 4.0 * eps_inf_1
 
     # Middle c-Si wafer and bottom IR properties
     d_si_m = 160.0e-6
     alpha_si = 1.1e5 * (np.maximum(0.0, _SIMP_E_EV - 1.12) ** 2) + 1.5e7 * np.sqrt(
         np.maximum(0.0, _SIMP_E_EV - 3.40)
     )
+    fabs_si_2l = (49.0 * alpha_si * d_si_m) / (1.0 + 49.0 * alpha_si * d_si_m)
     fabs_si_3l = (16.0 * alpha_si * d_si_m) / (1.0 + 16.0 * alpha_si * d_si_m)
     t_si_fca_low = np.exp(-0.08 * ((wl_nm / 1200.0) ** 2))
 
     n3_bot = math.sqrt(eps_inf_3)
     r_int_23 = 0.20 * (((n3_bot - 1.72) / (n3_bot + 1.72)) ** 2)
-    yab3 = 4.0 * eps_inf_3
     alpha3 = 1.2e5 * (np.maximum(0.0, _SIMP_E_EV - eg_ind_3) ** 2) + 2.8e7 * np.sqrt(
         np.maximum(0.0, _SIMP_E_EV - eg_dir_3)
     )
@@ -1768,7 +1752,7 @@ def independently_verify_phase10_bifacial_and_string_dossier(
                 t_win_front = np.exp(-4.0 * math.pi * (k_ito * 80.0 + k_tio2 * float(d_tio2)) / wl_nm)
 
                 d1_m = float(d_top) * 1.0e-9
-                fabs1 = (yab1 * alpha1 * d1_m) / (1.0 + yab1 * alpha1 * d1_m)
+                fabs1 = 1.0 - np.exp(-2.0 * alpha1 * d1_m)
                 a_arc_1 = (1.0 - r_arc_1) * t_win_front * fabs1
                 t_stack_1 = t_arc_1 * (1.0 - fabs1)
 
@@ -1782,6 +1766,13 @@ def independently_verify_phase10_bifacial_and_string_dossier(
                     eg_dir_ev=eg_dir_1,
                 )
                 phi2_front = _SIMP_PHI_SUN_E * t_stack_1
+                cell_si_2l_0 = _solve_pv_cell_energy_quadrature(
+                    absorptance_e=0.98 * fabs_si_2l,
+                    incident_photon_flux_e=phi2_front,
+                    eg_ind_ev=1.12,
+                    eg_dir_ev=1.12,
+                    j0_rad_fixed=1.2e-12,
+                )
                 cell_si_0 = _solve_pv_cell_energy_quadrature(
                     absorptance_e=0.98 * fabs_si_3l,
                     incident_photon_flux_e=phi2_front,
@@ -1793,7 +1784,7 @@ def independently_verify_phase10_bifacial_and_string_dossier(
 
                 for d_bot in d_bot_candidates:
                     d3_m = float(d_bot) * 1.0e-9
-                    fabs3 = (yab3 * alpha3 * d3_m) / (1.0 + yab3 * alpha3 * d3_m)
+                    fabs3 = 1.0 - np.exp(-2.0 * alpha3 * d3_m)
                     a_arc_3 = (1.0 - r_int_23) * fabs3
                     cell_bot_0 = _solve_pv_cell_energy_quadrature(
                         absorptance_e=a_arc_3,
@@ -1815,8 +1806,10 @@ def independently_verify_phase10_bifacial_and_string_dossier(
                             "fabs3_opt": fabs3,
                             "a_arc_3": a_arc_3,
                             "cell_top": cell_top,
+                            "cell_si_2l_0": cell_si_2l_0,
                             "cell_si_0": cell_si_0,
                             "cell_bot_0": cell_bot_0,
+                            "eta_2l_0": cell_top["eff"] + cell_si_2l_0["eff"],
                             "eta_4t_0": eta_4t_0,
                         }
 
@@ -1832,6 +1825,7 @@ def independently_verify_phase10_bifacial_and_string_dossier(
     eta_top_opt = cell_top_opt["eff"]
     eta_si_0 = cell_si_0_opt["eff"]
     eta_bot_0 = cell_bot_0_opt["eff"]
+    eta_2l_0 = opt_state["eta_2l_0"]
     eta_4t_0 = opt_state["eta_4t_0"]
 
     mask_above = (_SIMP_E_EV >= eg_ind_1) & (_SIMP_E_EV <= 3.50)
@@ -1847,7 +1841,7 @@ def independently_verify_phase10_bifacial_and_string_dossier(
         * 100.0
     )
 
-    # Section 10.2: Bifacial Ground-Albedo Harvesting (R_albedo = 0.20 and 0.30)
+    # Section 10.2: Bifacial Ground-Albedo Harvesting (R_albedo = 0.20 and 0.30, front-irradiance basis)
     bifacial_eta: Dict[float, float] = {}
     for r_alb in (0.20, 0.30):
         phi_rear = 0.78 * r_alb * _SIMP_PHI_SUN_E
@@ -1889,7 +1883,7 @@ def independently_verify_phase10_bifacial_and_string_dossier(
 
     kb_ev = K_B / Q_E
     t_field_k = 318.15
-    r_deg = 0.0035 + 0.0010 * math.exp(-(limiting_neb_barrier_ev - 0.65) / (kb_ev * t_field_k))
+    r_deg = 0.0035 + 0.0010 * math.exp(-(limiting_emig_heuristic_ev - 0.65) / (kb_ev * t_field_k))
 
     r_disc = 0.06
     c_bos_area = 100.0
@@ -1906,10 +1900,14 @@ def independently_verify_phase10_bifacial_and_string_dossier(
     )
     bifacial_20pct_lcoe_cents_kwh = round(100.0 * (capex_3l + om_disc_25yr) / e_disc_3l, 4)
 
-    # Section 10.3: Subcell J-V Operating Point & Integer Parallel-String Voltage Matching
-    top_vmp_raw = cell_top_opt["voc"] - V_TH * math.log((cell_top_opt["voc"] / V_TH) + 0.72)
+    # Section 10.3: Subcell J-V Operating Point at Selected Maturity Case & ITO Strip Check
+    top_jsc, top_voc, top_ff, top_vmp_raw = _apply_maturity_operating_point_p10(
+        cell_top_opt["jsc"], cell_top_opt["voc"], maturity_case
+    )
+    bot_jsc, bot_voc, bot_ff, bot_vmp_raw = _apply_maturity_operating_point_p10(
+        cell_bot_0_opt["jsc"], cell_bot_0_opt["voc"], maturity_case
+    )
     si_vmp_raw = cell_si_0_opt["voc"] - V_TH * math.log((cell_si_0_opt["voc"] / V_TH) + 0.72)
-    bot_vmp_raw = cell_bot_0_opt["voc"] - V_TH * math.log((cell_bot_0_opt["voc"] / V_TH) + 0.72)
 
     n_cells_si_ref = 72
     v_bus_si = 72.0 * si_vmp_raw
@@ -1923,30 +1921,44 @@ def independently_verify_phase10_bifacial_and_string_dossier(
         abs(n_cells_bot_matched * bot_vmp_raw - v_bus_si) / v_bus_si * 100.0, 2
     )
 
+    module_length_cm = 200.0
+    r_sheet_ito_ohm_sq = 15.0
+    max_loss_frac = 0.03
+    implied_strip_w_cm = module_length_cm / float(max(1, n_cells_top_matched))
+    j_top_a_cm2 = max(1e-9, top_jsc / 1000.0)
+    max_feasible_w_cm = math.sqrt((3.0 * max_loss_frac * top_vmp_raw) / (j_top_a_cm2 * r_sheet_ito_ohm_sq))
+    ito_loss_pct = min(
+        100.0,
+        ((j_top_a_cm2 * r_sheet_ito_ohm_sq * (implied_strip_w_cm**2)) / (3.0 * top_vmp_raw)) * 100.0,
+    )
+    strip_feasible = bool(implied_strip_w_cm <= max_feasible_w_cm and ito_loss_pct <= 3.0)
+
     res: Dict[str, Any] = {
         "opt_mgf2_nm": round(opt_mgf2, 1),
         "opt_tio2_nm": round(opt_tio2, 1),
         "opt_top_nm": round(opt_top, 1),
         "opt_bot_nm": round(opt_bot, 1),
         "opt_r_front_percent": round(opt_r_front_pct, 2),
+        "opt_monofacial_2l_pce_percent": round(eta_2l_0, 2),
         "opt_monofacial_4t_pce_percent": round(eta_4t_0, 2),
-        "bifacial_20pct_albedo_4t_pce_percent": round(eta_4t_20, 2),
+        "bifacial_20pct_equivalent_power_density_mw_cm2": round(eta_4t_20, 2),
         "bifacial_20pct_power_w_sqft": round(10.0 * eta_4t_20 * 0.09290304, 2),
-        "bifacial_30pct_albedo_4t_pce_percent": round(eta_4t_30, 2),
+        "bifacial_30pct_equivalent_power_density_mw_cm2": round(eta_4t_30, 2),
         "bifacial_30pct_power_w_sqft": round(10.0 * eta_4t_30 * 0.09290304, 2),
         "bifacial_20pct_gain_percent": round(((eta_4t_20 - eta_4t_0) / eta_4t_0) * 100.0, 2),
         "bifacial_20pct_lcoe_cents_kwh": bifacial_20pct_lcoe_cents_kwh,
-        "top_jsc_ma_cm2": round(cell_top_opt["jsc"], 2),
-        "top_voc_v": round(cell_top_opt["voc"], 4),
-        "top_ff": round(cell_top_opt["ff"], 4),
+        "string_matching_maturity_case": maturity_case,
+        "top_jsc_ma_cm2": round(top_jsc, 2),
+        "top_voc_v": round(top_voc, 4),
+        "top_ff": round(top_ff, 4),
         "top_vmp_v": round(top_vmp_raw, 4),
         "si_jsc_ma_cm2": round(cell_si_0_opt["jsc"], 2),
         "si_voc_v": round(cell_si_0_opt["voc"], 4),
         "si_ff": round(cell_si_0_opt["ff"], 4),
         "si_vmp_v": round(si_vmp_raw, 4),
-        "bot_jsc_ma_cm2": round(cell_bot_0_opt["jsc"], 2),
-        "bot_voc_v": round(cell_bot_0_opt["voc"], 4),
-        "bot_ff": round(cell_bot_0_opt["ff"], 4),
+        "bot_jsc_ma_cm2": round(bot_jsc, 2),
+        "bot_voc_v": round(bot_voc, 4),
+        "bot_ff": round(bot_ff, 4),
         "bot_vmp_v": round(bot_vmp_raw, 4),
         "n_cells_si_ref": n_cells_si_ref,
         "n_cells_top_matched": n_cells_top_matched,
@@ -1954,11 +1966,15 @@ def independently_verify_phase10_bifacial_and_string_dossier(
         "v_bus_si_v": round(v_bus_si, 2),
         "top_string_mismatch_percent": top_string_mismatch_percent,
         "bot_string_mismatch_percent": bot_string_mismatch_percent,
+        "implied_top_strip_width_cm": round(implied_strip_w_cm, 2),
+        "max_feasible_ito_strip_width_cm": round(max_feasible_w_cm, 2),
+        "ito_strip_resistive_loss_percent": round(ito_loss_pct, 2),
+        "strip_width_feasible": strip_feasible,
         "photon_conservation_holds": photon_conservation_holds,
     }
 
-    sig_payload = {k: v for k, v in res.items() if k != "sha256_signature"}
-    res["sha256_signature"] = hashlib.sha256(
+    sig_payload = {k: v for k, v in res.items() if k != "sha256_digest"}
+    res["sha256_digest"] = hashlib.sha256(
         json.dumps(sig_payload, sort_keys=True).encode("utf-8")
     ).hexdigest()
 
@@ -2074,8 +2090,8 @@ def independently_verify_phase11a_synthesis_and_contacts(
         "synthesis_practicality_score_100": round(float(sps), 2),
     }
 
-    sig_payload = {k: v for k, v in res.items() if k != "sha256_signature"}
-    res["sha256_signature"] = hashlib.sha256(
+    sig_payload = {k: v for k, v in res.items() if k != "sha256_digest"}
+    res["sha256_digest"] = hashlib.sha256(
         json.dumps(sig_payload, sort_keys=True).encode("utf-8")
     ).hexdigest()
 
@@ -2092,6 +2108,7 @@ def _solve_realistic_thin_film_p11(
     f_ap_scen: float,
     r_s_ohm_cm2: float,
     alpha_def: float,
+    ff_cap: Optional[float] = None,
 ) -> Dict[str, float]:
     """Section 11.2(1): Realistic Thin-Film Subcell Operating Solver (T=300 K, V_th=0.02585199 V)."""
     if jsc_rad <= 1.0e-9:
@@ -2113,6 +2130,8 @@ def _solve_realistic_thin_film_p11(
         * max(0.35, 1.0 - 1.1 * r_s)
         * max(0.35, 1.0 - ((v_k + 0.70) * ff_0) / (v_k * r_sh))
     )
+    if ff_cap is not None:
+        ff_real = min(ff_real, float(ff_cap))
     eta_real = jsc_real * voc_real * ff_real
     return {"jsc": jsc_real, "voc": voc_real, "ff": ff_real, "eff": eta_real}
 
@@ -2218,20 +2237,18 @@ def _compute_rouard_airy_top_and_bot_p11(
         -4.0 * math.pi * (k_ito * 80.0 + k_tio2 * float(opt_tio2_nm)) / wl_nm
     )
 
-    yab1 = 4.0 * eps_inf_1
     d1_m = float(opt_top_nm) * 1.0e-9
-    fabs1 = (yab1 * alpha1 * d1_m) / (1.0 + yab1 * alpha1 * d1_m)
+    fabs1 = 1.0 - np.exp(-2.0 * alpha1 * d1_m)
     a_arc_1 = (1.0 - r_arc_1) * t_win_front * fabs1
     t_stack_1 = t_arc_1 * (1.0 - fabs1)
 
     n3_bot = math.sqrt(eps_inf_3)
     r_int_23 = 0.20 * (((n3_bot - 1.72) / (n3_bot + 1.72)) ** 2)
-    yab3 = 4.0 * eps_inf_3
     d3_m = float(opt_bot_nm) * 1.0e-9
     alpha3 = 1.2e5 * (np.maximum(0.0, ENERGY_GRID_EV - eg_ind_3) ** 2) + 2.8e7 * np.sqrt(
         np.maximum(0.0, ENERGY_GRID_EV - eg_dir_3)
     )
-    fabs3 = (yab3 * alpha3 * d3_m) / (1.0 + yab3 * alpha3 * d3_m)
+    fabs3 = 1.0 - np.exp(-2.0 * alpha3 * d3_m)
     a_arc_3 = (1.0 - r_int_23) * fabs3
 
     return a_arc_1, t_stack_1, fabs3, a_arc_3
@@ -2288,8 +2305,9 @@ def independently_verify_phase11b_realistic_commercialization(
     raw_cost_bot_usd_m2: float,
     stoich_3: Dict[str, int],
 ) -> Dict[str, Any]:
-    """Blinded independent verification of Phase 11B realistic non-radiative SRH device physics,
-    +/-0.15 eV band-gap sensitivity, and Phase 11C 4-path commercialization techno-economics.
+    """Blinded independent verification of Phase 11B non-radiative SRH device physics
+    across the 'demonstrated', 'stretch', and 'ceiling' maturity cases, +/-0.15 eV band-gap
+    sensitivity, and Phase 11C requirements-oriented techno-economics.
     """
     wl_nm = LAMBDA_GRID_NM
     d_si_m = 160.0e-6
@@ -2303,16 +2321,15 @@ def independently_verify_phase11b_realistic_commercialization(
     t_si_fca_std = np.exp(-0.38 * ((wl_nm / 1200.0) ** 2))
 
     # Path 0: Standalone Commodity Bifacial TOPCon/SHJ c-Si Baseline
-    # Rear unobstructed albedo flux fraction: R_alb (0.20) * f_bif (80%) = 0.16
     si_0_mono = _solve_realistic_si_p11(a_si_2l, SOLAR_PHOTON_FLUX_E)
     si_0_bif20 = _solve_realistic_si_p11(
         a_si_2l, SOLAR_PHOTON_FLUX_E * (1.0 + 0.16)
     )
     eta_si_0_mono = si_0_mono["eff"]
-    eta_si_0_bif20 = si_0_bif20["eff"]
+    p_si_0_bif20 = si_0_bif20["eff"]
 
-    lcoe_p0_util = _compute_lcoe_25yr_p11(eta_si_0_bif20, 42.00, 100.0, 0.930, 0.0045)
-    lcoe_p0_roof = _compute_lcoe_25yr_p11(eta_si_0_bif20, 42.00, 240.0, 0.930, 0.0045)
+    lcoe_p0_util = _compute_lcoe_25yr_p11(p_si_0_bif20, 42.00, 100.0, 0.930, 0.0045)
+    lcoe_p0_roof = _compute_lcoe_25yr_p11(p_si_0_bif20, 42.00, 240.0, 0.930, 0.0045)
 
     # Nominal coherent stack at Phase 10 optimal thicknesses
     a_arc_1, t_stack_1, fabs3, a_arc_3 = _compute_rouard_airy_top_and_bot_p11(
@@ -2346,39 +2363,45 @@ def independently_verify_phase11b_realistic_commercialization(
         eg_dir_ev=eg_dir_3,
     )
 
-    # 3 Non-Radiative ERE Maturity Tiers (Monofacial)
-    top_cons = _solve_realistic_thin_film_p11(
-        top_rad["jsc"], top_rad["voc"], f_orient_1, v_antisite_1, v_contact_1, 1.0e-5, 0.90, 3.2, 1.00
+    # 3 Non-Radiative ERE Maturity Cases (Monofacial): demonstrated, stretch, ceiling
+    top_dem = _solve_realistic_thin_film_p11(
+        top_rad["jsc"], top_rad["voc"], f_orient_1, v_antisite_1, v_contact_1,
+        1.0e-9, 0.85, 3.2, 1.00, ff_cap=0.73
     )
-    bot_cons = _solve_realistic_thin_film_p11(
-        bot_mono_rad["jsc"], bot_mono_rad["voc"], f_orient_3, v_antisite_3, v_contact_3, 1.0e-5, 0.90, 3.2, 1.00
+    bot_dem = _solve_realistic_thin_film_p11(
+        bot_mono_rad["jsc"], bot_mono_rad["voc"], f_orient_3, v_antisite_3, v_contact_3,
+        1.0e-9, 0.85, 3.2, 1.00, ff_cap=0.73
     )
-    pce_2l_cons = top_cons["eff"] + si_2l_mono["eff"]
-    pce_3l_cons = top_cons["eff"] + si_3l_mono["eff"] + bot_cons["eff"]
+    pce_2l_dem = top_dem["eff"] + si_2l_mono["eff"]
+    pce_3l_dem = top_dem["eff"] + si_3l_mono["eff"] + bot_dem["eff"]
 
-    top_base = _solve_realistic_thin_film_p11(
-        top_rad["jsc"], top_rad["voc"], f_orient_1, v_antisite_1, v_contact_1, 1.0e-4, 0.96, 1.8, 0.65
+    top_str = _solve_realistic_thin_film_p11(
+        top_rad["jsc"], top_rad["voc"], f_orient_1, v_antisite_1, v_contact_1,
+        1.0e-7, 0.92, 2.2, 0.80, ff_cap=None
     )
-    bot_mono_base = _solve_realistic_thin_film_p11(
-        bot_mono_rad["jsc"], bot_mono_rad["voc"], f_orient_3, v_antisite_3, v_contact_3, 1.0e-4, 0.96, 1.8, 0.65
+    bot_str = _solve_realistic_thin_film_p11(
+        bot_mono_rad["jsc"], bot_mono_rad["voc"], f_orient_3, v_antisite_3, v_contact_3,
+        1.0e-7, 0.92, 2.2, 0.80, ff_cap=None
     )
-    eta_top_base = top_base["eff"]
-    voc_top_base = top_base["voc"]
-    eta_bot_mono_base = bot_mono_base["eff"]
-    voc_bot_mono_base = bot_mono_base["voc"]
-    pce_2l_base = eta_top_base + si_2l_mono["eff"]
-    pce_3l_base = eta_top_base + si_3l_mono["eff"] + eta_bot_mono_base
+    pce_2l_str = top_str["eff"] + si_2l_mono["eff"]
+    pce_3l_str = top_str["eff"] + si_3l_mono["eff"] + bot_str["eff"]
 
-    top_mat = _solve_realistic_thin_film_p11(
-        top_rad["jsc"], top_rad["voc"], f_orient_1, v_antisite_1, v_contact_1, 5.0e-3, 0.98, 0.9, 0.35
+    top_ceil = _solve_realistic_thin_film_p11(
+        top_rad["jsc"], top_rad["voc"], f_orient_1, v_antisite_1, v_contact_1,
+        1.0e-4, 0.96, 1.8, 0.65, ff_cap=None
     )
-    bot_mat = _solve_realistic_thin_film_p11(
-        bot_mono_rad["jsc"], bot_mono_rad["voc"], f_orient_3, v_antisite_3, v_contact_3, 5.0e-3, 0.98, 0.9, 0.35
+    bot_mono_ceil = _solve_realistic_thin_film_p11(
+        bot_mono_rad["jsc"], bot_mono_rad["voc"], f_orient_3, v_antisite_3, v_contact_3,
+        1.0e-4, 0.96, 1.8, 0.65, ff_cap=None
     )
-    pce_2l_mat = top_mat["eff"] + si_2l_mono["eff"]
-    pce_3l_mat = top_mat["eff"] + si_3l_mono["eff"] + bot_mat["eff"]
+    eta_top_ceil = top_ceil["eff"]
+    voc_top_ceil = top_ceil["voc"]
+    eta_bot_mono_ceil = bot_mono_ceil["eff"]
+    voc_bot_mono_ceil = bot_mono_ceil["voc"]
+    pce_2l_ceil = eta_top_ceil + si_2l_mono["eff"]
+    pce_3l_ceil = eta_top_ceil + si_3l_mono["eff"] + eta_bot_mono_ceil
 
-    # Section 11.2(3): Band-Gap Uncertainty Sensitivity (+/- 0.15 eV, Base-Case Monofacial)
+    # Section 11.2(3): Band-Gap Uncertainty Sensitivity (+/- 0.15 eV, Ceiling Monofacial)
     sens_2l: List[float] = []
     sens_3l: List[float] = []
     for delta_eg in (-0.15, 0.15):
@@ -2416,14 +2439,14 @@ def independently_verify_phase11b_realistic_commercialization(
             eg_dir_ev=s_eg_dir_3,
         )
 
-        s_top_base = _solve_realistic_thin_film_p11(
+        s_top_ceil = _solve_realistic_thin_film_p11(
             s_top_rad["jsc"], s_top_rad["voc"], f_orient_1, v_antisite_1, v_contact_1, 1.0e-4, 0.96, 1.8, 0.65
         )
-        s_bot_base = _solve_realistic_thin_film_p11(
+        s_bot_ceil = _solve_realistic_thin_film_p11(
             s_bot_rad["jsc"], s_bot_rad["voc"], f_orient_3, v_antisite_3, v_contact_3, 1.0e-4, 0.96, 1.8, 0.65
         )
-        sens_2l.append(s_top_base["eff"] + s_si_2l["eff"])
-        sens_3l.append(s_top_base["eff"] + s_si_3l["eff"] + s_bot_base["eff"])
+        sens_2l.append(s_top_ceil["eff"] + s_si_2l["eff"])
+        sens_3l.append(s_top_ceil["eff"] + s_si_3l["eff"] + s_bot_ceil["eff"])
 
     # Section 11.3: Fab CAPEX, Yield & 4-Path Commercialization Economics
     c_fab_top = 16.50 + 2.50 * float(raw_cost_top_usd_m2) + _crit_surcharge_p11(stoich_1)
@@ -2440,75 +2463,83 @@ def independently_verify_phase11b_realistic_commercialization(
         eg_ind_ev=eg_ind_3,
         eg_dir_ev=eg_dir_3,
     )
-    bot_p1_base = _solve_realistic_thin_film_p11(
+    bot_p1_ceil = _solve_realistic_thin_film_p11(
         bot_p1_rad["jsc"], bot_p1_rad["voc"], f_orient_3, v_antisite_3, v_contact_3, 1.0e-4, 0.96, 1.8, 0.65
     )
-    eta_p1_bif20 = eta_top_base + si_p1["eff"] + bot_p1_base["eff"]
-    lcoe_p1_util = _compute_lcoe_25yr_p11(eta_p1_bif20, c_mod_1, 100.0, 0.925, 0.0055)
-    lcoe_p1_roof = _compute_lcoe_25yr_p11(eta_p1_bif20, c_mod_1, 240.0, 0.925, 0.0055)
+    p_p1_bif20 = eta_top_ceil + si_p1["eff"] + bot_p1_ceil["eff"]
+    lcoe_p1_util = _compute_lcoe_25yr_p11(p_p1_bif20, c_mod_1, 100.0, 0.925, 0.0055)
+    lcoe_p1_roof = _compute_lcoe_25yr_p11(p_p1_bif20, c_mod_1, 240.0, 0.925, 0.0055)
 
     # Path 2: 2-Layer 4T Active Solar Glass Superstrate on Unobstructed Bifacial c-Si (20% ground albedo)
     c_mod_2 = 42.00 + (c_fab_top / 0.90) + 5.50
     phi2_p2 = phi2_mono + 0.16 * SOLAR_PHOTON_FLUX_E
     si_p2 = _solve_realistic_si_p11(a_si_2l, phi2_p2)
-    eta_p2_bif20 = eta_top_base + si_p2["eff"]
-    lcoe_p2_util = _compute_lcoe_25yr_p11(eta_p2_bif20, c_mod_2, 100.0, 0.930, 0.0050)
-    lcoe_p2_roof = _compute_lcoe_25yr_p11(eta_p2_bif20, c_mod_2, 240.0, 0.930, 0.0050)
+    p_p2_bif20_dem = top_dem["eff"] + si_p2["eff"]
+    p_p2_bif20_ceil = eta_top_ceil + si_p2["eff"]
+    lcoe_p2_util_dem = _compute_lcoe_25yr_p11(p_p2_bif20_dem, c_mod_2, 100.0, 0.930, 0.0050)
+    lcoe_p2_roof_dem = _compute_lcoe_25yr_p11(p_p2_bif20_dem, c_mod_2, 240.0, 0.930, 0.0050)
+    lcoe_p2_util = _compute_lcoe_25yr_p11(p_p2_bif20_ceil, c_mod_2, 100.0, 0.930, 0.0050)
+    lcoe_p2_roof = _compute_lcoe_25yr_p11(p_p2_bif20_ceil, c_mod_2, 240.0, 0.930, 0.0050)
 
     # Path 3: 2-Terminal Monolithic Top-on-Si (375 C Direct Deposition)
     c_mod_3 = 42.00 + ((c_fab_top - 3.50) / 0.84)
-    eta_p3_bif20 = 0.84 * eta_p2_bif20
-    lcoe_p3_util = _compute_lcoe_25yr_p11(eta_p3_bif20, c_mod_3, 100.0, 0.925, 0.0060)
+    p_p3_bif20 = 0.84 * p_p2_bif20_ceil
+    lcoe_p3_util = _compute_lcoe_25yr_p11(p_p3_bif20, c_mod_3, 100.0, 0.925, 0.0060)
 
     # Path 4: Standalone BIPV Semi-Transparent Solar Window Glazing
-    eta_p4_bipv = 0.72 * eta_top_base
+    eta_p4_bipv = 0.72 * eta_top_ceil
     c_mod_4 = 58.00 + (c_fab_top / 0.90)
-    gm_p4_pct = ((185.00 - c_mod_4) / 185.00) * 100.0
 
     rec_path = (
-        "PATH2_2L_ACTIVE_GLASS_PLUS_PATH4_BIPV"
-        if (lcoe_p2_util < lcoe_p1_util and gm_p4_pct > 40.0)
+        "PATH2_2L_ACTIVE_GLASS_IF_BREAKEVEN_MET"
+        if lcoe_p2_util < lcoe_p1_util
         else "PATH1_3L_4T_SANDWICH"
     )
 
     res: Dict[str, Any] = {
         "path0_si_mono_pce_percent": round(float(eta_si_0_mono), 2),
-        "path0_si_bif20_pce_percent": round(float(eta_si_0_bif20), 2),
+        "path0_si_bif20_equivalent_power_density_mw_cm2": round(float(p_si_0_bif20), 2),
         "path0_utility_lcoe_cents_kwh": round(float(lcoe_p0_util), 3),
         "path0_rooftop_lcoe_cents_kwh": round(float(lcoe_p0_roof), 3),
-        "conservative_2l_mono_pce_percent": round(float(pce_2l_cons), 2),
-        "conservative_3l_mono_pce_percent": round(float(pce_3l_cons), 2),
-        "base_top_pce_percent": round(float(eta_top_base), 2),
-        "base_top_voc_v": round(float(voc_top_base), 4),
-        "base_bot_mono_pce_percent": round(float(eta_bot_mono_base), 2),
-        "base_bot_mono_voc_v": round(float(voc_bot_mono_base), 4),
-        "base_2l_mono_pce_percent": round(float(pce_2l_base), 2),
-        "base_3l_mono_pce_percent": round(float(pce_3l_base), 2),
-        "mature_2l_mono_pce_percent": round(float(pce_2l_mat), 2),
-        "mature_3l_mono_pce_percent": round(float(pce_3l_mat), 2),
+        "demonstrated_top_pce_percent": round(float(top_dem["eff"]), 2),
+        "demonstrated_top_voc_v": round(float(top_dem["voc"]), 4),
+        "demonstrated_top_ff": round(float(top_dem["ff"]), 4),
+        "demonstrated_2l_mono_pce_percent": round(float(pce_2l_dem), 2),
+        "demonstrated_3l_mono_pce_percent": round(float(pce_3l_dem), 2),
+        "stretch_top_pce_percent": round(float(top_str["eff"]), 2),
+        "stretch_top_voc_v": round(float(top_str["voc"]), 4),
+        "stretch_2l_mono_pce_percent": round(float(pce_2l_str), 2),
+        "stretch_3l_mono_pce_percent": round(float(pce_3l_str), 2),
+        "ceiling_top_pce_percent": round(float(eta_top_ceil), 2),
+        "ceiling_top_voc_v": round(float(voc_top_ceil), 4),
+        "ceiling_bot_mono_pce_percent": round(float(eta_bot_mono_ceil), 2),
+        "ceiling_bot_mono_voc_v": round(float(voc_bot_mono_ceil), 4),
+        "ceiling_2l_mono_pce_percent": round(float(pce_2l_ceil), 2),
+        "ceiling_3l_mono_pce_percent": round(float(pce_3l_ceil), 2),
         "gap_sens_2l_mono_low_percent": round(float(min(sens_2l)), 2),
         "gap_sens_2l_mono_high_percent": round(float(max(sens_2l)), 2),
         "gap_sens_3l_mono_low_percent": round(float(min(sens_3l)), 2),
         "gap_sens_3l_mono_high_percent": round(float(max(sens_3l)), 2),
-        "path1_3l_bif20_pce_percent": round(float(eta_p1_bif20), 2),
+        "path1_3l_bif20_equivalent_power_density_mw_cm2": round(float(p_p1_bif20), 2),
         "path1_module_cost_usd_m2": round(float(c_mod_1), 2),
         "path1_utility_lcoe_cents_kwh": round(float(lcoe_p1_util), 3),
         "path1_rooftop_lcoe_cents_kwh": round(float(lcoe_p1_roof), 3),
-        "path2_2l_bif20_pce_percent": round(float(eta_p2_bif20), 2),
+        "path2_2l_bif20_equivalent_power_density_mw_cm2": round(float(p_p2_bif20_ceil), 2),
         "path2_module_cost_usd_m2": round(float(c_mod_2), 2),
+        "demonstrated_path2_utility_lcoe_cents_kwh": round(float(lcoe_p2_util_dem), 3),
+        "demonstrated_path2_rooftop_lcoe_cents_kwh": round(float(lcoe_p2_roof_dem), 3),
         "path2_utility_lcoe_cents_kwh": round(float(lcoe_p2_util), 3),
         "path2_rooftop_lcoe_cents_kwh": round(float(lcoe_p2_roof), 3),
-        "path3_2t_bif20_pce_percent": round(float(eta_p3_bif20), 2),
+        "path3_2t_bif20_equivalent_power_density_mw_cm2": round(float(p_p3_bif20), 2),
         "path3_module_cost_usd_m2": round(float(c_mod_3), 2),
         "path3_utility_lcoe_cents_kwh": round(float(lcoe_p3_util), 3),
         "path4_bipv_window_pce_percent": round(float(eta_p4_bipv), 2),
         "path4_dgu_cost_usd_m2": round(float(c_mod_4), 2),
-        "path4_gross_margin_percent": round(float(gm_p4_pct), 2),
         "recommended_commercial_path": rec_path,
     }
 
-    sig_payload = {k: v for k, v in res.items() if k != "sha256_signature"}
-    res["sha256_signature"] = hashlib.sha256(
+    sig_payload = {k: v for k, v in res.items() if k != "sha256_digest"}
+    res["sha256_digest"] = hashlib.sha256(
         json.dumps(sig_payload, sort_keys=True).encode("utf-8")
     ).hexdigest()
 
@@ -2642,11 +2673,11 @@ def verify_candidate_dossier(
         elec = dossier["electronics"]
 
         # Relativistic SOC splitting
-        hse_nosoc = elec.get("hse06_nosoc_gap_ev")
-        hse_soc_dir = elec.get("hse06_soc_direct_gap_ev")
+        gap_nosoc = elec.get("gap_est_nosoc_ev")
+        gap_dir = elec.get("gap_est_direct_ev")
         stated_soc = elec.get("soc_splitting_ev")
-        if hse_nosoc is not None and hse_soc_dir is not None and stated_soc is not None:
-            expected_soc = round(hse_nosoc - hse_soc_dir, 3)
+        if gap_nosoc is not None and gap_dir is not None and stated_soc is not None:
+            expected_soc = round(gap_nosoc - gap_dir, 3)
             soc_pass = abs(stated_soc - expected_soc) <= 0.005
             checks["soc_splitting"] = {
                 "stated_soc_ev": stated_soc,
@@ -2704,8 +2735,8 @@ def verify_candidate_dossier(
     if "optics" in dossier and dossier["optics"] and "electronics" in dossier and dossier["electronics"]:
         opt = dossier["optics"]
         elec = dossier["electronics"]
-        eg_ind = elec.get("hse06_soc_indirect_gap_ev")
-        eg_dir = elec.get("hse06_soc_direct_gap_ev")
+        eg_ind = elec.get("gap_est_indirect_ev")
+        eg_dir = elec.get("gap_est_direct_ev")
         eps_inf = elec.get("eps_inf")
         thickness_nm = opt.get("film_thickness_nm", 260.0)
         stated_slme = opt.get("standalone_slme_percent")
@@ -2788,5 +2819,5 @@ def verify_candidate_dossier(
         "passed_all_redundancy_checks": passed_all,
         "checks": checks,
         "mismatches": mismatches,
-        "sha256_signature": sha256_hex,
+        "sha256_digest": sha256_hex,
     }

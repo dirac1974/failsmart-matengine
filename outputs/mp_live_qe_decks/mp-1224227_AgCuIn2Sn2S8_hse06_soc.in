@@ -1,0 +1,57 @@
+! FailSmart-MatEngine Auto-Generated Quantum ESPRESSO HSE06+SOC Input Deck (not run)
+! Candidate: mp-1224227 (AgCuIn2Sn2S8) | Target: TOP_ACTIVE_GLASS_185EV
+! Space Group: Imm2 (#44) | nat = 14
+&CONTROL
+  calculation = 'scf',
+  prefix = 'agcuin2sn2s8',
+  outdir = './out/',
+  pseudo_dir = './pseudo_oncv_fr/',
+  tprnfor = .true.,
+  tstress = .true.,
+  etot_conv_thr = 1.0d-6,
+  forc_conv_thr = 1.0d-4,
+/
+&SYSTEM
+  ibrav = 0,
+  nat = 14,
+  ntyp = 5,
+  ecutwfc = 70.0,
+  ecutfock = 140.0,
+  noncolin = .true.,
+  lspinorb = .true.,
+  input_dft = 'hse',
+  nqx1 = 1, nqx2 = 1, nqx3 = 1,
+  x_gamma_extrapolation = .true.,
+/
+&ELECTRONS
+  conv_thr = 1.0d-8,
+  mixing_beta = 0.4,
+  adaptive_thr = .true.,
+/
+ATOMIC_SPECIES
+  Ag     107.8682  Ag_ONCV_PBE_FR-1.2.upf
+  Cu      63.5460  Cu_ONCV_PBE_FR-1.2.upf
+  In     114.8180  In_ONCV_PBE_FR-1.2.upf
+  Sn     118.7100  Sn_ONCV_PBE_FR-1.2.upf
+  S       32.0650  S_ONCV_PBE_FR-1.2.upf
+CELL_PARAMETERS (angstrom)
+      6.60052927      0.00000000     -3.78618198
+     -2.20486762      6.21127218     -3.80273815
+      0.00000000      0.00000000      7.60934693
+ATOMIC_POSITIONS (crystal)
+  In     0.74858700    0.49955100    0.24903600
+  In     0.25051500    0.49955100    0.75096400
+  Cu     0.62226400    0.12226400    0.50000000
+  Ag     0.87701100    0.87701100    0.00000000
+  Sn     0.25026500    0.50012100    0.24985600
+  Sn     0.25026500    0.00040900    0.75014400
+  S      0.47658900    0.74469200    0.73189700
+  S      0.01279500    0.74469200    0.26810300
+  S      0.01160300    0.74589300    0.73429100
+  S      0.01160300    0.27731200    0.26570900
+  S      0.00709000    0.25028400    0.75680600
+  S      0.49347800    0.25028400    0.24319400
+  S      0.49396800    0.24939000    0.75542200
+  S      0.49396800    0.73854500    0.24457800
+K_POINTS automatic
+  3 3 3 0 0 0
