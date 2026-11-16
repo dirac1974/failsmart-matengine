@@ -366,7 +366,7 @@ def fetch_live_mp_semiconductors(
         records.append(rec)
 
     cpath.parent.mkdir(parents=True, exist_ok=True)
-    cpath.write_text(json.dumps(records, indent=2))
+    cpath.write_text(json.dumps(records, indent=2), encoding="utf-8")
     return records[:max_candidates]
 
 
@@ -679,7 +679,8 @@ def build_live_mp_candidate_dossier(
         k_gpa = round(float(np.clip(820.0 / (vol_per_atom ** 0.95) + 22.0 * o_frac, 18.0, 115.0)), 1)
         g_gpa = round(0.51 * k_gpa, 1)
 
-    cell_abc = tuple(float(x) for x in parsed_struct.lattice.abc)
+    abc = parsed_struct.lattice.abc
+    cell_abc: Tuple[float, float, float] = (float(abc[0]), float(abc[1]), float(abc[2]))
     unit_cell_stoich = {el.symbol: int(round(cnt)) for el, cnt in parsed_struct.composition.items()}
     debye_k = compute_anderson_debye_temperature(k_gpa, g_gpa, cell_abc, unit_cell_stoich)
     wmin_thz = round(float(np.clip(0.55 + 0.0032 * debye_k - 0.008 * ehull_mev, 0.35, 2.40)), 2)
@@ -1077,12 +1078,12 @@ def compute_cross_layer_4t_stack_wavelength(
 
 
 def run_live_mp_discovery_campaign(
-    output_dir: str = "/home/antigravity/failsmart-matengine/outputs",
+    output_dir: Optional[str] = None,
     max_candidates: int = 100,
     refresh_mp_cache: bool = False,
 ) -> Dict[str, Any]:
     """Execute the Open-World Live Materials Project + LBNL 80k Impurity & A-Lab Precursor Genome Discovery Campaign."""
-    out_path = Path(output_dir)
+    out_path = Path(output_dir) if output_dir is not None else (_REPO_ROOT / "outputs")
     out_path.mkdir(parents=True, exist_ok=True)
     mp_qe_dir = out_path / "mp_live_qe_decks"
     mp_qe_dir.mkdir(parents=True, exist_ok=True)
@@ -1345,6 +1346,13 @@ if __name__ == "__main__":
             f"Path1(3L_Bif20)={p11b['path1_3l_bif20_pce_percent']:.2f}% (${p11b['path1_module_cost_usd_m2']:.1f}/m2, {p11b['path1_utility_lcoe_cents_kwh']:.3f} c/kWh) | "
             f"Path4(BIPV)={p11b['path4_bipv_window_pce_percent']:.2f}% (GM={p11b['path4_gross_margin_percent']:.1f}%)"
         )
+
+
+def main() -> int:
+    """CLI entrypoint for running the v3.0-v8.0 live MP discovery campaign."""
+    res = run_live_mp_discovery_campaign()
+    print("Funnel Counts:", json.dumps(res["funnel_counts"], indent=2))
+    return 0
 
 
 

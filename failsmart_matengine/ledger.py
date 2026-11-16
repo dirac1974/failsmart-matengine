@@ -12,11 +12,14 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 
 
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+
+
 class ContrastiveFailureLedger:
     """Persistent SQLite + vector store for positive and negative materials results."""
 
-    def __init__(self, db_path: str = "/home/antigravity/failsmart-matengine/data/failure_memory.db"):
-        self.db_path = Path(db_path)
+    def __init__(self, db_path: Optional[str] = None):
+        self.db_path = Path(db_path) if db_path is not None else (_REPO_ROOT / "data" / "failure_memory.db")
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._init_schema()
         self._seed_historical_archetypes()
@@ -174,7 +177,7 @@ class ContrastiveFailureLedger:
             if count > 0:
                 return
 
-        archetypes = [
+        archetypes: List[Dict[str, Any]] = [
             {
                 "candidate_id": "LIT-FAIL-001",
                 "formula_reduced": "BaZrS3",

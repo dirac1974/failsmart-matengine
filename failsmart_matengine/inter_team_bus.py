@@ -12,11 +12,14 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+
+
 class InterTeamBus:
     """Structured message bus and SHA-256 audit logger for the 13-agent team."""
 
-    def __init__(self, logs_dir: str = "/home/antigravity/failsmart-matengine/logs"):
-        self.logs_dir = Path(logs_dir)
+    def __init__(self, logs_dir: Optional[str] = None):
+        self.logs_dir = Path(logs_dir) if logs_dir is not None else (_REPO_ROOT / "logs")
         self.logs_dir.mkdir(parents=True, exist_ok=True)
         self.comm_log_path = self.logs_dir / "inter_team_communication.jsonl"
         self.audit_log_path = self.logs_dir / "verification_audit_log.jsonl"
