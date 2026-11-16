@@ -57,8 +57,10 @@ import glob
 import json
 import math
 import os
+import re
 import sqlite3
 import sys
+import tempfile
 import unittest
 
 # Ensure repo root is on sys.path so failsmart_matengine imports seamlessly
@@ -148,8 +150,6 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
             "tools",
             "mp_live_discovery",
             "atomistic_and_tmm",
-            "phase9_lab_and_lcoe",
-            "phase10_bifacial_and_string",
             "realistic_commercialization",
         }
         for node in ast.walk(iv_tree):
@@ -541,8 +541,9 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
         st2 = stage2_evaluate_stability(cand)
         self.assertTrue(st2.passed_stage2)
 
-        ledger = ContrastiveFailureLedger()
-        st3 = stage3_evaluate_synthesis_and_speciation(cand, ledger)
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdir:
+            ledger = ContrastiveFailureLedger(db_path=os.path.join(tmpdir, "test_ood.db"))
+            st3 = stage3_evaluate_synthesis_and_speciation(cand, ledger)
         self.assertTrue(st3.passed_stage3)
 
         gate = gate_a_adversarial_audit(cand, st2, st3)
@@ -858,9 +859,9 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
             while i < len(lines):
                 line = lines[i].strip()
                 if "nat" in line and "=" in line:
-                    for part in line.replace(",", " ").split():
-                        if part.startswith("nat="):
-                            nat_in_header = int(part.split("=")[1])
+                    m_nat = re.search(r"\bnat\s*=\s*(\d+)", line)
+                    if m_nat:
+                        nat_in_header = int(m_nat.group(1))
                 if line.startswith("ATOMIC_SPECIES"):
                     i += 1
                     while i < len(lines) and lines[i].strip() and not lines[i].strip().startswith(("CELL_PARAMETERS", "ATOMIC_POSITIONS", "K_POINTS", "&")):
@@ -1378,6 +1379,115 @@ class TestScientificIntegrityAndRedundancyV2(unittest.TestCase):
                 0.01,
                 f"{pid}: Path 2 Utility LCOE diff > 0.01 c/kWh",
             )
+
+    def test_step7_gate_b_supercell_vac_and_cross_platform_fixes(self):
+        """Test 23: Verify Gate B final red-team audit, active-learning routing, vac_el parsing,
+        halide Mulliken safety, Year-25 **25 exponent consistency, and cross-platform path defaults."""
+        from failsmart_matengine.atomistic_and_tmm import (
+            evaluate_phase9a_lab_synthesis_and_defect_supercell,
+            evaluate_phase9c_real_world_lcoe_stress_test,
+        )
+        from failsmart_matengine.inter_team_bus import InterTeamBus
+        from failsmart_matengine.ledger import ContrastiveFailureLedger
+        from failsmart_matengine.realistic_commercialization import MULLIKEN_CHI_EV
+        from failsmart_matengine.tools import (
+            build_candidate_from_spec,
+            gate_a_adversarial_audit,
+            gate_b_final_red_team_audit,
+            stage2_evaluate_stability,
+            stage3_evaluate_synthesis_and_speciation,
+            stage4_5_quantum_and_defects,
+            stage5_optical_4t_tandem_simulation,
+        )
+
+        # 1. Cross-platform defaults must resolve inside the repo, never /home/antigravity
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdir:
+            ledger_default = ContrastiveFailureLedger()
+            self.assertNotIn("antigravity/failsmart-matengine", str(ledger_default.db_path).replace("\\", "/").lstrip("C:/"))
+            self.assertTrue(ledger_default.db_path.is_absolute())
+
+            bus = InterTeamBus(logs_dir=tmpdir)
+            self.assertTrue(bus.logs_dir.exists())
+
+        # 2. Halide & alkaline-earth Mulliken keys present
+        for el in ("Cl", "Br", "I", "Ba", "Sr", "Zn"):
+            self.assertIn(el, MULLIKEN_CHI_EV)
+
+        # 3. Gate B Promote & Veto + Active-Learning routing
+        spec = {
+            "id": "CAND-A02",
+            "formula": "Bi2CuO2SCl",
+            "layer": "TOP_ACTIVE_GLASS_185EV",
+            "family": "Tetragonal Oxychalcogenide",
+            "elements": ["Bi", "Cu", "O", "S", "Cl"],
+            "stoich": {"Bi": 2, "Cu": 1, "O": 2, "S": 1, "Cl": 1},
+            "ox": {"Bi": 3, "Cu": 1, "O": -2, "S": -2, "Cl": -1},
+            "sg_sym": "I4/mmm",
+            "sg_num": 139,
+            "nsites": 28,
+            "dim": "Quasi-2D",
+            "chi_diff": 1.15,
+            "tol": 0.92,
+            "bvs_dev": 0.08,
+            "cell": (4.0, 4.0, 18.0),
+        }
+        cand = build_candidate_from_spec(spec)
+        stab = stage2_evaluate_stability(cand)
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdir:
+            ledger = ContrastiveFailureLedger(db_path=os.path.join(tmpdir, "gate_b.db"))
+            synth = stage3_evaluate_synthesis_and_speciation(cand, ledger)
+        elec = stage4_5_quantum_and_defects(cand)
+        opt = stage5_optical_4t_tandem_simulation(cand, elec, synth)
+
+        audit_b_pass = gate_b_final_red_team_audit(cand, stab, synth, elec, opt)
+        self.assertEqual(audit_b_pass.gate_stage, "GATE_B_FINAL")
+        self.assertEqual(audit_b_pass.decision, "PROMOTE")
+
+        # Deep SRH defect triggers Gate B VETO_REJECT
+        elec_bad = elec.model_copy(update={"deepest_defect_level_from_band_edge_ev": 0.35})
+        audit_b_veto = gate_b_final_red_team_audit(cand, stab, synth, elec_bad, opt)
+        self.assertEqual(audit_b_veto.decision, "VETO_REJECT")
+        self.assertEqual(audit_b_veto.primary_failure_mode, "DEEP_SRH_DEFECT")
+
+        # High epistemic uncertainty triggers ACTIVE_LEARNING_DFT
+        stab_unc = stab.model_copy(update={"mlip_force_std_ev_ang": 0.22})
+        audit_a_unc = gate_a_adversarial_audit(cand, stab_unc, synth)
+        self.assertEqual(audit_a_unc.decision, "ACTIVE_LEARNING_DFT")
+        audit_b_unc = gate_b_final_red_team_audit(cand, stab_unc, synth, elec, opt)
+        self.assertEqual(audit_b_unc.decision, "ACTIVE_LEARNING_DFT")
+
+        # 4. Supercell vacancy parser must strip annotations (e.g. "V_Cu (shallow acceptor)")
+        with open(os.path.join(self.repo_root, "outputs", "live_mp_discovery_summary.json"), "r", encoding="utf-8") as f:
+            live_sum = json.load(f)
+        top_f = dict(live_sum["finalists"][0])
+        top_f["electronics"] = dict(top_f["electronics"])
+        top_f["electronics"]["dominant_vacancy_defect"] = "V_S (shallow donor)"
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdir:
+            p9a = evaluate_phase9a_lab_synthesis_and_defect_supercell(top_f, defect_deck_dir=tmpdir)
+            deck_txt = open(os.path.join(tmpdir, p9a.doped_defect_deck_filename), "r", encoding="utf-8").read()
+            self.assertIn("V_S (shallow donor)", deck_txt)
+            # Host stoichiometry for candidate has S; verify an S site was actually removed
+            # Check exact S count is 1 less than host S count in supercell
+            pos_block = deck_txt.split("ATOMIC_POSITIONS (crystal)")[1].split("K_POINTS")[0]
+            s_lines = [ln for ln in pos_block.splitlines() if ln.strip().startswith("S ")]
+            from pymatgen.io.cif import CifParser as _CP
+            host_s = sum(1 for site in _CP.from_str(top_f["candidate"]["cif_content"]).parse_structures(primitive=False)[0] if site.specie.symbol == "S")
+            nx, ny, nz = p9a.supercell_dims
+            self.assertEqual(len(s_lines), host_s * nx * ny * nz - 1)
+
+        # 5. Year-25 retention **25 consistency
+        from failsmart_matengine.schemas import GradedARCTechnoEconomicReport
+        graded_0 = GradedARCTechnoEconomicReport(**live_sum["graded_arc_techno_economic_stacks"][0])
+        f_by_id = {x["candidate"]["candidate_id"]: x for x in live_sum["finalists"]}
+        tf = f_by_id[graded_0.top_mp_id]
+        bf = f_by_id[graded_0.bottom_mp_id]
+        p9c = evaluate_phase9c_real_world_lcoe_stress_test(tf, bf, graded_0)
+        r_deg_dec = p9c.annual_degradation_rate_pct_yr / 100.0
+        self.assertAlmostEqual(
+            p9c.year25_retained_power_fraction_percent,
+            round(((1.0 - r_deg_dec) ** 25) * 100.0, 2),
+            places=2,
+        )
 
 
 if __name__ == "__main__":

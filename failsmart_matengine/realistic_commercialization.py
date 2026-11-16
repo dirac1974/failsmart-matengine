@@ -50,9 +50,15 @@ MULLIKEN_CHI_EV: Dict[str, float] = {
     "Cu": 4.48,
     "Ag": 4.44,
     "Sn": 4.30,
+    "Zn": 4.45,
+    "Ba": 2.40,
+    "Sr": 2.50,
     "O": 7.54,
     "S": 6.22,
     "Se": 5.89,
+    "Cl": 8.30,
+    "Br": 7.59,
+    "I": 6.76,
 }
 
 
@@ -99,7 +105,7 @@ def evaluate_phase11a_synthesis_and_contacts(
 
     n_tot = sum(stoich.values())
     chi_comp = math.exp(
-        sum(cnt * math.log(MULLIKEN_CHI_EV[el]) for el, cnt in stoich.items()) / float(n_tot)
+        sum(cnt * math.log(MULLIKEN_CHI_EV.get(el, 4.50)) for el, cnt in stoich.items()) / float(n_tot)
     )
     lp_shift = 1.65 * (float(stoich.get("Bi", 0) + stoich.get("Sb", 0)) / float(n_tot))
 

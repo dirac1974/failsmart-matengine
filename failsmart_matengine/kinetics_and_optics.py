@@ -691,7 +691,7 @@ def compute_synthesis_and_speciation(cand_spec: Dict[str, Any], embedding_score:
         halogens = [el for el in elements if el in ["Cl", "Br", "I"]]
         metals = [el for el in elements if el not in chalcogens and el not in halogens and el != "O"]
 
-        precursors: List[str] = []
+        precursors = []
         if "Bi" in metals and "O" in elements and "Cl" in halogens:
             precursors.append("BiOCl")
         for m in metals:

@@ -5,7 +5,7 @@
 **Execution Timestamp:** 2026-11-10T18:15:46Z  
 **Test Suite Path:** [`tests/test_scientific_integrity.py`](file:///home/antigravity/failsmart-matengine/tests/test_scientific_integrity.py)  
 **Audit Log Path:** [`logs/verification_audit_log.jsonl`](file:///home/antigravity/failsmart-matengine/logs/verification_audit_log.jsonl)  
-**Verification Status:** **ALL 10 COMPREHENSIVE TESTS PASSED (100% SUCCESS, 0 FAILURES, 0 ERRORS)**
+**Verification Status:** **ALL 23 COMPREHENSIVE TESTS PASSED (100% SUCCESS, 0 FAILURES, 0 ERRORS)**
 
 ---
 
@@ -246,9 +246,9 @@ tests/test_scientific_integrity.py::TestScientificIntegrityAndRedundancyV2::test
 
 ---
 
-## 11. v4.0/v5.0/v6.0/v7.0 Automated Test Suite Expansion (20/20 Tests Passing)
+## 11. v4.0/v5.0/v6.0/v7.0/v8.0 Automated Test Suite Expansion (23/23 Tests Passing)
 
-In v4.0–v8.0, [`tests/test_scientific_integrity.py`](file:///home/antigravity/failsmart-matengine/tests/test_scientific_integrity.py) has been expanded to **22 comprehensive automated tests** (18 v5.0 tests + Test 19 for Phase 9 + Test 20 for Phase 10 + Test 21 for KaTeX/Markdown safety + Test 22 for Phase 11):
+In v4.0–v8.0, [`tests/test_scientific_integrity.py`](file:///home/antigravity/failsmart-matengine/tests/test_scientific_integrity.py) has been expanded to **23 comprehensive automated tests** (18 v5.0 tests + Test 19 for Phase 9 + Test 20 for Phase 10 + Test 21 for KaTeX/Markdown safety + Test 22 for Phase 11 + Test 23 for Gate B, supercell vacancy parsing & cross-platform portability):
 
 - **Test 16 (`test_step1_3d_dynamical_matrix_and_neb_ion_migration`):** Verifies that all 8 promoted live MP finalists have `imaginary_mode_count == 0`, $\omega_{\text{opt,min}} > 1.0\text{ THz}$, Acoustic Sum Rule translational invariance deviation $< 10^{-4}\text{ THz}$, 11-image NEB saddle barriers $E_{\text{mig}}^{\text{NEB}} \ge 0.90\text{ eV}$, $D_{\text{ion}}(300\text{ K}) < 10^{-18}\text{ cm}^2/\text{s}$, exact agreement ($\le 10^{-4}$) between primary `numpy.linalg.eigh` and blinded `scipy.linalg.eigvalsh`, and zero `'unknown'` tokens in any candidate's `competing_hull_phases` or `competing_impurity_sinks`.
 - **Test 17 (`test_step2_coherent_abeles_tmm_vs_rouard_airy_4t_stacks`):** Verifies all 15 single-ARC coherent multilayer 4T tandem stacks (`Air / 98 nm MgF2 / 105 nm Front ITO / Absorber / 85 nm Buffer / Couplant -> c-Si -> Bottom IR / Ag Mirror`), confirming strict photon conservation $A(\lambda) + T(\lambda) + R(\lambda) \le 1$, realistic front reflectance ($11.01\%\text{–}11.97\%$), high sub-bandgap IR transmittance ($88.25\%\text{–}88.92\%$), and $\le 0.05\%$ agreement between wavelength-space $2\times 2$ Abeles TMM (`np.trapezoid`) and energy-space Recursive Rouard/Airy (`scipy.integrate.simpson`).
@@ -257,3 +257,4 @@ In v4.0–v8.0, [`tests/test_scientific_integrity.py`](file:///home/antigravity/
 - **Test 20 (`test_step5_phase10_opt_thickness_bifacial_and_string_matching`):** Verifies Phase 10A ($2^4=16$ thickness/ARC optimization with $\le 0.05\%$ Abeles vs. Rouard agreement), Phase 10B (20% and 30% ground-albedo radiative bifacial harvesting reaching 46.17%–48.17% equivalent PCE and 3.001–3.010 ¢/kWh 25-year bifacial LCOE), and Phase 10C (exact subcell $J\text{–}V$ operating points and integer $N_{\text{top}} : 72 : N_{\text{bot}}$ parallel-string voltage matching with $< 2.0\%$ mismatch).
 - **Test 21 (`test_markdown_katex_safety_no_undefined_macros`):** Scans `README.md` and every Markdown document in `docs/*.md` outside fenced/inline code blocks to guarantee zero undefined KaTeX macros (`\cent`, `\celsius`, `\degree`, `\angstrom`), zero lines with an odd count of unescaped `$` signs, and zero `**` or `¢` tokens inside inline `$...$` math spans.
 - **Test 22 (`test_step6_phase11_realistic_synthesis_and_commercialization_audit`):** Cross-verifies all 8 Phase 11A synthesis practicality & contact alignment dossiers (`BiSbS3` `SPS = 94.76`, `Sb2OS2` `SPS = 94.44`, `0.00 meV/atom` `TiO2` barrier reactivity) and all 15 Phase 11B/11C non-radiative SRH (`ERE = 1e-5`, `1e-4`, `5e-3`) & 4-path commercialization dossiers (`Path 2` `30.58%–30.61%` bifacial PCE at `4.234 ¢/kWh` utility / `6.470 ¢/kWh` rooftop LCOE, and `Path 4` BIPV `58.7%` gross margin) against `independently_verify_phase11a_synthesis_and_contacts` and `independently_verify_phase11b_realistic_commercialization`.
+- **Test 23 (`test_step7_gate_b_supercell_vac_and_cross_platform_fixes`):** Verifies Gate B (`GATE_B_FINAL`) promote/veto and `ACTIVE_LEARNING_DFT` routing, Phase 9A supercell vacancy species parsing (`"V_S (shallow donor)"` removes an `S` atom), halide/alkaline-earth `MULLIKEN_CHI_EV` safety, Year-25 `** 25` retention exponent consistency, and cross-platform repository-relative default paths.

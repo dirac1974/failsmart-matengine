@@ -17,6 +17,7 @@ Implements:
 from __future__ import annotations
 
 import math
+import re
 from typing import Any, Dict, List, Tuple
 
 import numpy as np
@@ -834,7 +835,8 @@ def evaluate_phase9a_lab_synthesis_and_defect_supercell(
     fnv_q2 = (4.0 * madelung_alpha * coulomb_ev_ang) / (eps_0 * l_eff)
 
     dom_vac = str(elec["dominant_vacancy_defect"])
-    vac_el = dom_vac.replace("V_", "").strip()
+    vac_match = re.match(r"^\s*V_([A-Za-z]{1,2})\b", dom_vac)
+    vac_el = vac_match.group(1) if vac_match else dom_vac.replace("V_", "").split()[0].strip()
 
     # Write Stage 5 `doped` / QE Defect Supercell Input Deck
     out_dir = Path(defect_deck_dir)
@@ -1195,7 +1197,7 @@ def evaluate_phase9c_real_world_lcoe_stress_test(
     e_mig_lim = min(float(at_top["neb_saddle_barrier_ev"]), float(at_bot["neb_saddle_barrier_ev"]))
     kb_t_318 = (KB_J * 318.15) / E_CHARGE
     r_deg = 0.0035 + 0.0010 * math.exp(-max(0.0, e_mig_lim - 0.65) / kb_t_318)
-    yr25_ret_pct = ((1.0 - r_deg) ** 24) * 100.0
+    yr25_ret_pct = ((1.0 - r_deg) ** 25) * 100.0
 
     raw_top = float(s_top["active_layer_cost_usd_m2"])
     raw_bot = float(s_bot["active_layer_cost_usd_m2"])

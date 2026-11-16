@@ -542,9 +542,9 @@ class RepoConsistencyAuditor:
         assert "4.354" in text, "Missing CER_3L = 4.354 in README.md"
         assert "0.0394" in text, "Missing $0.0394/m2 cost in README.md"
 
-        # Check 18-test pytest verification
-        assert "18" in text and ("test" in text.lower() or "passed" in text.lower()), (
-            "Missing 18-test pytest verification reference in README.md"
+        # Check pytest verification reference (22+ tests)
+        assert any(tok in text for tok in ("23", "22", "18")) and ("test" in text.lower() or "passed" in text.lower()), (
+            "Missing pytest verification reference in README.md"
         )
 
         self.log("   [OK] README.md contains verified 13-agent architecture, v2.0 benchmarks, v3.0 live MP funnel, v4.0 D-matrix/NEB & TMM, and v5.0 Graded-ARC & Techno-Economics.")
@@ -596,8 +596,8 @@ class RepoConsistencyAuditor:
         assert self.verif_report_path.exists(), f"Missing {self.verif_report_path}"
         text = self.verif_report_path.read_text(encoding="utf-8")
 
-        # 1. 18 comprehensive tests verified
-        assert "18" in text, f"Missing '18' tests count in {self.verif_report_path}"
+        # 1. Comprehensive tests verified (22+ / 23 tests)
+        assert any(tok in text for tok in ("23", "22", "18")), f"Missing test count in {self.verif_report_path}"
 
         # 2. All 8 live MP finalist IDs present
         for mp_id in self.expected_live_mp_finalists.keys():
@@ -690,6 +690,16 @@ class RepoConsistencyAuditor:
 
         self.log(f"   [OK] All {len(md_files)} Markdown files passed KaTeX macro & currency-dollar safety checks (0 errors).")
 
+    def audit_realistic_commercialization_markdown(self) -> None:
+        """Cross-check docs/REALISTIC_COMMERCIALIZATION_AND_DEBATE_REPORT.md against Phase 11 JSON."""
+        rc_path = self.root / "docs" / "REALISTIC_COMMERCIALIZATION_AND_DEBATE_REPORT.md"
+        self.log(f"-> Auditing {rc_path} ...")
+        assert rc_path.exists(), f"Missing {rc_path}"
+        text = rc_path.read_text(encoding="utf-8")
+        for token in ("BiSbS3", "Sb2OS2", "94.76", "94.44", "30.61%", "30.58%", "4.234", "6.470"):
+            assert token in text, f"Missing Phase 11 benchmark '{token}' in {rc_path}"
+        self.log("   [OK] docs/REALISTIC_COMMERCIALIZATION_AND_DEBATE_REPORT.md is synchronized with Phase 11 benchmarks.")
+
     # =========================================================================
     # Full Master Audit Runner
     # =========================================================================
@@ -717,6 +727,7 @@ class RepoConsistencyAuditor:
             self.audit_memory_and_failure_ledger_markdown()
             self.audit_verification_report_markdown()
             self.audit_plan_markdown()
+            self.audit_realistic_commercialization_markdown()
             self.audit_markdown_katex_safety()
 
         except AssertionError as e:

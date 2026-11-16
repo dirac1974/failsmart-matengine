@@ -271,6 +271,62 @@ def gate_a_adversarial_audit(
     )
 
 
+def gate_b_final_red_team_audit(
+    cand: CandidateMaterial,
+    stab: StabilityReport,
+    synth: SynthesisRouteReport,
+    elec: ElectronicDefectReport,
+    opt: OpticalTandemReport,
+) -> AdversarialAuditReport:
+    """Agent 6 (adversarial_critic): Post-DFT Final Red-Team Audit (Gate B)."""
+    d = _GATE_A_DATA.get(cand.candidate_id) or _infer_ood_gate_a(cand)
+    polaron_flag = (
+        cand.structural_dimensionality in ("0D-Isolated", "1D-Chain")
+        or elec.frohlich_alpha > 5.0
+    )
+    tco_ok = d["tco_rxn"] > -100.0
+    seg_ok = d["hmix"] < 35.0
+    srh_ok = elec.deepest_defect_level_from_band_edge_ev <= 0.15
+    opt_ok = opt.passed_optical_gate and opt.tandem_4t_total_eff_percent >= 41.0
+    unc_flag = stab.mlip_force_std_ev_ang > 0.15
+
+    if polaron_flag:
+        decision = "VETO_REJECT"
+        fail_mode = "LOW_DIM_POLARON_RISK"
+    elif not srh_ok:
+        decision = "VETO_REJECT"
+        fail_mode = "DEEP_SRH_DEFECT"
+    elif not seg_ok or not tco_ok:
+        decision = "VETO_REJECT"
+        fail_mode = "ANION_PHASE_SEGREGATION"
+    elif not opt_ok:
+        decision = "VETO_REJECT"
+        fail_mode = "PARASITIC_OPTICAL_LOSS"
+    elif unc_flag:
+        decision = "ACTIVE_LEARNING_DFT"
+        fail_mode = None
+    else:
+        decision = "PROMOTE"
+        fail_mode = None
+
+    return AdversarialAuditReport(
+        candidate_id=cand.candidate_id,
+        gate_stage="GATE_B_FINAL",
+        anion_mixing_enthalpy_mev=d["hmix"],
+        photo_segregation_risk=d["seg"],
+        tco_interface_rxn_energy_mev=d["tco_rxn"],
+        tco_compatible=tco_ok,
+        polaron_dimensionality_flag=polaron_flag,
+        epistemic_uncertainty_flag=unc_flag,
+        decision=decision,
+        critique_summary=(
+            f"Gate B Post-DFT Audit: deepest_defect={elec.deepest_defect_level_from_band_edge_ev:.3f} eV, "
+            f"tandem_4t={opt.tandem_4t_total_eff_percent:.2f}%, decision={decision}."
+        ),
+        primary_failure_mode=fail_mode,
+    )
+
+
 def stage4_5_quantum_and_defects(cand: CandidateMaterial) -> ElectronicDefectReport:
     """Agent 4 (quantum_defect_physicist) + physics_engine_engineer: Evaluate HSE06+SOC, polaron & SRH defects."""
     spec = _spec_from_candidate(cand)
